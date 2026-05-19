@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
+
+class AkunController extends Controller
+{
+    public function index()
+    {
+        $users = User::orderBy('name')->paginate(10);
+        return view('akun.index', compact('users'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role'     => 'required|in:super_admin,admin',
+        ]);
+
+        User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => $request->role,
+        ]);
+
+        return redirect()->route('akun.index')->with('success', 'Akun berhasil ditambahkan!');
+    }
+
+    public function update(Request $request, User $akun)
+    {
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$akun->id,
+            'role'  => 'required|in:super_admin,admin',
+        ]);
+
+        $data = [
+            'name'  => $request->name,
+            'email' => $request->email,
+            'role'  => $request->role,
+        ];
+
+        // Update password hanya jika diisi
+        if ($request->filled('password')) {
+            $request->validate([
+                'password' => ['confirmed', Rules\Password::defaults()],
+            ]);
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $akun->update($data);
+
+        return redirect()->route('akun.index')->with('success', 'Akun berhasil diupdate!');
+    }
+
+    public function destroy(User $akun)
+    {
+        // Tidak bisa hapus diri sendiri
+        if ($akun->id === auth()->id()) {
+            return redirect()->route('akun.index')->with('error', 'Tidak bisa menghapus akun sendiri!');
+        }
+
+        $akun->delete();
+        return redirect()->route('akun.index')->with('success', 'Akun berhasil dihapus!');
+    }
+}
