@@ -283,6 +283,47 @@
         </div>
         
         @if(auth()->user()->isSuperAdmin())
+        <div class="nav-section">
+            <div class="nav-section-label">Master Data</div>
+            <a href="{{ route('master.jabatan.index') }}" data-tooltip="Jabatan"
+            class="nav-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <span class="nav-text">Jabatan</span>
+            </a>
+            <a href="{{ route('master.direktorat.index') }}" data-tooltip="Direktorat"
+            class="nav-link {{ request()->routeIs('master.direktorat.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span class="nav-text">Direktorat</span>
+            </a>
+            <a href="{{ route('master.kompartemen.index') }}" data-tooltip="Kompartemen"
+            class="nav-link {{ request()->routeIs('master.kompartemen.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                <span class="nav-text">Kompartemen</span>
+            </a>
+            <a href="{{ route('master.departemen.index') }}" data-tooltip="Departemen"
+            class="nav-link {{ request()->routeIs('master.departemen.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <span class="nav-text">Departemen</span>
+            </a>
+            <a href="{{ route('master.job-grade.index') }}" data-tooltip="Job Grade"
+            class="nav-link {{ request()->routeIs('master.job-grade.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="nav-text">Job Grade</span>
+            </a>
+            <a href="{{ route('master.person-grade.index') }}" data-tooltip="Person Grade"
+            class="nav-link {{ request()->routeIs('master.person-grade.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+                <span class="nav-text">Person Grade</span>
+            </a>
+            <a href="{{ route('master.kode-struktur.index') }}" data-tooltip="Kode Struktur"
+            class="nav-link {{ request()->routeIs('master.kode-struktur.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <span class="nav-text">Kode Struktur</span>
+            </a>
+        </div>
+        @endif
+        
+        @if(auth()->user()->isSuperAdmin())
         <!-- <div class="nav-section">
             <div class="nav-section-label">Super Admin</div>
             <a href="{{ route('akun.index') }}" data-tooltip="Manajemen Akun" class="nav-link {{ request()->routeIs('akun.*') ? 'active' : '' }}">

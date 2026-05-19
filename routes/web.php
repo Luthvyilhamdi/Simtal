@@ -12,6 +12,13 @@ use App\Http\Controllers\HistoryAssessmentAllController;
 use App\Http\Controllers\AkunController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\SuratPentingController;
+use App\Http\Controllers\MasterJabatanController;
+use App\Http\Controllers\MasterDirektoratController;
+use App\Http\Controllers\MasterKompartemenController;
+use App\Http\Controllers\MasterDepartemenController;
+use App\Http\Controllers\MasterJobGradeController;
+use App\Http\Controllers\MasterPersonGradeController;
+use App\Http\Controllers\MasterKodeStrukturController;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Route;
 
@@ -119,6 +126,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/{suratPenting}',       [SuratPentingController::class, 'destroy'])->name('destroy');
     });
 
+    Route::middleware(['auth', 'super_admin'])->prefix('master')->name('master.')->group(function () {
+    Route::resource('jabatan',       MasterJabatanController::class)->except(['show']);
+    Route::resource('direktorat',    MasterDirektoratController::class)->except(['show']);
+    Route::resource('kompartemen',   MasterKompartemenController::class)->except(['show']);
+    Route::resource('departemen',    MasterDepartemenController::class)->except(['show']);
+    Route::resource('job-grade',     MasterJobGradeController::class)->except(['show']);
+    Route::resource('person-grade',  MasterPersonGradeController::class)->except(['show']);
+    Route::resource('kode-struktur', MasterKodeStrukturController::class)->except(['show']);
+    });
+    
 });
 
 require __DIR__.'/auth.php';
