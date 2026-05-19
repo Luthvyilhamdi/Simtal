@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\HistoryAssessment;
 use App\Exports\HistoryAssessmentExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class HistoryAssessmentAllController extends Controller
@@ -36,11 +35,11 @@ class HistoryAssessmentAllController extends Controller
 
         // Stats
         $stats = [
-            'total'   => HistoryAssessment::count(),
-            'ready'   => HistoryAssessment::where('rekomendasi_final', 'ready')->count(),
-            'rwd'     => HistoryAssessment::where('rekomendasi_final', 'ready_with_development')->count(),
-            'nr'      => HistoryAssessment::where('rekomendasi_final', 'not_ready')->count(),
-            'expire'  => HistoryAssessment::whereNotNull('tanggal_exp_idp')
+            'total'  => HistoryAssessment::count(),
+            'ready'  => HistoryAssessment::where('rekomendasi_final', 'ready')->count(),
+            'rwd'    => HistoryAssessment::where('rekomendasi_final', 'ready_with_development')->count(),
+            'nr'     => HistoryAssessment::where('rekomendasi_final', 'not_ready')->count(),
+            'expire' => HistoryAssessment::whereNotNull('tanggal_exp_idp')
                             ->where('tanggal_exp_idp', '<', now())->count(),
         ];
 
@@ -57,9 +56,10 @@ class HistoryAssessmentAllController extends Controller
     {
         $filename = 'history-assessment-' . now()->format('d-m-Y') . '.xlsx';
 
-        return Excel::download(
-            new HistoryAssessmentExport($request->search, $request->rekomendasi, $request->tahun),
-            $filename
-        );
+        return (new HistoryAssessmentExport(
+            $request->search,
+            $request->rekomendasi,
+            $request->tahun
+        ))->download($filename);
     }
 }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\PgsPjs;
 use App\Models\Karyawan;
 use App\Exports\PgsPjsExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class PgsPjsController extends Controller
@@ -104,9 +103,6 @@ class PgsPjsController extends Controller
         $search   = $request->search;
         $filename = 'pgs-pjs-' . now()->format('d-m-Y') . '.xlsx';
 
-        return Excel::download(
-            new PgsPjsExport($tipe, $search),
-            $filename
-        );
+        return (new PgsPjsExport($tipe, $search))->download($filename);
     }
 }

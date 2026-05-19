@@ -3,16 +3,16 @@
 namespace App\Exports;
 
 use App\Models\HistoryAssessment;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Carbon\Carbon;
+use OpenSpout\Writer\XLSX\Writer;
+use OpenSpout\Writer\XLSX\Options;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Common\Entity\Style\Color;
+use OpenSpout\Common\Entity\Style\CellAlignment;
 
-class HistoryAssessmentExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle, ShouldAutoSize
+class HistoryAssessmentExport
 {
     protected $search;
     protected $rekomendasi;
@@ -25,108 +25,108 @@ class HistoryAssessmentExport implements FromCollection, WithHeadings, WithMappi
         $this->tahun       = $tahun;
     }
 
-    public function title(): string
+    public function download(string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        return 'History Assessment';
-    }
+        return response()->streamDownload(function () {
+            $options = new Options();
+            $writer  = new Writer($options);
+            $writer->openToFile('php://output');
 
-    public function collection()
-    {
-        $query = HistoryAssessment::with('karyawan')
-            ->orderBy('tanggal_pelaksanaan', 'desc');
+            $sheet = $writer->getCurrentSheet();
+            $sheet->setName('History Assessment');
 
-        if ($this->search) {
-            $query->whereHas('karyawan', function($q) {
-                $q->where('nama', 'like', '%'.$this->search.'%')
-                  ->orWhere('nik', 'like', '%'.$this->search.'%');
-            });
-        }
+            // Header style (ungu)
+            $headerStyle = (new Style())
+                ->setFontBold()
+                ->setFontSize(11)
+                ->setFontColor(Color::WHITE)
+                ->setBackgroundColor(Color::rgb(124, 58, 237))
+                ->setCellAlignment(CellAlignment::CENTER)
+                ->setShouldWrapText(false);
 
-        if ($this->rekomendasi) {
-            $query->where('rekomendasi_final', $this->rekomendasi);
-        }
+            $headings = [
+                'No', 'NIK', 'Nama Karyawan', 'Jabatan Saat Ini',
+                'Job Grade', 'Person Grade', 'Jenis Kelamin', 'Usia',
+                'Job Stream', 'Tanggal Pelaksanaan', 'Tingkat Pengukuran',
+                'Rekomendasi Inti (%)', 'Rekomendasi Primer (%)',
+                'Rekomendasi Sekunder (%)', 'Rekomendasi Final',
+                'Tanggal Exp IDP', 'Status IDP', 'Keterangan',
+            ];
 
-        if ($this->tahun) {
-            $query->whereYear('tanggal_pelaksanaan', $this->tahun);
-        }
+            $headerCells = array_map(
+                fn($h) => Cell::fromValue($h, $headerStyle),
+                $headings
+            );
+            $writer->addRow(new Row($headerCells));
 
-        return $query->get();
-    }
+            // Query
+            $query = HistoryAssessment::with('karyawan')
+                ->orderBy('tanggal_pelaksanaan', 'desc');
 
-    public function headings(): array
-    {
-        return [
-            'No',
-            'NIK',
-            'Nama Karyawan',
-            'Jabatan Saat Ini',
-            'Job Grade',
-            'Person Grade',
-            'Jenis Kelamin',
-            'Usia',
-            'Job Stream',
-            'Tanggal Pelaksanaan',
-            'Tingkat Pengukuran',
-            'Rekomendasi Inti (%)',
-            'Rekomendasi Primer (%)',
-            'Rekomendasi Sekunder (%)',
-            'Rekomendasi Final',
-            'Tanggal Exp IDP',
-            'Status IDP',
-            'Keterangan',
-        ];
-    }
+            if ($this->search) {
+                $query->whereHas('karyawan', function ($q) {
+                    $q->where('nama', 'like', '%' . $this->search . '%')
+                      ->orWhere('nik', 'like', '%' . $this->search . '%');
+                });
+            }
 
-    protected $rowNo = 1;
+            if ($this->rekomendasi) {
+                $query->where('rekomendasi_final', $this->rekomendasi);
+            }
 
-    public function map($row): array
-    {
-        $rekomendasiLabel = match($row->rekomendasi_final) {
-            'ready'                  => 'Ready',
-            'ready_with_development' => 'Ready with Development',
-            'not_ready'              => 'Not Ready',
-            default                  => '-',
-        };
+            if ($this->tahun) {
+                $query->whereYear('tanggal_pelaksanaan', $this->tahun);
+            }
 
-        $statusIdp = '-';
-        if ($row->tanggal_exp_idp) {
-            $statusIdp = \Carbon\Carbon::parse($row->tanggal_exp_idp)->isPast()
-                ? 'Expired'
-                : 'Aktif';
-        }
+            $rows  = $query->get();
+            $rowNo = 1;
 
-        return [
-            $this->rowNo++,
-            $row->karyawan->nik ?? '-',
-            $row->karyawan->nama ?? '-',
-            $row->jabatan_saat_ini ?? '-',
-            $row->job_grade ?? '-',
-            $row->person_grade ?? '-',
-            $row->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
-            $row->usia ?? '-',
-            $row->job_stream ?? '-',
-            \Carbon\Carbon::parse($row->tanggal_pelaksanaan)->format('d/m/Y'),
-            $row->tingkat_pengukuran ?? '-',
-            $row->rekomendasi_inti ?? '-',
-            $row->rekomendasi_primer ?? '-',
-            $row->rekomendasi_skunder ?? '-',
-            $rekomendasiLabel,
-            $row->tanggal_exp_idp
-                ? \Carbon\Carbon::parse($row->tanggal_exp_idp)->format('d/m/Y')
-                : '-',
-            $statusIdp,
-            $row->keterangan ?? '-',
-        ];
-    }
+            foreach ($rows as $row) {
+                $rekomendasiLabel = match ($row->rekomendasi_final) {
+                    'ready'                  => 'Ready',
+                    'ready_with_development' => 'Ready with Development',
+                    'not_ready'              => 'Not Ready',
+                    default                  => '-',
+                };
 
-    public function styles(Worksheet $sheet): array
-    {
-        return [
-            1 => [
-                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '7c3aed']],
-                'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
-            ],
-        ];
+                $statusIdp = '-';
+                if ($row->tanggal_exp_idp) {
+                    $statusIdp = Carbon::parse($row->tanggal_exp_idp)->isPast()
+                        ? 'Expired'
+                        : 'Aktif';
+                }
+
+                $data = [
+                    $rowNo++,
+                    $row->karyawan->nik  ?? '-',
+                    $row->karyawan->nama ?? '-',
+                    $row->jabatan_saat_ini ?? '-',
+                    $row->job_grade        ?? '-',
+                    $row->person_grade     ?? '-',
+                    $row->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
+                    $row->usia             ?? '-',
+                    $row->job_stream       ?? '-',
+                    Carbon::parse($row->tanggal_pelaksanaan)->format('d/m/Y'),
+                    $row->tingkat_pengukuran  ?? '-',
+                    $row->rekomendasi_inti    ?? '-',
+                    $row->rekomendasi_primer  ?? '-',
+                    $row->rekomendasi_skunder ?? '-',
+                    $rekomendasiLabel,
+                    $row->tanggal_exp_idp
+                        ? Carbon::parse($row->tanggal_exp_idp)->format('d/m/Y')
+                        : '-',
+                    $statusIdp,
+                    $row->keterangan ?? '-',
+                ];
+
+                $cells = array_map(fn($v) => Cell::fromValue($v), $data);
+                $writer->addRow(new Row($cells));
+            }
+
+            $writer->close();
+        }, $filename, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

@@ -13,7 +13,6 @@ use App\Models\JobGrade;
 use App\Models\PersonGrade;
 use App\Models\KodeStruktur;
 use App\Exports\HistoryJabatanExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -196,13 +195,8 @@ class HistoryJabatanController extends Controller
 
     public function export(Request $request)
     {
-        $search   = $request->search;
-        $tipe     = $request->tipe;
         $filename = 'history-jabatan-' . now()->format('d-m-Y') . '.xlsx';
 
-        return Excel::download(
-            new HistoryJabatanExport($search, $tipe),
-            $filename
-        );
+        return (new HistoryJabatanExport())->download($filename);
     }
 }

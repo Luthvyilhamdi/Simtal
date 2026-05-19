@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\HistoryPejabat;
 use App\Exports\HistoryPejabatExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class HistoryPejabatController extends Controller
@@ -55,9 +54,6 @@ class HistoryPejabatController extends Controller
         $search   = $request->search;
         $filename = 'history-pejabat-' . now()->format('d-m-Y') . '.xlsx';
 
-        return Excel::download(
-            new HistoryPejabatExport($jabatan, $search),
-            $filename
-        );
+        return (new HistoryPejabatExport($jabatan, $search))->download($filename);
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Exports\HistoryJabatanExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class HistoryKaryawanController extends Controller
@@ -46,6 +45,6 @@ class HistoryKaryawanController extends Controller
     {
         $filename = 'history-jabatan-semua-karyawan-' . now()->format('d-m-Y') . '.xlsx';
 
-        return Excel::download(new HistoryJabatanExport(), $filename);
+        return (new HistoryJabatanExport())->download($filename);
     }
 }
