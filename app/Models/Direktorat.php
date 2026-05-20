@@ -8,4 +8,9 @@ class Direktorat extends Model
 {
     protected $table = 'direktorat';
     protected $fillable = ['nama_direktorat'];
+
+    public function karyawans()
+    {
+        return $this->hasMany(Karyawan::class);
+    }
 }
