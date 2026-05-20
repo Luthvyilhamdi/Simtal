@@ -23,20 +23,26 @@ class MasterDepartemenController extends Controller
             ->with('success', 'Departemen berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Departemen $departemen)
+    public function update(Request $request, $id)
     {
+        $departemen = Departemen::findOrFail($id);
         $request->validate([
-            'nama_departemen' => 'required|string|unique:departemen,nama_departemen,' . $departemen->id,
+            'nama_departemen' => 'required|string|unique:departemen,nama_departemen,' . $id,
         ]);
         $departemen->update(['nama_departemen' => $request->nama_departemen]);
         return redirect()->route('master.departemen.index')
             ->with('success', 'Departemen berhasil diupdate!');
     }
 
-    public function destroy(Departemen $departemen)
+    public function destroy($id)
     {
-        $departemen->delete();
+    try {
+        Departemen::findOrFail($id)->delete();
         return redirect()->route('master.departemen.index')
             ->with('success', 'Departemen berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.departemen.index')
+            ->with('error', 'Departemen tidak bisa dihapus karena masih digunakan di data lain!');
+    }
     }
 }

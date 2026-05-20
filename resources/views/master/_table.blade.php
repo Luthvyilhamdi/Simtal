@@ -89,7 +89,18 @@
     </div>
 </div>
 @endif
-
+@if(session('error'))
+<div class="toast-wrap" id="toastWrap">
+    <div class="toast" id="toast" style="border-color:#fecaca;border-left-color:#ef4444;color:#dc2626;">
+        <div class="toast-icon" style="background:#fef2f2;">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <div>{{ session('error') }}</div>
+        <button class="toast-close" onclick="closeToast()">×</button>
+        <div class="toast-progress" style="background:#ef4444;"></div>
+    </div>
+</div>
+@endif
 {{-- Modal Edit --}}
 <div class="modal-backdrop" id="modalEdit">
     <div class="modal-box">

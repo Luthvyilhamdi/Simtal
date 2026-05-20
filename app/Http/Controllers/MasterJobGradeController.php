@@ -23,20 +23,26 @@ class MasterJobGradeController extends Controller
             ->with('success', 'Job Grade berhasil ditambahkan!');
     }
 
-    public function update(Request $request, JobGrade $jobGrade)
+    public function update(Request $request, $id)
     {
+        $jobGrade = JobGrade::findOrFail($id);
         $request->validate([
-            'job_grade' => 'required|string|unique:job_grade,job_grade,' . $jobGrade->id,
+            'job_grade' => 'required|string|unique:job_grade,job_grade,' . $id,
         ]);
         $jobGrade->update(['job_grade' => $request->job_grade]);
         return redirect()->route('master.job-grade.index')
             ->with('success', 'Job Grade berhasil diupdate!');
     }
 
-    public function destroy(JobGrade $jobGrade)
+   public function destroy($id)
     {
-        $jobGrade->delete();
+    try {
+        JobGrade::findOrFail($id)->delete();
         return redirect()->route('master.job-grade.index')
             ->with('success', 'Job Grade berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.job-grade.index')
+            ->with('error', 'Job Grade tidak bisa dihapus karena masih digunakan di data lain!');
+    }
     }
 }

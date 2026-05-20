@@ -23,20 +23,26 @@ class MasterDirektoratController extends Controller
             ->with('success', 'Direktorat berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Direktorat $direktorat)
+    public function update(Request $request, $id)
     {
+        $direktorat = Direktorat::findOrFail($id);
         $request->validate([
-            'nama_direktorat' => 'required|string|unique:direktorat,nama_direktorat,' . $direktorat->id,
+            'nama_direktorat' => 'required|string|unique:direktorat,nama_direktorat,' . $id,
         ]);
         $direktorat->update(['nama_direktorat' => $request->nama_direktorat]);
         return redirect()->route('master.direktorat.index')
             ->with('success', 'Direktorat berhasil diupdate!');
     }
 
-    public function destroy(Direktorat $direktorat)
+    public function destroy($id)
     {
-        $direktorat->delete();
+    try {
+        Direktorat::findOrFail($id)->delete();
         return redirect()->route('master.direktorat.index')
             ->with('success', 'Direktorat berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.direktorat.index')
+            ->with('error', 'Direktorat tidak bisa dihapus karena masih digunakan di data lain!');
+    }
     }
 }

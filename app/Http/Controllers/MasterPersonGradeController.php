@@ -23,20 +23,26 @@ class MasterPersonGradeController extends Controller
             ->with('success', 'Person Grade berhasil ditambahkan!');
     }
 
-    public function update(Request $request, PersonGrade $personGrade)
+    public function update(Request $request, $id)
     {
+        $personGrade = PersonGrade::findOrFail($id);
         $request->validate([
-            'person_grade' => 'required|string|unique:person_grade,person_grade,' . $personGrade->id,
+            'person_grade' => 'required|string|unique:person_grade,person_grade,' . $id,
         ]);
         $personGrade->update(['person_grade' => $request->person_grade]);
         return redirect()->route('master.person-grade.index')
             ->with('success', 'Person Grade berhasil diupdate!');
     }
 
-    public function destroy(PersonGrade $personGrade)
-    {
-        $personGrade->delete();
+    public function destroy($id)
+{
+    try {
+        PersonGrade::findOrFail($id)->delete();
         return redirect()->route('master.person-grade.index')
             ->with('success', 'Person Grade berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.person-grade.index')
+            ->with('error', 'Person Grade tidak bisa dihapus karena masih digunakan di data lain!');
     }
+}
 }

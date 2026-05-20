@@ -23,20 +23,26 @@ class MasterJabatanController extends Controller
             ->with('success', 'Jabatan berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Jabatan $jabatan)
+    public function update(Request $request, $id)
     {
+        $jabatan = Jabatan::findOrFail($id);
         $request->validate([
-            'nama_jabatan' => 'required|string|unique:jabatan,nama_jabatan,' . $jabatan->id,
+            'nama_jabatan' => 'required|string|unique:jabatan,nama_jabatan,' . $id,
         ]);
         $jabatan->update(['nama_jabatan' => $request->nama_jabatan]);
         return redirect()->route('master.jabatan.index')
             ->with('success', 'Jabatan berhasil diupdate!');
     }
 
-    public function destroy(Jabatan $jabatan)
+    public function destroy($id)
     {
-        $jabatan->delete();
+    try {
+        Jabatan::findOrFail($id)->delete();
         return redirect()->route('master.jabatan.index')
             ->with('success', 'Jabatan berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.jabatan.index')
+            ->with('error', 'Jabatan tidak bisa dihapus karena masih digunakan di data lain!');
     }
+}
 }

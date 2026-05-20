@@ -23,20 +23,26 @@ class MasterKompartemenController extends Controller
             ->with('success', 'Kompartemen berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Kompartemen $kompartemen)
+    public function update(Request $request, $id)
     {
+        $kompartemen = Kompartemen::findOrFail($id);
         $request->validate([
-            'nama_kompartemen' => 'required|string|unique:kompartemen,nama_kompartemen,' . $kompartemen->id,
+            'nama_kompartemen' => 'required|string|unique:kompartemen,nama_kompartemen,' . $id,
         ]);
         $kompartemen->update(['nama_kompartemen' => $request->nama_kompartemen]);
         return redirect()->route('master.kompartemen.index')
             ->with('success', 'Kompartemen berhasil diupdate!');
     }
 
-    public function destroy(Kompartemen $kompartemen)
+    public function destroy($id)
     {
-        $kompartemen->delete();
+    try {
+        Kompartemen::findOrFail($id)->delete();
         return redirect()->route('master.kompartemen.index')
             ->with('success', 'Kompartemen berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.kompartemen.index')
+            ->with('error', 'Kompartemen tidak bisa dihapus karena masih digunakan di data lain!');
+    }
     }
 }

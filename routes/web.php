@@ -127,13 +127,42 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware(['auth', 'super_admin'])->prefix('master')->name('master.')->group(function () {
-    Route::resource('jabatan',       MasterJabatanController::class)->except(['show']);
-    Route::resource('direktorat',    MasterDirektoratController::class)->except(['show']);
-    Route::resource('kompartemen',   MasterKompartemenController::class)->except(['show']);
-    Route::resource('departemen',    MasterDepartemenController::class)->except(['show']);
-    Route::resource('job-grade',     MasterJobGradeController::class)->except(['show']);
-    Route::resource('person-grade',  MasterPersonGradeController::class)->except(['show']);
-    Route::resource('kode-struktur', MasterKodeStrukturController::class)->except(['show']);
+
+    Route::get('jabatan',               [MasterJabatanController::class, 'index'])->name('jabatan.index');
+    Route::post('jabatan',              [MasterJabatanController::class, 'store'])->name('jabatan.store');
+    Route::put('jabatan/{id}',          [MasterJabatanController::class, 'update'])->name('jabatan.update');
+    Route::delete('jabatan/{id}',       [MasterJabatanController::class, 'destroy'])->name('jabatan.destroy');
+
+    Route::get('direktorat',            [MasterDirektoratController::class, 'index'])->name('direktorat.index');
+    Route::post('direktorat',           [MasterDirektoratController::class, 'store'])->name('direktorat.store');
+    Route::put('direktorat/{id}',       [MasterDirektoratController::class, 'update'])->name('direktorat.update');
+    Route::delete('direktorat/{id}',    [MasterDirektoratController::class, 'destroy'])->name('direktorat.destroy');
+
+    Route::get('kompartemen',           [MasterKompartemenController::class, 'index'])->name('kompartemen.index');
+    Route::post('kompartemen',          [MasterKompartemenController::class, 'store'])->name('kompartemen.store');
+    Route::put('kompartemen/{id}',      [MasterKompartemenController::class, 'update'])->name('kompartemen.update');
+    Route::delete('kompartemen/{id}',   [MasterKompartemenController::class, 'destroy'])->name('kompartemen.destroy');
+
+    Route::get('departemen',            [MasterDepartemenController::class, 'index'])->name('departemen.index');
+    Route::post('departemen',           [MasterDepartemenController::class, 'store'])->name('departemen.store');
+    Route::put('departemen/{id}',       [MasterDepartemenController::class, 'update'])->name('departemen.update');
+    Route::delete('departemen/{id}',    [MasterDepartemenController::class, 'destroy'])->name('departemen.destroy');
+
+    Route::get('job-grade',             [MasterJobGradeController::class, 'index'])->name('job-grade.index');
+    Route::post('job-grade',            [MasterJobGradeController::class, 'store'])->name('job-grade.store');
+    Route::put('job-grade/{id}',        [MasterJobGradeController::class, 'update'])->name('job-grade.update');
+    Route::delete('job-grade/{id}',     [MasterJobGradeController::class, 'destroy'])->name('job-grade.destroy');
+
+    Route::get('person-grade',          [MasterPersonGradeController::class, 'index'])->name('person-grade.index');
+    Route::post('person-grade',         [MasterPersonGradeController::class, 'store'])->name('person-grade.store');
+    Route::put('person-grade/{id}',     [MasterPersonGradeController::class, 'update'])->name('person-grade.update');
+    Route::delete('person-grade/{id}',  [MasterPersonGradeController::class, 'destroy'])->name('person-grade.destroy');
+
+    Route::get('kode-struktur',         [MasterKodeStrukturController::class, 'index'])->name('kode-struktur.index');
+    Route::post('kode-struktur',        [MasterKodeStrukturController::class, 'store'])->name('kode-struktur.store');
+    Route::put('kode-struktur/{id}',    [MasterKodeStrukturController::class, 'update'])->name('kode-struktur.update');
+    Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
+
     });
     
 });

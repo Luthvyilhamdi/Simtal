@@ -23,20 +23,26 @@ class MasterKodeStrukturController extends Controller
             ->with('success', 'Kode Struktur berhasil ditambahkan!');
     }
 
-    public function update(Request $request, KodeStruktur $kodeStruktur)
+    public function update(Request $request, $id)
     {
+        $kodeStruktur = KodeStruktur::findOrFail($id);
         $request->validate([
-            'kode_struktur' => 'required|string|unique:kode_struktur,kode_struktur,' . $kodeStruktur->id,
+            'kode_struktur' => 'required|string|unique:kode_struktur,kode_struktur,' . $id,
         ]);
         $kodeStruktur->update(['kode_struktur' => $request->kode_struktur]);
         return redirect()->route('master.kode-struktur.index')
             ->with('success', 'Kode Struktur berhasil diupdate!');
     }
 
-    public function destroy(KodeStruktur $kodeStruktur)
-    {
-        $kodeStruktur->delete();
+    public function destroy($id)
+{
+    try {
+        KodeStruktur::findOrFail($id)->delete();
         return redirect()->route('master.kode-struktur.index')
             ->with('success', 'Kode Struktur berhasil dihapus!');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('master.kode-struktur.index')
+            ->with('error', 'Kode Struktur tidak bisa dihapus karena masih digunakan di data lain!');
+    }
     }
 }
