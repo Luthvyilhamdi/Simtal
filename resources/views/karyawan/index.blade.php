@@ -257,10 +257,28 @@
         <div class="page-title">Profil Karyawan</div>
         <div class="page-sub">Daftar seluruh data karyawan · {{ $karyawans->total() }} karyawan terdaftar</div>
     </div>
-    <a href="{{ route('karyawan.create') }}" class="btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Tambah Karyawan
-    </a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        {{-- Hanya Super Admin yang bisa lihat tombol Import --}}
+        @if(auth()->user()->isSuperAdmin())
+        <a href="{{ route('karyawan.import') }}"
+        style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;transition:all 0.15s;"
+        onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Import Excel
+        </a>
+        @endif
+        <a href="{{ route('karyawan.create') }}" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah Karyawan
+        </a>
+    </div>
 </div>
 
 {{-- SEARCH --}}

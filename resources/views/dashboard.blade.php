@@ -501,14 +501,14 @@
     {{-- IDP Expire --}}
     <div class="list-card">
         <div class="list-card-header">
-            <div class="list-card-title">⚠️ IDP Akan Expire</div>
+            <div class="list-card-title">⚠️ Assessment Akan Expire</div>
             <span style="font-size:11px;color:#9ca3af;">30 hari ke depan</span>
         </div>
         <div class="list-card-body">
             @forelse($assessmentExpire as $a)
             <div class="list-item">
                 <div style="font-size:16px;font-weight:800;color:#ef4444;min-width:32px;text-align:center;">
-                    {{ now()->diffInDays($a->tanggal_exp_idp) }}h
+                    {{ (int) now()->diffInDays($a->tanggal_exp_idp) }}h
                 </div>
                 <div class="list-avatar" style="background:#fef2f2;color:#dc2626;">
                     @if($a->karyawan->foto)<img src="{{ Storage::url($a->karyawan->foto) }}" alt="">

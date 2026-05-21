@@ -10,6 +10,10 @@ use App\Models\JobGrade;
 use App\Models\PersonGrade;
 use App\Models\Jabatan;
 use App\Models\KodeStruktur;
+use App\Imports\KaryawanImport;
+use App\Exports\TemplateKaryawanExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -129,5 +133,54 @@ class KaryawanController extends Controller
         if ($karyawan->foto) Storage::disk('public')->delete($karyawan->foto);
         $karyawan->delete();
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil dihapus!');
+    }
+
+    // ===== IMPORT =====
+    public function importPage()
+    {
+        return view('karyawan.import');
+    }
+
+    public function import(Request $request)
+    {
+    $request->validate([
+        'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+    ], [
+        'file.required' => 'File wajib dipilih.',
+        'file.mimes'    => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+        'file.max'      => 'Ukuran file maksimal 10MB.',
+    ]);
+
+    try {
+        $import = new KaryawanImport();
+        Excel::import($import, $request->file('file'));
+
+        $imported = $import->getRowCount();
+        $skipped  = $import->getSkippedCount();
+
+        $msg = "Berhasil mengimport {$imported} karyawan.";
+        if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK duplikat).";
+
+        return redirect()->route('karyawan.index')->with('success', $msg);
+
+    } catch (ValidationException $e) {
+        $failures = $e->failures();
+        $errMsg   = 'Import gagal karena kesalahan validasi: ';
+        foreach (array_slice($failures, 0, 3) as $failure) {
+            $errMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . '. ';
+        }
+        return back()->with('error', $errMsg);
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Import gagal: ' . $e->getMessage());
+    }
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(
+            new TemplateKaryawanExport(),
+            'template-import-karyawan.xlsx'
+        );
     }
 }
