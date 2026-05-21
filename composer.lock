@@ -2959,16 +2959,16 @@
         },
         {
             "name": "openspout/openspout",
-            "version": "v4.28.5",
+            "version": "v4.32.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/openspout/openspout.git",
-                "reference": "ab05a09fe6fce57c90338f83280648a9786ce36b"
+                "reference": "41f045c1f632e1474e15d4c7bc3abcb4a153563d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/openspout/openspout/zipball/ab05a09fe6fce57c90338f83280648a9786ce36b",
-                "reference": "ab05a09fe6fce57c90338f83280648a9786ce36b",
+                "url": "https://api.github.com/repos/openspout/openspout/zipball/41f045c1f632e1474e15d4c7bc3abcb4a153563d",
+                "reference": "41f045c1f632e1474e15d4c7bc3abcb4a153563d",
                 "shasum": ""
             },
             "require": {
@@ -2978,17 +2978,17 @@
                 "ext-libxml": "*",
                 "ext-xmlreader": "*",
                 "ext-zip": "*",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0"
+                "php": "~8.3.0 || ~8.4.0 || ~8.5.0"
             },
             "require-dev": {
                 "ext-zlib": "*",
-                "friendsofphp/php-cs-fixer": "^3.68.3",
-                "infection/infection": "^0.29.10",
-                "phpbench/phpbench": "^1.4.0",
-                "phpstan/phpstan": "^2.1.2",
-                "phpstan/phpstan-phpunit": "^2.0.4",
-                "phpstan/phpstan-strict-rules": "^2",
-                "phpunit/phpunit": "^11.5.4"
+                "friendsofphp/php-cs-fixer": "^3.86.0",
+                "infection/infection": "^0.31.2",
+                "phpbench/phpbench": "^1.4.1",
+                "phpstan/phpstan": "^2.1.22",
+                "phpstan/phpstan-phpunit": "^2.0.7",
+                "phpstan/phpstan-strict-rules": "^2.0.6",
+                "phpunit/phpunit": "^12.3.7"
             },
             "suggest": {
                 "ext-iconv": "To handle non UTF-8 CSV files (if \"php-mbstring\" is not already installed or is too limited)",
@@ -3036,7 +3036,7 @@
             ],
             "support": {
                 "issues": "https://github.com/openspout/openspout/issues",
-                "source": "https://github.com/openspout/openspout/tree/v4.28.5"
+                "source": "https://github.com/openspout/openspout/tree/v4.32.0"
             },
             "funding": [
                 {
@@ -3048,7 +3048,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-30T13:51:11+00:00"
+            "time": "2025-09-03T16:03:54+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",
@@ -6892,16 +6892,16 @@
         },
         {
             "name": "laravel/breeze",
-            "version": "v2.4.1",
+            "version": "v2.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/breeze.git",
-                "reference": "28cefeaf6af20177ddf5cc7b93e87e4ad79d533f"
+                "reference": "4f20e7b2cc8d25daa85d8647241a89c8e0930305"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/breeze/zipball/28cefeaf6af20177ddf5cc7b93e87e4ad79d533f",
-                "reference": "28cefeaf6af20177ddf5cc7b93e87e4ad79d533f",
+                "url": "https://api.github.com/repos/laravel/breeze/zipball/4f20e7b2cc8d25daa85d8647241a89c8e0930305",
+                "reference": "4f20e7b2cc8d25daa85d8647241a89c8e0930305",
                 "shasum": ""
             },
             "require": {
@@ -6949,7 +6949,7 @@
                 "issues": "https://github.com/laravel/breeze/issues",
                 "source": "https://github.com/laravel/breeze"
             },
-            "time": "2026-03-10T19:59:01+00:00"
+            "time": "2026-05-14T16:54:25+00:00"
         },
         {
             "name": "laravel/pail",
@@ -7101,16 +7101,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.58.0",
+            "version": "v1.60.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "2e5e968138ca52ed87d712449697a8364d73b466"
+                "reference": "2a1538ed22eed4210ac1e17904235032571bd89c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/2e5e968138ca52ed87d712449697a8364d73b466",
-                "reference": "2e5e968138ca52ed87d712449697a8364d73b466",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/2a1538ed22eed4210ac1e17904235032571bd89c",
+                "reference": "2a1538ed22eed4210ac1e17904235032571bd89c",
                 "shasum": ""
             },
             "require": {
@@ -7160,7 +7160,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2026-04-27T13:38:34+00:00"
+            "time": "2026-05-14T17:29:51+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -9016,28 +9016,27 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v7.4.10",
+            "version": "v8.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "c660d6538545a3e8e65a5621ee3d7a6d352892c7"
+                "reference": "2a36f4b8405d41fa31799b06874dbd45c1b16c30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/c660d6538545a3e8e65a5621ee3d7a6d352892c7",
-                "reference": "c660d6538545a3e8e65a5621ee3d7a6d352892c7",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/2a36f4b8405d41fa31799b06874dbd45c1b16c30",
+                "reference": "2a36f4b8405d41fa31799b06874dbd45c1b16c30",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.2",
-                "symfony/deprecation-contracts": "^2.5|^3",
+                "php": ">=8.4",
                 "symfony/polyfill-ctype": "^1.8"
             },
             "conflict": {
-                "symfony/console": "<6.4"
+                "symfony/console": "<7.4"
             },
             "require-dev": {
-                "symfony/console": "^6.4|^7.0|^8.0"
+                "symfony/console": "^7.4|^8.0"
             },
             "bin": [
                 "Resources/bin/yaml-lint"
@@ -9068,7 +9067,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v7.4.10"
+                "source": "https://github.com/symfony/yaml/tree/v8.0.12"
             },
             "funding": [
                 {
@@ -9088,7 +9087,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-05T08:01:55+00:00"
+            "time": "2026-05-20T07:22:03+00:00"
         },
         {
             "name": "theseer/tokenizer",
