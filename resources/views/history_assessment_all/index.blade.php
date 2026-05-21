@@ -85,15 +85,31 @@
         <div class="page-title">History Assessment</div>
         <div class="page-sub">Riwayat assessment seluruh karyawan</div>
     </div>
-    <a href="{{ route('history_assessment_all.export', request()->query()) }}"
-       style="display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:14px;height:14px;">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Export Excel
-    </a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        {{-- Import — Super Admin Only --}}
+        @if(auth()->user()->isSuperAdmin())
+        <a href="{{ route('history_assessment_all.import') }}"
+           style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;transition:all 0.15s;"
+           onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Import Excel
+        </a>
+        @endif
+        {{-- Export --}}
+        <a href="{{ route('history_assessment_all.export', request()->query()) }}"
+           style="display:inline-flex;align-items:center;gap:8px;background:#7c3aed;color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:14px;height:14px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Excel
+        </a>
+    </div>
 </div>
 
 {{-- Stats --}}

@@ -19,6 +19,7 @@ use App\Http\Controllers\MasterDepartemenController;
 use App\Http\Controllers\MasterJobGradeController;
 use App\Http\Controllers\MasterPersonGradeController;
 use App\Http\Controllers\MasterKodeStrukturController;
+use App\Http\Controllers\ImportAssessmentController;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Route;
 
@@ -170,6 +171,15 @@ Route::middleware('auth')->group(function () {
             Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
         });
     });
+
+    Route::prefix('history-assessment')->name('history_assessment_all.')->group(function () {
+    Route::get('/',                [HistoryAssessmentAllController::class, 'index'])->name('index');
+    Route::get('/export',          [HistoryAssessmentAllController::class, 'export'])->name('export');
+    Route::get('/import',          [ImportAssessmentController::class, 'page'])->name('import');
+    Route::post('/import',         [ImportAssessmentController::class, 'import'])->name('import.store');
+    Route::get('/import/template', [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
+    });
+    
 });
 
 require __DIR__.'/auth.php';
