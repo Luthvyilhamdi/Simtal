@@ -9,7 +9,7 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .import-wrap { max-width:780px; }
+    .import-wrap { max-width:100%; }
     .page-title { font-size:20px;font-weight:700;color:#111827;margin-bottom:4px; }
     .page-sub { font-size:13px;color:#6b7280;margin-bottom:24px; }
 
