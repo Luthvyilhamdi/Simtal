@@ -62,4 +62,12 @@ class HistoryAssessmentAllController extends Controller
             $request->tahun
         ))->download($filename);
     }
+
+    public function destroy(HistoryAssessment $assessment)
+    {
+    $assessment->delete();
+    return redirect()
+        ->route('history_assessment_all.index')
+        ->with('success', 'Data assessment berhasil dihapus!');
+    }
 }

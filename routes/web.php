@@ -5,10 +5,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HistoryJabatanController;
 use App\Http\Controllers\HistoryKaryawanController;
 use App\Http\Controllers\HistoryAssessmentController;
+use App\Http\Controllers\HistoryAssessmentAllController;
+use App\Http\Controllers\ImportAssessmentController;
 use App\Http\Controllers\PgsPjsController;
 use App\Http\Controllers\HistoryPejabatController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HistoryAssessmentAllController;
 use App\Http\Controllers\AkunController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\SuratPentingController;
@@ -19,7 +20,6 @@ use App\Http\Controllers\MasterDepartemenController;
 use App\Http\Controllers\MasterJobGradeController;
 use App\Http\Controllers\MasterPersonGradeController;
 use App\Http\Controllers\MasterKodeStrukturController;
-use App\Http\Controllers\ImportAssessmentController;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Route;
 
@@ -32,8 +32,8 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
 
     // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Dashboard
@@ -41,12 +41,11 @@ Route::middleware('auth')->group(function () {
         ->middleware('verified')
         ->name('dashboard');
 
-    // Import Karyawan (harus sebelum resource)
+    // Karyawan (route manual harus SEBELUM resource)
+    Route::get('karyawan/export',            [KaryawanController::class, 'export'])->name('karyawan.export');
     Route::get('karyawan/import',            [KaryawanController::class, 'importPage'])->name('karyawan.import');
     Route::post('karyawan/import',           [KaryawanController::class, 'import'])->name('karyawan.import.store');
     Route::get('karyawan/template-download', [KaryawanController::class, 'downloadTemplate'])->name('karyawan.template');
-
-    // CRUD Karyawan
     Route::resource('karyawan', KaryawanController::class);
 
     // History Jabatan
@@ -78,12 +77,17 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{historyAssessment}', [HistoryAssessmentController::class, 'destroy'])->name('destroy');
         });
 
-    // History Assessment All
+    // History Assessment All (Global)
     Route::prefix('history-assessment')
         ->name('history_assessment_all.')
         ->group(function () {
-            Route::get('/',       [HistoryAssessmentAllController::class, 'index'])->name('index');
-            Route::get('/export', [HistoryAssessmentAllController::class, 'export'])->name('export');
+            Route::get('/',                [HistoryAssessmentAllController::class, 'index'])->name('index');
+            Route::get('/export',          [HistoryAssessmentAllController::class, 'export'])->name('export');
+            Route::delete('/{assessment}', [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
+            Route::get('/import',          [ImportAssessmentController::class, 'page'])->name('import');
+            Route::post('/import',         [ImportAssessmentController::class, 'import'])->name('import.store');
+            Route::get('/import/template', [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
+            Route::delete('/{assessment}', [HistoryAssessmentAllController::class, 'destroy'])->name('destroy'); // ← tambah
         });
 
     // PGS & PJS
@@ -104,11 +108,11 @@ Route::middleware('auth')->group(function () {
 
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
-        Route::get('/',                       [NotifikasiController::class, 'index'])->name('index');
-        Route::get('/fetch',                  [NotifikasiController::class, 'fetch'])->name('fetch');
-        Route::post('/read-all',              [NotifikasiController::class, 'readAll'])->name('readAll');
-        Route::post('/{notifikasi}/read',     [NotifikasiController::class, 'read'])->name('read');
-        Route::delete('/{notifikasi}',        [NotifikasiController::class, 'destroy'])->name('destroy');
+        Route::get('/',                   [NotifikasiController::class, 'index'])->name('index');
+        Route::get('/fetch',              [NotifikasiController::class, 'fetch'])->name('fetch');
+        Route::post('/read-all',          [NotifikasiController::class, 'readAll'])->name('readAll');
+        Route::post('/{notifikasi}/read', [NotifikasiController::class, 'read'])->name('read');
+        Route::delete('/{notifikasi}',    [NotifikasiController::class, 'destroy'])->name('destroy');
     });
 
     // Surat Penting
@@ -171,15 +175,6 @@ Route::middleware('auth')->group(function () {
             Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
         });
     });
-
-    Route::prefix('history-assessment')->name('history_assessment_all.')->group(function () {
-    Route::get('/',                [HistoryAssessmentAllController::class, 'index'])->name('index');
-    Route::get('/export',          [HistoryAssessmentAllController::class, 'export'])->name('export');
-    Route::get('/import',          [ImportAssessmentController::class, 'page'])->name('import');
-    Route::post('/import',         [ImportAssessmentController::class, 'import'])->name('import.store');
-    Route::get('/import/template', [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
-    });
-    
 });
 
 require __DIR__.'/auth.php';

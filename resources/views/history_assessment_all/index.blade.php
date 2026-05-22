@@ -56,6 +56,10 @@
     .rekom-fill { height:100%;border-radius:20px; }
     .rekom-pct { font-size:11px;font-weight:700;color:#374151;min-width:32px; }
 
+    .btn-del { width:30px;height:30px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s; }
+    .btn-del:hover { background:#fef2f2;border-color:#fecaca; }
+    .btn-del svg { width:13px;height:13px;stroke:#ef4444;fill:none;stroke-width:2; }
+
     .table-footer { display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:10px; }
     .pagination-wrap { display:flex;align-items:center;gap:4px; }
     .page-btn { width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#374151;cursor:pointer;text-decoration:none;transition:all 0.12s; }
@@ -66,6 +70,33 @@
 
     .empty-state { text-align:center;padding:60px 20px;color:#9ca3af; }
     .empty-state svg { width:48px;height:48px;margin:0 auto 12px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
+
+    /* Toast */
+    .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
+    .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:280px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s forwards; }
+    .toast.hiding { animation:toastOut 0.3s forwards; }
+    .toast-icon { width:22px;height:22px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .toast-icon svg { width:12px;height:12px;stroke:#16a34a;fill:none;stroke-width:2.5; }
+    .toast-close { border:none;background:transparent;color:#9ca3af;cursor:pointer;font-size:18px;padding:0;margin-left:auto; }
+    .toast-progress { position:absolute;bottom:0;left:0;height:3px;background:#16a34a;animation:toastProgress 3s linear forwards; }
+    @keyframes toastIn { from{opacity:0;transform:translateX(110%);}to{opacity:1;transform:translateX(0);} }
+    @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translateX(110%);} }
+    @keyframes toastProgress { from{width:100%;}to{width:0%;} }
+
+    /* Modal */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center; }
+    .modal-backdrop.show { display:flex; }
+    .modal-box { background:white;border-radius:16px;padding:28px;width:100%;max-width:400px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;animation:modalIn 0.25s cubic-bezier(0.4,0,0.2,1); }
+    .modal-icon-wrap { width:56px;height:56px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px; }
+    .modal-icon-wrap svg { width:26px;height:26px;stroke:#ef4444;fill:none;stroke-width:1.8; }
+    .modal-title { font-size:17px;font-weight:700;color:#111827;margin-bottom:8px; }
+    .modal-desc { font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:24px; }
+    .modal-actions { display:flex;gap:10px; }
+    .modal-btn { flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all 0.15s; }
+    .modal-btn.cancel { background:#f9fafb;color:#374151;border:1px solid #e5e7eb; }
+    .modal-btn.danger { background:#ef4444;color:white; }
+    .modal-btn.danger:hover { background:#dc2626; }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);} }
 
     @media (max-width:768px) {
         .stats-grid { grid-template-columns:repeat(3,1fr); }
@@ -79,6 +110,34 @@
 
 @section('content')
 
+{{-- Toast --}}
+@if(session('success'))
+<div class="toast-wrap" id="toastWrap">
+    <div class="toast" id="toast">
+        <div class="toast-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>{{ session('success') }}</div>
+        <button class="toast-close" onclick="closeToast()">×</button>
+        <div class="toast-progress"></div>
+    </div>
+</div>
+@endif
+
+{{-- Modal Hapus --}}
+<div class="modal-backdrop" id="modalHapus">
+    <div class="modal-box">
+        <div class="modal-icon-wrap">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+        <div class="modal-title">Hapus Assessment?</div>
+        <div class="modal-desc" id="modalDesc">Tindakan ini tidak dapat dibatalkan.</div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal()">Batal</button>
+            <button class="modal-btn danger" onclick="submitHapus()">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+<form id="formHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
+
 {{-- Page Header --}}
 <div class="page-header">
     <div>
@@ -86,7 +145,6 @@
         <div class="page-sub">Riwayat assessment seluruh karyawan</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        {{-- Import — Super Admin Only --}}
         @if(auth()->user()->isSuperAdmin())
         <a href="{{ route('history_assessment_all.import') }}"
            style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;transition:all 0.15s;"
@@ -99,7 +157,6 @@
             Import Excel
         </a>
         @endif
-        {{-- Export --}}
         <a href="{{ route('history_assessment_all.export', request()->query()) }}"
            style="display:inline-flex;align-items:center;gap:8px;background:#7c3aed;color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:14px;height:14px;">
@@ -158,7 +215,7 @@
             @endforeach
         </select>
         @if(request()->hasAny(['search','rekomendasi','tahun']))
-            <a href="{{ route('history_assessment_all.index') }}" class="btn-reset">✕ Reset</a>
+            <a href="{{ route('history_assessment_all.index') }}" class="btn-reset">&#x2715; Reset</a>
         @endif
     </div>
 </form>
@@ -180,6 +237,7 @@
                     <th>Rekomendasi Final</th>
                     <th>Tgl Exp IDP</th>
                     <th>Status IDP</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -205,50 +263,50 @@
                     <td>{{ $a->person_grade ?? '-' }}</td>
                     <td>{{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}</td>
 
-                    {{-- Rekomendasi Inti --}}
+                    {{-- Rek. Inti --}}
                     <td>
                         @if($a->rekomendasi_inti)
                         <div class="rekom-bar">
-                            <div class="rekom-track">
-                                <div class="rekom-fill" style="width:{{ $a->rekomendasi_inti }}%;background:#15803d;"></div>
-                            </div>
+                            <div class="rekom-track"><div class="rekom-fill" style="width:{{ $a->rekomendasi_inti }}%;background:#15803d;"></div></div>
                             <span class="rekom-pct">{{ $a->rekomendasi_inti }}%</span>
                         </div>
-                        @else - @endif
+                        @else
+                            -
+                        @endif
                     </td>
 
-                    {{-- Rekomendasi Primer --}}
+                    {{-- Rek. Primer --}}
                     <td>
                         @if($a->rekomendasi_primer)
                         <div class="rekom-bar">
-                            <div class="rekom-track">
-                                <div class="rekom-fill" style="width:{{ $a->rekomendasi_primer }}%;background:#3b82f6;"></div>
-                            </div>
+                            <div class="rekom-track"><div class="rekom-fill" style="width:{{ $a->rekomendasi_primer }}%;background:#3b82f6;"></div></div>
                             <span class="rekom-pct">{{ $a->rekomendasi_primer }}%</span>
                         </div>
-                        @else - @endif
+                        @else
+                            -
+                        @endif
                     </td>
 
-                    {{-- Rekomendasi Sekunder --}}
+                    {{-- Rek. Sekunder --}}
                     <td>
                         @if($a->rekomendasi_skunder)
                         <div class="rekom-bar">
-                            <div class="rekom-track">
-                                <div class="rekom-fill" style="width:{{ $a->rekomendasi_skunder }}%;background:#f59e0b;"></div>
-                            </div>
+                            <div class="rekom-track"><div class="rekom-fill" style="width:{{ $a->rekomendasi_skunder }}%;background:#f59e0b;"></div></div>
                             <span class="rekom-pct">{{ $a->rekomendasi_skunder }}%</span>
                         </div>
-                        @else - @endif
+                        @else
+                            -
+                        @endif
                     </td>
 
-                    {{-- Rekomendasi Final --}}
+                    {{-- Rek. Final --}}
                     <td>
                         @if($a->rekomendasi_final === 'ready')
-                            <span class="badge-final final-ready">● Ready</span>
+                            <span class="badge-final final-ready">&#x25CF; Ready</span>
                         @elseif($a->rekomendasi_final === 'ready_with_development')
-                            <span class="badge-final final-rwd">● Ready w/ Dev</span>
+                            <span class="badge-final final-rwd">&#x25CF; Ready w/ Dev</span>
                         @elseif($a->rekomendasi_final === 'not_ready')
-                            <span class="badge-final final-nr">● Not Ready</span>
+                            <span class="badge-final final-nr">&#x25CF; Not Ready</span>
                         @else
                             <span class="badge-final final-none">-</span>
                         @endif
@@ -257,28 +315,42 @@
                     {{-- Tgl Exp IDP --}}
                     <td>
                         @if($a->tanggal_exp_idp)
-                            <span style="color:{{ \Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast() ? '#ef4444' : '#374151' }};font-weight:{{ \Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast() ? '700' : '400' }};">
+                            @php $idpPast = \Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast(); @endphp
+                            <span style="color:{{ $idpPast ? '#ef4444' : '#374151' }};font-weight:{{ $idpPast ? '700' : '400' }};">
                                 {{ \Carbon\Carbon::parse($a->tanggal_exp_idp)->format('d M Y') }}
                             </span>
-                        @else - @endif
+                        @else
+                            -
+                        @endif
                     </td>
 
                     {{-- Status IDP --}}
                     <td>
                         @if($a->tanggal_exp_idp)
                             @if(\Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast())
-                                <span class="idp-badge idp-expired">⚠ Expired</span>
+                                <span class="idp-badge idp-expired">&#x26A0; Expired</span>
                             @else
-                                <span class="idp-badge idp-aktif">✓ Aktif</span>
+                                <span class="idp-badge idp-aktif">&#x2713; Aktif</span>
                             @endif
                         @else
                             <span style="color:#9ca3af;font-size:12px;">-</span>
                         @endif
                     </td>
+
+                    {{-- Action --}}
+                    <td>
+                        <button type="button" class="btn-del"
+                            data-url="{{ route('history_assessment_all.destroy', $a) }}"
+                            data-nama="{{ $a->karyawan->nama }}"
+                            data-tgl="{{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}"
+                            onclick="openModal(this.dataset.url, this.dataset.nama, this.dataset.tgl)">
+                            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                        </button>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="11">
+                    <td colspan="12">
                         <div class="empty-state">
                             <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                             <p style="font-size:14px;font-weight:600;color:#6b7280;margin-bottom:4px;">Belum ada data assessment</p>
@@ -299,10 +371,27 @@
             @else
                 <a href="{{ $assessments->previousPageUrl() }}" class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
             @endif
-            @php $cur=$assessments->currentPage();$last=$assessments->lastPage();$s=max(1,$cur-2);$e=min($last,$cur+2); @endphp
-            @if($s>1)<a href="{{ $assessments->url(1) }}" class="page-btn">1</a>@if($s>2)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif@endif
-            @for($i=$s;$i<=$e;$i++)<a href="{{ $assessments->url($i) }}" class="page-btn {{ $i==$cur?'active':'' }}">{{ $i }}</a>@endfor
-            @if($e<$last)@if($e<$last-1)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif<a href="{{ $assessments->url($last) }}" class="page-btn">{{ $last }}</a>@endif
+            @php
+                $cur  = $assessments->currentPage();
+                $last = $assessments->lastPage();
+                $s    = max(1, $cur - 2);
+                $e    = min($last, $cur + 2);
+            @endphp
+            @if($s > 1)
+                <a href="{{ $assessments->url(1) }}" class="page-btn">1</a>
+                @if($s > 2)
+                    <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
+                @endif
+            @endif
+            @for($i = $s; $i <= $e; $i++)
+                <a href="{{ $assessments->url($i) }}" class="page-btn {{ $i == $cur ? 'active' : '' }}">{{ $i }}</a>
+            @endfor
+            @if($e < $last)
+                @if($e < $last - 1)
+                    <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
+                @endif
+                <a href="{{ $assessments->url($last) }}" class="page-btn">{{ $last }}</a>
+            @endif
             @if($assessments->hasMorePages())
                 <a href="{{ $assessments->nextPageUrl() }}" class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
             @else
@@ -313,5 +402,48 @@
     @endif
 </div>
 
-@endif
 @endsection
+
+@push('scripts')
+<script>
+    // Toast
+    function closeToast() {
+        var t = document.getElementById('toast');
+        if (!t) return;
+        t.classList.add('hiding');
+        setTimeout(function() {
+            var wrap = document.getElementById('toastWrap');
+            if (wrap) wrap.remove();
+        }, 300);
+    }
+    window.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('toast')) {
+            setTimeout(function() { closeToast(); }, 3000);
+        }
+    });
+
+    // Modal Hapus
+    var deleteUrl = '';
+    function openModal(url, nama, tgl) {
+        deleteUrl = url;
+        document.getElementById('modalDesc').innerHTML =
+            'Kamu akan menghapus assessment <strong>' + nama + '</strong> tanggal <strong>' + tgl + '</strong>.<br>Tindakan ini tidak dapat dibatalkan.';
+        document.getElementById('modalHapus').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        document.getElementById('modalHapus').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function submitHapus() {
+        document.getElementById('formHapus').action = deleteUrl;
+        document.getElementById('formHapus').submit();
+    }
+    document.getElementById('modalHapus').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+@endpush

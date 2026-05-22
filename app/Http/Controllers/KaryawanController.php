@@ -12,6 +12,7 @@ use App\Models\Jabatan;
 use App\Models\KodeStruktur;
 use App\Imports\KaryawanImport;
 use App\Exports\TemplateKaryawanExport;
+use App\Exports\KaryawanExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
@@ -135,6 +136,15 @@ class KaryawanController extends Controller
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil dihapus!');
     }
 
+    public function export(Request $request)
+    {
+    $filename = 'data-karyawan-' . now()->format('d-m-Y') . '.xlsx';
+    return Excel::download(
+        new KaryawanExport($request->search, $request->status),
+        $filename
+    );
+    }
+    
     // ===== IMPORT =====
     public function importPage()
     {
