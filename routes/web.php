@@ -7,6 +7,7 @@ use App\Http\Controllers\HistoryKaryawanController;
 use App\Http\Controllers\HistoryAssessmentController;
 use App\Http\Controllers\HistoryAssessmentAllController;
 use App\Http\Controllers\ImportAssessmentController;
+use App\Http\Controllers\ImportHistoryJabatanController;
 use App\Http\Controllers\PgsPjsController;
 use App\Http\Controllers\HistoryPejabatController;
 use App\Http\Controllers\DashboardController;
@@ -58,14 +59,24 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{historyJabatan}', [HistoryJabatanController::class, 'destroy'])->name('destroy');
         });
 
-    // History Karyawan
+    // History Karyawan (gabungan — harus dalam auth middleware)
     Route::prefix('history-karyawan')
         ->name('history_karyawan.')
         ->group(function () {
-            Route::get('/',           [HistoryKaryawanController::class, 'index'])->name('index');
-            Route::get('/export',     [HistoryKaryawanController::class, 'export'])->name('export');
+            Route::get('/',        [HistoryKaryawanController::class, 'index'])->name('index');
+            Route::get('/export',  [HistoryKaryawanController::class, 'export'])->name('export');
+
+            // Route import hanya untuk Super Admin
+            Route::middleware('super_admin')->group(function () {
+                Route::get('/import',          [ImportHistoryJabatanController::class, 'page'])->name('import');
+                Route::post('/import',         [ImportHistoryJabatanController::class, 'import'])->name('import.store');
+                Route::get('/import/template', [ImportHistoryJabatanController::class, 'downloadTemplate'])->name('import.template');
+            });
+
+            // /{karyawan} HARUS paling bawah agar tidak menangkap /export dan /import
             Route::get('/{karyawan}', [HistoryKaryawanController::class, 'show'])->name('show');
-        });
+    });
+
 
     // History Assessment per Karyawan
     Route::prefix('karyawan/{karyawan}/history-assessment')

@@ -128,15 +128,6 @@
         <div class="section-title">Riwayat Jabatan</div>
         <div class="section-sub">{{ $histories->count() }} jabatan tercatat dalam sistem</div>
     </div>
-    <a href="{{ route('history_karyawan.export', $karyawan) }}"
-       style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Export Excel
-    </a>
 </div>
 
 {{-- Timeline (read only, tanpa tombol hapus) --}}

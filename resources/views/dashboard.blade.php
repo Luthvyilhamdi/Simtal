@@ -249,9 +249,9 @@
         <div class="chart-card-sub">Jumlah karyawan aktif per direktorat</div>
         @php $maxDir = $distribusiDirektorat->max('total') ?: 1; @endphp
         <div class="bar-chart">
-            @foreach($distribusiDirektorat->take(11) as $d)
+            @foreach($distribusiDirektorat->take(8) as $d)
             <div class="bar-row">
-                <div class="bar-label" title="{{ $d['nama'] }}">{{ Str::limit($d['nama'], 23) }}</div>
+                <div class="bar-label" title="{{ $d['nama'] }}">{{ Str::limit($d['nama'], 18) }}</div>
                 <div class="bar-track">
                     <div class="bar-fill" style="width:{{ ($d['total']/$maxDir)*100 }}%;background:#2563eb;">
                         {{ $d['total'] }}
