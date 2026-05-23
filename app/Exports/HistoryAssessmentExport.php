@@ -50,7 +50,7 @@ class HistoryAssessmentExport
                 'Job Stream', 'Tanggal Pelaksanaan', 'Tingkat Pengukuran',
                 'Rekomendasi Inti (%)', 'Rekomendasi Primer (%)',
                 'Rekomendasi Sekunder (%)', 'Rekomendasi Final',
-                'Tanggal Exp IDP', 'Status IDP', 'Keterangan',
+                'Tanggal Exp Assessment', 'Status Assessment', 'Keterangan',
             ];
 
             $headerCells = array_map(

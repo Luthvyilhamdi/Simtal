@@ -175,7 +175,7 @@
                 <div class="integrated-item">✓ Person Grade</div>
                 <div class="integrated-item">✓ Jenis Kelamin</div>
                 <div class="integrated-item">✓ Usia (dihitung otomatis)</div>
-                <div class="integrated-item">✓ Tanggal Exp IDP (+2 tahun)</div>
+                <div class="integrated-item">✓ Tanggal Exp Assessment (+2 tahun)</div>
             </div>
         </div>
     </div>
@@ -253,7 +253,7 @@
             </div>
             <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#6b7280;">
                 <span style="color:#15803d;font-weight:700;">✓</span>
-                Tanggal Exp IDP otomatis +2 tahun dari pelaksanaan
+                Tanggal Exp Assessment otomatis +2 tahun dari pelaksanaan
             </div>
         </div>
     </div>
