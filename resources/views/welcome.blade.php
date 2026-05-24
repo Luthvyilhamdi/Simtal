@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTAL - Login</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -244,6 +245,7 @@
         <div class="top-logos">
             <span class="company-name">SIMTAL</span>
             <div class="divider-v"></div>
+            <img src="{{ asset('images/PIM.png') }}" alt="Pupuk Iskandar Muda" style="height:28px;width:auto;object-fit:contain;">
             <span class="sub-name">Pupuk Iskandar Muda</span>
         </div>
 

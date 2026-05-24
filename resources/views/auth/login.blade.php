@@ -179,9 +179,9 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
-                <label>NIK</label>
+                <label>Email</label>
                 <input type="email" name="email" value="{{ old('email') }}"
-                       placeholder="5120084" required autofocus />
+                       placeholder="email@example.com" required autofocus />
             </div>
             <div class="form-group">
                 <label>Password</label>
@@ -199,7 +199,9 @@
             <button type="submit" class="btn-login">Masuk ke SIMTAL</button>
         </form>
 
-        <p class="footer-note">© 2025 SIMTAL · Sistem Informasi Manajemen Talenta</p>
+        <footer style="text-align:center; padding: 16px; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0eb; background: white;">
+            &copy; {{ date('Y') }} SIMTAL &mdash; Talent Management System. All rights reserved.
+        </footer>
     </div>
 </div>
 </body>
