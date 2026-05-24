@@ -13,6 +13,7 @@ use App\Models\KodeStruktur;
 use App\Imports\KaryawanImport;
 use App\Exports\TemplateKaryawanExport;
 use App\Exports\KaryawanExport;
+use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Storage;
 
 class KaryawanController extends Controller
 {
+    use LogsActivity;
+
     public function index(Request $request)
     {
         $query = Karyawan::with(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur']);
@@ -74,6 +77,8 @@ class KaryawanController extends Controller
         }
 
         Karyawan::create($data);
+        $this->log('tambah', 'Karyawan', $request->nama, 'NIK: ' . $request->nik);
+
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil ditambahkan!');
     }
 
@@ -126,26 +131,33 @@ class KaryawanController extends Controller
         }
 
         $karyawan->update($data);
+        $this->log('edit', 'Karyawan', $karyawan->nama, 'NIK: ' . $karyawan->nik);
+
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diupdate!');
     }
 
     public function destroy(Karyawan $karyawan)
     {
+        $nama = $karyawan->nama;
+        $nik  = $karyawan->nik;
+
         if ($karyawan->foto) Storage::disk('public')->delete($karyawan->foto);
         $karyawan->delete();
+
+        $this->log('hapus', 'Karyawan', $nama, 'NIK: ' . $nik);
+
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil dihapus!');
     }
 
     public function export(Request $request)
     {
-    $filename = 'data-karyawan-' . now()->format('d-m-Y') . '.xlsx';
-    return Excel::download(
-        new KaryawanExport($request->search, $request->status),
-        $filename
-    );
+        $filename = 'data-karyawan-' . now()->format('d-m-Y') . '.xlsx';
+        return Excel::download(
+            new KaryawanExport($request->search, $request->status),
+            $filename
+        );
     }
-    
-    // ===== IMPORT =====
+
     public function importPage()
     {
         return view('karyawan.import');
@@ -153,37 +165,39 @@ class KaryawanController extends Controller
 
     public function import(Request $request)
     {
-    $request->validate([
-        'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-    ], [
-        'file.required' => 'File wajib dipilih.',
-        'file.mimes'    => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
-        'file.max'      => 'Ukuran file maksimal 10MB.',
-    ]);
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], [
+            'file.required' => 'File wajib dipilih.',
+            'file.mimes'    => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            'file.max'      => 'Ukuran file maksimal 10MB.',
+        ]);
 
-    try {
-        $import = new KaryawanImport();
-        Excel::import($import, $request->file('file'));
+        try {
+            $import = new KaryawanImport();
+            Excel::import($import, $request->file('file'));
 
-        $imported = $import->getRowCount();
-        $skipped  = $import->getSkippedCount();
+            $imported = $import->getRowCount();
+            $skipped  = $import->getSkippedCount();
 
-        $msg = "Berhasil mengimport {$imported} karyawan.";
-        if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK duplikat).";
+            $msg = "Berhasil mengimport {$imported} karyawan.";
+            if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK duplikat).";
 
-        return redirect()->route('karyawan.index')->with('success', $msg);
+            $this->log('import', 'Karyawan', 'Import Excel', "Berhasil import {$imported} karyawan");
 
-    } catch (ValidationException $e) {
-        $failures = $e->failures();
-        $errMsg   = 'Import gagal karena kesalahan validasi: ';
-        foreach (array_slice($failures, 0, 3) as $failure) {
-            $errMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . '. ';
+            return redirect()->route('karyawan.index')->with('success', $msg);
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $errMsg   = 'Import gagal karena kesalahan validasi: ';
+            foreach (array_slice($failures, 0, 3) as $failure) {
+                $errMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . '. ';
+            }
+            return back()->with('error', $errMsg);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
         }
-        return back()->with('error', $errMsg);
-
-    } catch (\Exception $e) {
-        return back()->with('error', 'Import gagal: ' . $e->getMessage());
-    }
     }
 
     public function downloadTemplate()

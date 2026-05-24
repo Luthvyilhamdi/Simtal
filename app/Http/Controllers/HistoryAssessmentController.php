@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\HistoryAssessment;
+use App\Traits\LogsActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class HistoryAssessmentController extends Controller
 {
+    use LogsActivity;
+
     public function index(Karyawan $karyawan)
     {
         $karyawan->load(['jabatan', 'departemen', 'jobGrade', 'personGrade']);
@@ -40,10 +43,7 @@ class HistoryAssessmentController extends Controller
 
         $karyawan->load(['jobGrade', 'personGrade']);
 
-        // Hitung usia saat assessment
-        $usia = Carbon::parse($karyawan->tanggal_lahir)->age;
-
-        // Tanggal exp IDP = tanggal assessment + 2 tahun
+        $usia          = Carbon::parse($karyawan->tanggal_lahir)->age;
         $tanggalExpIdp = Carbon::parse($request->tanggal_pelaksanaan)->addYears(2);
 
         HistoryAssessment::create([
@@ -64,6 +64,8 @@ class HistoryAssessmentController extends Controller
             'keterangan'          => $request->keterangan,
         ]);
 
+        $this->log('tambah', 'Assessment', $karyawan->nama, 'Tgl: ' . $request->tanggal_pelaksanaan);
+
         return redirect()
             ->route('history_assessment.index', $karyawan)
             ->with('success', 'History assessment berhasil ditambahkan!');
@@ -72,6 +74,9 @@ class HistoryAssessmentController extends Controller
     public function destroy(Karyawan $karyawan, HistoryAssessment $historyAssessment)
     {
         $historyAssessment->delete();
+
+        $this->log('hapus', 'Assessment', $karyawan->nama, 'Hapus data assessment');
+
         return redirect()
             ->route('history_assessment.index', $karyawan)
             ->with('success', 'History assessment berhasil dihapus!');

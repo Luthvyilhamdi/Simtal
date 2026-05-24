@@ -4,26 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\PgsPjs;
 use App\Models\Karyawan;
+use App\Traits\LogsActivity;
 use App\Exports\PgsPjsExport;
 use Illuminate\Http\Request;
 
 class PgsPjsController extends Controller
 {
+    use LogsActivity;
+
     public function index()
     {
-        // Auto-update is_active berdasarkan tanggal_berakhir
         PgsPjs::where('is_active', true)
             ->where('tanggal_berakhir', '<', now())
             ->whereNotNull('tanggal_berakhir')
             ->update(['is_active' => false]);
 
-        // Yang sedang berlangsung
         $aktif = PgsPjs::with('karyawan')
             ->where('is_active', true)
             ->orderBy('tanggal_berakhir', 'asc')
             ->get();
 
-        // History (sudah berakhir)
         $history = PgsPjs::with('karyawan')
             ->where('is_active', false)
             ->orderBy('tanggal_berakhir', 'desc')
@@ -54,6 +54,8 @@ class PgsPjsController extends Controller
             'keterangan'      => 'nullable|string',
         ]);
 
+        $karyawan = Karyawan::find($request->karyawan_id);
+
         PgsPjs::create([
             'karyawan_id'      => $request->karyawan_id,
             'tipe'             => $request->tipe,
@@ -67,6 +69,8 @@ class PgsPjsController extends Controller
             'keterangan'       => $request->keterangan,
             'is_active'        => true,
         ]);
+
+        $this->log('tambah', 'PGS/PJS', $karyawan->nama, strtoupper($request->tipe) . ': ' . $request->jabatan_pgs_pjs);
 
         return redirect()
             ->route('pgs_pjs.index')
@@ -84,6 +88,8 @@ class PgsPjsController extends Controller
             'is_active'        => false,
         ]);
 
+        $this->log('akhiri', 'PGS/PJS', $pgsPjs->karyawan->nama, 'Diakhiri: ' . $request->tanggal_berakhir);
+
         return redirect()
             ->route('pgs_pjs.index')
             ->with('success', 'PGS/PJS berhasil diakhiri!');
@@ -91,7 +97,11 @@ class PgsPjsController extends Controller
 
     public function destroy(PgsPjs $pgsPjs)
     {
+        $nama = $pgsPjs->karyawan->nama ?? '-';
         $pgsPjs->delete();
+
+        $this->log('hapus', 'PGS/PJS', $nama, 'Hapus data PGS/PJS');
+
         return redirect()
             ->route('pgs_pjs.index')
             ->with('success', 'Data PGS/PJS berhasil dihapus!');

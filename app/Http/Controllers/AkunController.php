@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
 class AkunController extends Controller
 {
+    use LogsActivity;
+
     public function index()
     {
         $users = User::orderBy('name')->paginate(10);
@@ -31,6 +34,8 @@ class AkunController extends Controller
             'role'     => $request->role,
         ]);
 
+        $this->log('tambah', 'Akun', $request->name, 'Role: ' . $request->role);
+
         return redirect()->route('akun.index')->with('success', 'Akun berhasil ditambahkan!');
     }
 
@@ -38,7 +43,7 @@ class AkunController extends Controller
     {
         $request->validate([
             'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$akun->id,
+            'email' => 'required|email|unique:users,email,' . $akun->id,
             'role'  => 'required|in:super_admin,admin',
         ]);
 
@@ -48,7 +53,6 @@ class AkunController extends Controller
             'role'  => $request->role,
         ];
 
-        // Update password hanya jika diisi
         if ($request->filled('password')) {
             $request->validate([
                 'password' => ['confirmed', Rules\Password::defaults()],
@@ -58,17 +62,22 @@ class AkunController extends Controller
 
         $akun->update($data);
 
+        $this->log('edit', 'Akun', $akun->name, 'Role: ' . $akun->role);
+
         return redirect()->route('akun.index')->with('success', 'Akun berhasil diupdate!');
     }
 
     public function destroy(User $akun)
     {
-        // Tidak bisa hapus diri sendiri
         if ($akun->id === auth()->id()) {
             return redirect()->route('akun.index')->with('error', 'Tidak bisa menghapus akun sendiri!');
         }
 
+        $nama = $akun->name;
         $akun->delete();
+
+        $this->log('hapus', 'Akun', $nama, 'Hapus akun user');
+
         return redirect()->route('akun.index')->with('success', 'Akun berhasil dihapus!');
     }
 }

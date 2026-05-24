@@ -12,12 +12,15 @@ use App\Models\Departemen;
 use App\Models\JobGrade;
 use App\Models\PersonGrade;
 use App\Models\KodeStruktur;
+use App\Traits\LogsActivity;
 use App\Exports\HistoryJabatanExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class HistoryJabatanController extends Controller
 {
+    use LogsActivity;
+
     public function index(Karyawan $karyawan)
     {
         $karyawan->load(['jabatan', 'departemen', 'direktorat', 'jobGrade']);
@@ -64,7 +67,6 @@ class HistoryJabatanController extends Controller
 
         DB::transaction(function () use ($request, $karyawan) {
 
-            // === 1. Ambil jabatan lama sebelum diubah ===
             $historyLama = HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->first();
@@ -73,7 +75,6 @@ class HistoryJabatanController extends Controller
                 ? Jabatan::find($historyLama->jabatan_id)
                 : null;
 
-            // === 2. Tutup history jabatan lama ===
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->update([
@@ -81,7 +82,6 @@ class HistoryJabatanController extends Controller
                     'tanggal_selesai' => $request->tanggal_mulai,
                 ]);
 
-            // === 3. Buat history jabatan baru ===
             $historyBaru = HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,
                 'jabatan_id'       => $request->jabatan_id,
@@ -101,7 +101,6 @@ class HistoryJabatanController extends Controller
                 'is_current'       => true,
             ]);
 
-            // === 4. Update profil karyawan ===
             $karyawan->update([
                 'jabatan_id'       => $request->jabatan_id,
                 'direktorat_id'    => $request->direktorat_id,
@@ -113,18 +112,15 @@ class HistoryJabatanController extends Controller
                 'jabatan_saat_ini' => $request->jabatan_saat_ini,
             ]);
 
-            // === 5. Load relasi untuk history pejabat ===
             $karyawan->load(['direktorat', 'kompartemen', 'departemen', 'jobGrade', 'personGrade']);
             $jabatanBaru = Jabatan::find($request->jabatan_id);
 
-            // === 6. Jika jabatan LAMA adalah SVP/VP/SPM/PM → tutup history pejabat ===
             if ($jabatanLamaModel && HistoryPejabat::isDipantau($jabatanLamaModel->nama_jabatan)) {
                 HistoryPejabat::where('karyawan_id', $karyawan->id)
                     ->whereNull('tanggal_selesai')
                     ->update(['tanggal_selesai' => $request->tanggal_mulai]);
             }
 
-            // === 7. Jika jabatan BARU adalah SVP/VP/SPM/PM → buat history pejabat baru ===
             if ($jabatanBaru && HistoryPejabat::isDipantau($jabatanBaru->nama_jabatan)) {
                 HistoryPejabat::create([
                     'karyawan_id'        => $karyawan->id,
@@ -145,6 +141,13 @@ class HistoryJabatanController extends Controller
             }
         });
 
+        $this->log(
+            'tambah',
+            'History Jabatan',
+            $karyawan->nama,
+            ucfirst($request->tipe) . ' jabatan: ' . ($request->jabatan_saat_ini ?? '-')
+        );
+
         return redirect()
             ->route('history_jabatan.index', $karyawan)
             ->with('success', 'History jabatan berhasil ditambahkan & profil karyawan diperbarui!');
@@ -152,16 +155,13 @@ class HistoryJabatanController extends Controller
 
     public function destroy(Karyawan $karyawan, HistoryJabatan $historyJabatan)
     {
-        $wasCurrent = $historyJabatan->is_current;
-
-        // Cek apakah jabatan yang dihapus adalah jabatan dipantau
+        $wasCurrent   = $historyJabatan->is_current;
         $jabatanModel = Jabatan::find($historyJabatan->jabatan_id);
         $isDipantau   = $jabatanModel && HistoryPejabat::isDipantau($jabatanModel->nama_jabatan);
 
         $historyJabatan->delete();
 
         if ($wasCurrent) {
-            // Kembalikan jabatan sebelumnya sebagai current
             $prev = HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->orderBy('tanggal_mulai', 'desc')
                 ->first();
@@ -179,14 +179,14 @@ class HistoryJabatanController extends Controller
                 ]);
             }
 
-            // Jika jabatan yang dihapus adalah jabatan dipantau
-            // → hapus juga history pejabat yang terkait
             if ($isDipantau) {
                 HistoryPejabat::where('karyawan_id', $karyawan->id)
                     ->whereNull('tanggal_selesai')
                     ->delete();
             }
         }
+
+        $this->log('hapus', 'History Jabatan', $karyawan->nama, 'Hapus data jabatan');
 
         return redirect()
             ->route('history_jabatan.index', $karyawan)
@@ -196,7 +196,6 @@ class HistoryJabatanController extends Controller
     public function export(Request $request)
     {
         $filename = 'history-jabatan-' . now()->format('d-m-Y') . '.xlsx';
-
         return (new HistoryJabatanExport())->download($filename);
     }
 }

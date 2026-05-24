@@ -21,6 +21,7 @@ use App\Http\Controllers\MasterDepartemenController;
 use App\Http\Controllers\MasterJobGradeController;
 use App\Http\Controllers\MasterPersonGradeController;
 use App\Http\Controllers\MasterKodeStrukturController;
+use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Route;
 
@@ -75,8 +76,7 @@ Route::middleware('auth')->group(function () {
 
             // /{karyawan} HARUS paling bawah agar tidak menangkap /export dan /import
             Route::get('/{karyawan}', [HistoryKaryawanController::class, 'show'])->name('show');
-    });
-
+        });
 
     // History Assessment per Karyawan
     Route::prefix('karyawan/{karyawan}/history-assessment')
@@ -98,7 +98,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/import',          [ImportAssessmentController::class, 'page'])->name('import');
             Route::post('/import',         [ImportAssessmentController::class, 'import'])->name('import.store');
             Route::get('/import/template', [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
-            Route::delete('/{assessment}', [HistoryAssessmentAllController::class, 'destroy'])->name('destroy'); // ← tambah
         });
 
     // PGS & PJS
@@ -138,6 +137,12 @@ Route::middleware('auth')->group(function () {
 
     // Super Admin Only
     Route::middleware('super_admin')->group(function () {
+
+        // Activity Log
+        Route::prefix('activity-log')->name('activity_log.')->group(function () {
+            Route::get('/',    [ActivityLogController::class, 'index'])->name('index');
+            Route::delete('/', [ActivityLogController::class, 'destroy'])->name('destroy');
+        });
 
         // Akun
         Route::prefix('akun')->name('akun.')->group(function () {
