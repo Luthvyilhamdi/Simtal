@@ -20,6 +20,7 @@ class GenerateNotifikasi extends Command
         $this->cekPensiun();
         $this->cekMasaKerja();
         $this->cekPgsPjsBerakhir();
+        $this->cekEligibleKenaikanGrade();
 
         $this->info('Notifikasi berhasil digenerate!');
     }
@@ -35,7 +36,6 @@ class GenerateNotifikasi extends Command
         foreach ($assessments as $a) {
             $sisaHari = now()->diffInDays($a->tanggal_exp_idp);
 
-            // Cek apakah notifikasi sudah ada
             $exists = Notifikasi::where('tipe', 'idp_expire')
                 ->where('notifiable_type', HistoryAssessment::class)
                 ->where('notifiable_id', $a->id)
@@ -87,7 +87,7 @@ class GenerateNotifikasi extends Command
         }
     }
 
-    // 3. Cek milestone masa kerja (5, 10, 15, 20 tahun)
+    // 3. Cek milestone masa kerja (5, 10, 15, 20, 25 tahun)
     private function cekMasaKerja()
     {
         $milestones = [5, 10, 15, 20, 25];
@@ -146,6 +146,47 @@ class GenerateNotifikasi extends Command
                     'notifiable_id'   => $p->id,
                 ]);
             }
+        }
+    }
+
+    // 5. Cek karyawan eligible kenaikan grade
+    private function cekEligibleKenaikanGrade()
+    {
+        $karyawans = Karyawan::with(['jobGrade', 'personGrade'])
+            ->where('status', 'aktif')
+            ->whereNotNull('tanggal_mulai_pg')
+            ->get();
+
+        foreach ($karyawans as $k) {
+            $sk = $k->statusKenaikan;
+
+            if (!$sk['eligible']) continue;
+
+            // Cek notifikasi belum dibaca hari ini
+            $exists = Notifikasi::where('tipe', 'eligible_grade')
+                ->where('notifiable_type', Karyawan::class)
+                ->where('notifiable_id', $k->id)
+                ->where('is_read', false)
+                ->exists();
+
+            if ($exists) continue;
+
+            // Tentukan label & pesan berdasarkan status
+            $icon = match($sk['status']) {
+                'naik_pg'   => '⬆️',
+                'naik_jg'   => '🚀',
+                'naik_band' => '🏆',
+                default     => '✅',
+            };
+
+            Notifikasi::create([
+                'judul'           => $icon . ' Eligible Kenaikan Grade',
+                'pesan'           => "{$k->nama} sudah eligible untuk {$sk['label']} (MDG terpenuhi)",
+                'tipe'            => 'eligible_grade',
+                'level'           => 'info',
+                'notifiable_type' => Karyawan::class,
+                'notifiable_id'   => $k->id,
+            ]);
         }
     }
 }

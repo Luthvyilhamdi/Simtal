@@ -42,8 +42,8 @@ class KaryawanController extends Controller
             'direktorats'   => Direktorat::all(),
             'kompartemens'  => Kompartemen::all(),
             'departemens'   => Departemen::all(),
-            'jobGrades'     => JobGrade::all(),
-            'personGrades'  => PersonGrade::all(),
+            'jobGrades'     => JobGrade::orderByRaw('CAST(job_grade AS UNSIGNED)')->get(),
+            'personGrades'  => PersonGrade::orderByRaw('CAST(person_grade AS UNSIGNED)')->get(),
             'jabatans'      => Jabatan::all(),
             'kodeStrukturs' => KodeStruktur::all(),
         ]);
@@ -52,22 +52,25 @@ class KaryawanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nik'              => 'required|unique:karyawans,nik',
-            'nama'             => 'required',
-            'jenis_kelamin'    => 'required|in:L,P',
-            'tempat_lahir'     => 'required',
-            'tanggal_lahir'    => 'required|date',
-            'tanggal_masuk'    => 'required|date',
-            'jabatan_id'       => 'required',
-            'direktorat_id'    => 'required',
-            'kompartemen_id'   => 'required',
-            'departemen_id'    => 'required',
-            'job_grade_id'     => 'required',
-            'person_grade_id'  => 'required',
-            'kode_struktur_id' => 'required',
-            'status'           => 'required',
-            'jabatan_saat_ini' => 'required|string',
-            'foto'             => 'nullable|image|max:2048',
+            'nik'                => 'required|unique:karyawans,nik',
+            'nama'               => 'required',
+            'jenis_kelamin'      => 'required|in:L,P',
+            'tempat_lahir'       => 'required',
+            'tanggal_lahir'      => 'required|date',
+            'tanggal_masuk'      => 'required|date',
+            'jabatan_id'         => 'required',
+            'direktorat_id'      => 'required',
+            'kompartemen_id'     => 'required',
+            'departemen_id'      => 'required',
+            'job_grade_id'       => 'required',
+            'person_grade_id'    => 'required',
+            'kode_struktur_id'   => 'required',
+            'status'             => 'required',
+            'jabatan_saat_ini'   => 'required|string',
+            'foto'               => 'nullable|image|max:2048',
+            'tanggal_mulai_pg'   => 'nullable|date',
+            'tanggal_mulai_jg'   => 'nullable|date',
+            'tanggal_mulai_band' => 'nullable|date',
         ]);
 
         $data = $request->except('foto');
@@ -95,8 +98,8 @@ class KaryawanController extends Controller
             'direktorats'   => Direktorat::all(),
             'kompartemens'  => Kompartemen::all(),
             'departemens'   => Departemen::all(),
-            'jobGrades'     => JobGrade::all(),
-            'personGrades'  => PersonGrade::all(),
+            'jobGrades'     => JobGrade::orderByRaw('CAST(job_grade AS UNSIGNED)')->get(),
+            'personGrades'  => PersonGrade::orderByRaw('CAST(person_grade AS UNSIGNED)')->get(),
             'jabatans'      => Jabatan::all(),
             'kodeStrukturs' => KodeStruktur::all(),
         ]);
@@ -105,22 +108,25 @@ class KaryawanController extends Controller
     public function update(Request $request, Karyawan $karyawan)
     {
         $request->validate([
-            'nik'              => 'required|unique:karyawans,nik,'.$karyawan->id,
-            'nama'             => 'required',
-            'jenis_kelamin'    => 'required|in:L,P',
-            'tempat_lahir'     => 'required',
-            'tanggal_lahir'    => 'required|date',
-            'tanggal_masuk'    => 'required|date',
-            'jabatan_id'       => 'required',
-            'direktorat_id'    => 'required',
-            'kompartemen_id'   => 'required',
-            'departemen_id'    => 'required',
-            'job_grade_id'     => 'required',
-            'person_grade_id'  => 'required',
-            'kode_struktur_id' => 'required',
-            'status'           => 'required',
-            'jabatan_saat_ini' => 'required|string',
-            'foto'             => 'nullable|image|max:2048',
+            'nik'                => 'required|unique:karyawans,nik,'.$karyawan->id,
+            'nama'               => 'required',
+            'jenis_kelamin'      => 'required|in:L,P',
+            'tempat_lahir'       => 'required',
+            'tanggal_lahir'      => 'required|date',
+            'tanggal_masuk'      => 'required|date',
+            'jabatan_id'         => 'required',
+            'direktorat_id'      => 'required',
+            'kompartemen_id'     => 'required',
+            'departemen_id'      => 'required',
+            'job_grade_id'       => 'required',
+            'person_grade_id'    => 'required',
+            'kode_struktur_id'   => 'required',
+            'status'             => 'required',
+            'jabatan_saat_ini'   => 'required|string',
+            'foto'               => 'nullable|image|max:2048',
+            'tanggal_mulai_pg'   => 'nullable|date',
+            'tanggal_mulai_jg'   => 'nullable|date',
+            'tanggal_mulai_band' => 'nullable|date',
         ]);
 
         $data = $request->except('foto');
@@ -158,13 +164,25 @@ class KaryawanController extends Controller
         );
     }
 
+    // ===== IMPORT =====
     public function importPage()
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
         return view('karyawan.import');
     }
 
     public function import(Request $request)
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ], [
@@ -202,6 +220,12 @@ class KaryawanController extends Controller
 
     public function downloadTemplate()
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+
         return Excel::download(
             new TemplateKaryawanExport(),
             'template-import-karyawan.xlsx'

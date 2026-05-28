@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\HistoryAssessment;
+use App\Models\HistoryAssessmentKompetensi;
 use App\Traits\LogsActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,11 +16,16 @@ class HistoryAssessmentController extends Controller
     public function index(Karyawan $karyawan)
     {
         $karyawan->load(['jabatan', 'departemen', 'jobGrade', 'personGrade']);
+
         $assessments = $karyawan->historyAssessment()
             ->orderBy('tanggal_pelaksanaan', 'desc')
             ->get();
 
-        return view('history_assessment.index', compact('karyawan', 'assessments'));
+        $assessmentKompetensi = $karyawan->historyAssessmentKompetensi()
+            ->orderBy('tanggal_assessment', 'desc')
+            ->get();
+
+        return view('history_assessment.index', compact('karyawan', 'assessments', 'assessmentKompetensi'));
     }
 
     public function create(Karyawan $karyawan)
@@ -74,7 +80,6 @@ class HistoryAssessmentController extends Controller
     public function destroy(Karyawan $karyawan, HistoryAssessment $historyAssessment)
     {
         $historyAssessment->delete();
-
         $this->log('hapus', 'Assessment', $karyawan->nama, 'Hapus data assessment');
 
         return redirect()

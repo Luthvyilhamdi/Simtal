@@ -39,8 +39,8 @@ class HistoryJabatanController extends Controller
             'direktorats'   => Direktorat::all(),
             'kompartemens'  => Kompartemen::all(),
             'departemens'   => Departemen::all(),
-            'jobGrades'     => JobGrade::all(),
-            'personGrades'  => PersonGrade::all(),
+            'jobGrades'     => JobGrade::orderByRaw('CAST(job_grade AS UNSIGNED)')->get(),
+            'personGrades'  => PersonGrade::orderByRaw('CAST(person_grade AS UNSIGNED)')->get(),
             'jabatans'      => Jabatan::all(),
             'kodeStrukturs' => KodeStruktur::all(),
         ]);
@@ -67,6 +67,10 @@ class HistoryJabatanController extends Controller
 
         DB::transaction(function () use ($request, $karyawan) {
 
+            // Simpan JG & PG lama sebelum update
+            $jgLama = $karyawan->job_grade_id;
+            $pgLama = $karyawan->person_grade_id;
+
             $historyLama = HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->first();
@@ -75,6 +79,7 @@ class HistoryJabatanController extends Controller
                 ? Jabatan::find($historyLama->jabatan_id)
                 : null;
 
+            // Tutup history lama
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->update([
@@ -82,6 +87,7 @@ class HistoryJabatanController extends Controller
                     'tanggal_selesai' => $request->tanggal_mulai,
                 ]);
 
+            // Buat history baru
             $historyBaru = HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,
                 'jabatan_id'       => $request->jabatan_id,
@@ -101,7 +107,8 @@ class HistoryJabatanController extends Controller
                 'is_current'       => true,
             ]);
 
-            $karyawan->update([
+            // Update profil karyawan
+            $updateData = [
                 'jabatan_id'       => $request->jabatan_id,
                 'direktorat_id'    => $request->direktorat_id,
                 'kompartemen_id'   => $request->kompartemen_id,
@@ -110,8 +117,21 @@ class HistoryJabatanController extends Controller
                 'person_grade_id'  => $request->person_grade_id,
                 'kode_struktur_id' => $request->kode_struktur_id,
                 'jabatan_saat_ini' => $request->jabatan_saat_ini,
-            ]);
+            ];
 
+            // Auto update TMT JG jika Job Grade berubah
+            if ($request->job_grade_id != $jgLama) {
+                $updateData['tanggal_mulai_jg'] = $request->tanggal_mulai;
+            }
+
+            // Auto update TMT PG jika Person Grade berubah
+            if ($request->person_grade_id != $pgLama) {
+                $updateData['tanggal_mulai_pg'] = $request->tanggal_mulai;
+            }
+
+            $karyawan->update($updateData);
+
+            // History Pejabat
             $karyawan->load(['direktorat', 'kompartemen', 'departemen', 'jobGrade', 'personGrade']);
             $jabatanBaru = Jabatan::find($request->jabatan_id);
 
@@ -168,6 +188,7 @@ class HistoryJabatanController extends Controller
 
             if ($prev) {
                 $prev->update(['is_current' => true, 'tanggal_selesai' => null]);
+
                 $karyawan->update([
                     'jabatan_id'       => $prev->jabatan_id,
                     'direktorat_id'    => $prev->direktorat_id,
@@ -176,6 +197,9 @@ class HistoryJabatanController extends Controller
                     'job_grade_id'     => $prev->job_grade_id,
                     'person_grade_id'  => $prev->person_grade_id,
                     'kode_struktur_id' => $prev->kode_struktur_id,
+                    // Reset TMT ke tanggal mulai history sebelumnya
+                    'tanggal_mulai_jg' => $prev->tanggal_mulai,
+                    'tanggal_mulai_pg' => $prev->tanggal_mulai,
                 ]);
             }
 
