@@ -11,6 +11,7 @@ class HistoryAssessmentAllController extends Controller
 {
     public function index(Request $request)
     {
+        // ===== QUERY REKOMENDASI =====
         $query = HistoryAssessment::with('karyawan')
             ->orderBy('tanggal_pelaksanaan', 'desc');
 
@@ -29,14 +30,22 @@ class HistoryAssessmentAllController extends Controller
             $query->whereYear('tanggal_pelaksanaan', $request->tahun);
         }
 
-        $assessments = $query->paginate(15);
+        $assessments = $query->paginate(15)->withQueryString();
 
-        // Data kompetensi semua karyawan
-        $assessmentKompetensi = HistoryAssessmentKompetensi::with('karyawan')
-            ->orderBy('tanggal_assessment', 'desc')
-            ->get();
+        // ===== QUERY KOMPETENSI + search_komp =====
+        $queryKomp = HistoryAssessmentKompetensi::with('karyawan')
+            ->orderBy('tanggal_assessment', 'desc');
 
-        // Stats
+        if ($request->search_komp) {
+            $queryKomp->whereHas('karyawan', function($q) use ($request) {
+                $q->where('nama', 'like', '%'.$request->search_komp.'%')
+                  ->orWhere('nik', 'like', '%'.$request->search_komp.'%');
+            });
+        }
+
+        $assessmentKompetensi = $queryKomp->paginate(15)->withQueryString();
+
+        // ===== STATS =====
         $stats = [
             'total'            => HistoryAssessment::count(),
             'total_kompetensi' => HistoryAssessmentKompetensi::count(),
@@ -46,9 +55,10 @@ class HistoryAssessmentAllController extends Controller
             'expire'           => HistoryAssessment::whereNotNull('tanggal_exp_idp')
                                     ->where('tanggal_exp_idp', '<', now())->count(),
             'qualified'        => HistoryAssessmentKompetensi::where('kesimpulan', 'QUALIFIED')->count(),
+            'not_qualified'    => HistoryAssessmentKompetensi::where('kesimpulan', 'NOT QUALIFIED')->count(),
         ];
 
-        // Tahun untuk filter
+        // ===== TAHUN FILTER =====
         $tahuns = HistoryAssessment::selectRaw('YEAR(tanggal_pelaksanaan) as tahun')
             ->distinct()
             ->orderBy('tahun', 'desc')

@@ -9,7 +9,7 @@ class StrukturOrganisasi extends Model
     protected $table = 'struktur_organisasi';
 
     protected $fillable = [
-        'direktorat', 'kompartemen', 'dept', 'bagian',
+        'bulan', 'tahun', 'direktorat', 'kompartemen', 'dept', 'bagian',
         'fungsional', 'posisi', 'job_grade',
         'mc_tko', 'pengisian', 'deviasi', 'core',
         'karyawan_id', 'nik_karyawan', 'nama_karyawan',

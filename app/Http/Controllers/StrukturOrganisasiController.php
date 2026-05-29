@@ -51,6 +51,7 @@ class StrukturOrganisasiController extends Controller
 
         // ===== FIX: Stats dalam 1 query =====
         $statsRaw = StrukturOrganisasi::where('bulan', $bulan)->where('tahun', $tahun)
+            ->where('posisi', '!=', '-')
             ->selectRaw('
                 COUNT(*) as total_posisi,
                 SUM(mc_tko) as total_mc,
@@ -242,6 +243,10 @@ class StrukturOrganisasiController extends Controller
 
     public function destroy(StrukturOrganisasi $so)
     {
+        if (auth()->user()->role !== 'super_admin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menghapus data.');
+        }
+
         $bulan = $so->bulan;
         $tahun = $so->tahun;
         $so->delete();
@@ -344,10 +349,10 @@ class StrukturOrganisasiController extends Controller
 
         foreach ($data as $row) {
             $dir  = $row->direktorat  ?: '(Tanpa Direktorat)';
-            $komp = $row->kompartemen ?: '';
-            $dept = $row->dept        ?: '';
-            $bag  = $row->bagian      ?: '';
-            $func = $row->fungsional  ?: '';
+            $komp = trim($row->kompartemen ?? '') ?: '';
+            $dept = trim($row->dept        ?? '') ?: '';
+            $bag  = trim($row->bagian      ?? '') ?: '';
+            $func = trim($row->fungsional  ?? '') ?: '';
 
             if (!isset($tree[$dir])) {
                 $tree[$dir] = ['label' => $dir, 'mc_tko' => 0, 'pengisian' => 0, 'children' => []];

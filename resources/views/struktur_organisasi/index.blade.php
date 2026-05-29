@@ -212,9 +212,11 @@ $periodeSaatIni = $namaBulanList[$bulan] . ' ' . $tahun;
                       <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                       </button>
-                      <button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                      </button>
+                      @if(auth()->user()->role === 'super_admin')
+                        <button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                        </button>
+                        @endif
                     </div>
                   </td>
                 </tr>
@@ -242,7 +244,65 @@ $periodeSaatIni = $namaBulanList[$bulan] . ' ' . $tahun;
           </td>
         </tr>
 
+        {{-- Posisi langsung di bawah kompartemen (dept=null): SVP pimpinan ATAU staff dengan fungsional --}}
+        @if(isset($komp['children']['__no_dept__']))
+          @foreach($komp['children']['__no_dept__']['children'] as $bagKey2 => $bag2)
+            @foreach($bag2['children'] as $funcKey2 => $func2)
+              @php $isFuncReal2 = $funcKey2 !== '__no_func__' && $func2['label']; @endphp
+              @if($isFuncReal2)
+              <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }}" data-type="func">
+                <td colspan="8" style="padding:0;border-bottom:1px solid #f5f5f0">
+                  <div style="padding:5px 14px 5px 46px;display:flex;align-items:center;gap:6px;background:#fafafa">
+                    <span style="font-size:11px;color:#b0b0a8;flex:1">⬦ {{ $func2['label'] }}</span>
+                    <span style="font-size:11px;color:#d1d5db">MC: {{ $func2['mc_tko'] }} | Terisi: {{ $func2['pengisian'] }}</span>
+                  </div>
+                </td>
+              </tr>
+              @endif
+              @foreach($func2['jabatan'] as $row)
+              @if($row->posisi === '-') @continue @endif
+              <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }}" id="row-{{ $row->id }}" style="border-bottom:1px solid #f5f5f0"
+                data-search="{{ strtolower($row->posisi.' '.($row->nama_karyawan??'').' '.($row->fungsional??'')) }}"
+                data-dir="{{ strtolower($row->direktorat??'') }}" data-komp="{{ strtolower($row->kompartemen??'') }}" data-core="{{ strtolower($row->core??'') }}">
+                @if(!$isFuncReal2)
+                {{-- Pimpinan komp: SVP, tanpa fungsional --}}
+                <td style="padding:10px 14px 10px 46px;position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap;box-shadow:2px 0 5px rgba(0,0,0,0.04)">
+                  <span style="font-size:13px;font-weight:600;color:#185fa5">{{ $row->posisi }}</span>
+                  <span style="font-size:10px;color:#185fa5;margin-left:6px;background:#dbeafe;padding:1px 6px;border-radius:4px">Pimpinan</span>
+                </td>
+                @else
+                {{-- Staff di bawah komp dengan fungsional --}}
+                <td style="padding:10px 14px 10px 60px;position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap;box-shadow:2px 0 5px rgba(0,0,0,0.04)">
+                  <span style="font-size:13px;font-weight:500;color:#111827">{{ $row->posisi }}</span>
+                </td>
+                @endif
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af">{{ $row->job_grade }}</span></td>
+                <td style="padding:10px 14px;text-align:center;font-weight:600;color:#111827;white-space:nowrap">{{ $row->mc_tko }}</td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->pengisian?'#dcfce7':'#f3f4f6' }};color:{{ $row->pengisian?'#15803d':'#6b7280' }}">{{ $row->pengisian }}</span></td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->deviasi==0?'#dcfce7':($row->deviasi>0?'#fee2e2':'#fef3c7') }};color:{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:{{ $row->core==='Core'?'#dcfce7':'#dbeafe' }};color:{{ $row->core==='Core'?'#15803d':'#185fa5' }}">{{ $row->core }}</span></td>
+                <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
+                  @if($row->karyawan_id)
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal2?'#15803d':'#185fa5' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($row->nama_karyawan??'?',0,2)) }}</div>
+                      <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
+                    </div>
+                  @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
+                </td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap">
+                  <div style="display:flex;gap:4px;justify-content:center">
+                    <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+                    @if(auth()->user()->role === 'super_admin')<button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
+                  </div>
+                </td>
+              </tr>
+              @endforeach
+            @endforeach
+          @endforeach
+        @endif
+
         @foreach($komp['children'] as $deptKey => $dept)
+        @if($deptKey==='__no_dept__') @continue @endif
         @php $isDeptReal = $deptKey!=='__no_dept__' && $dept['label']; @endphp
         @php $deptSlug = $kompSlug.'-d-'.Str::slug($deptKey); @endphp
 
@@ -262,7 +322,55 @@ $periodeSaatIni = $namaBulanList[$bulan] . ' ' . $tahun;
         </tr>
         @endif
 
+        {{-- Posisi langsung di bawah dept (bagian=null): VP pimpinan ATAU staff dengan fungsional --}}
+        @if($isDeptReal && isset($dept['children']['__no_bag__']))
+          @foreach($dept['children']['__no_bag__']['children'] as $funcKey3 => $func3)
+            @php $isFuncReal3 = $funcKey3 !== '__no_func__' && $func3['label']; @endphp
+            {{-- Tampilkan header fungsional jika ada --}}
+            @if($isFuncReal3)
+            <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }} child-{{ $deptSlug }}" data-type="func">
+              <td colspan="8" style="padding:0;border-bottom:1px solid #f5f5f0">
+                <div style="padding:5px 14px 5px 62px;display:flex;align-items:center;gap:6px;background:#fafafa">
+                  <span style="font-size:11px;color:#b0b0a8;flex:1">⬦ {{ $func3['label'] }}</span>
+                  <span style="font-size:11px;color:#d1d5db">MC: {{ $func3['mc_tko'] }} | Terisi: {{ $func3['pengisian'] }}</span>
+                </div>
+              </td>
+            </tr>
+            @endif
+            @foreach($func3['jabatan'] as $row)
+            @if($row->posisi === '-') @continue @endif
+            <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }} child-{{ $deptSlug }}" id="row-{{ $row->id }}" style="border-bottom:1px solid #f5f5f0"
+              data-search="{{ strtolower($row->posisi.' '.($row->nama_karyawan??'').' '.($row->fungsional??'')) }}"
+              data-dir="{{ strtolower($row->direktorat??'') }}" data-komp="{{ strtolower($row->kompartemen??'') }}" data-core="{{ strtolower($row->core??'') }}">
+              <td style="padding:10px 14px 10px {{ $isFuncReal3 ? '76' : '62' }}px;position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap;box-shadow:2px 0 5px rgba(0,0,0,0.04)">
+                <span style="font-size:13px;font-weight:{{ $isFuncReal3 ? '500' : '600' }};color:{{ $isFuncReal3 ? '#111827' : '#374151' }}">{{ $row->posisi }}</span>
+              </td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af">{{ $row->job_grade }}</span></td>
+              <td style="padding:10px 14px;text-align:center;font-weight:600;color:#111827;white-space:nowrap">{{ $row->mc_tko }}</td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->pengisian?'#dcfce7':'#f3f4f6' }};color:{{ $row->pengisian?'#15803d':'#6b7280' }}">{{ $row->pengisian }}</span></td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->deviasi==0?'#dcfce7':($row->deviasi>0?'#fee2e2':'#fef3c7') }};color:{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:{{ $row->core==='Core'?'#dcfce7':'#dbeafe' }};color:{{ $row->core==='Core'?'#15803d':'#185fa5' }}">{{ $row->core }}</span></td>
+              <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
+                @if($row->karyawan_id)
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal3?'#15803d':'#374151' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($row->nama_karyawan??'?',0,2)) }}</div>
+                    <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
+                  </div>
+                @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
+              </td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap">
+                <div style="display:flex;gap:4px;justify-content:center">
+                  <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+                  @if(auth()->user()->role === 'super_admin')<button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
+                </div>
+              </td>
+            </tr>
+            @endforeach
+          @endforeach
+        @endif
+
         @foreach($dept['children'] as $bagKey => $bag)
+        @if($bagKey==='__no_bag__') @continue @endif
         @php $isBagReal = $bagKey!=='__no_bag__' && $bag['label']; @endphp
         @if($isBagReal)
         <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }} {{ $isDeptReal?'child-'.$deptSlug:'' }}" data-type="bag" data-text="{{ strtolower($bag['label']) }}">
@@ -321,9 +429,11 @@ $periodeSaatIni = $namaBulanList[$bulan] . ' ' . $tahun;
               <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center" title="Assign Karyawan">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
               </button>
-              <button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center" title="Hapus">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-              </button>
+              @if(auth()->user()->role === 'super_admin')
+                <button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center" title="Hapus">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                </button>
+                @endif
             </div>
           </td>
         </tr>
@@ -482,16 +592,18 @@ $periodeSaatIni = $namaBulanList[$bulan] . ' ' . $tahun;
       <input type="hidden" name="dept"        id="ftDept">
       <input type="hidden" name="bagian"      id="ftBag">
       <input type="hidden" name="fungsional"  id="ftFunc">
+      <input type="hidden" name="posisi"   id="ftPosisiHidden">
+      <input type="hidden" name="mc_tko"   id="ftMcTkoHidden" value="1">
       <div id="konteksInfo" style="background:#f9fafb;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#374151;flex-direction:column;gap:6px;display:none"></div>
       <div id="fieldKompartemen" style="display:none;margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Nama Kompartemen <span style="color:#dc2626">*</span></label><input type="text" id="inputKompartemen" placeholder="Contoh: Kompartemen Operasi" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
       <div id="fieldDepartemen" style="display:none;margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Nama Departemen <span style="color:#dc2626">*</span></label><input type="text" id="inputDepartemen" placeholder="Contoh: Dept. Komunikasi" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
       <div id="fieldBagian" style="display:none;margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Nama Bagian <span style="color:#dc2626">*</span></label><input type="text" id="inputBagian" placeholder="Contoh: Bagian Operasi Amoniak" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
       <div id="fieldStaff" style="display:none">
         <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Fungsional <span style="font-size:11px;color:#9ca3af">(opsional)</span></label><input list="listFunc" id="inputFungsional" name="fungsional_staff" placeholder="Kosongkan jika tidak ada fungsional" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"><datalist id="listFunc">@foreach($fungsionals as $f)<option value="{{ $f }}">@endforeach</datalist></div>
-        <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Title / Posisi <span style="color:#dc2626">*</span></label><input type="text" name="posisi" id="inputPosisi" placeholder="Contoh: Officer Komunikasi Korporat" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
+        <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Title / Posisi <span style="color:#dc2626">*</span></label><input type="text" id="inputPosisi" placeholder="Contoh: Officer Komunikasi Korporat" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
           <div><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Grade</label><input type="number" name="job_grade" placeholder="Contoh: 16" min="1" max="30" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none"></div>
-          <div><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">MC / TKO <span style="color:#dc2626">*</span></label><input type="number" name="mc_tko" value="1" min="1" id="ftMcTko" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none"></div>
+          <div><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">MC / TKO <span style="color:#dc2626">*</span></label><input type="number" id="inputMcTko" value="1" min="1" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none"></div>
         </div>
         <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Core / Non Core <span style="color:#dc2626">*</span></label><select name="core" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;background:#fff"><option value="Non Core">Non Core</option><option value="Core">Core</option></select></div>
       </div>
@@ -681,23 +793,25 @@ function submitTambah(){
     const val=document.getElementById('inputKompartemen').value.trim();
     if(!val){alert('Nama kompartemen wajib diisi!');return;}
     document.getElementById('ftKomp').value=val;
-    form.querySelector('[name=posisi]') && (form.querySelector('[name=posisi]').value='-');
-    if(!form.querySelector('[name=mc_tko]').value) form.querySelector('[name=mc_tko]').value=1;
+    document.getElementById('ftPosisiHidden').value='-';
+    document.getElementById('ftMcTkoHidden').value='1';
   } else if(tambahTipe==='departemen'){
     const val=document.getElementById('inputDepartemen').value.trim();
     if(!val){alert('Nama departemen wajib diisi!');return;}
     document.getElementById('ftDept').value=val;
-    form.querySelector('[name=posisi]') && (form.querySelector('[name=posisi]').value='-');
-    if(!form.querySelector('[name=mc_tko]').value) form.querySelector('[name=mc_tko]').value=1;
+    document.getElementById('ftPosisiHidden').value='-';
+    document.getElementById('ftMcTkoHidden').value='1';
   } else if(tambahTipe==='bagian'){
     const val=document.getElementById('inputBagian').value.trim();
     if(!val){alert('Nama bagian wajib diisi!');return;}
     document.getElementById('ftBag').value=val;
-    form.querySelector('[name=posisi]') && (form.querySelector('[name=posisi]').value='-');
-    if(!form.querySelector('[name=mc_tko]').value) form.querySelector('[name=mc_tko]').value=1;
+    document.getElementById('ftPosisiHidden').value='-';
+    document.getElementById('ftMcTkoHidden').value='1';
   } else if(tambahTipe==='staff'){
     const posisi=document.getElementById('inputPosisi').value.trim();
     if(!posisi){alert('Job Title / Posisi wajib diisi!');return;}
+    document.getElementById('ftPosisiHidden').value=posisi;
+    document.getElementById('ftMcTkoHidden').value=document.getElementById('inputMcTko').value||'1';
     document.getElementById('ftFunc').value=document.getElementById('inputFungsional').value.trim();
   }
   form.submit();

@@ -175,7 +175,12 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                             $applyBg($r, self::BG_KOMP, true);
                         }
 
-                        foreach ($kompData['depts'] as $deptLabel => $deptData) {
+                        // Pimpinan komp (tanpa dept) tampil dulu
+                        $sortedDepts = array_merge(
+                            array_filter($kompData['depts'], fn($k) => $k === '__no_dept__', ARRAY_FILTER_USE_KEY),
+                            array_filter($kompData['depts'], fn($k) => $k !== '__no_dept__', ARRAY_FILTER_USE_KEY)
+                        );
+                        foreach ($sortedDepts as $deptLabel => $deptData) {
                             $deptLabel = $deptLabel === '__no_dept__' ? '' : $deptLabel;
                             $deptRows  = collect($deptData['rows']);
 
@@ -189,7 +194,12 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                                 $applyBg($r, self::BG_DEPT, false);
                             }
 
-                            foreach ($deptData['bags'] as $bagLabel => $bagData) {
+                            // Pimpinan dept (tanpa bagian) tampil dulu
+                            $sortedBags = array_merge(
+                                array_filter($deptData['bags'], fn($k) => $k === '__no_bag__', ARRAY_FILTER_USE_KEY),
+                                array_filter($deptData['bags'], fn($k) => $k !== '__no_bag__', ARRAY_FILTER_USE_KEY)
+                            );
+                            foreach ($sortedBags as $bagLabel => $bagData) {
                                 $bagLabel = $bagLabel === '__no_bag__' ? '' : $bagLabel;
 
                                 if ($bagLabel) {

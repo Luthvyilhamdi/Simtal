@@ -211,6 +211,8 @@ Route::middleware('auth')->group(function () {
             Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
         });
     });
+
+    Route::get('/faq', fn() => view('faq'))->name('faq');
 });
 
 require __DIR__.'/auth.php';
