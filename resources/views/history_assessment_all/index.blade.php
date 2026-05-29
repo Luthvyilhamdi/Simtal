@@ -111,6 +111,63 @@
 
     mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
 
+    /* ===== SIDE PANEL DETAIL ===== */
+    .side-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:2000;display:none;backdrop-filter:blur(2px); }
+    .side-overlay.show { display:block; }
+    .side-panel {
+        position:fixed;right:0;top:0;bottom:0;width:420px;max-width:95vw;
+        background:white;z-index:2001;
+        box-shadow:-8px 0 40px rgba(0,0,0,0.14);
+        display:flex;flex-direction:column;
+        transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .side-panel.show { transform:translateX(0); }
+    .side-panel-header {
+        display:flex;align-items:center;justify-content:space-between;
+        padding:18px 20px;border-bottom:1px solid #f3f4f6;flex-shrink:0;
+    }
+    .side-panel-title { font-size:15px;font-weight:700;color:#111827; }
+    .side-close { width:30px;height:30px;border-radius:50%;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6b7280;font-size:18px;transition:all 0.12s; }
+    .side-close:hover { background:#fef2f2;border-color:#fecaca;color:#ef4444; }
+    .side-panel-body { flex:1;overflow-y:auto;padding:18px 20px; }
+
+    /* Karyawan info di panel */
+    .sp-karyawan { display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border-radius:10px;margin-bottom:16px; }
+    .sp-avatar { width:40px;height:40px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0; }
+    .sp-name { font-size:14px;font-weight:700;color:#111827; }
+    .sp-sub { font-size:12px;color:#9ca3af;margin-top:2px; }
+
+    /* Kesimpulan di panel */
+    .sp-kesimpulan { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:10px;margin-bottom:16px; }
+    .sp-kesimpulan.qualified { background:#dcfce7;border:1px solid #86efac; }
+    .sp-kesimpulan.notqualified { background:#fee2e2;border:1px solid #fca5a5; }
+    .sp-kesimpulan-label { font-size:12px;font-weight:600;color:#6b7280; }
+    .sp-kesimpulan-val { font-size:14px;font-weight:800; }
+
+    /* Score item di panel */
+    .sp-section-title { font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:16px;display:flex;align-items:center;gap:6px; }
+    .sp-section-title::after { content:'';flex:1;height:1px;background:#f3f4f6; }
+    .sp-score-item { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f9fafb; }
+    .sp-score-item:last-child { border-bottom:none; }
+    .sp-score-label { font-size:12px;color:#374151;font-weight:500;flex:1;line-height:1.4; }
+    .sp-score-val { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0; }
+    .sp-score-1 { background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5; }
+    .sp-score-2 { background:#fffbeb;color:#d97706;border:1.5px solid #fcd34d; }
+    .sp-score-3 { background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac; }
+    .sp-score-4 { background:#eff6ff;color:#1d4ed8;border:1.5px solid #93c5fd; }
+    .sp-score-na { background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb; }
+
+    /* Summary stats */
+    .sp-summary { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px; }
+    .sp-stat { background:#f9fafb;border-radius:8px;padding:10px;text-align:center; }
+    .sp-stat-num { font-size:20px;font-weight:800;margin-bottom:2px; }
+    .sp-stat-label { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase; }
+
+    /* Btn detail */
+    .btn-detail { width:28px;height:28px;border-radius:7px;border:1px solid #dbeafe;background:#eff6ff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s; }
+    .btn-detail:hover { background:#dbeafe;border-color:#93c5fd; }
+    .btn-detail svg { width:12px;height:12px;stroke:#2563eb;fill:none;stroke-width:2; }
+
     @media (max-width:900px) { .stats-grid { grid-template-columns:repeat(3,1fr); } }
     @media (max-width:480px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
 </style>
@@ -158,11 +215,28 @@
             Import
         </a>
         @endif
-        <a href="{{ route('history_assessment_all.export', request()->query()) }}"
-           style="display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-        </a>
+        <div style="position:relative;" id="exportWrap">
+            <button onclick="toggleExportMenu()" id="exportBtn"
+                style="display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:11px;height:11px;" id="exportChevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div id="exportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:white;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;min-width:210px;z-index:100;">
+                <a href="{{ route('history_assessment_all.export', request()->query()) }}"
+                   style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;border-bottom:1px solid #f3f4f6;transition:background 0.12s;"
+                   onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
+                    <span style="width:26px;height:26px;border-radius:7px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:14px;">📋</span>
+                    Export Rekomendasi
+                </a>
+                <a href="{{ route('history_assessment_all.export.kompetensi', request()->query()) }}"
+                   style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;transition:background 0.12s;"
+                   onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'">
+                    <span style="width:26px;height:26px;border-radius:7px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:14px;">⭐</span>
+                    Export Kompetensi
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -412,8 +486,8 @@
                         <th>Karyawan</th>
                         <th>Tgl Assessment</th>
                         <th>Periode</th>
-                        <th>Under Competency</th>
-                        <th>Under Qualification</th>
+                        <th style="text-align:center;">Under Competency</th>
+                        <th style="text-align:center;">Under Qualification</th>
                         <th>Kesimpulan</th>
                         <th>Keterangan</th>
                         <th>Aksi</th>
@@ -439,8 +513,22 @@
                         </td>
                         <td>{{ $ak->tanggal_assessment->format('d M Y') }}</td>
                         <td>{{ $ak->periode ?? '-' }}</td>
-                        <td><span style="font-size:15px;font-weight:800;color:{{ $ak->total_competency_under > 0 ? '#dc2626' : '#15803d' }};">{{ $ak->total_competency_under }}</span></td>
-                        <td><span style="font-size:15px;font-weight:800;color:{{ $ak->total_qualification_under > 0 ? '#dc2626' : '#15803d' }};">{{ $ak->total_qualification_under }}</span></td>
+                        <td style="text-align:center;">
+                            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;font-size:16px;font-weight:800;
+                                background:{{ $ak->total_competency_under > 0 ? '#fef2f2' : '#f0fdf4' }};
+                                color:{{ $ak->total_competency_under > 0 ? '#dc2626' : '#15803d' }};
+                                border:1.5px solid {{ $ak->total_competency_under > 0 ? '#fca5a5' : '#86efac' }};">
+                                {{ $ak->total_competency_under }}
+                            </span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;font-size:16px;font-weight:800;
+                                background:{{ $ak->total_qualification_under > 0 ? '#fef2f2' : '#f0fdf4' }};
+                                color:{{ $ak->total_qualification_under > 0 ? '#dc2626' : '#15803d' }};
+                                border:1.5px solid {{ $ak->total_qualification_under > 0 ? '#fca5a5' : '#86efac' }};">
+                                {{ $ak->total_qualification_under }}
+                            </span>
+                        </td>
                         <td>
                             @if($ak->kesimpulan === 'QUALIFIED')
                                 <span class="badge-final final-qualified">● QUALIFIED</span>
@@ -452,13 +540,43 @@
                         </td>
                         <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;color:#6b7280;font-style:italic;">{{ $ak->keterangan ?? '-' }}</td>
                         <td>
-                            <button type="button" class="btn-del"
-                                data-url="{{ route('assessment_kompetensi_all.destroy', $ak) }}"
-                                data-nama="{{ $ak->karyawan->nama }}"
-                                data-tgl="{{ $ak->tanggal_assessment->format('d M Y') }}"
-                                onclick="openModal(this.dataset.url, this.dataset.nama, this.dataset.tgl)">
-                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                            </button>
+                            @php
+                            $kompLabels   = \App\Models\HistoryAssessmentKompetensi::competencies();
+                            $qualLabels   = \App\Models\HistoryAssessmentKompetensi::qualifications();
+                            $compR1det = 0; $compR2det = 0;
+                            foreach (array_keys($kompLabels) as $kKey) {
+                                $vDet = (int)($ak->$kKey ?? 0);
+                                if ($vDet === 1) $compR1det++;
+                                if ($vDet === 2) $compR2det++;
+                            }
+                            $detail = [
+                                'nama'       => $ak->karyawan->nama,
+                                'nik'        => $ak->karyawan->nik,
+                                'tgl'        => $ak->tanggal_assessment->format('d M Y'),
+                                'periode'    => $ak->periode ?? '-',
+                                'comp_r1'    => $compR1det,
+                                'comp_r2'    => $compR2det,
+                                'qual_under' => $ak->total_qualification_under,
+                                'kesimpulan' => $ak->kesimpulan ?? '-',
+                                'kompetensi' => collect($kompLabels)->mapWithKeys(fn($label, $key) => [$label => $ak->$key ?? null])->toArray(),
+                                'kualifikasi'=> collect($qualLabels)->mapWithKeys(fn($label, $key) => [$label => $ak->$key ?? null])->toArray(),
+                            ];
+                            @endphp
+                            <div style="display:flex;gap:4px;">
+                                <button type="button" class="btn-detail"
+                                    data-detail='@json($detail)'
+                                    onclick="showDetail(this.dataset.detail)"
+                                    title="Lihat Detail">
+                                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                                <button type="button" class="btn-del"
+                                    data-url="{{ route('assessment_kompetensi_all.destroy', $ak) }}"
+                                    data-nama="{{ $ak->karyawan->nama }}"
+                                    data-tgl="{{ $ak->tanggal_assessment->format('d M Y') }}"
+                                    onclick="openModal(this.dataset.url, this.dataset.nama, this.dataset.tgl)">
+                                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -508,6 +626,18 @@
             </div>
         </div>
         @endif
+    </div>
+</div>
+
+{{-- ===== SIDE PANEL DETAIL KOMPETENSI ===== --}}
+<div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
+<div class="side-panel" id="sidePanel">
+    <div class="side-panel-header">
+        <div class="side-panel-title">📊 Detail Assessment Kompetensi</div>
+        <button class="side-close" onclick="closeSidePanel()">×</button>
+    </div>
+    <div class="side-panel-body" id="sidePanelBody">
+        <div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:13px;">Memuat data...</div>
     </div>
 </div>
 
@@ -644,5 +774,105 @@ function doSearchKomp(keyword){
         })
         .catch(function(){tableBodyKomp.style.opacity='1';spinnerKomp.classList.remove('show');});
 }
+
+// ===== SIDE PANEL DETAIL =====
+function showDetail(detailJson) {
+    var d = typeof detailJson === 'string' ? JSON.parse(detailJson) : detailJson;
+    var panel = document.getElementById('sidePanel');
+    var overlay = document.getElementById('sideOverlay');
+    var body = document.getElementById('sidePanelBody');
+
+    var isQualified = d.kesimpulan === 'QUALIFIED';
+    var kesClass = isQualified ? 'qualified' : 'notqualified';
+    var kesColor = isQualified ? '#15803d' : '#dc2626';
+
+    var scoreClass = function(v) {
+        if (!v) return 'sp-score-na';
+        return 'sp-score-' + Math.min(Math.max(parseInt(v), 1), 4);
+    };
+
+    var kompRows = '';
+    for (var label in d.kompetensi) {
+        var val = d.kompetensi[label];
+        var cls = scoreClass(val);
+        var warning = (val == 1) ? ' <span style="font-size:10px;color:#dc2626;font-weight:700;">⚠ Kritis</span>' : (val == 2 ? ' <span style="font-size:10px;color:#d97706;">Under</span>' : '');
+        kompRows += '<div class="sp-score-item">'
+            + '<span class="sp-score-label">' + label + warning + '</span>'
+            + '<span class="sp-score-val ' + cls + '">' + (val ?? '—') + '</span>'
+            + '</div>';
+    }
+
+    var qualRows = '';
+    for (var label in d.kualifikasi) {
+        var val = d.kualifikasi[label];
+        var cls = scoreClass(val);
+        var warning2 = (val < 2 && val !== null) ? ' <span style="font-size:10px;color:#dc2626;font-weight:700;">⚠ Under</span>' : '';
+        qualRows += '<div class="sp-score-item">'
+            + '<span class="sp-score-label">' + label + warning2 + '</span>'
+            + '<span class="sp-score-val ' + cls + '">' + (val ?? '—') + '</span>'
+            + '</div>';
+    }
+
+    body.innerHTML =
+        '<div class="sp-karyawan">'
+        + '<div class="sp-avatar">' + d.nama.substring(0,2).toUpperCase() + '</div>'
+        + '<div><div class="sp-name">' + d.nama + '</div>'
+        + '<div class="sp-sub">NIK ' + d.nik + ' · ' + d.tgl + (d.periode !== '-' ? ' · ' + d.periode : '') + '</div></div>'
+        + '</div>'
+
+        + '<div class="sp-kesimpulan ' + kesClass + '">'
+        + '<span class="sp-kesimpulan-label">Kesimpulan</span>'
+        + '<span class="sp-kesimpulan-val" style="color:' + kesColor + ';">' + (isQualified ? '✅ QUALIFIED' : '❌ NOT QUALIFIED') + '</span>'
+        + '</div>'
+
+        + '<div class="sp-summary">'
+        + '<div class="sp-stat"><div class="sp-stat-num" style="color:' + ((d.comp_r1 + d.comp_r2) > 0 ? '#dc2626' : '#15803d') + ';">' + ((d.comp_r1 ?? 0) + (d.comp_r2 ?? 0)) + '</div><div class="sp-stat-label">Under Competency</div></div>'
+        + '<div class="sp-stat"><div class="sp-stat-num" style="color:' + (d.qual_under > 0 ? '#dc2626' : '#15803d') + ';">' + d.qual_under + '</div><div class="sp-stat-label">Under Qualification</div></div>'
+        + '</div>'
+
+        + '<div class="sp-section-title">⭐ Kompetensi Perilaku</div>'
+        + '<div style="background:white;border:1px solid #f3f4f6;border-radius:8px;padding:4px 12px;">' + kompRows + '</div>'
+
+        + '<div class="sp-section-title">🏆 Professional Qualification</div>'
+        + '<div style="background:white;border:1px solid #f3f4f6;border-radius:8px;padding:4px 12px;">' + qualRows + '</div>'
+
+        + '<div style="margin-top:16px;padding:10px 12px;background:#f9fafb;border-radius:8px;font-size:11px;color:#6b7280;">'
+        + '<span style="font-weight:700;color:#374151;">Keterangan warna:</span><br>'
+        + '<span style="color:#dc2626;">■</span> Nilai 1 (Kritis) &nbsp; '
+        + '<span style="color:#d97706;">■</span> Nilai 2 (Under) &nbsp; '
+        + '<span style="color:#16a34a;">■</span> Nilai 3 (Cukup) &nbsp; '
+        + '<span style="color:#1d4ed8;">■</span> Nilai 4 (Baik)'
+        + '</div>';
+
+    overlay.classList.add('show');
+    setTimeout(function() { panel.classList.add('show'); }, 10);
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSidePanel() {
+    document.getElementById('sidePanel').classList.remove('show');
+    document.getElementById('sideOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeSidePanel(); closeExportMenu(); }
+});
+
+// Export dropdown
+function toggleExportMenu() {
+    var menu = document.getElementById('exportMenu');
+    var open = menu.style.display === 'block';
+    menu.style.display = open ? 'none' : 'block';
+    document.getElementById('exportChevron').style.transform = open ? '' : 'rotate(180deg)';
+}
+function closeExportMenu() {
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportChevron').style.transform = '';
+}
+document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('exportWrap');
+    if (wrap && !wrap.contains(e.target)) closeExportMenu();
+});
 </script>
 @endpush

@@ -95,9 +95,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/',                [HistoryAssessmentAllController::class, 'index'])->name('index');
         Route::get('/export',          [HistoryAssessmentAllController::class, 'export'])->name('export');
         Route::delete('/{assessment}', [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
-        Route::get('/import',          [ImportAssessmentController::class, 'page'])->name('import');
-        Route::post('/import',         [ImportAssessmentController::class, 'import'])->name('import.store');
-        Route::get('/import/template', [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
+
+        // Import Assessment Rekomendasi
+        Route::get('/import',                  [ImportAssessmentController::class, 'page'])->name('import');
+        Route::post('/import',                 [ImportAssessmentController::class, 'import'])->name('import.store');
+        Route::get('/import/template',         [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
+
+        // Import Assessment Kompetensi (BARU)
+        Route::post('/import/kompetensi',          [ImportAssessmentController::class, 'importKompetensi'])->name('import.store.kompetensi');
+        Route::get('/import/template/kompetensi',  [ImportAssessmentController::class, 'downloadTemplateKompetensi'])->name('import.template.kompetensi');
+
+        // Export Kompetensi (BARU)
+        Route::get('/export/kompetensi',           [HistoryAssessmentAllController::class, 'exportKompetensi'])->name('export.kompetensi');
     });
 
     // ===== ASSESSMENT KOMPETENSI ALL (GLOBAL) =====
@@ -155,6 +164,9 @@ Route::middleware('auth')->group(function () {
     Route::get('api/karyawan/{id}/detail',  [StrukturOrganisasiController::class, 'getKaryawanData'])->name('api.karyawan.detail');
     Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
 
+    // ===== FAQ =====
+    Route::get('/faq', fn() => view('faq'))->name('faq');
+
     // ===== SUPER ADMIN ONLY =====
     Route::middleware('super_admin')->group(function () {
 
@@ -211,8 +223,6 @@ Route::middleware('auth')->group(function () {
             Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
         });
     });
-
-    Route::get('/faq', fn() => view('faq'))->name('faq');
 });
 
 require __DIR__.'/auth.php';

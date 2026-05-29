@@ -23,7 +23,7 @@
     .template-info { display:flex;align-items:center;gap:12px; }
     .template-name { font-size:14px;font-weight:700;color:#111827; }
     .template-desc { font-size:12px;color:#6b7280;margin-top:2px; }
-    .btn-download-tpl { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background 0.15s; }
+    .btn-download-tpl { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:background 0.15s;font-family:inherit; }
     .btn-download-tpl:hover { background:#166534; }
 
     .kolom-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px; }
@@ -32,7 +32,6 @@
     .kolom-desc { font-size:11px;color:#9ca3af;margin-top:2px; }
     .kolom-req { font-size:10px;font-weight:700;color:#ef4444; }
 
-    /* Contoh format */
     .example-box { background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-top:12px; }
     .example-title { font-size:12px;font-weight:700;color:#d97706;margin-bottom:8px; }
     .example-table { width:100%;border-collapse:collapse;font-size:11px; }
@@ -72,6 +71,7 @@
     .toast { display:flex;align-items:center;gap:10px;background:white;border-left:4px solid #ef4444;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#dc2626;font-weight:500;min-width:280px;pointer-events:all;animation:toastIn 0.35s forwards; }
     .toast-close { border:none;background:transparent;color:#9ca3af;cursor:pointer;font-size:18px;padding:0;margin-left:auto; }
     @keyframes toastIn { from{opacity:0;transform:translateX(110%);}to{opacity:1;transform:translateX(0);} }
+    @keyframes spin { to{transform:rotate(360deg)} }
 
     @media (max-width:640px) {
         .kolom-grid { grid-template-columns:1fr 1fr; }
@@ -119,9 +119,9 @@
                     <div class="template-desc">Template dengan contoh 1 karyawan 5 jabatan</div>
                 </div>
             </div>
-            <a href="{{ route('history_karyawan.import.template') }}" class="btn-download-tpl">
+            <button type="button" class="btn-download-tpl" onclick="triggerDownload('{{ route('history_karyawan.import.template') }}')">
                 ⬇ Download Template
-            </a>
+            </button>
         </div>
 
         {{-- Panduan Kolom --}}
@@ -348,5 +348,35 @@
         btn.disabled = true;
         btn.innerHTML = '⏳ Mengimport...';
     });
+
+    // ===== DOWNLOAD TEMPLATE (tanpa trigger spinner halaman) =====
+    function triggerDownload(url) {
+        var toast = document.getElementById('downloadToast');
+        toast.style.display = 'flex';
+        document.getElementById('downloadFrame').src = url;
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            setTimeout(function() {
+                toast.style.display = 'none';
+                toast.style.opacity = '1';
+                document.getElementById('downloadFrame').src = 'about:blank';
+            }, 400);
+        }, 4000);
+    }
 </script>
+
+{{-- Hidden iframe untuk download tanpa navigasi --}}
+<iframe id="downloadFrame" src="about:blank" style="display:none;"></iframe>
+
+{{-- Toast notif download --}}
+<div id="downloadToast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;
+    background:white;border:1px solid #bbf7d0;border-left:4px solid #15803d;border-radius:12px;
+    padding:12px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);
+    align-items:center;gap:10px;font-size:13px;font-weight:500;color:#15803d;
+    min-width:240px;transition:opacity 0.4s;">
+    <div style="width:20px;height:20px;border:2px solid #bbf7d0;border-top-color:#15803d;border-radius:50%;
+        animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
+    <span>Menyiapkan file Excel...</span>
+</div>
+
 @endpush

@@ -28,10 +28,11 @@
     .kpi-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
     .kpi-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.07); }
     .kpi-card::before { content:'';position:absolute;bottom:0;left:0;right:0;height:3px; }
-    .kpi-card.green::before { background:#16a34a; }
-    .kpi-card.blue::before  { background:#2563eb; }
-    .kpi-card.purple::before{ background:#7c3aed; }
-    .kpi-card.amber::before { background:#d97706; }
+    .kpi-card.green::before  { background:#16a34a; }
+    .kpi-card.blue::before   { background:#2563eb; }
+    .kpi-card.purple::before { background:#7c3aed; }
+    .kpi-card.amber::before  { background:#d97706; }
+    .kpi-card.teal::before   { background:#0891b2; }
     .kpi-label { font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px; }
     .kpi-num { font-size:28px;font-weight:800;color:#111827;line-height:1;margin-bottom:5px; }
     .kpi-sub { font-size:11px;color:#6b7280; }
@@ -41,6 +42,7 @@
     .kpi-icon.blue   { background:#eff6ff; }
     .kpi-icon.purple { background:#f5f3ff; }
     .kpi-icon.amber  { background:#fffbeb; }
+    .kpi-icon.teal   { background:#ecfeff; }
 
     /* Section title */
     .sec-title { font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px; }
@@ -115,6 +117,12 @@
     .view-all { font-size:11px;color:#16a34a;text-decoration:none;font-weight:600; }
     .view-all:hover { text-decoration:underline; }
 
+    /* Kompetensi stat mini */
+    .komp-stat-row { display:flex;align-items:center;gap:8px;margin-top:8px; }
+    .komp-stat-item { flex:1;text-align:center;padding:8px 6px;border-radius:8px; }
+    .komp-stat-num { font-size:20px;font-weight:800;line-height:1; }
+    .komp-stat-label { font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px; }
+
     @media (max-width:1024px) {
         .kpi-grid { grid-template-columns:repeat(2,1fr); }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr; }
@@ -174,22 +182,31 @@
     </div>
     <div class="kpi-card purple">
         <div class="kpi-left">
-            <div class="kpi-label">Total Assessment</div>
+            <div class="kpi-label">Assessment Rekomendasi</div>
             <div class="kpi-num">{{ $totalAssessment }}</div>
             <div class="kpi-sub">{{ $assessmentReady }} ready · {{ $assessmentNR }} not ready</div>
             @php $pctReady = $totalAssessment > 0 ? round(($assessmentReady/$totalAssessment)*100) : 0; @endphp
             <span class="kpi-badge" style="background:#f5f3ff;color:#7c3aed;">{{ $pctReady }}% ready rate</span>
         </div>
-        <div class="kpi-icon purple">📊</div>
+        <div class="kpi-icon purple">📋</div>
     </div>
-    <div class="kpi-card amber">
+    <div class="kpi-card teal">
         <div class="kpi-left">
-            <div class="kpi-label">Pejabat Aktif</div>
-            <div class="kpi-num">{{ $pejabatAktif }}</div>
-            <div class="kpi-sub">SVP/VP/SPM/PM</div>
-            <span class="kpi-badge" style="background:#fef3c7;color:#d97706;">{{ $pgsAktif + $pjsAktif }} PGS/PJS aktif</span>
+            <div class="kpi-label">Assessment Kompetensi</div>
+            <div class="kpi-num">{{ $totalKompetensi }}</div>
+            <div class="kpi-sub">Total assessment kompetensi</div>
+            <div class="komp-stat-row">
+                <div class="komp-stat-item" style="background:#dcfce7;">
+                    <div class="komp-stat-num" style="color:#15803d;">{{ $totalQualified }}</div>
+                    <div class="komp-stat-label" style="color:#15803d;">Qualified</div>
+                </div>
+                <div class="komp-stat-item" style="background:#fee2e2;">
+                    <div class="komp-stat-num" style="color:#dc2626;">{{ $totalNotQualified }}</div>
+                    <div class="komp-stat-label" style="color:#dc2626;">Not Qual.</div>
+                </div>
+            </div>
         </div>
-        <div class="kpi-icon amber">⭐</div>
+        <div class="kpi-icon teal">⭐</div>
     </div>
 </div>
 
@@ -216,6 +233,37 @@
                     <span class="pie-item-pct">({{ round(($a['value']/$totalA)*100) }}%)</span>
                 </div>
                 @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ASSESSMENT KOMPETENSI CHART --}}
+<div class="chart-grid-3" style="margin-bottom:18px;">
+    <div class="chart-card">
+        <div class="chart-card-title">Tren Assessment Kompetensi</div>
+        <div class="chart-card-sub">QUALIFIED vs NOT QUALIFIED per bulan (12 bulan terakhir)</div>
+        <canvas id="kompChart" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title">Kompetensi: QUALIFIED vs NOT QUALIFIED</div>
+        <div class="chart-card-sub">Distribusi hasil assessment kompetensi</div>
+        @php $totalK = max($totalKompetensi, 1); @endphp
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <canvas id="kompPieChart" width="150" height="150"></canvas>
+            <div class="pie-legend" style="width:100%;">
+                <div class="pie-item">
+                    <div class="pie-dot" style="background:#15803d;"></div>
+                    <span class="pie-item-label">QUALIFIED</span>
+                    <span class="pie-item-val">{{ $totalQualified }}</span>
+                    <span class="pie-item-pct">({{ round(($totalQualified/$totalK)*100) }}%)</span>
+                </div>
+                <div class="pie-item">
+                    <div class="pie-dot" style="background:#dc2626;"></div>
+                    <span class="pie-item-label">NOT QUALIFIED</span>
+                    <span class="pie-item-val">{{ $totalNotQualified }}</span>
+                    <span class="pie-item-pct">({{ round(($totalNotQualified/$totalK)*100) }}%)</span>
+                </div>
             </div>
         </div>
     </div>
@@ -330,6 +378,7 @@
                     <th class="center">Assessment</th>
                     <th class="center">Ready</th>
                     <th class="center">Ready Rate</th>
+                    <th class="center">Qualified</th>
                 </tr>
             </thead>
             <tbody>
@@ -365,9 +414,14 @@
                             <div class="progress-mini"><div class="progress-mini-fill" style="width:{{ $readyRate }}%;background:#16a34a;"></div></div>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
+                    <td class="center">
+                        @if(isset($r['qualified']) && $r['qualified'] > 0)
+                            <span style="background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['qualified'] }}</span>
+                        @else<span style="color:#d1d5db;">—</span>@endif
+                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="9" style="text-align:center;padding:24px;color:#9ca3af;">Belum ada data</td></tr>
+                <tr><td colspan="10" style="text-align:center;padding:24px;color:#9ca3af;">Belum ada data</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -533,6 +587,43 @@ new Chart(document.getElementById('genderChart'), {
     data: {
         labels:['Laki-laki','Perempuan'],
         datasets:[{ data:[{{ $genderChart['L'] }},{{ $genderChart['P'] }}], backgroundColor:['#2563eb','#ec4899'], borderWidth:2, borderColor:'#fff' }]
+    },
+    options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
+});
+
+// Chart Kompetensi — tren QUALIFIED vs NOT QUALIFIED
+const kompTren = @json($trenKompetensi);
+new Chart(document.getElementById('kompChart'), {
+    type: 'bar',
+    data: {
+        labels: kompTren.map(d => d.bulan),
+        datasets: [
+            { label:'QUALIFIED',     data:kompTren.map(d=>d.qualified),     backgroundColor:'#15803d', borderRadius:3 },
+            { label:'NOT QUALIFIED', data:kompTren.map(d=>d.not_qualified),  backgroundColor:'#ef4444', borderRadius:3 },
+        ]
+    },
+    options: {
+        responsive:true,
+        plugins: {
+            legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, font:{size:11} } },
+            tooltip:{ mode:'index', intersect:false },
+        },
+        scales: {
+            x:{ grid:{display:false}, ticks:{font:{size:10}} },
+            y:{ beginAtZero:true, grid:{color:'#f3f4f6'}, ticks:{stepSize:1, font:{size:10}} },
+        },
+    }
+});
+
+new Chart(document.getElementById('kompPieChart'), {
+    type:'doughnut',
+    data: {
+        labels:['QUALIFIED','NOT QUALIFIED'],
+        datasets:[{
+            data:[{{ $totalQualified }}, {{ $totalNotQualified }}],
+            backgroundColor:['#15803d','#ef4444'],
+            borderWidth:2, borderColor:'#fff'
+        }]
     },
     options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
 });

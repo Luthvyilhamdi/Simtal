@@ -22,6 +22,12 @@
     .error-msg { font-size:11px;color:#ef4444; }
     .form-hint { font-size:11px;color:#9ca3af;margin-top:2px; }
 
+    /* Criteria Info Box */
+    .criteria-box { background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:#92400e; }
+    .criteria-box strong { color:#78350f; }
+    .criteria-box ul { margin:6px 0 0 16px; }
+    .criteria-box ul li { margin-bottom:3px; }
+
     /* Kompetensi Table */
     .komp-table { width:100%;border-collapse:collapse; }
     .komp-table th { font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;background:#f9fafb;border:1px solid #e5e7eb;text-align:left; }
@@ -33,21 +39,25 @@
     .score-group { display:flex;gap:6px; }
     .score-btn { width:40px;height:36px;border-radius:8px;border:1.5px solid #e5e7eb;background:white;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;color:#6b7280; }
     .score-btn:hover { border-color:#16a34a;color:#15803d;background:#f0fdf4; }
-    .score-btn.selected-1 { background:#fef2f2;border-color:#fca5a5;color:#dc2626; }
-    .score-btn.selected-2 { background:#fffbeb;border-color:#fcd34d;color:#d97706; }
-    .score-btn.selected-3 { background:#f0fdf4;border-color:#86efac;color:#16a34a; }
-    .score-btn.selected-4 { background:#eff6ff;border-color:#93c5fd;color:#1d4ed8; }
-    .score-input { display:none; }
+    .score-btn.sel-1 { background:#fef2f2;border-color:#fca5a5;color:#dc2626; }
+    .score-btn.sel-2 { background:#fffbeb;border-color:#fcd34d;color:#d97706; }
+    .score-btn.sel-3 { background:#f0fdf4;border-color:#86efac;color:#16a34a; }
+    .score-btn.sel-4 { background:#eff6ff;border-color:#93c5fd;color:#1d4ed8; }
 
     /* Hasil Preview */
     .hasil-preview { background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-top:16px; }
-    .hasil-row { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6; }
+    .hasil-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6; }
     .hasil-row:last-child { border-bottom:none; }
-    .hasil-label { font-size:12px;color:#6b7280;font-weight:500; }
+    .hasil-label { font-size:12px;color:#6b7280;font-weight:500;display:flex;align-items:center;gap:6px; }
     .hasil-val { font-size:14px;font-weight:700; }
     .badge-qualified { background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700; }
     .badge-not { background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700; }
     .badge-pending { background:#f3f4f6;color:#6b7280;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700; }
+
+    /* Status indicator */
+    .crit-ok  { display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:4px; }
+    .crit-err { display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:4px; }
+    .crit-gray{ display:inline-block;width:8px;height:8px;border-radius:50%;background:#d1d5db;margin-right:4px; }
 
     .form-actions { display:flex;gap:12px;justify-content:flex-end;margin-top:20px; }
     .btn-save { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:11px 24px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s; }
@@ -57,7 +67,6 @@
 
     @media (max-width:640px) {
         .form-grid { grid-template-columns:1fr; }
-        .komp-table { font-size:12px; }
         .score-btn { width:34px;height:32px;font-size:13px; }
     }
 </style>
@@ -120,15 +129,24 @@
         </div>
     </div>
 
-    {{-- Competencies --}}
+    {{-- Kompetensi Perilaku --}}
     <div class="form-card">
-        <div class="section-label">⭐ Competencies</div>
+        <div class="section-label">⭐ Kompetensi Perilaku</div>
+
+        <div class="criteria-box">
+            <strong>📋 Kriteria QUALIFIED (Kompetensi Perilaku):</strong>
+            <ul>
+                <li>Kompetensi yang mendapat rating <strong>2 berjumlah maksimal 3</strong></li>
+                <li><strong>Tidak ada</strong> kompetensi yang mendapat rating <strong>1</strong></li>
+            </ul>
+        </div>
+
         <div style="overflow-x:auto;">
             <table class="komp-table">
                 <thead>
                     <tr>
                         <th style="width:50%;">Kompetensi</th>
-                        <th>Nilai (1-4)</th>
+                        <th>Nilai (1–4)</th>
                         <th style="width:80px;text-align:center;">Score</th>
                     </tr>
                 </thead>
@@ -139,8 +157,8 @@
                         <td>
                             <div class="score-group">
                                 @for($i = 1; $i <= 4; $i++)
-                                <button type="button" class="score-btn {{ old($key) == $i ? 'selected-'.$i : '' }}"
-                                        onclick="selectScore('{{ $key }}', {{ $i }}, this)">
+                                <button type="button" class="score-btn {{ old($key) == $i ? 'sel-'.$i : '' }}"
+                                        onclick="selectScore('{{ $key }}', {{ $i }}, this, 'comp')">
                                     {{ $i }}
                                 </button>
                                 @endfor
@@ -163,12 +181,20 @@
     {{-- Professional Qualification --}}
     <div class="form-card">
         <div class="section-label">🏆 Professional Qualification</div>
+
+        <div class="criteria-box">
+            <strong>📋 Kriteria QUALIFIED (Professional Qualification):</strong>
+            <ul>
+                <li>Seluruh bidang mendapat nilai <strong>minimal 2</strong> (tidak ada nilai 1)</li>
+            </ul>
+        </div>
+
         <div style="overflow-x:auto;">
             <table class="komp-table">
                 <thead>
                     <tr>
                         <th style="width:50%;">Qualification</th>
-                        <th>Nilai (1-4)</th>
+                        <th>Nilai (1–4)</th>
                         <th style="width:80px;text-align:center;">Score</th>
                     </tr>
                 </thead>
@@ -179,8 +205,8 @@
                         <td>
                             <div class="score-group">
                                 @for($i = 1; $i <= 4; $i++)
-                                <button type="button" class="score-btn {{ old($key) == $i ? 'selected-'.$i : '' }}"
-                                        onclick="selectScore('{{ $key }}', {{ $i }}, this)">
+                                <button type="button" class="score-btn {{ old($key) == $i ? 'sel-'.$i : '' }}"
+                                        onclick="selectScore('{{ $key }}', {{ $i }}, this, 'qual')">
                                     {{ $i }}
                                 </button>
                                 @endfor
@@ -189,7 +215,7 @@
                             @error($key)<div class="error-msg">{{ $message }}</div>@enderror
                         </td>
                         <td style="text-align:center;">
-                            <span id="display_{{ $key }}" style="font-size:18px;font-weight:800;color:{{ old($key) ? (old($key) < 3 ? '#dc2626' : '#15803d') : '#d1d5db' }};">
+                            <span id="display_{{ $key }}" style="font-size:18px;font-weight:800;color:{{ old($key) ? (old($key) < 2 ? '#dc2626' : '#15803d') : '#d1d5db' }};">
                                 {{ old($key) ?? '—' }}
                             </span>
                         </td>
@@ -201,16 +227,32 @@
 
         {{-- Hasil Preview --}}
         <div class="hasil-preview">
+            <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;">📊 Preview Hasil</div>
+
+            {{-- Kompetensi detail --}}
             <div class="hasil-row">
-                <span class="hasil-label">Total Competency Under Requirement</span>
-                <span class="hasil-val" id="preview_comp_under" style="color:#dc2626;">0</span>
+                <span class="hasil-label">
+                    <span class="crit-gray" id="dot_comp_r1"></span>
+                    Kompetensi rating 1 (harus = 0)
+                </span>
+                <span class="hasil-val" id="preview_comp_r1" style="color:#dc2626;">0</span>
             </div>
             <div class="hasil-row">
-                <span class="hasil-label">Total Qualification Under Requirement</span>
-                <span class="hasil-val" id="preview_qual_under" style="color:#dc2626;">0</span>
+                <span class="hasil-label">
+                    <span class="crit-gray" id="dot_comp_r2"></span>
+                    Kompetensi rating 2 (maks. 3)
+                </span>
+                <span class="hasil-val" id="preview_comp_r2" style="color:#d97706;">0</span>
             </div>
             <div class="hasil-row">
-                <span class="hasil-label">Kesimpulan</span>
+                <span class="hasil-label">
+                    <span class="crit-gray" id="dot_qual_r1"></span>
+                    Qualification nilai &lt; 2 (harus = 0)
+                </span>
+                <span class="hasil-val" id="preview_qual_r1" style="color:#dc2626;">0</span>
+            </div>
+            <div class="hasil-row">
+                <span class="hasil-label" style="font-weight:700;color:#374151;">Kesimpulan</span>
                 <span id="preview_kesimpulan" class="badge-pending">Belum lengkap</span>
             </div>
         </div>
@@ -232,59 +274,79 @@
 <script>
 const competencies   = @json(array_keys($competencies));
 const qualifications = @json(array_keys($qualifications));
-const allFields      = [...competencies, ...qualifications];
 
-function selectScore(field, val, btn) {
-    // Reset semua tombol di row ini
-    btn.closest('.score-group').querySelectorAll('.score-btn').forEach(b => {
-        b.className = 'score-btn';
-    });
-
-    // Set selected
-    btn.className = 'score-btn selected-' + val;
+function selectScore(field, val, btn, type) {
+    btn.closest('.score-group').querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+    btn.className = 'score-btn sel-' + val;
     document.getElementById('input_' + field).value = val;
 
-    // Update display
     const disp = document.getElementById('display_' + field);
     disp.textContent = val;
-    disp.style.color = val < 3 ? '#dc2626' : '#15803d';
-
+    if (type === 'comp') {
+        disp.style.color = val < 3 ? '#dc2626' : '#15803d';
+    } else {
+        // Qualification: merah jika < 2
+        disp.style.color = val < 2 ? '#dc2626' : '#15803d';
+    }
     updatePreview();
 }
 
 function updatePreview() {
-    let underComp = 0, underQual = 0;
+    let compR1 = 0, compR2 = 0, qualR1 = 0;
     let allFilled = true;
 
+    // Hitung kompetensi
     competencies.forEach(f => {
         const val = parseInt(document.getElementById('input_' + f).value);
         if (!val) { allFilled = false; return; }
-        if (val < 3) underComp++;
+        if (val === 1) compR1++;
+        if (val === 2) compR2++;
     });
 
+    // Hitung qualification
     qualifications.forEach(f => {
         const val = parseInt(document.getElementById('input_' + f).value);
         if (!val) { allFilled = false; return; }
-        if (val < 3) underQual++;
+        if (val < 2) qualR1++; // nilai < 2 = tidak memenuhi minimal
     });
 
-    document.getElementById('preview_comp_under').textContent = underComp;
-    document.getElementById('preview_qual_under').textContent = underQual;
+    // Update display
+    document.getElementById('preview_comp_r1').textContent = compR1;
+    document.getElementById('preview_comp_r2').textContent = compR2;
+    document.getElementById('preview_qual_r1').textContent = qualR1;
 
+    // Update dot indicators
+    const setDot = (id, ok) => {
+        const el = document.getElementById(id);
+        el.className = ok ? 'crit-ok' : (allFilled ? 'crit-err' : 'crit-gray');
+    };
+
+    const compR1ok = compR1 === 0;
+    const compR2ok = compR2 <= 3;
+    const qualOk   = qualR1 === 0;
+
+    setDot('dot_comp_r1', compR1ok);
+    setDot('dot_comp_r2', compR2ok);
+    setDot('dot_qual_r1', qualOk);
+
+    // Update r2 color
+    const r2el = document.getElementById('preview_comp_r2');
+    r2el.style.color = compR2 > 3 ? '#dc2626' : (compR2 > 0 ? '#d97706' : '#374151');
+
+    // Kesimpulan
     const el = document.getElementById('preview_kesimpulan');
     if (!allFilled) {
-        el.textContent  = 'Belum lengkap';
-        el.className    = 'badge-pending';
-    } else if (underComp === 0 && underQual === 0) {
-        el.textContent  = 'QUALIFIED';
-        el.className    = 'badge-qualified';
+        el.textContent = 'Belum lengkap';
+        el.className = 'badge-pending';
+    } else if (compR1ok && compR2ok && qualOk) {
+        el.textContent = '✅ QUALIFIED';
+        el.className = 'badge-qualified';
     } else {
-        el.textContent  = 'NOT QUALIFIED';
-        el.className    = 'badge-not';
+        el.textContent = '❌ NOT QUALIFIED';
+        el.className = 'badge-not';
     }
 }
 
-// Init preview jika ada old value
 window.addEventListener('DOMContentLoaded', updatePreview);
 </script>
 @endpush

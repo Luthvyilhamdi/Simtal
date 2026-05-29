@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Karyawan;
 use App\Models\HistoryJabatan;
 use App\Models\HistoryAssessment;
+use App\Models\HistoryAssessmentKompetensi;
 use App\Models\HistoryPejabat;
 use App\Models\PgsPjs;
 use App\Models\Direktorat;
@@ -29,11 +30,16 @@ class DashboardController extends Controller
         $mutasiThisYear      = HistoryJabatan::where('tipe', 'mutasi')->whereYear('tanggal_mulai', now()->year)->count();
         $demosiThisYear      = HistoryJabatan::where('tipe', 'demosi')->whereYear('tanggal_mulai', now()->year)->count();
 
-        // === ASSESSMENT ===
+        // === ASSESSMENT REKOMENDASI ===
         $totalAssessment = HistoryAssessment::count();
         $assessmentReady = HistoryAssessment::where('rekomendasi_final', 'ready')->count();
         $assessmentRWD   = HistoryAssessment::where('rekomendasi_final', 'ready_with_development')->count();
         $assessmentNR    = HistoryAssessment::where('rekomendasi_final', 'not_ready')->count();
+
+        // === ASSESSMENT KOMPETENSI ===
+        $totalKompetensi   = HistoryAssessmentKompetensi::count();
+        $totalQualified    = HistoryAssessmentKompetensi::where('kesimpulan', 'QUALIFIED')->count();
+        $totalNotQualified = HistoryAssessmentKompetensi::where('kesimpulan', 'NOT QUALIFIED')->count();
 
         // === PEJABAT ===
         $pejabatAktif = HistoryPejabat::whereNull('tanggal_selesai')->count();
@@ -55,16 +61,31 @@ class DashboardController extends Controller
         for ($i = 11; $i >= 0; $i--) {
             $bulan = now()->subMonths($i);
             $trenBulan[] = [
-                'bulan'    => $bulan->translatedFormat('M Y'),
-                'promosi'  => HistoryJabatan::where('tipe', 'promosi')
+                'bulan'   => $bulan->translatedFormat('M Y'),
+                'promosi' => HistoryJabatan::where('tipe', 'promosi')
                                 ->whereYear('tanggal_mulai', $bulan->year)
                                 ->whereMonth('tanggal_mulai', $bulan->month)->count(),
-                'mutasi'   => HistoryJabatan::where('tipe', 'mutasi')
+                'mutasi'  => HistoryJabatan::where('tipe', 'mutasi')
                                 ->whereYear('tanggal_mulai', $bulan->year)
                                 ->whereMonth('tanggal_mulai', $bulan->month)->count(),
-                'demosi'   => HistoryJabatan::where('tipe', 'demosi')
+                'demosi'  => HistoryJabatan::where('tipe', 'demosi')
                                 ->whereYear('tanggal_mulai', $bulan->year)
                                 ->whereMonth('tanggal_mulai', $bulan->month)->count(),
+            ];
+        }
+
+        // === CHART: Tren Kompetensi 12 Bulan Terakhir ===
+        $trenKompetensi = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $bulan = now()->subMonths($i);
+            $trenKompetensi[] = [
+                'bulan'         => $bulan->translatedFormat('M Y'),
+                'qualified'     => HistoryAssessmentKompetensi::where('kesimpulan', 'QUALIFIED')
+                                    ->whereYear('tanggal_assessment', $bulan->year)
+                                    ->whereMonth('tanggal_assessment', $bulan->month)->count(),
+                'not_qualified' => HistoryAssessmentKompetensi::where('kesimpulan', 'NOT QUALIFIED')
+                                    ->whereYear('tanggal_assessment', $bulan->year)
+                                    ->whereMonth('tanggal_assessment', $bulan->month)->count(),
             ];
         }
 
@@ -82,9 +103,9 @@ class DashboardController extends Controller
 
         // === CHART 3: Assessment Rekomendasi Final (Pie) ===
         $assessmentChart = [
-            ['label' => 'Ready',                'value' => $assessmentReady, 'color' => '#16a34a'],
-            ['label' => 'Ready with Development','value' => $assessmentRWD,  'color' => '#f59e0b'],
-            ['label' => 'Not Ready',             'value' => $assessmentNR,   'color' => '#ef4444'],
+            ['label' => 'Ready',                 'value' => $assessmentReady, 'color' => '#16a34a'],
+            ['label' => 'Ready with Development', 'value' => $assessmentRWD,  'color' => '#f59e0b'],
+            ['label' => 'Not Ready',              'value' => $assessmentNR,   'color' => '#ef4444'],
         ];
 
         // === CHART 4: Karyawan per Job Grade ===
@@ -95,7 +116,7 @@ class DashboardController extends Controller
             ->orderBy('total', 'desc')
             ->get()
             ->map(fn($k) => [
-                'nama'  => $k->jobGrade->job_grade ?? '-',
+                'nama'  => 'JG ' . ($k->jobGrade->job_grade ?? '-'),
                 'total' => $k->total,
             ]);
 
@@ -106,16 +127,23 @@ class DashboardController extends Controller
         ])
         ->orderBy('total_karyawan', 'desc')
         ->get()
-        ->map(function($d) {
+        ->map(function ($d) {
             $ids = $d->karyawans()->pluck('id');
             return [
-                'nama'           => $d->nama_direktorat,
-                'total'          => $d->total_karyawan,
-                'aktif'          => $d->karyawan_aktif,
-                'promosi'        => HistoryJabatan::whereIn('karyawan_id', $ids)->where('tipe','promosi')->whereYear('tanggal_mulai', now()->year)->count(),
-                'mutasi'         => HistoryJabatan::whereIn('karyawan_id', $ids)->where('tipe','mutasi')->whereYear('tanggal_mulai', now()->year)->count(),
-                'assessment'     => HistoryAssessment::whereIn('karyawan_id', $ids)->count(),
-                'ready'          => HistoryAssessment::whereIn('karyawan_id', $ids)->where('rekomendasi_final','ready')->count(),
+                'nama'       => $d->nama_direktorat,
+                'total'      => $d->total_karyawan,
+                'aktif'      => $d->karyawan_aktif,
+                'promosi'    => HistoryJabatan::whereIn('karyawan_id', $ids)
+                                    ->where('tipe', 'promosi')
+                                    ->whereYear('tanggal_mulai', now()->year)->count(),
+                'mutasi'     => HistoryJabatan::whereIn('karyawan_id', $ids)
+                                    ->where('tipe', 'mutasi')
+                                    ->whereYear('tanggal_mulai', now()->year)->count(),
+                'assessment' => HistoryAssessment::whereIn('karyawan_id', $ids)->count(),
+                'ready'      => HistoryAssessment::whereIn('karyawan_id', $ids)
+                                    ->where('rekomendasi_final', 'ready')->count(),
+                'qualified'  => HistoryAssessmentKompetensi::whereIn('karyawan_id', $ids)
+                                    ->where('kesimpulan', 'QUALIFIED')->count(),
             ];
         });
 
@@ -148,21 +176,22 @@ class DashboardController extends Controller
 
         // === USIA DISTRIBUTION ===
         $usiaChart = [
-            '< 30'  => Karyawan::where('status','aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) < 30')->count(),
-            '30-39' => Karyawan::where('status','aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 30 AND 39')->count(),
-            '40-49' => Karyawan::where('status','aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 40 AND 49')->count(),
-            '50+'   => Karyawan::where('status','aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) >= 50')->count(),
+            '< 30'  => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) < 30')->count(),
+            '30-39' => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 30 AND 39')->count(),
+            '40-49' => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 40 AND 49')->count(),
+            '50+'   => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) >= 50')->count(),
         ];
 
         return view('dashboard', compact(
-            'totalKaryawan','karyawanAktif','karyawanTidakAktif','karyawanBaru',
-            'totalHistoryJabatan','promosiThisYear','mutasiThisYear','demosiThisYear',
-            'totalAssessment','assessmentReady','assessmentRWD','assessmentNR',
-            'pejabatAktif','pejabatSVP','pejabatVP','pejabatSPM','pejabatPM',
-            'pgsAktif','pjsAktif',
-            'trenBulan','distribusiDirektorat','assessmentChart','distribusiJobGrade',
-            'ringkasanDirektorat','akanPensiun','aktivitasTerbaru','assessmentExpire',
-            'karyawanTerbaru','genderChart','usiaChart'
+            'totalKaryawan', 'karyawanAktif', 'karyawanTidakAktif', 'karyawanBaru',
+            'totalHistoryJabatan', 'promosiThisYear', 'mutasiThisYear', 'demosiThisYear',
+            'totalAssessment', 'assessmentReady', 'assessmentRWD', 'assessmentNR',
+            'totalKompetensi', 'totalQualified', 'totalNotQualified', 'trenKompetensi',
+            'pejabatAktif', 'pejabatSVP', 'pejabatVP', 'pejabatSPM', 'pejabatPM',
+            'pgsAktif', 'pjsAktif',
+            'trenBulan', 'distribusiDirektorat', 'assessmentChart', 'distribusiJobGrade',
+            'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
+            'karyawanTerbaru', 'genderChart', 'usiaChart'
         ));
     }
 }

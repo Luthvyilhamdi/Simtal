@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\HistoryAssessment;
 use App\Models\HistoryAssessmentKompetensi;
 use App\Exports\HistoryAssessmentExport;
+use App\Exports\HistoryAssessmentKompetensiExport;
 use Illuminate\Http\Request;
 
 class HistoryAssessmentAllController extends Controller
@@ -32,7 +33,7 @@ class HistoryAssessmentAllController extends Controller
 
         $assessments = $query->paginate(15)->withQueryString();
 
-        // ===== QUERY KOMPETENSI + search_komp =====
+        // ===== QUERY KOMPETENSI =====
         $queryKomp = HistoryAssessmentKompetensi::with('karyawan')
             ->orderBy('tanggal_assessment', 'desc');
 
@@ -69,9 +70,10 @@ class HistoryAssessmentAllController extends Controller
         ));
     }
 
+    // ===== EXPORT REKOMENDASI =====
     public function export(Request $request)
     {
-        $filename = 'history-assessment-' . now()->format('d-m-Y') . '.xlsx';
+        $filename = 'history-assessment-rekomendasi-' . now()->format('d-m-Y') . '.xlsx';
 
         return (new HistoryAssessmentExport(
             $request->search,
@@ -80,6 +82,17 @@ class HistoryAssessmentAllController extends Controller
         ))->download($filename);
     }
 
+    // ===== EXPORT KOMPETENSI =====
+    public function exportKompetensi(Request $request)
+    {
+        $filename = 'history-assessment-kompetensi-' . now()->format('d-m-Y') . '.xlsx';
+
+        return (new HistoryAssessmentKompetensiExport(
+            $request->search_komp
+        ))->download($filename);
+    }
+
+    // ===== DESTROY REKOMENDASI =====
     public function destroy(HistoryAssessment $assessment)
     {
         $assessment->delete();
@@ -88,6 +101,7 @@ class HistoryAssessmentAllController extends Controller
             ->with('success', 'Data assessment berhasil dihapus!');
     }
 
+    // ===== DESTROY KOMPETENSI =====
     public function destroyKompetensi(HistoryAssessmentKompetensi $kompetensi)
     {
         $kompetensi->delete();
