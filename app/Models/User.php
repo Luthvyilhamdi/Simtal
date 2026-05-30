@@ -28,8 +28,15 @@ class User extends Authenticatable
         return $this->role === 'super_admin';
     }
 
+    // super_admin juga termasuk admin
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    // role user biasa (hanya akses Struktur Organisasi)
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
     }
 }

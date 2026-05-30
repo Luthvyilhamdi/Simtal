@@ -35,102 +35,36 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
 
-    // ===== PROFILE =====
+    // ===== PROFILE (semua role) =====
     Route::get('/profile',           [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',         [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/password',[ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::delete('/profile',        [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // ===== DASHBOARD =====
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('verified')
-        ->name('dashboard');
+    // ===== DASHBOARD (redirect user → struktur organisasi) =====
+    Route::get('/dashboard', function () {
+        if (auth()->user()->role === 'user') {
+            return redirect()->route('struktur-organisasi.index');
+        }
+        return app(DashboardController::class)->index();
+    })->middleware('verified')->name('dashboard');
 
-    // ===== KARYAWAN =====
-    Route::get('karyawan/export',            [KaryawanController::class, 'export'])->name('karyawan.export');
-    Route::get('karyawan/import',            [KaryawanController::class, 'importPage'])->name('karyawan.import');
-    Route::post('karyawan/import',           [KaryawanController::class, 'import'])->name('karyawan.import.store');
-    Route::get('karyawan/template-download', [KaryawanController::class, 'downloadTemplate'])->name('karyawan.template');
-    Route::resource('karyawan', KaryawanController::class);
+    // ===== STRUKTUR ORGANISASI (semua role bisa akses) =====
+    Route::prefix('struktur-organisasi')->name('struktur-organisasi.')->group(function () {
+        Route::get('/',       [StrukturOrganisasiController::class, 'index'])->name('index');
+        Route::get('/export', [StrukturOrganisasiController::class, 'export'])->name('export');
 
-    // ===== HISTORY JABATAN =====
-    Route::prefix('karyawan/{karyawan}/history-jabatan')->name('history_jabatan.')->group(function () {
-        Route::get('/',                    [HistoryJabatanController::class, 'index'])->name('index');
-        Route::get('/create',              [HistoryJabatanController::class, 'create'])->name('create');
-        Route::post('/',                   [HistoryJabatanController::class, 'store'])->name('store');
-        Route::delete('/{historyJabatan}', [HistoryJabatanController::class, 'destroy'])->name('destroy');
-    });
-
-    // ===== HISTORY KARYAWAN =====
-    Route::prefix('history-karyawan')->name('history_karyawan.')->group(function () {
-        Route::get('/',       [HistoryKaryawanController::class, 'index'])->name('index');
-        Route::get('/export', [HistoryKaryawanController::class, 'export'])->name('export');
-
-        Route::middleware('super_admin')->group(function () {
-            Route::get('/import',          [ImportHistoryJabatanController::class, 'page'])->name('import');
-            Route::post('/import',         [ImportHistoryJabatanController::class, 'import'])->name('import.store');
-            Route::get('/import/template', [ImportHistoryJabatanController::class, 'downloadTemplate'])->name('import.template');
+        // Edit hanya untuk admin & super_admin
+        Route::middleware('not_user_role')->group(function () {
+            Route::post('/',              [StrukturOrganisasiController::class, 'store'])->name('store');
+            Route::post('/salin-periode', [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
+            Route::patch('/{so}',         [StrukturOrganisasiController::class, 'update'])->name('update');
+            Route::put('/{so}',           [StrukturOrganisasiController::class, 'update'])->name('update.put');
+            Route::delete('/{so}',        [StrukturOrganisasiController::class, 'destroy'])->name('destroy');
         });
-
-        Route::get('/{karyawan}', [HistoryKaryawanController::class, 'show'])->name('show');
     });
 
-    // ===== HISTORY ASSESSMENT PER KARYAWAN =====
-    Route::prefix('karyawan/{karyawan}/history-assessment')->name('history_assessment.')->group(function () {
-        Route::get('/',                       [HistoryAssessmentController::class, 'index'])->name('index');
-        Route::get('/create',                 [HistoryAssessmentController::class, 'create'])->name('create');
-        Route::post('/',                      [HistoryAssessmentController::class, 'store'])->name('store');
-        Route::delete('/{historyAssessment}', [HistoryAssessmentController::class, 'destroy'])->name('destroy');
-    });
-
-    // ===== ASSESSMENT KOMPETENSI PER KARYAWAN =====
-    Route::prefix('karyawan/{karyawan}/assessment-kompetensi')->name('assessment_kompetensi.')->group(function () {
-        Route::get('/create',         [HistoryAssessmentKompetensiController::class, 'create'])->name('create');
-        Route::post('/',              [HistoryAssessmentKompetensiController::class, 'store'])->name('store');
-        Route::delete('/{kompetensi}',[HistoryAssessmentKompetensiController::class, 'destroy'])->name('destroy');
-    });
-
-    // ===== HISTORY ASSESSMENT ALL (GLOBAL) =====
-    Route::prefix('history-assessment')->name('history_assessment_all.')->group(function () {
-        Route::get('/',                [HistoryAssessmentAllController::class, 'index'])->name('index');
-        Route::get('/export',          [HistoryAssessmentAllController::class, 'export'])->name('export');
-        Route::delete('/{assessment}', [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
-
-        // Import Assessment Rekomendasi
-        Route::get('/import',                  [ImportAssessmentController::class, 'page'])->name('import');
-        Route::post('/import',                 [ImportAssessmentController::class, 'import'])->name('import.store');
-        Route::get('/import/template',         [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
-
-        // Import Assessment Kompetensi (BARU)
-        Route::post('/import/kompetensi',          [ImportAssessmentController::class, 'importKompetensi'])->name('import.store.kompetensi');
-        Route::get('/import/template/kompetensi',  [ImportAssessmentController::class, 'downloadTemplateKompetensi'])->name('import.template.kompetensi');
-
-        // Export Kompetensi (BARU)
-        Route::get('/export/kompetensi',           [HistoryAssessmentAllController::class, 'exportKompetensi'])->name('export.kompetensi');
-    });
-
-    // ===== ASSESSMENT KOMPETENSI ALL (GLOBAL) =====
-    Route::delete('/history-assessment/kompetensi/{kompetensi}',
-        [HistoryAssessmentAllController::class, 'destroyKompetensi'])
-        ->name('assessment_kompetensi_all.destroy');
-
-    // ===== PGS & PJS =====
-    Route::prefix('pgs-pjs')->name('pgs_pjs.')->group(function () {
-        Route::get('/',                  [PgsPjsController::class, 'index'])->name('index');
-        Route::get('/create',            [PgsPjsController::class, 'create'])->name('create');
-        Route::post('/',                 [PgsPjsController::class, 'store'])->name('store');
-        Route::get('/export',            [PgsPjsController::class, 'export'])->name('export');
-        Route::patch('/{pgsPjs}/akhiri', [PgsPjsController::class, 'akhiri'])->name('akhiri');
-        Route::delete('/{pgsPjs}',       [PgsPjsController::class, 'destroy'])->name('destroy');
-    });
-
-    // ===== HISTORY PEJABAT =====
-    Route::prefix('history-pejabat')->name('history_pejabat.')->group(function () {
-        Route::get('/',       [HistoryPejabatController::class, 'index'])->name('index');
-        Route::get('/export', [HistoryPejabatController::class, 'export'])->name('export');
-    });
-
-    // ===== NOTIFIKASI =====
+    // ===== NOTIFIKASI (semua role) =====
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/',                   [NotifikasiController::class, 'index'])->name('index');
         Route::get('/fetch',              [NotifikasiController::class, 'fetch'])->name('fetch');
@@ -139,88 +73,147 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{notifikasi}',    [NotifikasiController::class, 'destroy'])->name('destroy');
     });
 
-    // ===== SURAT PENTING =====
-    Route::prefix('surat-penting')->name('surat_penting.')->group(function () {
-        Route::get('/',                        [SuratPentingController::class, 'index'])->name('index');
-        Route::get('/create',                  [SuratPentingController::class, 'create'])->name('create');
-        Route::post('/',                       [SuratPentingController::class, 'store'])->name('store');
-        Route::get('/{suratPenting}',          [SuratPentingController::class, 'show'])->name('show');
-        Route::get('/{suratPenting}/download', [SuratPentingController::class, 'download'])->name('download');
-        Route::delete('/{suratPenting}',       [SuratPentingController::class, 'destroy'])->name('destroy');
-    });
+    // ===== SEMUA ROUTE BERIKUT: HANYA ADMIN & SUPER ADMIN =====
+    Route::middleware('not_user_role')->group(function () {
 
-    // ===== STRUKTUR ORGANISASI =====
-    Route::prefix('struktur-organisasi')->name('struktur-organisasi.')->group(function () {
-        Route::get('/',              [StrukturOrganisasiController::class, 'index'])->name('index');
-        Route::get('/export',        [StrukturOrganisasiController::class, 'export'])->name('export');
-        Route::post('/',             [StrukturOrganisasiController::class, 'store'])->name('store');
-        Route::post('/salin-periode',[StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
-        Route::patch('/{so}',        [StrukturOrganisasiController::class, 'update'])->name('update');
-        Route::put('/{so}',          [StrukturOrganisasiController::class, 'update'])->name('update.put');
-        Route::delete('/{so}',       [StrukturOrganisasiController::class, 'destroy'])->name('destroy');
-    });
+        // Karyawan
+        Route::get('karyawan/export',            [KaryawanController::class, 'export'])->name('karyawan.export');
+        Route::get('karyawan/import',            [KaryawanController::class, 'importPage'])->name('karyawan.import');
+        Route::post('karyawan/import',           [KaryawanController::class, 'import'])->name('karyawan.import.store');
+        Route::get('karyawan/template-download', [KaryawanController::class, 'downloadTemplate'])->name('karyawan.template');
+        Route::resource('karyawan', KaryawanController::class);
 
-    // ===== API AJAX =====
-    Route::get('api/karyawan/{id}/detail',  [StrukturOrganisasiController::class, 'getKaryawanData'])->name('api.karyawan.detail');
-    Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
-
-    // ===== FAQ =====
-    Route::get('/faq', fn() => view('faq'))->name('faq');
-
-    // ===== SUPER ADMIN ONLY =====
-    Route::middleware('super_admin')->group(function () {
-
-        // Activity Log
-        Route::prefix('activity-log')->name('activity_log.')->group(function () {
-            Route::get('/',    [ActivityLogController::class, 'index'])->name('index');
-            Route::delete('/', [ActivityLogController::class, 'destroy'])->name('destroy');
+        // History Jabatan
+        Route::prefix('karyawan/{karyawan}/history-jabatan')->name('history_jabatan.')->group(function () {
+            Route::get('/',                    [HistoryJabatanController::class, 'index'])->name('index');
+            Route::get('/create',              [HistoryJabatanController::class, 'create'])->name('create');
+            Route::post('/',                   [HistoryJabatanController::class, 'store'])->name('store');
+            Route::delete('/{historyJabatan}', [HistoryJabatanController::class, 'destroy'])->name('destroy');
         });
 
-        // Akun
-        Route::prefix('akun')->name('akun.')->group(function () {
-            Route::get('/',          [AkunController::class, 'index'])->name('index');
-            Route::post('/',         [AkunController::class, 'store'])->name('store');
-            Route::put('/{akun}',    [AkunController::class, 'update'])->name('update');
-            Route::delete('/{akun}', [AkunController::class, 'destroy'])->name('destroy');
+        // History Karyawan
+        Route::prefix('history-karyawan')->name('history_karyawan.')->group(function () {
+            Route::get('/',       [HistoryKaryawanController::class, 'index'])->name('index');
+            Route::get('/export', [HistoryKaryawanController::class, 'export'])->name('export');
+            Route::middleware('super_admin')->group(function () {
+                Route::get('/import',          [ImportHistoryJabatanController::class, 'page'])->name('import');
+                Route::post('/import',         [ImportHistoryJabatanController::class, 'import'])->name('import.store');
+                Route::get('/import/template', [ImportHistoryJabatanController::class, 'downloadTemplate'])->name('import.template');
+            });
+            Route::get('/{karyawan}', [HistoryKaryawanController::class, 'show'])->name('show');
         });
 
-        // Master Data
-        Route::prefix('master')->name('master.')->group(function () {
+        // History Assessment per Karyawan
+        Route::prefix('karyawan/{karyawan}/history-assessment')->name('history_assessment.')->group(function () {
+            Route::get('/',                       [HistoryAssessmentController::class, 'index'])->name('index');
+            Route::get('/create',                 [HistoryAssessmentController::class, 'create'])->name('create');
+            Route::post('/',                      [HistoryAssessmentController::class, 'store'])->name('store');
+            Route::delete('/{historyAssessment}', [HistoryAssessmentController::class, 'destroy'])->name('destroy');
+        });
 
-            Route::get('jabatan',               [MasterJabatanController::class, 'index'])->name('jabatan.index');
-            Route::post('jabatan',              [MasterJabatanController::class, 'store'])->name('jabatan.store');
-            Route::put('jabatan/{id}',          [MasterJabatanController::class, 'update'])->name('jabatan.update');
-            Route::delete('jabatan/{id}',       [MasterJabatanController::class, 'destroy'])->name('jabatan.destroy');
+        // Assessment Kompetensi per Karyawan
+        Route::prefix('karyawan/{karyawan}/assessment-kompetensi')->name('assessment_kompetensi.')->group(function () {
+            Route::get('/create',          [HistoryAssessmentKompetensiController::class, 'create'])->name('create');
+            Route::post('/',               [HistoryAssessmentKompetensiController::class, 'store'])->name('store');
+            Route::delete('/{kompetensi}', [HistoryAssessmentKompetensiController::class, 'destroy'])->name('destroy');
+        });
 
-            Route::get('direktorat',            [MasterDirektoratController::class, 'index'])->name('direktorat.index');
-            Route::post('direktorat',           [MasterDirektoratController::class, 'store'])->name('direktorat.store');
-            Route::put('direktorat/{id}',       [MasterDirektoratController::class, 'update'])->name('direktorat.update');
-            Route::delete('direktorat/{id}',    [MasterDirektoratController::class, 'destroy'])->name('direktorat.destroy');
+        // History Assessment All
+        Route::prefix('history-assessment')->name('history_assessment_all.')->group(function () {
+            Route::get('/',                [HistoryAssessmentAllController::class, 'index'])->name('index');
+            Route::get('/export',          [HistoryAssessmentAllController::class, 'export'])->name('export');
+            Route::get('/export/kompetensi', [HistoryAssessmentAllController::class, 'exportKompetensi'])->name('export.kompetensi');
+            Route::delete('/{assessment}', [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
+            Route::get('/import',                 [ImportAssessmentController::class, 'page'])->name('import');
+            Route::post('/import',                [ImportAssessmentController::class, 'import'])->name('import.store');
+            Route::get('/import/template',        [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
+            Route::post('/import/kompetensi',         [ImportAssessmentController::class, 'importKompetensi'])->name('import.store.kompetensi');
+            Route::get('/import/template/kompetensi', [ImportAssessmentController::class, 'downloadTemplateKompetensi'])->name('import.template.kompetensi');
+        });
 
-            Route::get('kompartemen',           [MasterKompartemenController::class, 'index'])->name('kompartemen.index');
-            Route::post('kompartemen',          [MasterKompartemenController::class, 'store'])->name('kompartemen.store');
-            Route::put('kompartemen/{id}',      [MasterKompartemenController::class, 'update'])->name('kompartemen.update');
-            Route::delete('kompartemen/{id}',   [MasterKompartemenController::class, 'destroy'])->name('kompartemen.destroy');
+        // Assessment Kompetensi All
+        Route::delete('/history-assessment/kompetensi/{kompetensi}',
+            [HistoryAssessmentAllController::class, 'destroyKompetensi'])
+            ->name('assessment_kompetensi_all.destroy');
 
-            Route::get('departemen',            [MasterDepartemenController::class, 'index'])->name('departemen.index');
-            Route::post('departemen',           [MasterDepartemenController::class, 'store'])->name('departemen.store');
-            Route::put('departemen/{id}',       [MasterDepartemenController::class, 'update'])->name('departemen.update');
-            Route::delete('departemen/{id}',    [MasterDepartemenController::class, 'destroy'])->name('departemen.destroy');
+        // PGS & PJS
+        Route::prefix('pgs-pjs')->name('pgs_pjs.')->group(function () {
+            Route::get('/',                  [PgsPjsController::class, 'index'])->name('index');
+            Route::get('/create',            [PgsPjsController::class, 'create'])->name('create');
+            Route::post('/',                 [PgsPjsController::class, 'store'])->name('store');
+            Route::get('/export',            [PgsPjsController::class, 'export'])->name('export');
+            Route::patch('/{pgsPjs}/akhiri', [PgsPjsController::class, 'akhiri'])->name('akhiri');
+            Route::delete('/{pgsPjs}',       [PgsPjsController::class, 'destroy'])->name('destroy');
+        });
 
-            Route::get('job-grade',             [MasterJobGradeController::class, 'index'])->name('job-grade.index');
-            Route::post('job-grade',            [MasterJobGradeController::class, 'store'])->name('job-grade.store');
-            Route::put('job-grade/{id}',        [MasterJobGradeController::class, 'update'])->name('job-grade.update');
-            Route::delete('job-grade/{id}',     [MasterJobGradeController::class, 'destroy'])->name('job-grade.destroy');
+        // History Pejabat
+        Route::prefix('history-pejabat')->name('history_pejabat.')->group(function () {
+            Route::get('/',       [HistoryPejabatController::class, 'index'])->name('index');
+            Route::get('/export', [HistoryPejabatController::class, 'export'])->name('export');
+        });
 
-            Route::get('person-grade',          [MasterPersonGradeController::class, 'index'])->name('person-grade.index');
-            Route::post('person-grade',         [MasterPersonGradeController::class, 'store'])->name('person-grade.store');
-            Route::put('person-grade/{id}',     [MasterPersonGradeController::class, 'update'])->name('person-grade.update');
-            Route::delete('person-grade/{id}',  [MasterPersonGradeController::class, 'destroy'])->name('person-grade.destroy');
+        // Surat Penting
+        Route::prefix('surat-penting')->name('surat_penting.')->group(function () {
+            Route::get('/',                        [SuratPentingController::class, 'index'])->name('index');
+            Route::get('/create',                  [SuratPentingController::class, 'create'])->name('create');
+            Route::post('/',                       [SuratPentingController::class, 'store'])->name('store');
+            Route::get('/{suratPenting}',          [SuratPentingController::class, 'show'])->name('show');
+            Route::get('/{suratPenting}/download', [SuratPentingController::class, 'download'])->name('download');
+            Route::delete('/{suratPenting}',       [SuratPentingController::class, 'destroy'])->name('destroy');
+        });
 
-            Route::get('kode-struktur',         [MasterKodeStrukturController::class, 'index'])->name('kode-struktur.index');
-            Route::post('kode-struktur',        [MasterKodeStrukturController::class, 'store'])->name('kode-struktur.store');
-            Route::put('kode-struktur/{id}',    [MasterKodeStrukturController::class, 'update'])->name('kode-struktur.update');
-            Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
+        // API AJAX
+        Route::get('api/karyawan/{id}/detail',  [StrukturOrganisasiController::class, 'getKaryawanData'])->name('api.karyawan.detail');
+        Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
+
+        // FAQ
+        Route::get('/faq', fn() => view('faq'))->name('faq');
+
+        // ===== SUPER ADMIN ONLY =====
+        Route::middleware('super_admin')->group(function () {
+
+            Route::prefix('activity-log')->name('activity_log.')->group(function () {
+                Route::get('/',    [ActivityLogController::class, 'index'])->name('index');
+                Route::delete('/', [ActivityLogController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('akun')->name('akun.')->group(function () {
+                Route::get('/',          [AkunController::class, 'index'])->name('index');
+                Route::post('/',         [AkunController::class, 'store'])->name('store');
+                Route::put('/{akun}',    [AkunController::class, 'update'])->name('update');
+                Route::delete('/{akun}', [AkunController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('master')->name('master.')->group(function () {
+                Route::get('jabatan',               [MasterJabatanController::class, 'index'])->name('jabatan.index');
+                Route::post('jabatan',              [MasterJabatanController::class, 'store'])->name('jabatan.store');
+                Route::put('jabatan/{id}',          [MasterJabatanController::class, 'update'])->name('jabatan.update');
+                Route::delete('jabatan/{id}',       [MasterJabatanController::class, 'destroy'])->name('jabatan.destroy');
+                Route::get('direktorat',            [MasterDirektoratController::class, 'index'])->name('direktorat.index');
+                Route::post('direktorat',           [MasterDirektoratController::class, 'store'])->name('direktorat.store');
+                Route::put('direktorat/{id}',       [MasterDirektoratController::class, 'update'])->name('direktorat.update');
+                Route::delete('direktorat/{id}',    [MasterDirektoratController::class, 'destroy'])->name('direktorat.destroy');
+                Route::get('kompartemen',           [MasterKompartemenController::class, 'index'])->name('kompartemen.index');
+                Route::post('kompartemen',          [MasterKompartemenController::class, 'store'])->name('kompartemen.store');
+                Route::put('kompartemen/{id}',      [MasterKompartemenController::class, 'update'])->name('kompartemen.update');
+                Route::delete('kompartemen/{id}',   [MasterKompartemenController::class, 'destroy'])->name('kompartemen.destroy');
+                Route::get('departemen',            [MasterDepartemenController::class, 'index'])->name('departemen.index');
+                Route::post('departemen',           [MasterDepartemenController::class, 'store'])->name('departemen.store');
+                Route::put('departemen/{id}',       [MasterDepartemenController::class, 'update'])->name('departemen.update');
+                Route::delete('departemen/{id}',    [MasterDepartemenController::class, 'destroy'])->name('departemen.destroy');
+                Route::get('job-grade',             [MasterJobGradeController::class, 'index'])->name('job-grade.index');
+                Route::post('job-grade',            [MasterJobGradeController::class, 'store'])->name('job-grade.store');
+                Route::put('job-grade/{id}',        [MasterJobGradeController::class, 'update'])->name('job-grade.update');
+                Route::delete('job-grade/{id}',     [MasterJobGradeController::class, 'destroy'])->name('job-grade.destroy');
+                Route::get('person-grade',          [MasterPersonGradeController::class, 'index'])->name('person-grade.index');
+                Route::post('person-grade',         [MasterPersonGradeController::class, 'store'])->name('person-grade.store');
+                Route::put('person-grade/{id}',     [MasterPersonGradeController::class, 'update'])->name('person-grade.update');
+                Route::delete('person-grade/{id}',  [MasterPersonGradeController::class, 'destroy'])->name('person-grade.destroy');
+                Route::get('kode-struktur',         [MasterKodeStrukturController::class, 'index'])->name('kode-struktur.index');
+                Route::post('kode-struktur',        [MasterKodeStrukturController::class, 'store'])->name('kode-struktur.store');
+                Route::put('kode-struktur/{id}',    [MasterKodeStrukturController::class, 'update'])->name('kode-struktur.update');
+                Route::delete('kode-struktur/{id}', [MasterKodeStrukturController::class, 'destroy'])->name('kode-struktur.destroy');
+            });
         });
     });
 });

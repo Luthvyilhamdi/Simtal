@@ -49,7 +49,6 @@ class StrukturOrganisasiController extends Controller
 
         $allJabatan = $query->get();
 
-        // ===== FIX: Stats dalam 1 query =====
         $statsRaw = StrukturOrganisasi::where('bulan', $bulan)->where('tahun', $tahun)
             ->where('posisi', '!=', '-')
             ->selectRaw('
@@ -70,12 +69,10 @@ class StrukturOrganisasiController extends Controller
             'non_core'     => $statsRaw->total_non_core ?? 0,
         ];
 
-        // ===== FIX: distinct values dari $allJabatan (tidak perlu query lagi) =====
         $direktorats  = $allJabatan->pluck('direktorat')->filter()->unique()->sort()->values();
         $kompartemens = $allJabatan->pluck('kompartemen')->filter()->unique()->sort()->values();
         $fungsionals  = $allJabatan->pluck('fungsional')->filter()->unique()->sort()->values();
 
-        // Daftar periode yang sudah ada
         $periodeList = StrukturOrganisasi::selectRaw('bulan, tahun, COUNT(*) as total')
             ->groupBy('bulan', 'tahun')
             ->orderByDesc('tahun')
@@ -84,7 +81,6 @@ class StrukturOrganisasiController extends Controller
 
         $tree = $this->buildTree($allJabatan);
 
-        // ===== FIX: Karyawan hanya ambil kolom minimal =====
         $karyawans = Karyawan::where('status', 'aktif')
                              ->orderBy('nama')
                              ->get(['id', 'nik', 'nama']);
@@ -106,7 +102,7 @@ class StrukturOrganisasiController extends Controller
             'fungsional_staff'=> 'nullable|string',
             'posisi'          => 'nullable|string',
             'job_grade'       => 'nullable|integer',
-            'mc_tko'          => 'nullable|integer|min:1',
+            'mc_tko'          => 'nullable|integer|min:0',
             'core'            => 'nullable|in:Core,Non Core',
             'bulan'           => 'nullable|integer|min:1|max:12',
             'tahun'           => 'nullable|integer|min:2000|max:2100',
@@ -116,23 +112,32 @@ class StrukturOrganisasiController extends Controller
         $bulan = (int)($request->bulan ?? now()->month);
         $tahun = (int)($request->tahun ?? now()->year);
 
+        // Simpan kompartemen sebagai NULL jika kosong (bukan empty string)
+        $kompartemen = $request->kompartemen ?: null;
+
         StrukturOrganisasi::create([
             'bulan'       => $bulan,
             'tahun'       => $tahun,
             'direktorat'  => $request->direktorat,
-            'kompartemen' => $request->kompartemen,
-            'dept'        => $request->dept,
-            'bagian'      => $request->bagian,
-            'fungsional'  => $fungsional,
+            'kompartemen' => $kompartemen,
+            'dept'        => $request->dept ?: null,
+            'bagian'      => $request->bagian ?: null,
+            'fungsional'  => $fungsional ?: null,
             'posisi'      => $request->posisi ?? '-',
             'job_grade'   => $request->job_grade,
-            'mc_tko'      => $request->mc_tko ?? 1,
+            'mc_tko'      => $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0,
             'core'        => $request->core ?? 'Non Core',
             'pengisian'   => 0,
-            'deviasi'     => -($request->mc_tko ?? 1),
+            'deviasi'     => $request->mc_tko ? -(int)$request->mc_tko : 0,
         ]);
 
-        return redirect()->route('struktur-organisasi.index', ['bulan' => $bulan, 'tahun' => $tahun])
+        // ===== FIX: Redirect kembali ke direktorat yang sama =====
+        $params = ['bulan' => $bulan, 'tahun' => $tahun];
+        if ($request->direktorat) {
+            $params['direktorat'] = $request->direktorat;
+        }
+
+        return redirect()->route('struktur-organisasi.index', $params)
                          ->with('success', 'Posisi berhasil ditambahkan.');
     }
 
@@ -161,7 +166,6 @@ class StrukturOrganisasiController extends Controller
             return back()->with('error', "Tidak ada data di periode {$dariBulan}/{$dariTahun}.");
         }
 
-        // ===== FIX: Gunakan insert bulk untuk performa lebih baik =====
         DB::transaction(function() use ($data, $keBulan, $keTahun) {
             $chunks = $data->map(fn($row) => [
                 'bulan'         => $keBulan,
@@ -184,7 +188,6 @@ class StrukturOrganisasiController extends Controller
                 'updated_at'    => now(),
             ])->toArray();
 
-            // Insert per batch 100 baris
             foreach (array_chunk($chunks, 100) as $batch) {
                 StrukturOrganisasi::insert($batch);
             }
@@ -359,8 +362,16 @@ class StrukturOrganisasiController extends Controller
             }
 
             $kompKey = $komp ?: '__no_komp__';
+
+            // ===== FIX: __no_komp__ selalu jadi key PERTAMA agar tampil di atas =====
             if (!isset($tree[$dir]['children'][$kompKey])) {
-                $tree[$dir]['children'][$kompKey] = ['label' => $komp, 'mc_tko' => 0, 'pengisian' => 0, 'children' => []];
+                if ($kompKey === '__no_komp__') {
+                    // Sisipkan di depan array
+                    $tree[$dir]['children'] = ['__no_komp__' => ['label' => '', 'mc_tko' => 0, 'pengisian' => 0, 'children' => []]]
+                                            + $tree[$dir]['children'];
+                } else {
+                    $tree[$dir]['children'][$kompKey] = ['label' => $komp, 'mc_tko' => 0, 'pengisian' => 0, 'children' => []];
+                }
             }
 
             $deptKey = $dept ?: '__no_dept__';

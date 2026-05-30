@@ -13,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'super_admin' => \App\Http\Middleware\SuperAdminMiddleware::class,
+            'super_admin'   => \App\Http\Middleware\SuperAdminMiddleware::class,
+            'not_user_role' => \App\Http\Middleware\UserRoleMiddleware::class,
+            'role'          => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

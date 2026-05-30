@@ -24,7 +24,7 @@ class AkunController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role'     => 'required|in:super_admin,admin',
+            'role'     => 'required|in:user,admin,super_admin',
         ]);
 
         User::create([
@@ -44,7 +44,7 @@ class AkunController extends Controller
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $akun->id,
-            'role'  => 'required|in:super_admin,admin',
+            'role'  => 'required|in:user,admin,super_admin',
         ]);
 
         $data = [

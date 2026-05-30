@@ -223,6 +223,18 @@
 
     <div class="sidebar-nav">
 
+        @if(auth()->user()->role === 'user')
+        {{-- ===== SIDEBAR USER: hanya Struktur Organisasi ===== --}}
+        <div class="nav-group">
+            <div class="nav-section-label">Akses Saya</div>
+            <a href="{{ route('struktur-organisasi.index') }}" data-tooltip="Struktur Organisasi" class="nav-link {{ request()->routeIs('struktur-organisasi.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
+                <span class="nav-text">Struktur Organisasi</span>
+            </a>
+        </div>
+        @else
+        {{-- ===== SIDEBAR ADMIN / SUPER ADMIN ===== --}}
+
         {{-- Beranda --}}
         <div class="nav-group">
             <div class="nav-section-label">Beranda</div>
@@ -322,6 +334,8 @@
         </div>
         @endif
 
+        @endif
+
     </div>
 </div>
 
@@ -363,7 +377,7 @@
                     <div class="user-trigger-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
                     <div class="user-trigger-info">
                         <div class="user-trigger-name">{{ auth()->user()->name }}</div>
-                        <div class="user-trigger-role">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Administrator' }}</div>
+                        <div class="user-trigger-role">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isAdmin() ? 'Administrator' : 'User') }}</div>
                     </div>
                     <svg class="user-trigger-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
@@ -374,7 +388,7 @@
                         <div class="dropdown-header-name">{{ auth()->user()->name }}</div>
                         <div class="dropdown-header-email">{{ auth()->user()->email }}</div>
                         <div class="dropdown-header-badge">
-                            @if(auth()->user()->isSuperAdmin()) ⭐ Super Admin @else 🔵 Administrator @endif
+                            {{ auth()->user()->isSuperAdmin() ? '⭐ Super Admin' : (auth()->user()->isAdmin() ? '🔵 Administrator' : '👤 User') }}
                         </div>
                     </div>
                     <div class="dropdown-body">

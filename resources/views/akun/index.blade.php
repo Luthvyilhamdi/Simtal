@@ -21,11 +21,15 @@
     .form-hint { font-size:11px;color:#9ca3af;margin-top:2px; }
 
     .select-wrap { position:relative; }
-    .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
+    .select-wrap::after { content:\'\';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
 
     .btn-save { width:100%;padding:11px;background:#15803d;color:white;border:none;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s; }
     .btn-save:hover { background:#166534; }
+
+    /* Role info box */
+    .role-info { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;margin-top:6px;font-size:11px;color:#374151;line-height:1.7; }
+    .role-info strong { color:#15803d; }
 
     .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
     .table-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f3f4f6; }
@@ -44,6 +48,7 @@
     .role-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700; }
     .role-super { background:#fef3c7;color:#d97706; }
     .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-user  { background:#f3f4f6;color:#6b7280; }
     .you-badge { display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#dcfce7;color:#15803d;margin-left:6px; }
 
     .action-btns { display:flex;gap:6px; }
@@ -54,7 +59,6 @@
     .btn-del-sm svg { width:13px;height:13px;stroke:#ef4444;fill:none;stroke-width:2; }
     .btn-del-sm.disabled { opacity:0.4;cursor:not-allowed;pointer-events:none; }
 
-    /* Toast */
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
     .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:280px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
     .toast.error { border-color:#fecaca;border-left-color:#ef4444;color:#dc2626; }
@@ -70,7 +74,6 @@
     @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translateX(110%);} }
     @keyframes toastProgress { from{width:100%;}to{width:0%;} }
 
-    /* Modal Edit */
     .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center; }
     .modal-backdrop.show { display:flex; }
     .modal-box { background:white;border-radius:16px;padding:28px;width:100%;max-width:460px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.4,0,0.2,1); }
@@ -80,8 +83,6 @@
     .modal-btn.cancel { background:#f9fafb;color:#374151;border:1px solid #e5e7eb; }
     .modal-btn.save { background:#15803d;color:white; }
     .modal-btn.save:hover { background:#166534; }
-
-    /* Modal Hapus */
     .modal-box.center { text-align:center; }
     .modal-icon-wrap { width:56px;height:56px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px; }
     .modal-icon-wrap svg { width:26px;height:26px;stroke:#ef4444;fill:none;stroke-width:1.8; }
@@ -89,7 +90,6 @@
     .modal-btn.danger:hover { background:#dc2626; }
     @keyframes modalIn { from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);} }
 
-    /* Table footer */
     .table-footer { display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:10px; }
     .pagination-wrap { display:flex;align-items:center;gap:4px; }
     .page-btn { width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#374151;cursor:pointer;text-decoration:none;transition:all 0.12s; }
@@ -97,7 +97,6 @@
     .page-btn.active { background:#15803d;color:white;border-color:#15803d; }
     .page-btn.disabled { opacity:0.4;pointer-events:none; }
     .page-btn svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
-
     .empty-state { text-align:center;padding:40px 20px;color:#9ca3af;font-size:13px; }
 
     @media (max-width:768px) {
@@ -109,7 +108,6 @@
 
 @section('content')
 
-{{-- Toast --}}
 @if(session('success'))
 <div class="toast-wrap" id="toastWrap">
     <div class="toast" id="toast">
@@ -151,6 +149,7 @@
                 <label class="form-label">Role</label>
                 <div class="select-wrap">
                     <select name="role" id="editRole" class="form-input">
+                        <option value="user">User (Hanya Struktur Organisasi)</option>
                         <option value="admin">Admin</option>
                         <option value="super_admin">Super Admin</option>
                     </select>
@@ -227,10 +226,14 @@
             <div class="form-group">
                 <label class="form-label">Role *</label>
                 <div class="select-wrap">
-                    <select name="role" class="form-input">
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <select name="role" id="roleSelect" class="form-input" onchange="updateRoleInfo(this.value)">
+                        <option value="user"        {{ old('role') == 'user'        ? 'selected' : '' }}>User</option>
+                        <option value="admin"       {{ old('role') == 'admin'       ? 'selected' : '' }}>Admin</option>
                         <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                     </select>
+                </div>
+                <div class="role-info" id="roleInfo">
+                    <strong>User</strong> — Hanya dapat melihat dan mengekspor Struktur Organisasi.
                 </div>
                 @error('role')
                     <div class="error-msg">{{ $message }}</div>
@@ -275,7 +278,9 @@
                     <td style="color:#9ca3af;">{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
                     <td>
                         <div class="user-info">
-                            <div class="user-avatar">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                            <div class="user-avatar" style="background:{{ $user->role === 'user' ? '#6b7280' : ($user->isSuperAdmin() ? '#d97706' : '#1d4ed8') }};">
+                                {{ strtoupper(substr($user->name, 0, 2)) }}
+                            </div>
                             <div>
                                 <div class="user-name">
                                     {{ $user->name }}
@@ -290,6 +295,8 @@
                     <td>
                         @if($user->isSuperAdmin())
                             <span class="role-badge role-super">⭐ Super Admin</span>
+                        @elseif($user->role === 'user')
+                            <span class="role-badge role-user">👤 User</span>
                         @else
                             <span class="role-badge role-admin">🔵 Admin</span>
                         @endif
@@ -329,55 +336,28 @@
         <div class="table-footer">
             <span>Menampilkan <strong>{{ $users->firstItem() }}</strong>–<strong>{{ $users->lastItem() }}</strong> dari <strong>{{ $users->total() }}</strong></span>
             <div class="pagination-wrap">
-
-                {{-- Tombol Prev --}}
                 @if($users->onFirstPage())
-                    <span class="page-btn disabled">
-                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-                    </span>
+                    <span class="page-btn disabled"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></span>
                 @else
-                    <a href="{{ $users->previousPageUrl() }}" class="page-btn">
-                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-                    </a>
+                    <a href="{{ $users->previousPageUrl() }}" class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
                 @endif
-
-                {{-- Nomor Halaman --}}
-                @php
-                    $cur  = $users->currentPage();
-                    $last = $users->lastPage();
-                    $s    = max(1, $cur - 2);
-                    $e    = min($last, $cur + 2);
-                @endphp
-
+                @php $cur=$users->currentPage();$last=$users->lastPage();$s=max(1,$cur-2);$e=min($last,$cur+2); @endphp
                 @if($s > 1)
                     <a href="{{ $users->url(1) }}" class="page-btn">1</a>
-                    @if($s > 2)
-                        <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
-                    @endif
+                    @if($s > 2)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif
                 @endif
-
                 @for($i = $s; $i <= $e; $i++)
                     <a href="{{ $users->url($i) }}" class="page-btn {{ $i == $cur ? 'active' : '' }}">{{ $i }}</a>
                 @endfor
-
                 @if($e < $last)
-                    @if($e < $last - 1)
-                        <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
-                    @endif
+                    @if($e < $last - 1)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif
                     <a href="{{ $users->url($last) }}" class="page-btn">{{ $last }}</a>
                 @endif
-
-                {{-- Tombol Next --}}
                 @if($users->hasMorePages())
-                    <a href="{{ $users->nextPageUrl() }}" class="page-btn">
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-                    </a>
+                    <a href="{{ $users->nextPageUrl() }}" class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 @else
-                    <span class="page-btn disabled">
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-                    </span>
+                    <span class="page-btn disabled"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
                 @endif
-
             </div>
         </div>
         @endif
@@ -388,6 +368,20 @@
 
 @push('scripts')
 <script>
+    // Role info helper
+    const roleDesc = {
+        user:        '<strong>User</strong> — Hanya dapat melihat dan mengekspor Struktur Organisasi.',
+        admin:       '<strong>Admin</strong> — Akses penuh ke semua fitur kecuali Master Data dan Manajemen Akun.',
+        super_admin: '<strong>Super Admin</strong> — Akses penuh ke seluruh sistem termasuk Master Data dan Manajemen Akun.',
+    };
+    function updateRoleInfo(val) {
+        document.getElementById('roleInfo').innerHTML = roleDesc[val] || '';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        const sel = document.getElementById('roleSelect');
+        if (sel) updateRoleInfo(sel.value);
+    });
+
     // Toast
     function closeToast() {
         const t = document.getElementById('toast');
@@ -397,6 +391,8 @@
     }
     window.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('toast')) setTimeout(() => closeToast(), 3000);
+        const sel = document.getElementById('roleSelect');
+        if (sel) updateRoleInfo(sel.value);
     });
 
     // Modal Edit
@@ -431,22 +427,13 @@
         document.getElementById('formHapus').submit();
     }
 
-    // Close on backdrop click
     ['modalEdit', 'modalHapus'].forEach(id => {
         document.getElementById(id).addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('show');
-                document.body.style.overflow = '';
-            }
+            if (e.target === this) { this.classList.remove('show'); document.body.style.overflow = ''; }
         });
     });
-
-    // Close on Escape key
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            closeEditModal();
-            closeHapusModal();
-        }
+        if (e.key === 'Escape') { closeEditModal(); closeHapusModal(); }
     });
 </script>
 @endpush
