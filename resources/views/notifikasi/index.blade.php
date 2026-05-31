@@ -71,7 +71,7 @@
     <a href="{{ route('notifikasi.index') }}"
        class="filter-chip {{ !request('tipe') ? 'active' : '' }}">Semua</a>
     <a href="{{ route('notifikasi.index', ['tipe' => 'idp_expire']) }}"
-       class="filter-chip {{ request('tipe') == 'idp_expire' ? 'active' : '' }}">📋 IDP Expire</a>
+       class="filter-chip {{ request('tipe') == 'idp_expire' ? 'active' : '' }}">📋 Assessment Expire</a>
     <a href="{{ route('notifikasi.index', ['tipe' => 'pensiun']) }}"
        class="filter-chip {{ request('tipe') == 'pensiun' ? 'active' : '' }}">🎯 Pensiun</a>
     <a href="{{ route('notifikasi.index', ['tipe' => 'masa_kerja']) }}"

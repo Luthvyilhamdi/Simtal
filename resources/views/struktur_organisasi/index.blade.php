@@ -64,16 +64,17 @@ $isUser = auth()->user()->isUser();
   @endif
 
   @if($periodeList->count() > 0)
-  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-    <span style="font-size:11px;color:#9ca3af">Tersedia:</span>
-    @foreach($periodeList as $p)
-    <a href="{{ route('struktur-organisasi.index', ['bulan'=>$p->bulan,'tahun'=>$p->tahun]) }}"
-      style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;
-             background:{{ $p->bulan==$bulan&&$p->tahun==$tahun ? '#15803d' : '#f3f4f6' }};
-             color:{{ $p->bulan==$bulan&&$p->tahun==$tahun ? '#fff' : '#374151' }}">
-      {{ $namaBulanList[$p->bulan] }} {{ $p->tahun }}
-    </a>
-    @endforeach
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+    <span style="font-size:11px;color:#9ca3af;white-space:nowrap">Tersedia:</span>
+    <select onchange="window.location.href=this.value" style="border:1px solid #e8e8e3;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;outline:none;background:#fff;color:#374151;cursor:pointer">
+      @foreach($periodeList as $p)
+      @php $isActive = $p->bulan==$bulan && $p->tahun==$tahun; @endphp
+      <option value="{{ route('struktur-organisasi.index', ['bulan'=>$p->bulan,'tahun'=>$p->tahun]) }}"
+        {{ $isActive ? 'selected' : '' }}>
+        {{ $namaBulanList[$p->bulan] }} {{ $p->tahun }}
+      </option>
+      @endforeach
+    </select>
   </div>
   @endif
 </div>

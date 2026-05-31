@@ -34,7 +34,10 @@ class GenerateNotifikasi extends Command
             ->get();
 
         foreach ($assessments as $a) {
-            $sisaHari = now()->diffInDays($a->tanggal_exp_idp);
+            // Skip jika karyawan tidak ditemukan
+            if (!$a->karyawan) continue;
+
+            $sisaHari = (int) now()->diffInDays($a->tanggal_exp_idp);
 
             $exists = Notifikasi::where('tipe', 'idp_expire')
                 ->where('notifiable_type', HistoryAssessment::class)
@@ -54,18 +57,24 @@ class GenerateNotifikasi extends Command
                 ]);
             }
         }
+
+        $this->info("✓ IDP expire: {$assessments->count()} dicek");
     }
 
-    // 2. Cek karyawan mendekati pensiun
+    // 2. Cek karyawan mendekati pensiun (>= 53 tahun)
     private function cekPensiun()
     {
         $karyawans = Karyawan::where('status', 'aktif')
+            ->whereNotNull('tanggal_lahir')
             ->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) >= 53')
             ->get();
 
         foreach ($karyawans as $k) {
             $usia      = Carbon::parse($k->tanggal_lahir)->age;
             $sisaTahun = 56 - $usia;
+
+            // Sudah lewat pensiun
+            if ($sisaTahun < 0) continue;
 
             $exists = Notifikasi::where('tipe', 'pensiun')
                 ->where('notifiable_type', Karyawan::class)
@@ -85,15 +94,19 @@ class GenerateNotifikasi extends Command
                 ]);
             }
         }
+
+        $this->info("✓ Pensiun: {$karyawans->count()} dicek");
     }
 
     // 3. Cek milestone masa kerja (5, 10, 15, 20, 25 tahun)
     private function cekMasaKerja()
     {
         $milestones = [5, 10, 15, 20, 25];
+        $total = 0;
 
         foreach ($milestones as $tahun) {
             $karyawans = Karyawan::where('status', 'aktif')
+                ->whereNotNull('tanggal_masuk')
                 ->whereRaw("TIMESTAMPDIFF(YEAR, tanggal_masuk, CURDATE()) = ?", [$tahun])
                 ->get();
 
@@ -107,15 +120,18 @@ class GenerateNotifikasi extends Command
                 if (!$exists) {
                     Notifikasi::create([
                         'judul'           => "Milestone {$tahun} Tahun",
-                        'pesan'           => "🏆 {$k->nama} telah bekerja selama {$tahun} tahun!",
+                        'pesan'           => "{$k->nama} telah bekerja selama {$tahun} tahun!",
                         'tipe'            => 'masa_kerja',
                         'level'           => 'info',
                         'notifiable_type' => Karyawan::class,
                         'notifiable_id'   => $k->id,
                     ]);
+                    $total++;
                 }
             }
         }
+
+        $this->info("✓ Masa kerja: {$total} milestone ditemukan");
     }
 
     // 4. Cek PGS/PJS yang akan berakhir (7 hari)
@@ -128,7 +144,10 @@ class GenerateNotifikasi extends Command
             ->get();
 
         foreach ($pgsPjs as $p) {
-            $sisaHari = now()->diffInDays($p->tanggal_berakhir);
+            // Skip jika karyawan tidak ditemukan
+            if (!$p->karyawan) continue;
+
+            $sisaHari = (int) now()->diffInDays($p->tanggal_berakhir);
 
             $exists = Notifikasi::where('tipe', 'pgs_pjs_berakhir')
                 ->where('notifiable_type', PgsPjs::class)
@@ -137,9 +156,13 @@ class GenerateNotifikasi extends Command
                 ->exists();
 
             if (!$exists) {
+                // FIX: gunakan kolom yang benar (tipe bukan jenis)
+                $tipLabel = strtoupper($p->tipe ?? 'PGS/PJS');
+                $jabatan  = $p->jabatan_pgs_pjs ?? $p->jabatan ?? '-';
+
                 Notifikasi::create([
-                    'judul'           => strtoupper($p->tipe) . ' Akan Berakhir',
-                    'pesan'           => "{$p->karyawan->nama} sebagai {$p->jabatan_pgs_pjs} akan berakhir dalam {$sisaHari} hari",
+                    'judul'           => "{$tipLabel} Akan Berakhir",
+                    'pesan'           => "{$p->karyawan->nama} sebagai {$jabatan} akan berakhir dalam {$sisaHari} hari",
                     'tipe'            => 'pgs_pjs_berakhir',
                     'level'           => $sisaHari <= 3 ? 'danger' : 'warning',
                     'notifiable_type' => PgsPjs::class,
@@ -147,6 +170,8 @@ class GenerateNotifikasi extends Command
                 ]);
             }
         }
+
+        $this->info("✓ PGS/PJS berakhir: {$pgsPjs->count()} dicek");
     }
 
     // 5. Cek karyawan eligible kenaikan grade
@@ -157,12 +182,16 @@ class GenerateNotifikasi extends Command
             ->whereNotNull('tanggal_mulai_pg')
             ->get();
 
+        $total = 0;
+
         foreach ($karyawans as $k) {
+            // Skip jika model tidak punya accessor statusKenaikan
+            if (!method_exists($k, 'getStatusKenaikanAttribute')) continue;
+
             $sk = $k->statusKenaikan;
 
-            if (!$sk['eligible']) continue;
+            if (!$sk || !$sk['eligible']) continue;
 
-            // Cek notifikasi belum dibaca hari ini
             $exists = Notifikasi::where('tipe', 'eligible_grade')
                 ->where('notifiable_type', Karyawan::class)
                 ->where('notifiable_id', $k->id)
@@ -171,8 +200,7 @@ class GenerateNotifikasi extends Command
 
             if ($exists) continue;
 
-            // Tentukan label & pesan berdasarkan status
-            $icon = match($sk['status']) {
+            $icon = match($sk['status'] ?? '') {
                 'naik_pg'   => '⬆️',
                 'naik_jg'   => '🚀',
                 'naik_band' => '🏆',
@@ -180,13 +208,17 @@ class GenerateNotifikasi extends Command
             };
 
             Notifikasi::create([
-                'judul'           => $icon . ' Eligible Kenaikan Grade',
+                'judul'           => "{$icon} Eligible Kenaikan Grade",
                 'pesan'           => "{$k->nama} sudah eligible untuk {$sk['label']} (MDG terpenuhi)",
                 'tipe'            => 'eligible_grade',
                 'level'           => 'info',
                 'notifiable_type' => Karyawan::class,
                 'notifiable_id'   => $k->id,
             ]);
+
+            $total++;
         }
+
+        $this->info("✓ Eligible grade: {$total} karyawan eligible");
     }
 }
