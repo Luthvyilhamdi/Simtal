@@ -131,13 +131,7 @@ class StrukturOrganisasiController extends Controller
             'deviasi'     => $request->mc_tko ? -(int)$request->mc_tko : 0,
         ]);
 
-        // ===== FIX: Redirect kembali ke direktorat yang sama =====
-        $params = ['bulan' => $bulan, 'tahun' => $tahun];
-        if ($request->direktorat) {
-            $params['direktorat'] = $request->direktorat;
-        }
-
-        return redirect()->route('struktur-organisasi.index', $params)
+        return redirect()->route('struktur-organisasi.index', ['bulan' => $bulan, 'tahun' => $tahun])
                          ->with('success', 'Posisi berhasil ditambahkan.');
     }
 
