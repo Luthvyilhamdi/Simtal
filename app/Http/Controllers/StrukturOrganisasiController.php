@@ -326,7 +326,7 @@ class StrukturOrganisasiController extends Controller
     {
         ['bulan' => $bulan, 'tahun' => $tahun] = $this->getPeriode($request);
         $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F-Y');
-        $filename = "struktur-organisasi-{$namaBulan}.xlsx";
+        $filename = "Data Karyawan-{$namaBulan}.xlsx";
 
         return Excel::download(
             new StrukturOrganisasiExport([
