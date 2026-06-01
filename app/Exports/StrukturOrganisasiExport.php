@@ -11,6 +11,8 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Borders;
 use Carbon\Carbon;
 
 class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
@@ -25,6 +27,9 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
     const BG_HEADER = 'FFC000';
     const BG_DEV_NEG= 'FF0000';
     const FONT_NAME = 'Calibri';
+
+    // Semua kolom A-X untuk background full row
+    const ALL_COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X'];
 
     public function __construct($filters = [])
     {
@@ -41,20 +46,18 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
 
     public function collection(): Collection
     {
-        // Data dihandle manual di AfterSheet — return kosong supaya tidak auto-dump
         return collect();
     }
 
-    // Method terpisah untuk ambil data
     private function getData(): Collection
     {
         $q = StrukturOrganisasi::orderBy('id');
 
-        if (!empty($this->filters['bulan']))      $q->where('bulan', $this->filters['bulan']);
-        if (!empty($this->filters['tahun']))      $q->where('tahun', $this->filters['tahun']);
-        if (!empty($this->filters['direktorat'])) $q->where('direktorat', $this->filters['direktorat']);
-        if (!empty($this->filters['kompartemen']))$q->where('kompartemen', $this->filters['kompartemen']);
-        if (!empty($this->filters['core']))       $q->where('core', $this->filters['core']);
+        if (!empty($this->filters['bulan']))       $q->where('bulan', $this->filters['bulan']);
+        if (!empty($this->filters['tahun']))       $q->where('tahun', $this->filters['tahun']);
+        if (!empty($this->filters['direktorat']))  $q->where('direktorat', $this->filters['direktorat']);
+        if (!empty($this->filters['kompartemen'])) $q->where('kompartemen', $this->filters['kompartemen']);
+        if (!empty($this->filters['core']))        $q->where('core', $this->filters['core']);
 
         return $q->get();
     }
@@ -66,7 +69,7 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                 $sheet = $event->sheet->getDelegate();
                 $data  = $this->getData();
 
-                // ===== FIX: Load semua karyawan sekaligus (1 query) =====
+                // Load semua karyawan sekaligus (1 query)
                 $karyawanIds = $data->pluck('karyawan_id')->filter()->unique();
                 $karyawanMap = Karyawan::with([
                     'direktorat','kompartemen','departemen','jobGrade','personGrade',
@@ -76,7 +79,8 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                     ->get()
                     ->keyBy('id');
 
-                $rows = $data->filter(fn($r) => $r->posisi !== '-');
+                // Filter: hanya posisi yang valid (bukan '-', bukan kosong, bukan null)
+                $rows = $data->filter(fn($r) => !empty($r->posisi) && $r->posisi !== '-');
 
                 $totalMc   = $data->sum('mc_tko');
                 $totalPeng = $data->sum('pengisian');
@@ -101,7 +105,8 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                         ->setWrapText(true);
                 }
 
-                foreach (['J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X'] as $col) {
+                // Header background A-X
+                foreach (self::ALL_COLS as $col) {
                     $sheet->getCell($col.'1')->getStyle()->getFill()
                         ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_HEADER);
                 }
@@ -113,23 +118,22 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                 $sheet->getCell('L2')->setValue($totalPeng);
                 $sheet->getCell('M2')->setValue($totalDev);
 
-                foreach (['A','B','C','D','E','F','G','H','I','K','L'] as $col) {
+                // Total background A-X
+                foreach (self::ALL_COLS as $col) {
                     $sheet->getCell($col.'2')->getStyle()->getFill()
                         ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_TOTAL);
                     $sheet->getCell($col.'2')->getStyle()->getFont()
                         ->setBold(true)->setName(self::FONT_NAME)->setSize(10)->getColor()->setRGB('FFFFFF');
                 }
-                $devStyle = $sheet->getCell('M2')->getStyle();
+$devStyle = $sheet->getCell('M2')->getStyle();
                 $devStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
                 $devStyle->getFont()->setBold(true)->setName(self::FONT_NAME)->setSize(10)->getColor()->setRGB('000000');
                 $devStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 $currentRow = 3;
-                $hierCols   = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'];
-
-                // ===== FIX: Helper style apply sekaligus =====
-                $applyBg = function($row, $bg, $bold = false) use ($sheet, $hierCols) {
-                    foreach ($hierCols as $col) {
+                // Helper apply background A-X
+                $applyBg = function($row, $bg, $bold = false) use ($sheet) {
+                    foreach (self::ALL_COLS as $col) {
                         $style = $sheet->getCell($col.$row)->getStyle();
                         $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
                         $style->getFont()->setName(self::FONT_NAME)->setSize(10)->setBold($bold);
@@ -151,6 +155,16 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                     $tree[$dir]['komps'][$komp]['depts'][$dept]['bags'][$bag]['funcs'][$func]['rows'][] = $row;
                 }
 
+                // ===== FIX: Pastikan __no_komp__ selalu PERTAMA per direktorat =====
+                foreach ($tree as $dirLabel => &$dirData) {
+                    if (isset($dirData['komps']['__no_komp__'])) {
+                        $noKomp = ['__no_komp__' => $dirData['komps']['__no_komp__']];
+                        unset($dirData['komps']['__no_komp__']);
+                        $dirData['komps'] = $noKomp + $dirData['komps'];
+                    }
+                }
+                unset($dirData);
+
                 foreach ($tree as $dirLabel => $dirData) {
                     $dirRows = collect($dirData['rows']);
                     $r = $currentRow++;
@@ -158,11 +172,14 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                     $sheet->getCell('K'.$r)->setValue($dirRows->sum('mc_tko'));
                     $sheet->getCell('L'.$r)->setValue($dirRows->sum('pengisian'));
                     $dev = $dirRows->sum('pengisian') - $dirRows->sum('mc_tko');
-                    if ($dev != 0) { $sheet->getCell('M'.$r)->setValue($dev); $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG); }
                     $applyBg($r, self::BG_DIR, true);
+                    if ($dev != 0) {
+                        $sheet->getCell('M'.$r)->setValue($dev);
+                        $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
+                    }
 
-                    foreach ($dirData['komps'] as $kompLabel => $kompData) {
-                        $kompLabel = $kompLabel === '__no_komp__' ? '' : $kompLabel;
+                    foreach ($dirData['komps'] as $kompKey => $kompData) {
+                        $kompLabel = $kompKey === '__no_komp__' ? '' : $kompKey;
                         $kompRows  = collect($kompData['rows']);
 
                         if ($kompLabel) {
@@ -171,17 +188,24 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                             $sheet->getCell('K'.$r)->setValue($kompRows->sum('mc_tko'));
                             $sheet->getCell('L'.$r)->setValue($kompRows->sum('pengisian'));
                             $dev = $kompRows->sum('pengisian') - $kompRows->sum('mc_tko');
-                            if ($dev != 0) { $sheet->getCell('M'.$r)->setValue($dev); $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG); }
                             $applyBg($r, self::BG_KOMP, true);
+                            if ($dev != 0) {
+                                $sheet->getCell('M'.$r)->setValue($dev);
+                                $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
+                            }
                         }
 
-                        // Pimpinan komp (tanpa dept) tampil dulu
-                        $sortedDepts = array_merge(
-                            array_filter($kompData['depts'], fn($k) => $k === '__no_dept__', ARRAY_FILTER_USE_KEY),
-                            array_filter($kompData['depts'], fn($k) => $k !== '__no_dept__', ARRAY_FILTER_USE_KEY)
-                        );
-                        foreach ($sortedDepts as $deptLabel => $deptData) {
-                            $deptLabel = $deptLabel === '__no_dept__' ? '' : $deptLabel;
+                        // __no_dept__ (pimpinan komp) tampil duluan
+                        $sortedDepts = [];
+                        if (isset($kompData['depts']['__no_dept__'])) {
+                            $sortedDepts['__no_dept__'] = $kompData['depts']['__no_dept__'];
+                        }
+                        foreach ($kompData['depts'] as $dk => $dv) {
+                            if ($dk !== '__no_dept__') $sortedDepts[$dk] = $dv;
+                        }
+
+                        foreach ($sortedDepts as $deptKey => $deptData) {
+                            $deptLabel = $deptKey === '__no_dept__' ? '' : $deptKey;
                             $deptRows  = collect($deptData['rows']);
 
                             if ($deptLabel) {
@@ -190,32 +214,44 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                                 $sheet->getCell('K'.$r)->setValue($deptRows->sum('mc_tko'));
                                 $sheet->getCell('L'.$r)->setValue($deptRows->sum('pengisian'));
                                 $dev = $deptRows->sum('pengisian') - $deptRows->sum('mc_tko');
-                                if ($dev != 0) { $sheet->getCell('M'.$r)->setValue($dev); $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG); }
                                 $applyBg($r, self::BG_DEPT, false);
+                                if ($dev != 0) {
+                                    $sheet->getCell('M'.$r)->setValue($dev);
+                                    $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
+                                }
                             }
 
-                            // Pimpinan dept (tanpa bagian) tampil dulu
-                            $sortedBags = array_merge(
-                                array_filter($deptData['bags'], fn($k) => $k === '__no_bag__', ARRAY_FILTER_USE_KEY),
-                                array_filter($deptData['bags'], fn($k) => $k !== '__no_bag__', ARRAY_FILTER_USE_KEY)
-                            );
-                            foreach ($sortedBags as $bagLabel => $bagData) {
-                                $bagLabel = $bagLabel === '__no_bag__' ? '' : $bagLabel;
+                            // __no_bag__ tampil duluan
+                            $sortedBags = [];
+                            if (isset($deptData['bags']['__no_bag__'])) {
+                                $sortedBags['__no_bag__'] = $deptData['bags']['__no_bag__'];
+                            }
+                            foreach ($deptData['bags'] as $bk => $bv) {
+                                if ($bk !== '__no_bag__') $sortedBags[$bk] = $bv;
+                            }
+
+                            foreach ($sortedBags as $bagKey => $bagData) {
+                                $bagLabel = $bagKey === '__no_bag__' ? '' : $bagKey;
 
                                 if ($bagLabel) {
                                     $bagAllRows = collect();
-                                    foreach ($bagData['funcs'] as $func) { $bagAllRows = $bagAllRows->merge(collect($func['rows'])); }
+                                    foreach ($bagData['funcs'] as $func) {
+                                        $bagAllRows = $bagAllRows->merge(collect($func['rows']));
+                                    }
                                     $r = $currentRow++;
                                     $sheet->getCell('D'.$r)->setValue($bagLabel);
                                     $sheet->getCell('K'.$r)->setValue($bagAllRows->sum('mc_tko'));
                                     $sheet->getCell('L'.$r)->setValue($bagAllRows->sum('pengisian'));
                                     $dev = $bagAllRows->sum('pengisian') - $bagAllRows->sum('mc_tko');
-                                    if ($dev != 0) { $sheet->getCell('M'.$r)->setValue($dev); $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG); }
                                     $applyBg($r, self::BG_DEPT, false);
+                                    if ($dev != 0) {
+                                        $sheet->getCell('M'.$r)->setValue($dev);
+                                        $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
+                                    }
                                 }
 
-                                foreach ($bagData['funcs'] as $funcLabel => $funcData) {
-                                    $funcLabel = $funcLabel === '__no_func__' ? '' : $funcLabel;
+                                foreach ($bagData['funcs'] as $funcKey => $funcData) {
+                                    $funcLabel = $funcKey === '__no_func__' ? '' : $funcKey;
                                     $funcRows  = collect($funcData['rows']);
 
                                     if ($funcLabel) {
@@ -224,14 +260,23 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                                         $sheet->getCell('K'.$r)->setValue($funcRows->sum('mc_tko'));
                                         $sheet->getCell('L'.$r)->setValue($funcRows->sum('pengisian'));
                                         $dev = $funcRows->sum('pengisian') - $funcRows->sum('mc_tko');
-                                        if ($dev != 0) { $sheet->getCell('M'.$r)->setValue($dev); $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG); }
                                         $applyBg($r, self::BG_DEPT, false);
+                                        if ($dev != 0) {
+                                            $sheet->getCell('M'.$r)->setValue($dev);
+                                            $sheet->getCell('M'.$r)->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
+                                        }
                                     }
 
                                     foreach ($funcData['rows'] as $posRow) {
                                         $r = $currentRow++;
 
-                                        $indent = $funcLabel ? 'E' : ($bagLabel ? 'E' : ($deptLabel ? 'D' : ($kompLabel ? 'C' : 'B')));
+                                        // Tentukan indent kolom posisi
+                                        $indent = $funcLabel ? 'E'
+                                            : ($bagLabel  ? 'E'
+                                            : ($deptLabel ? 'D'
+                                            : ($kompLabel ? 'C'
+                                            : 'B')));
+
                                         $sheet->getCell($indent.$r)->setValue($posRow->posisi);
                                         $sheet->getCell('I'.$r)->setValue($posRow->posisi);
                                         $sheet->getCell('J'.$r)->setValue($posRow->job_grade);
@@ -240,21 +285,19 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                                         $sheet->getCell('M'.$r)->setValue($posRow->deviasi);
                                         $sheet->getCell('N'.$r)->setValue($posRow->core);
 
-                                        // ===== FIX: Ambil dari map, bukan query =====
                                         if ($posRow->karyawan_id && isset($karyawanMap[$posRow->karyawan_id])) {
-                                            $k = $karyawanMap[$posRow->karyawan_id];
+                                            $k       = $karyawanMap[$posRow->karyawan_id];
+                                            $history = $k->historyJabatan ?? collect();
+
+                                            // Jabatan baru = is_current, jabatan lama = terbaru sebelum current
+                                            $jabatanBaru = $history->where('is_current', 1)->first();
+                                            $jabatanLama = $history->where('is_current', 0)->first();
+
                                             $sheet->getCell('O'.$r)->setValue($k->nama);
                                             $sheet->getCell('P'.$r)->setValue($k->nik);
                                             $sheet->getCell('Q'.$r)->setValue($k->nama);
-
-                                            // Jabatan dari history: current = jabatan baru, sebelumnya = jabatan lama
-                                            $history = $k->historyJabatan ?? collect();
-                                            $jabatanBaru  = $history->firstWhere('is_current', 1);
-                                            $jabatanLama  = $history->firstWhere('is_current', 0);
-
                                             $sheet->getCell('R'.$r)->setValue($jabatanLama?->jabatan_saat_ini ?? '');
                                             $sheet->getCell('S'.$r)->setValue($jabatanBaru?->jabatan_saat_ini ?? $k->jabatan_saat_ini ?? '');
-
                                             $sheet->getCell('T'.$r)->setValue($k->jobGrade?->job_grade ?? '');
                                             $sheet->getCell('U'.$r)->setValue($k->personGrade?->person_grade ?? '');
                                             $sheet->getCell('V'.$r)->setValue($k->direktorat?->nama_direktorat ?? '');
@@ -287,6 +330,24 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                 ];
                 foreach ($widths as $col => $width) {
                     $sheet->getColumnDimension($col)->setWidth($width);
+                }
+
+                // ===== BORDER: apply ke seluruh data sekaligus =====
+                $lastDataRow = $currentRow - 1;
+                if ($lastDataRow >= 1) {
+                    $borderStyle = [
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color'       => ['rgb' => 'BFBFBF'],
+                            ],
+                            'outline' => [
+                                'borderStyle' => Border::BORDER_MEDIUM,
+                                'color'       => ['rgb' => '999999'],
+                            ],
+                        ],
+                    ];
+                    $sheet->getStyle('A1:X'.$lastDataRow)->applyFromArray($borderStyle);
                 }
 
                 $sheet->freezePane('A3');
