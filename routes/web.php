@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{so}',         [StrukturOrganisasiController::class, 'update'])->name('update');
             Route::put('/{so}',           [StrukturOrganisasiController::class, 'update'])->name('update.put');
             Route::delete('/{so}',        [StrukturOrganisasiController::class, 'destroy'])->name('destroy');
+            Route::patch('/{so}/posisi',    [StrukturOrganisasiController::class, 'editPosisi'])->name('editPosisi');
         });
     });
 

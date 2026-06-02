@@ -115,7 +115,7 @@ class StrukturOrganisasiController extends Controller
         // Simpan kompartemen sebagai NULL jika kosong (bukan empty string)
         $kompartemen = $request->kompartemen ?: null;
 
-        StrukturOrganisasi::create([
+        $so = StrukturOrganisasi::create([
             'bulan'       => $bulan,
             'tahun'       => $tahun,
             'direktorat'  => $request->direktorat,
@@ -132,7 +132,8 @@ class StrukturOrganisasiController extends Controller
         ]);
 
         return redirect()->route('struktur-organisasi.index', ['bulan' => $bulan, 'tahun' => $tahun])
-                         ->with('success', 'Posisi berhasil ditambahkan.');
+                         ->with('success', 'Posisi berhasil ditambahkan.')
+                         ->with('new_row_id', $so->id);
     }
 
     public function salinPeriode(Request $request)
@@ -238,6 +239,39 @@ class StrukturOrganisasiController extends Controller
         ]);
     }
 
+
+    public function editPosisi(Request $request, StrukturOrganisasi $so)
+    {
+        $request->validate([
+            'posisi'    => 'required|string|max:255',
+            'job_grade' => 'nullable|integer|min:1|max:30',
+            'mc_tko'    => 'nullable|integer|min:0',
+            'core'      => 'nullable|in:Core,Non Core',
+        ]);
+
+        $mcTko = $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0;
+
+        $so->update([
+            'posisi'    => $request->posisi,
+            'job_grade' => $request->job_grade ?: null,
+            'mc_tko'    => $mcTko,
+            'core'      => $request->core ?? $so->core,
+            'deviasi'   => $so->pengisian - $mcTko,
+        ]);
+
+        $so->refresh();
+
+        return response()->json([
+            'success'   => true,
+            'posisi'    => $so->posisi,
+            'job_grade' => $so->job_grade,
+            'mc_tko'    => $so->mc_tko,
+            'core'      => $so->core,
+            'deviasi'   => $so->deviasi,
+            'warna'     => $so->warnaDeviasi,
+        ]);
+    }
+
     public function destroy(StrukturOrganisasi $so)
     {
         if (auth()->user()->role !== 'super_admin') {
@@ -326,7 +360,7 @@ class StrukturOrganisasiController extends Controller
     {
         ['bulan' => $bulan, 'tahun' => $tahun] = $this->getPeriode($request);
         $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F-Y');
-        $filename = "Data Karyawan-{$namaBulan}.xlsx";
+        $filename = "struktur-organisasi-{$namaBulan}.xlsx";
 
         return Excel::download(
             new StrukturOrganisasiExport([

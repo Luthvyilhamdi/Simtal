@@ -9,6 +9,7 @@ use App\Models\HistoryAssessmentKompetensi;
 use App\Models\HistoryPejabat;
 use App\Models\PgsPjs;
 use App\Models\Direktorat;
+use App\Models\StrukturOrganisasi;
 use App\Models\Departemen;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -55,6 +56,28 @@ class DashboardController extends Controller
             ->update(['is_active' => false]);
         $pgsAktif = PgsPjs::where('is_active', true)->where('tipe', 'pgs')->count();
         $pjsAktif = PgsPjs::where('is_active', true)->where('tipe', 'pjs')->count();
+
+
+        // === STRUKTUR ORGANISASI: Core & Non Core bulan ini ===
+        $soBulan = now()->month;
+        $soTahun = now()->year;
+        $soStats = StrukturOrganisasi::where('bulan', $soBulan)
+            ->where('tahun', $soTahun)
+            ->where('posisi', '!=', '-')
+            ->selectRaw('
+                COUNT(*) as total_posisi,
+                SUM(mc_tko) as total_mc,
+                SUM(pengisian) as total_terisi,
+                SUM(CASE WHEN core = "Core" THEN 1 ELSE 0 END) as total_core,
+                SUM(CASE WHEN core = "Non Core" THEN 1 ELSE 0 END) as total_non_core
+            ')->first();
+
+        $soTotalPosisi = $soStats->total_posisi ?? 0;
+        $soTotalMc     = $soStats->total_mc     ?? 0;
+        $soTerisi      = $soStats->total_terisi ?? 0;
+        $soCore        = $soStats->total_core    ?? 0;
+        $soNonCore     = $soStats->total_non_core ?? 0;
+        $soDeviasi     = $soTerisi - $soTotalMc;
 
         // === CHART 1: Tren Pergerakan Jabatan 12 Bulan Terakhir ===
         $trenBulan = [];
@@ -191,7 +214,8 @@ class DashboardController extends Controller
             'pgsAktif', 'pjsAktif',
             'trenBulan', 'distribusiDirektorat', 'assessmentChart', 'distribusiJobGrade',
             'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
-            'karyawanTerbaru', 'genderChart', 'usiaChart'
+            'karyawanTerbaru', 'genderChart', 'usiaChart',
+            'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun'
         ));
     }
 }

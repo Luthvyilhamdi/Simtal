@@ -153,7 +153,7 @@
     <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
         <div class="welcome-date">📅 {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.45);">
-            {{ auth()->user()->role === 'super_admin' ? '⭐ Super Admin' : '🔵 Administrator' }}
+            {{ auth()->user()->isSuperAdmin() ? '⭐ Super Admin' : (auth()->user()->isAdmin() ? '🔵 Administrator' : '👤 User') }}
         </div>
     </div>
 </div>
@@ -208,6 +208,58 @@
         </div>
         <div class="kpi-icon teal">⭐</div>
     </div>
+</div>
+
+
+{{-- SO CORE & NON CORE --}}
+@php
+$namaBulanDash = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+$pctCore    = $soTotalPosisi > 0 ? round(($soCore/$soTotalPosisi)*100) : 0;
+$pctNonCore = $soTotalPosisi > 0 ? round(($soNonCore/$soTotalPosisi)*100) : 0;
+$pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
+@endphp
+<div class="sec-title">🏗️ Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px">
+
+  <div class="kpi-card blue" style="flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label">Total Posisi</div>
+    <div class="kpi-num">{{ $soTotalPosisi }}</div>
+    <div class="kpi-sub">Posisi terdaftar</div>
+  </div>
+
+  <div class="kpi-card amber" style="flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label">Total MC/TKO</div>
+    <div class="kpi-num">{{ $soTotalMc }}</div>
+    <div class="kpi-sub">Man Count kebutuhan</div>
+  </div>
+
+  <div class="kpi-card green" style="flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label">Terisi</div>
+    <div class="kpi-num">{{ $soTerisi }}</div>
+    <div class="kpi-sub">{{ $pctTerisi }}% dari MC/TKO</div>
+    <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
+      <div style="height:100%;width:{{ $pctTerisi }}%;background:#16a34a;border-radius:20px"></div>
+    </div>
+  </div>
+
+  <div class="kpi-card" style="border-top:3px solid #2563eb;flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label" style="color:#9ca3af">Core</div>
+    <div class="kpi-num" style="color:#2563eb">{{ $soCore }}</div>
+    <div class="kpi-sub">{{ $pctCore }}% dari total posisi</div>
+    <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
+      <div style="height:100%;width:{{ $pctCore }}%;background:#2563eb;border-radius:20px"></div>
+    </div>
+  </div>
+
+  <div class="kpi-card" style="border-top:3px solid #7c3aed;flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label" style="color:#9ca3af">Non Core</div>
+    <div class="kpi-num" style="color:#7c3aed">{{ $soNonCore }}</div>
+    <div class="kpi-sub">{{ $pctNonCore }}% dari total posisi</div>
+    <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
+      <div style="height:100%;width:{{ $pctNonCore }}%;background:#7c3aed;border-radius:20px"></div>
+    </div>
+  </div>
+
 </div>
 
 {{-- GRAFIK --}}

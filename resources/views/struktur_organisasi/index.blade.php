@@ -128,6 +128,16 @@ $isUser = auth()->user()->isUser();
       <option value="Core" {{ request('core')=='Core'?'selected':'' }}>Core</option>
       <option value="Non Core" {{ request('core')=='Non Core'?'selected':'' }}>Non Core</option>
     </select>
+    <div style="display:flex;gap:4px">
+      <button onclick="collapseAll()" title="Collapse Semua" style="padding:8px 10px;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        Tutup Semua
+      </button>
+      <button onclick="expandAll()" title="Expand Semua" style="padding:8px 10px;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        Buka Semua
+      </button>
+    </div>
     <a href="{{ route('struktur-organisasi.export') }}?bulan={{ $bulan }}&tahun={{ $tahun }}" style="padding:8px 16px;background:#15803d;color:#fff;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:5px;white-space:nowrap">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
       Export {{ $periodeSaatIni }}
@@ -170,7 +180,7 @@ $isUser = auth()->user()->isUser();
         @php $dirSlug = 'dir-'.Str::slug($dirKey); @endphp
 
         {{-- DIREKTORAT --}}
-        <tr onclick="toggleDir('{{ $dirSlug }}')" style="cursor:pointer" data-type="dir" data-text="{{ strtolower($dir['label']) }}">
+        <tr onclick="toggleDir('{{ $dirSlug }}')" data-slug="{{ $dirSlug }}"" style="cursor:pointer" data-type="dir" data-text="{{ strtolower($dir['label']) }}">
           <td colspan="{{ $isUser ? 7 : 8 }}" style="padding:0;border-bottom:1px solid #d1fae5">
             <div style="padding:9px 14px;display:flex;align-items:center;gap:8px;background:#f0fdf4">
               <svg id="ic-{{ $dirSlug }}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
@@ -220,6 +230,9 @@ $isUser = auth()->user()->isUser();
                   @if(!$isUser)
                   <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                     <div style="display:flex;gap:4px;justify-content:center">
+                      <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}')" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
                       <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                       </button>
@@ -303,7 +316,10 @@ $isUser = auth()->user()->isUser();
                 @if(!$isUser)
                 <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                   <div style="display:flex;gap:4px;justify-content:center">
-                    <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+                    <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}')" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
                     @if(auth()->user()->role === 'super_admin')<button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
                   </div>
                 </td>
@@ -374,7 +390,10 @@ $isUser = auth()->user()->isUser();
               @if(!$isUser)
               <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                 <div style="display:flex;gap:4px;justify-content:center">
-                  <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+                  <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}')" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
                   @if(auth()->user()->role === 'super_admin')<button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
                 </div>
               </td>
@@ -444,6 +463,9 @@ $isUser = auth()->user()->isUser();
           @if(!$isUser)
           <td style="padding:10px 14px;text-align:center;white-space:nowrap">
             <div style="display:flex;gap:4px;justify-content:center">
+              <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}')" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
               <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center" title="Assign Karyawan">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
               </button>
@@ -651,12 +673,12 @@ $isUser = auth()->user()->isUser();
       <div id="infoCard" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-top:12px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">NIK</div><div id="iNik" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
+          <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Jabatan Saat Ini</div><div id="iJab" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
           <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Direktorat</div><div id="iDir" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
           <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Kompartemen</div><div id="iKomp" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
-          <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Job Grade</div><div id="iJg" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
           <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Departemen</div><div id="iDept" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
+          <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Job Grade</div><div id="iJg" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
           <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Person Grade</div><div id="iPg" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
-          <div><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Jabatan Saat Ini</div><div id="iJab" style="font-size:13px;font-weight:500;color:#111827">-</div></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #bbf7d0">
           <div style="flex:1;background:#dcfce7;border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;font-weight:700;color:#15803d;letter-spacing:.5px;margin-bottom:4px">PENGISIAN</div><div style="font-size:22px;font-weight:700;color:#15803d">1</div></div>
@@ -673,6 +695,47 @@ $isUser = auth()->user()->isUser();
     <div style="padding:14px 22px;border-top:1px solid #f3f4f6;display:flex;gap:8px;justify-content:flex-end">
       <button onclick="closeModal()" style="padding:9px 18px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;cursor:pointer;font-family:inherit">Batal</button>
       <button onclick="saveAssign()" style="padding:9px 20px;background:#15803d;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Simpan</button>
+    </div>
+  </div>
+</div>
+
+
+{{-- ===== MODAL EDIT POSISI ===== --}}
+<div id="modalEditBg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;width:460px;max-width:95vw;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+    <div style="padding:18px 22px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#111827">Edit Posisi</div>
+        <div id="editPosisiLabel" style="font-size:12px;color:#9ca3af;margin-top:2px"></div>
+      </div>
+      <button onclick="closeEdit()" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:20px 22px">
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Title / Posisi <span style="color:#dc2626">*</span></label>
+        <input type="text" id="editInputPosisi" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Grade</label>
+          <input type="number" id="editInputJg" placeholder="Contoh: 16" min="1" max="30" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">MC / TKO <span style="font-size:11px;color:#9ca3af">(opsional)</span></label>
+          <input type="number" id="editInputMc" min="0" placeholder="Contoh: 1" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none">
+        </div>
+      </div>
+      <div style="margin-bottom:6px">
+        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Core / Non Core</label>
+        <select id="editInputCore" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;background:#fff">
+          <option value="Non Core">Non Core</option>
+          <option value="Core">Core</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:14px 22px;border-top:1px solid #f3f4f6;display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeEdit()" style="padding:9px 18px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;cursor:pointer;font-family:inherit">Batal</button>
+      <button onclick="saveEdit()" style="padding:9px 20px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Simpan Perubahan</button>
     </div>
   </div>
 </div>
@@ -811,6 +874,89 @@ function loadKaryawanInfo(id){document.getElementById('infoCard').style.display=
 function showKosong(){document.getElementById('deviasiKosong').textContent=0-currentMc;document.getElementById('kosongCard').style.display='block';}
 function saveAssign(){const karyawanId=document.getElementById('modalSelKaryawan').value;fetch('/struktur-organisasi/'+currentSoId,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({karyawan_id:karyawanId||null}),}).then(r=>r.json()).then(d=>{if(!d.success)return;const td=document.getElementById('td-karyawan-'+currentSoId);if(d.nama_karyawan){td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+d.nama_karyawan.substring(0,2).toUpperCase()+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';}else{td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';}const pEl=document.getElementById('pengisian-'+currentSoId);const dEl=document.getElementById('deviasi-'+currentSoId);pEl.textContent=d.pengisian;pEl.style.background=d.pengisian?'#dcfce7':'#f3f4f6';pEl.style.color=d.pengisian?'#15803d':'#6b7280';dEl.textContent=d.deviasi;dEl.style.color=d.warna;dEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');closeModal();});}
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// ===== COLLAPSE ALL / EXPAND ALL =====
+function collapseAll(){
+  document.querySelectorAll('tr[data-slug]').forEach(tr=>{
+    const slug=tr.dataset.slug;
+    if(stateDir[slug]!==false){stateDir[slug]=false;setRows('child-'+slug,false);rotateIcon(slug,true);
+    Object.keys(stateKomp).forEach(k=>{if(k.startsWith(slug)){stateKomp[k]=false;rotateIcon(k,false);}});
+    Object.keys(stateDept).forEach(k=>{if(k.startsWith(slug)){stateDept[k]=false;rotateIcon(k,false);}});}
+  });
+}
+function expandAll(){
+  document.querySelectorAll('tr[data-slug]').forEach(tr=>{
+    const slug=tr.dataset.slug;
+    if(stateDir[slug]===false){stateDir[slug]=true;setRows('child-'+slug,true);rotateIcon(slug,false);}
+  });
+}
+
+// ===== EDIT POSISI =====
+let currentEditId=null;
+function openEdit(soId,posisi,jg,mc,core){
+  currentEditId=soId;
+  document.getElementById('editPosisiLabel').textContent=posisi;
+  document.getElementById('editInputPosisi').value=posisi;
+  document.getElementById('editInputJg').value=jg||'';
+  document.getElementById('editInputMc').value=mc||'';
+  document.getElementById('editInputCore').value=core||'Non Core';
+  document.getElementById('modalEditBg').style.display='flex';
+}
+function closeEdit(){document.getElementById('modalEditBg').style.display='none';currentEditId=null;}
+function saveEdit(){
+  const posisi=document.getElementById('editInputPosisi').value.trim();
+  if(!posisi){alert('Posisi wajib diisi!');return;}
+  const jg=document.getElementById('editInputJg').value;
+  const mc=document.getElementById('editInputMc').value;
+  const core=document.getElementById('editInputCore').value;
+  fetch('/struktur-organisasi/'+currentEditId+'/posisi',{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+    body:JSON.stringify({posisi,job_grade:jg||null,mc_tko:mc!==''?mc:null,core}),
+  }).then(r=>r.json()).then(d=>{
+    if(!d.success){alert('Gagal menyimpan');return;}
+    // Update posisi text in row
+    const row=document.getElementById('row-'+currentEditId);
+    if(row){
+      const posisiSpan=row.querySelector('td:first-child span:first-child');
+      if(posisiSpan)posisiSpan.textContent=d.posisi;
+      // Update JG badge
+      const jgCell=row.cells[1];
+      if(jgCell&&d.job_grade)jgCell.querySelector('span').textContent=d.job_grade;
+      // Update MC cell
+      const mcCell=row.cells[2];
+      if(mcCell)mcCell.textContent=d.mc_tko;
+      // Update deviasi
+      const devEl=document.getElementById('deviasi-'+currentEditId);
+      if(devEl){devEl.textContent=d.deviasi;devEl.style.color=d.warna;devEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');}
+      // Update core badge
+      const coreCell=row.cells[5];
+      if(coreCell){const s=coreCell.querySelector('span');if(s){s.textContent=d.core;s.style.background=d.core==='Core'?'#dcfce7':'#dbeafe';s.style.color=d.core==='Core'?'#15803d':'#185fa5';}}
+      // Highlight row
+      row.style.transition='background-color 0.5s';
+      row.style.backgroundColor='#fef9c3';
+      setTimeout(()=>{row.style.backgroundColor='';},2000);
+    }
+    closeEdit();
+  }).catch(()=>alert('Terjadi kesalahan'));
+}
+document.getElementById('modalEditBg').addEventListener('click',function(e){if(e.target===this)closeEdit();});
+
+// ===== HIGHLIGHT NEW ROW =====
+@if(session('new_row_id'))
+document.addEventListener('DOMContentLoaded',function(){
+  const newRow=document.getElementById('row-{{ session("new_row_id") }}');
+  if(newRow){
+    setTimeout(()=>{
+      newRow.scrollIntoView({behavior:'smooth',block:'center'});
+      newRow.style.transition='background-color 0.5s';
+      newRow.style.backgroundColor='#fef9c3';
+      setTimeout(()=>{newRow.style.backgroundColor='';},2500);
+    },300);
+  }
+});
+@endif
+
 </script>
 @endpush
 @endsection
