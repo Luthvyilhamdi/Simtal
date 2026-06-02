@@ -69,15 +69,23 @@ class DashboardController extends Controller
                 SUM(mc_tko) as total_mc,
                 SUM(pengisian) as total_terisi,
                 SUM(CASE WHEN core = "Core" THEN 1 ELSE 0 END) as total_core,
-                SUM(CASE WHEN core = "Non Core" THEN 1 ELSE 0 END) as total_non_core
+                SUM(CASE WHEN core = "Non Core" THEN 1 ELSE 0 END) as total_non_core,
+                SUM(CASE WHEN core = "Core" AND pengisian > 0 THEN pengisian ELSE 0 END) as core_terisi,
+                SUM(CASE WHEN core = "Non Core" AND pengisian > 0 THEN pengisian ELSE 0 END) as non_core_terisi,
+                SUM(CASE WHEN core = "Core" THEN mc_tko ELSE 0 END) as core_mc,
+                SUM(CASE WHEN core = "Non Core" THEN mc_tko ELSE 0 END) as non_core_mc
             ')->first();
 
-        $soTotalPosisi = $soStats->total_posisi ?? 0;
-        $soTotalMc     = $soStats->total_mc     ?? 0;
-        $soTerisi      = $soStats->total_terisi ?? 0;
+        $soTotalPosisi = $soStats->total_posisi  ?? 0;
+        $soTotalMc     = $soStats->total_mc      ?? 0;
+        $soTerisi      = $soStats->total_terisi  ?? 0;
         $soCore        = $soStats->total_core    ?? 0;
         $soNonCore     = $soStats->total_non_core ?? 0;
         $soDeviasi     = $soTerisi - $soTotalMc;
+        $soCoreTerisi  = $soStats->core_terisi   ?? 0;
+        $soNonCoreTerisi = $soStats->non_core_terisi ?? 0;
+        $soCoreMc      = $soStats->core_mc       ?? 0;
+        $soNonCoreMc   = $soStats->non_core_mc   ?? 0;
 
         // === CHART 1: Tren Pergerakan Jabatan 12 Bulan Terakhir ===
         $trenBulan = [];
@@ -215,7 +223,8 @@ class DashboardController extends Controller
             'trenBulan', 'distribusiDirektorat', 'assessmentChart', 'distribusiJobGrade',
             'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
             'karyawanTerbaru', 'genderChart', 'usiaChart',
-            'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun'
+            'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
+            'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc'
         ));
     }
 }

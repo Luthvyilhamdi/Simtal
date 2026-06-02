@@ -138,7 +138,7 @@ $isUser = auth()->user()->isUser();
         Buka Semua
       </button>
     </div>
-    <a href="{{ route('struktur-organisasi.export') }}?bulan={{ $bulan }}&tahun={{ $tahun }}" style="padding:8px 16px;background:#15803d;color:#fff;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:5px;white-space:nowrap">
+    <a href="{{ route('struktur-organisasi.export') }}?bulan={{ $bulan }}&tahun={{ $tahun }}" style="margin-left:auto;padding:8px 16px;background:#15803d;color:#fff;border-radius:8px;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:5px;white-space:nowrap">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
       Export {{ $periodeSaatIni }}
     </a>

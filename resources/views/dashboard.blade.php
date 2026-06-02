@@ -214,8 +214,6 @@
 {{-- SO CORE & NON CORE --}}
 @php
 $namaBulanDash = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-$pctCore    = $soTotalPosisi > 0 ? round(($soCore/$soTotalPosisi)*100) : 0;
-$pctNonCore = $soTotalPosisi > 0 ? round(($soNonCore/$soTotalPosisi)*100) : 0;
 $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
 @endphp
 <div class="sec-title">🏗️ Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
@@ -243,20 +241,22 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
   </div>
 
   <div class="kpi-card" style="border-top:3px solid #2563eb;flex-direction:column;align-items:flex-start;gap:6px">
-    <div class="kpi-label" style="color:#9ca3af">Core</div>
-    <div class="kpi-num" style="color:#2563eb">{{ $soCore }}</div>
-    <div class="kpi-sub">{{ $pctCore }}% dari total posisi</div>
+    @php $pctCoreTerisi = $soCoreMc > 0 ? round(($soCoreTerisi/$soCoreMc)*100) : 0; @endphp
+    <div class="kpi-label" style="color:#9ca3af">Core — Keterisian</div>
+    <div class="kpi-num" style="color:#2563eb">{{ $soCoreTerisi }} <span style="font-size:14px;color:#9ca3af">/ {{ $soCoreMc }}</span></div>
+    <div class="kpi-sub">{{ $pctCoreTerisi }}% terisi · {{ $soCore }} posisi Core</div>
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div style="height:100%;width:{{ $pctCore }}%;background:#2563eb;border-radius:20px"></div>
+      <div style="height:100%;width:{{ $pctCoreTerisi }}%;background:#2563eb;border-radius:20px"></div>
     </div>
   </div>
 
   <div class="kpi-card" style="border-top:3px solid #7c3aed;flex-direction:column;align-items:flex-start;gap:6px">
-    <div class="kpi-label" style="color:#9ca3af">Non Core</div>
-    <div class="kpi-num" style="color:#7c3aed">{{ $soNonCore }}</div>
-    <div class="kpi-sub">{{ $pctNonCore }}% dari total posisi</div>
+    @php $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100) : 0; @endphp
+    <div class="kpi-label" style="color:#9ca3af">Non Core — Keterisian</div>
+    <div class="kpi-num" style="color:#7c3aed">{{ $soNonCoreTerisi }} <span style="font-size:14px;color:#9ca3af">/ {{ $soNonCoreMc }}</span></div>
+    <div class="kpi-sub">{{ $pctNonCoreTerisi }}% terisi · {{ $soNonCore }} posisi Non Core</div>
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div style="height:100%;width:{{ $pctNonCore }}%;background:#7c3aed;border-radius:20px"></div>
+      <div style="height:100%;width:{{ $pctNonCoreTerisi }}%;background:#7c3aed;border-radius:20px"></div>
     </div>
   </div>
 
