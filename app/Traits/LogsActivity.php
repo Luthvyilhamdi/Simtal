@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use App\Models\ActivityLog;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 
 trait LogsActivity
@@ -13,9 +15,12 @@ trait LogsActivity
         string $target = '',
         string $keterangan = ''
     ): void {
+        /** @var User|null $user */
+        $user = Auth::user();
+
         ActivityLog::create([
-            'user_id'    => auth()->id(),
-            'user_name'  => auth()->user()->name ?? 'System',
+            'user_id'    => Auth::id(),
+            'user_name'  => $user?->name ?? 'System',
             'aksi'       => $aksi,
             'modul'      => $modul,
             'target'     => $target,

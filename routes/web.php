@@ -24,6 +24,8 @@ use App\Http\Controllers\MasterPersonGradeController;
 use App\Http\Controllers\MasterKodeStrukturController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\StrukturOrganisasiController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -40,7 +42,9 @@ Route::middleware('auth')->group(function () {
 
     // ===== DASHBOARD (redirect user → struktur organisasi) =====
     Route::get('/dashboard', function () {
-        if (auth()->user()->role === 'user') {
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user->isUser()) {
             return redirect()->route('struktur-organisasi.index');
         }
         return app(DashboardController::class)->index();
@@ -52,12 +56,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/export', [StrukturOrganisasiController::class, 'export'])->name('export');
 
         Route::middleware('not_user_role')->group(function () {
-            Route::post('/',              [StrukturOrganisasiController::class, 'store'])->name('store');
-            Route::post('/salin-periode', [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
-            Route::patch('/{so}',         [StrukturOrganisasiController::class, 'update'])->name('update');
-            Route::put('/{so}',           [StrukturOrganisasiController::class, 'update'])->name('update.put');
-            Route::delete('/{so}',        [StrukturOrganisasiController::class, 'destroy'])->name('destroy');
-            Route::patch('/{so}/posisi',    [StrukturOrganisasiController::class, 'editPosisi'])->name('editPosisi');
+            Route::post('/',               [StrukturOrganisasiController::class, 'store'])->name('store');
+            Route::post('/salin-periode',  [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
+            Route::patch('/{so}',          [StrukturOrganisasiController::class, 'update'])->name('update');
+            Route::put('/{so}',            [StrukturOrganisasiController::class, 'update'])->name('update.put');
+            Route::delete('/{so}',         [StrukturOrganisasiController::class, 'destroy'])->name('destroy');
+            Route::patch('/{so}/posisi',   [StrukturOrganisasiController::class, 'editPosisi'])->name('editPosisi');
         });
     });
 
@@ -117,15 +121,15 @@ Route::middleware('auth')->group(function () {
 
         // History Assessment All
         Route::prefix('history-assessment')->name('history_assessment_all.')->group(function () {
-            Route::get('/',                          [HistoryAssessmentAllController::class, 'index'])->name('index');
-            Route::get('/export',                    [HistoryAssessmentAllController::class, 'export'])->name('export');
-            Route::get('/export/kompetensi',         [HistoryAssessmentAllController::class, 'exportKompetensi'])->name('export.kompetensi');
-            Route::delete('/{assessment}',           [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
-            Route::get('/import',                    [ImportAssessmentController::class, 'page'])->name('import');
-            Route::post('/import',                   [ImportAssessmentController::class, 'import'])->name('import.store');
-            Route::get('/import/template',           [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
-            Route::post('/import/kompetensi',        [ImportAssessmentController::class, 'importKompetensi'])->name('import.store.kompetensi');
-            Route::get('/import/template/kompetensi',[ImportAssessmentController::class, 'downloadTemplateKompetensi'])->name('import.template.kompetensi');
+            Route::get('/',                           [HistoryAssessmentAllController::class, 'index'])->name('index');
+            Route::get('/export',                     [HistoryAssessmentAllController::class, 'export'])->name('export');
+            Route::get('/export/kompetensi',          [HistoryAssessmentAllController::class, 'exportKompetensi'])->name('export.kompetensi');
+            Route::delete('/{assessment}',            [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
+            Route::get('/import',                     [ImportAssessmentController::class, 'page'])->name('import');
+            Route::post('/import',                    [ImportAssessmentController::class, 'import'])->name('import.store');
+            Route::get('/import/template',            [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
+            Route::post('/import/kompetensi',         [ImportAssessmentController::class, 'importKompetensi'])->name('import.store.kompetensi');
+            Route::get('/import/template/kompetensi', [ImportAssessmentController::class, 'downloadTemplateKompetensi'])->name('import.template.kompetensi');
         });
 
         // Assessment Kompetensi All

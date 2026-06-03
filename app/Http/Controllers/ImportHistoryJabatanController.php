@@ -4,29 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Imports\HistoryJabatanImport;
 use App\Exports\TemplateHistoryJabatanExport;
+use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ImportHistoryJabatanController extends Controller
 {
-    public function page()
+    private function checkSuperAdmin(): void
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         if (!$user->isSuperAdmin()) {
             abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
         }
+    }
+
+    public function page()
+    {
+        $this->checkSuperAdmin();
         return view('history_karyawan.import');
     }
 
     public function import(Request $request)
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
-        }
+        $this->checkSuperAdmin();
 
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',

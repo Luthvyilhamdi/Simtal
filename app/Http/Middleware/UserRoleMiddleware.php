@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Middleware untuk memblokir role 'user' dari halaman selain Struktur Organisasi.
@@ -13,7 +15,8 @@ class UserRoleMiddleware
 {
     public function handle(Request $request, Closure $next): mixed
     {
-        $user = auth()->user();
+        /** @var User|null $user */
+        $user = Auth::user();
 
         if ($user && $user->role === 'user') {
             return redirect()->route('struktur-organisasi.index')

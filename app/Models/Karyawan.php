@@ -258,4 +258,9 @@ class Karyawan extends Model
             'mdg_band'    => $this->mdg_band,
         ];
     }
+
+    public function getRouteKeyName(): string
+    {
+    return 'nik';
+    }
 }

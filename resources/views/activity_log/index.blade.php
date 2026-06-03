@@ -22,7 +22,6 @@
     .log-list { display:flex;flex-direction:column;gap:8px; }
     .log-item { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow 0.15s; }
     .log-item:hover { box-shadow:0 2px 12px rgba(0,0,0,0.05); }
-
     .log-icon { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
     .log-body { flex:1;min-width:0; }
     .log-top { display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px; }
@@ -114,6 +113,7 @@
         <div class="page-sub">Riwayat semua aktivitas di sistem SIMTAL</div>
     </div>
     <button type="button" class="btn-hapus-log" onclick="openModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         Hapus Semua Log
     </button>
 </div>
@@ -129,14 +129,29 @@
         </div>
         <select name="aksi" class="filter-select" onchange="this.form.submit()">
             <option value="">Semua Aksi</option>
-            @foreach(['tambah','edit','hapus','import','export','login','logout','akhiri'] as $a)
-                <option value="{{ $a }}" {{ request('aksi') == $a ? 'selected' : '' }}>{{ ucfirst($a) }}</option>
+            @php
+            $aksiList = [
+                'tambah'      => 'Tambah',
+                'edit'        => 'Edit',
+                'hapus'       => 'Hapus',
+                'import'      => 'Import',
+                'export'      => 'Export',
+                'login'       => 'Login',
+                'logout'      => 'Logout',
+                'akhiri'      => 'Akhiri',
+                'assign'      => 'Assign Karyawan',
+                'salin'       => 'Salin Periode',
+                'edit_posisi' => 'Edit Posisi',
+            ];
+            @endphp
+            @foreach($aksiList as $val => $label)
+                <option value="{{ $val }}" {{ request('aksi') === $val ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>
         <select name="modul" class="filter-select" onchange="this.form.submit()">
             <option value="">Semua Modul</option>
             @foreach($moduls as $m)
-                <option value="{{ $m }}" {{ request('modul') == $m ? 'selected' : '' }}>{{ $m }}</option>
+                <option value="{{ $m }}" {{ request('modul') === $m ? 'selected' : '' }}>{{ $m }}</option>
             @endforeach
         </select>
         <input type="date" name="tanggal" value="{{ request('tanggal') }}"
@@ -151,7 +166,10 @@
 @if($logs->count() > 0)
 <div class="log-list">
     @foreach($logs as $log)
-    @php $w = $log->warna; @endphp
+    @php
+        /** @var \App\Models\ActivityLog $log */
+        $w = $log->warna;
+    @endphp
     <div class="log-item">
         <div class="log-icon" style="background:{{ $w['bg'] }};border:1px solid {{ $w['border'] }};">
             {{ $log->icon }}
@@ -160,7 +178,7 @@
             <div class="log-top">
                 <span class="log-user">{{ $log->user_name }}</span>
                 <span class="log-aksi" style="background:{{ $w['bg'] }};color:{{ $w['text'] }};">
-                    {{ ucfirst($log->aksi) }}
+                    {{ $log->label_aksi }}
                 </span>
                 <span class="log-modul">{{ $log->modul }}</span>
             </div>
@@ -213,11 +231,7 @@
         @endif
 
         @for($i = $s; $i <= $e; $i++)
-            @if($i == $cur)
-                <a href="{{ $logs->url($i) }}" class="page-btn active">{{ $i }}</a>
-            @else
-                <a href="{{ $logs->url($i) }}" class="page-btn">{{ $i }}</a>
-            @endif
+            <a href="{{ $logs->url($i) }}" class="page-btn {{ $i === $cur ? 'active' : '' }}">{{ $i }}</a>
         @endfor
 
         @if($e < $last)

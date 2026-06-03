@@ -87,6 +87,24 @@ class DashboardController extends Controller
         $soCoreMc      = $soStats->core_mc       ?? 0;
         $soNonCoreMc   = $soStats->non_core_mc   ?? 0;
 
+
+        // === SO: Deviasi & Core/NonCore per Direktorat (chart) ===
+        $soPerDirektorat = \App\Models\StrukturOrganisasi::where('bulan', $soBulan)
+            ->where('tahun', $soTahun)
+            ->where('posisi', '!=', '-')
+            ->whereNotNull('direktorat')
+            ->selectRaw('
+                direktorat,
+                SUM(mc_tko) as mc,
+                SUM(pengisian) as terisi,
+                SUM(deviasi) as deviasi,
+                SUM(CASE WHEN core = "Core" THEN 1 ELSE 0 END) as core,
+                SUM(CASE WHEN core = "Non Core" THEN 1 ELSE 0 END) as non_core
+            ')
+            ->groupBy('direktorat')
+            ->orderByRaw('ABS(SUM(deviasi)) DESC')
+            ->get();
+
         // === CHART 1: Tren Pergerakan Jabatan 12 Bulan Terakhir ===
         $trenBulan = [];
         for ($i = 11; $i >= 0; $i--) {
@@ -224,7 +242,7 @@ class DashboardController extends Controller
             'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
             'karyawanTerbaru', 'genderChart', 'usiaChart',
             'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
-            'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc'
+            'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc', 'soPerDirektorat'
         ));
     }
 }

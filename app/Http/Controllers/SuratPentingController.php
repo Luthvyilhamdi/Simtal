@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\SuratPenting;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class SuratPentingController extends Controller
 {
-    // Index global semua surat
     public function index(Request $request)
     {
         $query = SuratPenting::with(['karyawan', 'uploader'])
@@ -33,26 +33,24 @@ class SuratPentingController extends Controller
             $query->where('karyawan_id', $request->karyawan_id);
         }
 
-        $surats   = $query->paginate(15);
+        $surats    = $query->paginate(15);
         $karyawans = Karyawan::orderBy('nama')->get();
 
         $stats = [
-            'total'   => SuratPenting::count(),
-            'expire'  => SuratPenting::whereNotNull('tanggal_exp')->where('tanggal_exp', '<', now())->count(),
-            'soon'    => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
+            'total'  => SuratPenting::count(),
+            'expire' => SuratPenting::whereNotNull('tanggal_exp')->where('tanggal_exp', '<', now())->count(),
+            'soon'   => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
         ];
 
         return view('surat_penting.index', compact('surats', 'karyawans', 'stats'));
     }
 
-    // Form upload
     public function create()
     {
         $karyawans = Karyawan::orderBy('nama')->get();
         return view('surat_penting.create', compact('karyawans'));
     }
 
-    // Simpan
     public function store(Request $request)
     {
         $request->validate([
@@ -82,7 +80,7 @@ class SuratPentingController extends Controller
             'file_name'     => $file->getClientOriginalName(),
             'file_size'     => $fileSize,
             'keterangan'    => $request->keterangan,
-            'uploaded_by'   => auth()->id(),
+            'uploaded_by'   => Auth::id(),
         ]);
 
         return redirect()
@@ -90,25 +88,28 @@ class SuratPentingController extends Controller
             ->with('success', 'Surat berhasil diupload!');
     }
 
-    // Preview / Download
     public function show(SuratPenting $suratPenting)
     {
-        return response()->file(storage_path('app/public/' . $suratPenting->file_path));
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+        return response()->file($disk->path((string) $suratPenting->file_path));
     }
 
-    // Download
     public function download(SuratPenting $suratPenting)
     {
-        return Storage::disk('public')->download(
-            $suratPenting->file_path,
-            $suratPenting->file_name
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+        return $disk->download(
+            (string) $suratPenting->file_path,
+            (string) $suratPenting->file_name
         );
     }
 
-    // Hapus
     public function destroy(SuratPenting $suratPenting)
     {
-        Storage::disk('public')->delete($suratPenting->file_path);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+        $disk->delete((string) $suratPenting->file_path);
         $suratPenting->delete();
 
         return redirect()

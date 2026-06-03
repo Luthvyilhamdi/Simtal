@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
@@ -13,10 +15,10 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string ...$roles): mixed
     {
-        $user = auth()->user();
+        /** @var User|null $user */
+        $user = Auth::user();
 
         if (!$user || !in_array($user->role, $roles)) {
-            // User role → redirect ke struktur organisasi
             if ($user && $user->role === 'user') {
                 return redirect()->route('struktur-organisasi.index')
                     ->with('info', 'Akses Anda terbatas hanya pada Struktur Organisasi.');

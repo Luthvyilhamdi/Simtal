@@ -184,7 +184,21 @@
         <div class="kpi-left">
             <div class="kpi-label">Assessment Rekomendasi</div>
             <div class="kpi-num">{{ $totalAssessment }}</div>
-            <div class="kpi-sub">{{ $assessmentReady }} ready · {{ $assessmentNR }} not ready</div>
+            <div class="kpi-sub">Total assessment rekomendasi</div>
+            <div class="komp-stat-row">
+                <div class="komp-stat-item" style="background:#dcfce7;">
+                    <div class="komp-stat-num" style="color:#15803d;">{{ $assessmentReady }}</div>
+                    <div class="komp-stat-label" style="color:#15803d;">Ready</div>
+                </div>
+                <div class="komp-stat-item" style="background:#fef9c3;">
+                    <div class="komp-stat-num" style="color:#a16207;">{{ $assessmentRWD }}</div>
+                    <div class="komp-stat-label" style="color:#a16207;">Readt With Dev</div>
+                </div>
+                <div class="komp-stat-item" style="background:#fee2e2;">
+                    <div class="komp-stat-num" style="color:#dc2626;">{{ $assessmentNR }}</div>
+                    <div class="komp-stat-label" style="color:#dc2626;">Not Ready</div>
+                </div>
+            </div>
             @php $pctReady = $totalAssessment > 0 ? round(($assessmentReady/$totalAssessment)*100) : 0; @endphp
             <span class="kpi-badge" style="background:#f5f3ff;color:#7c3aed;">{{ $pctReady }}% ready rate</span>
         </div>
@@ -205,6 +219,8 @@
                     <div class="komp-stat-label" style="color:#dc2626;">Not Qual.</div>
                 </div>
             </div>
+            @php $pctQualified = $totalKompetensi > 0 ? round(($totalQualified/$totalKompetensi)*100) : 0; @endphp
+            <span class="kpi-badge" style="background:#f0fdfa;color:#0f766e;">{{ $pctQualified }}% qualified rate</span>
         </div>
         <div class="kpi-icon teal">⭐</div>
     </div>
@@ -260,6 +276,57 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
     </div>
   </div>
 
+</div>
+
+
+{{-- SO CHARTS: Core/NonCore Pie + Deviasi per Direktorat --}}
+<div class="chart-grid-2" style="margin-bottom:18px">
+    <div class="chart-card">
+        <div class="chart-card-title">Core vs Non Core</div>
+        <div class="chart-card-sub">Distribusi posisi Struktur Organisasi {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+        <div style="display:flex;align-items:center;gap:20px;margin-top:6px">
+            <canvas id="soCorePie" width="130" height="130" style="flex-shrink:0"></canvas>
+            <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                    <div style="width:10px;height:10px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
+                    <div style="flex:1;font-size:12px;color:#374151">Core</div>
+                    <div style="font-size:15px;font-weight:800;color:#2563eb">{{ $soCore }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                    <div style="width:10px;height:10px;border-radius:50%;background:#7c3aed;flex-shrink:0"></div>
+                    <div style="flex:1;font-size:12px;color:#374151">Non Core</div>
+                    <div style="font-size:15px;font-weight:800;color:#7c3aed">{{ $soNonCore }}</div>
+                </div>
+                <div style="margin-top:14px;padding-top:10px;border-top:1px solid #f3f4f6">
+                    <div style="font-size:11px;color:#9ca3af">Terisi Core: <strong style="color:#2563eb">{{ $soCoreTerisi }}</strong> / {{ $soCoreMc }}</div>
+                    <div style="font-size:11px;color:#9ca3af;margin-top:3px">Terisi Non Core: <strong style="color:#7c3aed">{{ $soNonCoreTerisi }}</strong> / {{ $soNonCoreMc }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-card-title">Deviasi per Direktorat</div>
+        <div class="chart-card-sub">Selisih MC/TKO vs Pengisian (negatif = kurang terisi)</div>
+        @php $maxDev = $soPerDirektorat->max(fn($d) => abs($d->deviasi)) ?: 1; @endphp
+        <div class="bar-chart" style="margin-top:6px">
+            @foreach($soPerDirektorat as $d)
+            @php
+                $devVal  = (int) $d->deviasi;
+                $barW    = min(100, round(abs($devVal) / $maxDev * 100));
+                $barColor = $devVal < 0 ? '#ef4444' : ($devVal > 0 ? '#16a34a' : '#6b7280');
+                $shortName = Str::limit(str_replace(['Direktorat ', 'Directorat '], '', $d->direktorat), 20);
+            @endphp
+            <div class="bar-row">
+                <div class="bar-label" title="{{ $d->direktorat }}">{{ $shortName }}</div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width:{{ $barW }}%;background:{{ $barColor }};">{{ $devVal }}</div>
+                </div>
+                <div class="bar-val" style="color:{{ $barColor }}">{{ $devVal }}</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
 </div>
 
 {{-- GRAFIK --}}
@@ -679,5 +746,25 @@ new Chart(document.getElementById('kompPieChart'), {
     },
     options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
 });
+
+// SO Core vs Non Core Pie
+new Chart(document.getElementById('soCorePie'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Core', 'Non Core'],
+        datasets: [{
+            data: [{{ $soCore }}, {{ $soNonCore }}],
+            backgroundColor: ['#2563eb', '#7c3aed'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: false,
+        cutout: '65%',
+        plugins: { legend: { display: false } }
+    }
+});
+
 </script>
 @endpush

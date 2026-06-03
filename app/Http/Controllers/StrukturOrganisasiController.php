@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\StrukturOrganisasi;
 use App\Models\Karyawan;
+use App\Models\User;
 use App\Exports\StrukturOrganisasiExport;
+use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class StrukturOrganisasiController extends Controller
 {
+    use LogsActivity;
+
     private function getPeriode(Request $request): array
     {
         return [
@@ -108,11 +113,9 @@ class StrukturOrganisasiController extends Controller
             'tahun'           => 'nullable|integer|min:2000|max:2100',
         ]);
 
-        $fungsional = $request->fungsional ?? $request->fungsional_staff ?? null;
-        $bulan = (int)($request->bulan ?? now()->month);
-        $tahun = (int)($request->tahun ?? now()->year);
-
-        // Simpan kompartemen sebagai NULL jika kosong (bukan empty string)
+        $fungsional  = $request->fungsional ?? $request->fungsional_staff ?? null;
+        $bulan       = (int)($request->bulan ?? now()->month);
+        $tahun       = (int)($request->tahun ?? now()->year);
         $kompartemen = $request->kompartemen ?: null;
 
         $so = StrukturOrganisasi::create([
@@ -130,6 +133,9 @@ class StrukturOrganisasiController extends Controller
             'pengisian'   => 0,
             'deviasi'     => $request->mc_tko ? -(int)$request->mc_tko : 0,
         ]);
+
+        $this->log('tambah', 'Struktur Organisasi', $request->posisi ?? '-',
+            "Periode {$bulan}/{$tahun} · " . ($request->direktorat ?? '-'));
 
         return redirect()->route('struktur-organisasi.index', ['bulan' => $bulan, 'tahun' => $tahun])
                          ->with('success', 'Posisi berhasil ditambahkan.')
@@ -189,6 +195,10 @@ class StrukturOrganisasiController extends Controller
         });
 
         $namaBulan = Carbon::createFromDate($keTahun, $keBulan, 1)->translatedFormat('F Y');
+
+        $this->log('salin', 'Struktur Organisasi', "Periode {$namaBulan}",
+            "Disalin dari {$dariBulan}/{$dariTahun} · {$data->count()} posisi");
+
         return redirect()->route('struktur-organisasi.index', ['bulan' => $keBulan, 'tahun' => $keTahun])
                          ->with('success', "Berhasil menyalin {$data->count()} posisi ke periode {$namaBulan}.");
     }
@@ -210,6 +220,9 @@ class StrukturOrganisasiController extends Controller
                 'pengisian'     => $karyawan ? 1 : 0,
                 'deviasi'       => ($karyawan ? 1 : 0) - $so->mc_tko,
             ]);
+
+            $this->log('assign', 'Struktur Organisasi', $so->posisi,
+                $karyawan ? "Assign: {$karyawan->nama} ({$karyawan->nik})" : 'Lepas karyawan');
 
             return response()->json([
                 'success'       => true,
@@ -239,7 +252,6 @@ class StrukturOrganisasiController extends Controller
         ]);
     }
 
-
     public function editPosisi(Request $request, StrukturOrganisasi $so)
     {
         $request->validate([
@@ -249,7 +261,8 @@ class StrukturOrganisasiController extends Controller
             'core'      => 'nullable|in:Core,Non Core',
         ]);
 
-        $mcTko = $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0;
+        $mcTko    = $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0;
+        $oldPosisi = $so->posisi;
 
         $so->update([
             'posisi'    => $request->posisi,
@@ -260,6 +273,9 @@ class StrukturOrganisasiController extends Controller
         ]);
 
         $so->refresh();
+
+        $this->log('edit_posisi', 'Struktur Organisasi', $request->posisi,
+            "Dari: {$oldPosisi} · JG: {$so->job_grade} · MC: {$so->mc_tko} · {$so->core}");
 
         return response()->json([
             'success'   => true,
@@ -274,13 +290,21 @@ class StrukturOrganisasiController extends Controller
 
     public function destroy(StrukturOrganisasi $so)
     {
-        if (auth()->user()->role !== 'super_admin') {
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user->role !== 'super_admin') {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menghapus data.');
         }
 
-        $bulan = $so->bulan;
-        $tahun = $so->tahun;
+        $bulan  = $so->bulan;
+        $tahun  = $so->tahun;
+        $posisi = $so->posisi;
+
         $so->delete();
+
+        $this->log('hapus', 'Struktur Organisasi', $posisi,
+            "Periode {$bulan}/{$tahun}");
+
         return redirect()->route('struktur-organisasi.index', ['bulan' => $bulan, 'tahun' => $tahun])
                          ->with('success', 'Posisi berhasil dihapus.');
     }
@@ -360,7 +384,7 @@ class StrukturOrganisasiController extends Controller
     {
         ['bulan' => $bulan, 'tahun' => $tahun] = $this->getPeriode($request);
         $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F-Y');
-        $filename = "struktur-organisasi-{$namaBulan}.xlsx";
+        $filename  = "struktur-organisasi-{$namaBulan}.xlsx";
 
         return Excel::download(
             new StrukturOrganisasiExport([
@@ -391,10 +415,8 @@ class StrukturOrganisasiController extends Controller
 
             $kompKey = $komp ?: '__no_komp__';
 
-            // ===== FIX: __no_komp__ selalu jadi key PERTAMA agar tampil di atas =====
             if (!isset($tree[$dir]['children'][$kompKey])) {
                 if ($kompKey === '__no_komp__') {
-                    // Sisipkan di depan array
                     $tree[$dir]['children'] = ['__no_komp__' => ['label' => '', 'mc_tko' => 0, 'pengisian' => 0, 'children' => []]]
                                             + $tree[$dir]['children'];
                 } else {

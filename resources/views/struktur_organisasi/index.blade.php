@@ -180,7 +180,7 @@ $isUser = auth()->user()->isUser();
         @php $dirSlug = 'dir-'.Str::slug($dirKey); @endphp
 
         {{-- DIREKTORAT --}}
-        <tr onclick="toggleDir('{{ $dirSlug }}')" data-slug="{{ $dirSlug }}"" style="cursor:pointer" data-type="dir" data-text="{{ strtolower($dir['label']) }}">
+        <tr onclick="toggleDir('{{ $dirSlug }}')" data-slug="{{ $dirSlug }}" style="cursor:pointer" data-type="dir" data-text="{{ strtolower($dir['label']) }}">
           <td colspan="{{ $isUser ? 7 : 8 }}" style="padding:0;border-bottom:1px solid #d1fae5">
             <div style="padding:9px 14px;display:flex;align-items:center;gap:8px;background:#f0fdf4">
               <svg id="ic-{{ $dirSlug }}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
@@ -488,9 +488,13 @@ $isUser = auth()->user()->isUser();
       </tbody>
     </table>
   </div>
-  <div style="padding:10px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f0f0eb;display:flex;align-items:center;justify-content:space-between">
+  <div style="padding:10px 16px;font-size:12px;color:#9ca3af;border-top:1px solid #f0f0eb;display:flex;align-items:center;justify-content:space-between;gap:10px">
     <span>Total <strong>{{ $allJabatan->count() }}</strong> posisi — Periode <strong>{{ $periodeSaatIni }}</strong></span>
-    <span id="searchCount" style="display:none;color:#15803d;font-weight:600"></span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="searchCount" style="display:none;color:#15803d;font-weight:600"></span>
+      @if(!$isUser)
+      @endif
+    </div>
   </div>
 </div>
 @endif
@@ -665,10 +669,38 @@ $isUser = auth()->user()->isUser();
       <button onclick="closeModal()" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div style="padding:18px 22px">
-      <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Pilih Karyawan</label>
-      <select id="modalSelKaryawan" onchange="loadKaryawanInfo(this.value)" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:13px;outline:none;background:#fff;color:#111827">
-        <option value="">-- Kosong (Lepas Karyawan) --</option>
-        @foreach($karyawans as $k)<option value="{{ $k->id }}">{{ $k->nama }} — {{ $k->nik }}</option>@endforeach
+      {{-- Search NIK / Nama --}}
+      <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Cari NIK / Nama Karyawan</label>
+      <div style="position:relative">
+        <div style="display:flex;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;margin-bottom:6px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="assignSearch" oninput="onAssignSearch(this.value)" onkeydown="onAssignKeydown(event)"
+            placeholder="Ketik atau paste NIK / nama..." autocomplete="off"
+            style="border:none;background:none;outline:none;font-size:13px;color:#111827;width:100%">
+          <span id="assignSearchClear" onclick="clearAssign()" style="cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;display:none">×</span>
+        </div>
+        {{-- Dropdown hasil --}}
+        <div id="assignDropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:100;max-height:200px;overflow-y:auto;margin-top:-4px">
+          <div id="assignDropdownList"></div>
+        </div>
+      </div>
+      {{-- Karyawan terpilih --}}
+      <div id="assignSelected" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="assignSelAvatar" style="width:30px;height:30px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div id="assignSelNama" style="font-size:13px;font-weight:600;color:#15803d"></div>
+            <div id="assignSelNik" style="font-size:11px;color:#6b7280"></div>
+          </div>
+          <button onclick="clearAssign()" style="border:none;background:none;color:#9ca3af;cursor:pointer;font-size:18px;padding:0;line-height:1">×</button>
+        </div>
+      </div>
+      {{-- Tombol lepas karyawan --}}
+      <button onclick="clearAssign(true)" style="font-size:11px;color:#9ca3af;border:none;background:none;cursor:pointer;padding:0;margin-bottom:8px;text-decoration:underline">Lepas karyawan dari posisi ini</button>
+      {{-- Hidden select untuk kompatibilitas --}}
+      <select id="modalSelKaryawan" style="display:none" onchange="loadKaryawanInfo(this.value)">
+        <option value="">-- Kosong --</option>
+        @foreach($karyawans as $k)<option value="{{ $k->id }}" data-nama="{{ strtolower($k->nama) }}" data-nik="{{ strtolower($k->nik) }}" data-display="{{ $k->nama }} — {{ $k->nik }}">{{ $k->nama }} — {{ $k->nik }}</option>@endforeach
       </select>
       <div id="infoCard" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-top:12px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -700,6 +732,8 @@ $isUser = auth()->user()->isUser();
 </div>
 
 
+
+{{-- ===== MODAL BULK ASSIGN ===== --}}
 {{-- ===== MODAL EDIT POSISI ===== --}}
 <div id="modalEditBg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;width:460px;max-width:95vw;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
@@ -868,11 +902,37 @@ function submitTambah(){
 document.getElementById('modalTambahBg').addEventListener('click',function(e){if(e.target===this)closeTambah();});
 
 let currentSoId=null,currentMc=1;
-function openModal(soId,posisi,karyawanId,mc){currentSoId=soId;currentMc=mc||1;document.getElementById('modalPosisi').textContent=posisi;document.getElementById('modalSelKaryawan').value=karyawanId??'';document.getElementById('infoCard').style.display='none';document.getElementById('kosongCard').style.display='none';karyawanId?loadKaryawanInfo(karyawanId):showKosong();document.getElementById('modalBg').style.display='flex';}
+const currentAssignments={};// track karyawan_id terbaru per soId
+function openModal(soId,posisi,karyawanId,mc){
+  currentSoId=soId;currentMc=mc||1;
+  document.getElementById('modalPosisi').textContent=posisi;
+  // Reset search
+  document.getElementById('assignSearch').value='';
+  document.getElementById('assignSearchClear').style.display='none';
+  document.getElementById('assignDropdown').style.display='none';
+  document.getElementById('assignSelected').style.display='none';
+  document.getElementById('infoCard').style.display='none';
+  document.getElementById('kosongCard').style.display='none';
+  // Pakai state terbaru jika ada (setelah AJAX assign)
+  const effectiveId = currentAssignments.hasOwnProperty(soId)
+    ? currentAssignments[soId]
+    : (karyawanId??null);
+  document.getElementById('modalSelKaryawan').value=effectiveId||'';
+  if(effectiveId){
+    const opt=document.querySelector('#modalSelKaryawan option[value="'+effectiveId+'"]');
+    if(opt){
+      selectAssignKaryawan(effectiveId, opt.dataset.nama||'', opt.dataset.nik||'');
+    } else {
+      loadKaryawanInfo(effectiveId);
+    }
+  } else { showKosong(); }
+  document.getElementById('modalBg').style.display='flex';
+  setTimeout(()=>document.getElementById('assignSearch').focus(),100);
+}
 function closeModal(){document.getElementById('modalBg').style.display='none';currentSoId=null;}
 function loadKaryawanInfo(id){document.getElementById('infoCard').style.display='none';document.getElementById('kosongCard').style.display='none';if(!id){showKosong();return;}fetch('/api/karyawan/'+id+'/detail').then(r=>r.json()).then(d=>{document.getElementById('iNik').textContent=d.nik??'-';document.getElementById('iJab').textContent=d.jabatan_saat_ini??'-';document.getElementById('iDir').textContent=d.direktorat??'-';document.getElementById('iKomp').textContent=d.kompartemen??'-';document.getElementById('iDept').textContent=d.departemen??'-';document.getElementById('iJg').textContent=d.job_grade??'-';document.getElementById('iPg').textContent=d.person_grade??'-';const dev=1-currentMc;document.getElementById('deviasiVal').textContent=dev;document.getElementById('deviasiVal').style.color=dev<0?'#d97706':(dev>0?'#dc2626':'#15803d');document.getElementById('deviasiBox').style.background=dev<0?'#fef3c7':(dev>0?'#fee2e2':'#dcfce7');document.getElementById('infoCard').style.display='grid';});}
 function showKosong(){document.getElementById('deviasiKosong').textContent=0-currentMc;document.getElementById('kosongCard').style.display='block';}
-function saveAssign(){const karyawanId=document.getElementById('modalSelKaryawan').value;fetch('/struktur-organisasi/'+currentSoId,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({karyawan_id:karyawanId||null}),}).then(r=>r.json()).then(d=>{if(!d.success)return;const td=document.getElementById('td-karyawan-'+currentSoId);if(d.nama_karyawan){td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+d.nama_karyawan.substring(0,2).toUpperCase()+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';}else{td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';}const pEl=document.getElementById('pengisian-'+currentSoId);const dEl=document.getElementById('deviasi-'+currentSoId);pEl.textContent=d.pengisian;pEl.style.background=d.pengisian?'#dcfce7':'#f3f4f6';pEl.style.color=d.pengisian?'#15803d':'#6b7280';dEl.textContent=d.deviasi;dEl.style.color=d.warna;dEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');closeModal();});}
+function saveAssign(){const karyawanId=document.getElementById('modalSelKaryawan').value;fetch('/struktur-organisasi/'+currentSoId,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({karyawan_id:karyawanId||null}),}).then(r=>r.json()).then(d=>{if(!d.success)return;currentAssignments[currentSoId]=d.karyawan_id||null;const td=document.getElementById('td-karyawan-'+currentSoId);if(d.nama_karyawan){td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+d.nama_karyawan.substring(0,2).toUpperCase()+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';}else{td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';}const pEl=document.getElementById('pengisian-'+currentSoId);const dEl=document.getElementById('deviasi-'+currentSoId);pEl.textContent=d.pengisian;pEl.style.background=d.pengisian?'#dcfce7':'#f3f4f6';pEl.style.color=d.pengisian?'#15803d':'#6b7280';dEl.textContent=d.deviasi;dEl.style.color=d.warna;dEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');closeModal();});}
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
 // ===== COLLAPSE ALL / EXPAND ALL =====
@@ -890,6 +950,7 @@ function expandAll(){
     if(stateDir[slug]===false){stateDir[slug]=true;setRows('child-'+slug,true);rotateIcon(slug,false);}
   });
 }
+
 
 // ===== EDIT POSISI =====
 let currentEditId=null;
@@ -915,24 +976,18 @@ function saveEdit(){
     body:JSON.stringify({posisi,job_grade:jg||null,mc_tko:mc!==''?mc:null,core}),
   }).then(r=>r.json()).then(d=>{
     if(!d.success){alert('Gagal menyimpan');return;}
-    // Update posisi text in row
     const row=document.getElementById('row-'+currentEditId);
     if(row){
       const posisiSpan=row.querySelector('td:first-child span:first-child');
       if(posisiSpan)posisiSpan.textContent=d.posisi;
-      // Update JG badge
       const jgCell=row.cells[1];
       if(jgCell&&d.job_grade)jgCell.querySelector('span').textContent=d.job_grade;
-      // Update MC cell
       const mcCell=row.cells[2];
       if(mcCell)mcCell.textContent=d.mc_tko;
-      // Update deviasi
       const devEl=document.getElementById('deviasi-'+currentEditId);
       if(devEl){devEl.textContent=d.deviasi;devEl.style.color=d.warna;devEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');}
-      // Update core badge
       const coreCell=row.cells[5];
       if(coreCell){const s=coreCell.querySelector('span');if(s){s.textContent=d.core;s.style.background=d.core==='Core'?'#dcfce7':'#dbeafe';s.style.color=d.core==='Core'?'#15803d':'#185fa5';}}
-      // Highlight row
       row.style.transition='background-color 0.5s';
       row.style.backgroundColor='#fef9c3';
       setTimeout(()=>{row.style.backgroundColor='';},2000);
@@ -956,6 +1011,88 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 });
 @endif
+
+
+// ===== ASSIGN SEARCH =====
+let assignHighlight=-1;
+
+// Event delegation - no inline onclick, no escaping issues
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('assignDropdownList').addEventListener('click',function(e){
+    const item=e.target.closest('[data-assign-id]');
+    if(item) selectAssignKaryawan(item.dataset.assignId, item.dataset.assignNama, item.dataset.assignNik);
+  });
+  document.getElementById('assignDropdownList').addEventListener('mouseover',function(e){
+    const item=e.target.closest('[data-assign-id]');
+    if(!item)return;
+    document.querySelectorAll('[data-assign-id]').forEach((el,i)=>{
+      const isHover=el===item;
+      el.style.background=isHover?'#f0fdf4':'';
+      el.style.color=isHover?'#15803d':'#111827';
+      if(isHover)assignHighlight=i;
+    });
+  });
+});
+
+function onAssignSearch(val){
+  const clr=document.getElementById('assignSearchClear');
+  if(clr)clr.style.display=val?'block':'none';
+  document.getElementById('assignSelected').style.display='none';
+  if(val.length<1){document.getElementById('assignDropdown').style.display='none';return;}
+  const kw=val.toLowerCase();
+  const list=document.getElementById('assignDropdownList');
+  const results=[];
+  document.querySelectorAll('#modalSelKaryawan option').forEach(function(opt){
+    if(!opt.value)return;
+    if((opt.dataset.nama||'').includes(kw)||(opt.dataset.nik||'').includes(kw))
+      results.push({id:opt.value,nama:opt.dataset.nama,nik:opt.dataset.nik,display:opt.textContent.trim()});
+  });
+  if(results.length===0){
+    list.innerHTML='<div style="padding:12px 14px;font-size:13px;color:#9ca3af">Tidak ditemukan</div>';
+  }else{
+    list.innerHTML=results.slice(0,20).map(function(r){
+      return '<div data-assign-id="'+r.id+'" data-assign-nama="'+r.nama+'" data-assign-nik="'+r.nik+'" style="padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid #f3f4f6;color:#111827">'+r.display+'</div>';
+    }).join('');
+  }
+  assignHighlight=-1;
+  document.getElementById('assignDropdown').style.display='block';
+}
+
+function onAssignKeydown(e){
+  const items=document.querySelectorAll('[data-assign-id]');
+  if(!items.length)return;
+  if(e.key==='ArrowDown'){assignHighlight=Math.min(assignHighlight+1,items.length-1);items[assignHighlight].dispatchEvent(new Event('mouseover',{bubbles:true}));e.preventDefault();}
+  else if(e.key==='ArrowUp'){assignHighlight=Math.max(assignHighlight-1,0);items[assignHighlight].dispatchEvent(new Event('mouseover',{bubbles:true}));e.preventDefault();}
+  else if(e.key==='Enter'&&assignHighlight>=0&&items[assignHighlight]){items[assignHighlight].click();e.preventDefault();}
+  else if(e.key==='Escape'){document.getElementById('assignDropdown').style.display='none';}
+}
+
+function selectAssignKaryawan(id,nama,nik){
+  document.getElementById('assignDropdown').style.display='none';
+  const display=document.querySelector('#modalSelKaryawan option[value="'+id+'"]')
+    ?document.querySelector('#modalSelKaryawan option[value="'+id+'"]').textContent.trim():'';
+  document.getElementById('assignSearch').value=display;
+  const clr=document.getElementById('assignSearchClear');
+  if(clr)clr.style.display=id?'block':'none';
+  if(id){
+    const initials=(display||'?').substring(0,2).toUpperCase();
+    document.getElementById('assignSelAvatar').textContent=initials;
+    document.getElementById('assignSelNama').textContent=display.split(' — ')[0]||display;
+    document.getElementById('assignSelNik').textContent='NIK: '+(display.split(' — ')[1]||nik||'');
+    document.getElementById('assignSelected').style.display='block';
+  }else{
+    document.getElementById('assignSelected').style.display='none';
+    document.getElementById('assignSearch').value='';
+    if(clr)clr.style.display='none';
+  }
+  document.getElementById('modalSelKaryawan').value=id||'';
+  if(id)loadKaryawanInfo(id);else showKosong();
+}
+
+function clearAssign(lepas){
+  selectAssignKaryawan('','','');
+  if(lepas)showKosong();
+}
 
 </script>
 @endpush

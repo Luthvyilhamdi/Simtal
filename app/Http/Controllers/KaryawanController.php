@@ -10,6 +10,7 @@ use App\Models\JobGrade;
 use App\Models\PersonGrade;
 use App\Models\Jabatan;
 use App\Models\KodeStruktur;
+use App\Models\User;
 use App\Imports\KaryawanImport;
 use App\Exports\TemplateKaryawanExport;
 use App\Exports\KaryawanExport;
@@ -17,11 +18,21 @@ use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class KaryawanController extends Controller
 {
     use LogsActivity;
+
+    private function checkSuperAdmin(): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+    }
 
     public function index(Request $request)
     {
@@ -167,21 +178,13 @@ class KaryawanController extends Controller
     // ===== IMPORT =====
     public function importPage()
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
-        }
+        $this->checkSuperAdmin();
         return view('karyawan.import');
     }
 
     public function import(Request $request)
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
-        }
+        $this->checkSuperAdmin();
 
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
@@ -220,11 +223,7 @@ class KaryawanController extends Controller
 
     public function downloadTemplate()
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
-        }
+        $this->checkSuperAdmin();
 
         return Excel::download(
             new TemplateKaryawanExport(),

@@ -6,17 +6,19 @@ use App\Imports\AssessmentImport;
 use App\Imports\AssessmentKompetensiImport;
 use App\Exports\TemplateAssessmentExport;
 use App\Exports\TemplateAssessmentKompetensiExport;
+use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ImportAssessmentController extends Controller
 {
     // ===== CEK SUPER ADMIN =====
     private function checkSuperAdmin(): void
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         if (!$user->isSuperAdmin()) {
             abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
         }

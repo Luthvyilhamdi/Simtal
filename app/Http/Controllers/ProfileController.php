@@ -14,9 +14,8 @@ class ProfileController extends Controller
     public function edit()
     {
         /** @var User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
-        // Cari data karyawan berdasarkan NIK
         $karyawan = $user->nik
             ? Karyawan::with([
                 'jabatan', 'direktorat', 'kompartemen',
@@ -31,7 +30,7 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         /** @var User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $request->validate([
             'name'  => 'required|string|max:255',
@@ -51,12 +50,12 @@ class ProfileController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'current_password'      => 'required',
-            'password'              => ['required', 'confirmed', Password::defaults()],
+            'current_password' => 'required',
+            'password'         => ['required', 'confirmed', Password::defaults()],
         ]);
 
         /** @var User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);

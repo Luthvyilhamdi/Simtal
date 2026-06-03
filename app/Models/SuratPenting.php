@@ -4,6 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int         $id
+ * @property int         $karyawan_id
+ * @property int         $uploaded_by
+ * @property string      $judul
+ * @property string|null $nomor_surat
+ * @property string      $kategori
+ * @property string      $file_path
+ * @property string      $file_name
+ * @property string|null $file_size
+ * @property string|null $keterangan
+ * @property \Carbon\Carbon      $tanggal_surat
+ * @property \Carbon\Carbon|null $tanggal_exp
+ * @property \Carbon\Carbon      $created_at
+ * @property \Carbon\Carbon      $updated_at
+ */
 class SuratPenting extends Model
 {
     protected $fillable = [
@@ -27,7 +43,6 @@ class SuratPenting extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    // Label kategori
     public function getKategoriLabelAttribute(): string
     {
         return match($this->kategori) {
@@ -43,7 +58,6 @@ class SuratPenting extends Model
         };
     }
 
-    // Warna kategori
     public function getKategoriWarnaAttribute(): array
     {
         return match($this->kategori) {
@@ -57,13 +71,11 @@ class SuratPenting extends Model
         };
     }
 
-    // Cek apakah sudah expired
     public function getIsExpiredAttribute(): bool
     {
         return $this->tanggal_exp && $this->tanggal_exp->isPast();
     }
 
-    // Cek tipe file
     public function getIsPdfAttribute(): bool
     {
         return str_ends_with(strtolower($this->file_name), '.pdf');
