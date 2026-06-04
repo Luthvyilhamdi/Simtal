@@ -87,8 +87,15 @@ class StrukturOrganisasiController extends Controller
         $tree = $this->buildTree($allJabatan);
 
         $karyawans = Karyawan::where('status', 'aktif')
+                             ->with('direktorat')
                              ->orderBy('nama')
-                             ->get(['id', 'nik', 'nama']);
+                             ->get(['id', 'nik', 'nama', 'direktorat_id'])
+                             ->map(fn($k) => (object)[
+                                 'id'              => $k->id,
+                                 'nik'             => $k->nik,
+                                 'nama'            => $k->nama,
+                                 'direktorat_nama' => $k->direktorat?->nama_direktorat ?? '',
+                             ]);
 
         return view('struktur_organisasi.index', compact(
             'allJabatan', 'tree', 'stats', 'direktorats', 'kompartemens', 'fungsionals',
@@ -128,10 +135,11 @@ class StrukturOrganisasiController extends Controller
             'fungsional'  => $fungsional ?: null,
             'posisi'      => $request->posisi ?? '-',
             'job_grade'   => $request->job_grade,
-            'mc_tko'      => $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0,
+            // Baris placeholder (posisi='-') tidak boleh punya mc_tko
+            'mc_tko'      => ($request->posisi === '-') ? 0 : ($request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0),
             'core'        => $request->core ?? 'Non Core',
             'pengisian'   => 0,
-            'deviasi'     => $request->mc_tko ? -(int)$request->mc_tko : 0,
+            'deviasi'     => ($request->posisi === '-') ? 0 : ($request->mc_tko ? -(int)$request->mc_tko : 0),
         ]);
 
         $this->log('tambah', 'Struktur Organisasi', $request->posisi ?? '-',
@@ -259,17 +267,21 @@ class StrukturOrganisasiController extends Controller
             'job_grade' => 'nullable|integer|min:1|max:30',
             'mc_tko'    => 'nullable|integer|min:0',
             'core'      => 'nullable|in:Core,Non Core',
+            'pengisian' => 'nullable|integer|min:0',
         ]);
 
         $mcTko    = $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0;
         $oldPosisi = $so->posisi;
+
+        $pengisian = $request->pengisian !== null ? (int)$request->pengisian : $so->pengisian;
 
         $so->update([
             'posisi'    => $request->posisi,
             'job_grade' => $request->job_grade ?: null,
             'mc_tko'    => $mcTko,
             'core'      => $request->core ?? $so->core,
-            'deviasi'   => $so->pengisian - $mcTko,
+            'pengisian' => $pengisian,
+            'deviasi'   => $pengisian - $mcTko,
         ]);
 
         $so->refresh();
@@ -283,6 +295,7 @@ class StrukturOrganisasiController extends Controller
             'job_grade' => $so->job_grade,
             'mc_tko'    => $so->mc_tko,
             'core'      => $so->core,
+            'pengisian' => $so->pengisian,
             'deviasi'   => $so->deviasi,
             'warna'     => $so->warnaDeviasi,
         ]);
@@ -357,6 +370,20 @@ class StrukturOrganisasiController extends Controller
             ? Carbon::parse($k->tanggal_masuk)->diffForHumans(null, true)
             : null;
 
+        // SO assignments history
+        $soAssignments = StrukturOrganisasi::where('karyawan_id', $id)
+            ->where('posisi', '!=', '-')
+            ->orderByDesc('tahun')
+            ->orderByDesc('bulan')
+            ->get(['id','posisi','direktorat','kompartemen','bulan','tahun','job_grade','core']);
+
+        // Activity log assign untuk karyawan ini
+        $assignLogs = \App\Models\ActivityLog::where('aksi', 'assign')
+            ->where('keterangan', 'LIKE', '%('.$k->nik.')%')
+            ->orderByDesc('created_at')
+            ->take(10)
+            ->get(['target','keterangan','user_name','created_at']);
+
         return response()->json([
             'id'              => $k->id,
             'nama'            => $k->nama,
@@ -377,7 +404,86 @@ class StrukturOrganisasiController extends Controller
             'lama_bekerja'    => $lamaBekerja,
             'status'          => $k->status,
             'history'         => $history,
+            'so_assignments'  => $soAssignments,
+            'assign_logs'     => $assignLogs,
         ]);
+    }
+
+
+    public function renameGroup(Request $request)
+    {
+        $request->validate([
+            'tipe'        => 'required|in:direktorat,kompartemen,departemen',
+            'lama'        => 'required|string',
+            'baru'        => 'required|string',
+            'bulan'       => 'required|integer',
+            'tahun'       => 'required|integer',
+            'direktorat'  => 'nullable|string',
+            'kompartemen' => 'nullable|string',
+        ]);
+
+        // Map tipe ke nama kolom sebenarnya ('departemen' → 'dept')
+        $kolom = $request->tipe === 'departemen' ? 'dept' : $request->tipe;
+
+        $query = StrukturOrganisasi::where('bulan', $request->bulan)
+            ->where('tahun', $request->tahun)
+            ->where($kolom, $request->lama);
+
+        if ($request->tipe === 'kompartemen' && $request->direktorat) {
+            $query->where('direktorat', $request->direktorat);
+        }
+        if ($request->tipe === 'departemen') {
+            if ($request->direktorat)  $query->where('direktorat', $request->direktorat);
+            if ($request->kompartemen) $query->where('kompartemen', $request->kompartemen);
+        }
+
+        $count = $query->update([$kolom => $request->baru]);
+
+        $this->log('edit', 'Struktur Organisasi', $request->tipe,
+            "Rename: {$request->lama} → {$request->baru} ({$count} baris)");
+
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    public function deleteGroup(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user->role !== 'super_admin') {
+            return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+        }
+
+        $request->validate([
+            'tipe'        => 'required|in:direktorat,kompartemen,departemen',
+            'nama'        => 'required|string',
+            'bulan'       => 'required|integer',
+            'tahun'       => 'required|integer',
+            'direktorat'  => 'nullable|string',
+            'kompartemen' => 'nullable|string',
+        ]);
+
+        // Map tipe ke nama kolom sebenarnya ('departemen' → 'dept')
+        $kolom = $request->tipe === 'departemen' ? 'dept' : $request->tipe;
+
+        $query = StrukturOrganisasi::where('bulan', $request->bulan)
+            ->where('tahun', $request->tahun)
+            ->where($kolom, $request->nama);
+
+        if ($request->tipe === 'kompartemen' && $request->direktorat) {
+            $query->where('direktorat', $request->direktorat);
+        }
+        if ($request->tipe === 'departemen') {
+            if ($request->direktorat)  $query->where('direktorat', $request->direktorat);
+            if ($request->kompartemen) $query->where('kompartemen', $request->kompartemen);
+        }
+
+        $count = $query->count();
+        $query->delete();
+
+        $this->log('hapus', 'Struktur Organisasi', $request->tipe,
+            "Hapus grup: {$request->nama} ({$count} baris) · Periode {$request->bulan}/{$request->tahun}");
+
+        return response()->json(['success' => true, 'count' => $count]);
     }
 
     public function export(Request $request)
@@ -441,16 +547,19 @@ class StrukturOrganisasiController extends Controller
 
             $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['children'][$funcKey]['jabatan'][] = $row;
 
-            $tree[$dir]['mc_tko']    += $row->mc_tko;
-            $tree[$dir]['pengisian'] += $row->pengisian;
-            $tree[$dir]['children'][$kompKey]['mc_tko']    += $row->mc_tko;
-            $tree[$dir]['children'][$kompKey]['pengisian'] += $row->pengisian;
-            $tree[$dir]['children'][$kompKey]['children'][$deptKey]['mc_tko']    += $row->mc_tko;
-            $tree[$dir]['children'][$kompKey]['children'][$deptKey]['pengisian'] += $row->pengisian;
-            $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['mc_tko']    += $row->mc_tko;
-            $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['pengisian'] += $row->pengisian;
-            $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['children'][$funcKey]['mc_tko']    += $row->mc_tko;
-            $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['children'][$funcKey]['pengisian'] += $row->pengisian;
+            // Hanya hitung baris posisi nyata (bukan placeholder '-')
+            if ($row->posisi !== '-') {
+                $tree[$dir]['mc_tko']    += $row->mc_tko;
+                $tree[$dir]['pengisian'] += $row->pengisian;
+                $tree[$dir]['children'][$kompKey]['mc_tko']    += $row->mc_tko;
+                $tree[$dir]['children'][$kompKey]['pengisian'] += $row->pengisian;
+                $tree[$dir]['children'][$kompKey]['children'][$deptKey]['mc_tko']    += $row->mc_tko;
+                $tree[$dir]['children'][$kompKey]['children'][$deptKey]['pengisian'] += $row->pengisian;
+                $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['mc_tko']    += $row->mc_tko;
+                $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['pengisian'] += $row->pengisian;
+                $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['children'][$funcKey]['mc_tko']    += $row->mc_tko;
+                $tree[$dir]['children'][$kompKey]['children'][$deptKey]['children'][$bagKey]['children'][$funcKey]['pengisian'] += $row->pengisian;
+            }
         }
 
         return $tree;

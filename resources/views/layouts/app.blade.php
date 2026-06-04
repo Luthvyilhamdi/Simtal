@@ -50,7 +50,6 @@
             .sidebar.collapsed .logout-btn { justify-content: flex-start; padding: 8px 10px; }
         }
 
-        /* Brand */
         .sidebar-brand { padding: 18px 16px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0eb; flex-shrink: 0; }
         .brand-row { display: flex; align-items: center; gap: 10px; overflow: hidden; }
         .brand-icon { width: 34px; height: 34px; flex-shrink: 0; background: #f0fdf4; border-radius: 9px; display: flex; align-items: center; justify-content: center; border: 1px solid #bbf7d0; }
@@ -61,44 +60,22 @@
         .collapse-btn:hover { background: #f5f5f0; color: #6b7280; }
         .collapse-btn svg { width: 12px; height: 12px; transition: transform 0.25s; }
 
-        /* Nav */
         .sidebar-nav { flex: 1; padding: 10px 10px; overflow-y: auto; overflow-x: hidden; }
         .sidebar-nav::-webkit-scrollbar { width: 3px; }
         .sidebar-nav::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
 
         .nav-group { margin-bottom: 6px; }
-        .nav-section-label {
-            font-size: 9.5px; font-weight: 700; color: #b0b0a8;
-            text-transform: uppercase; letter-spacing: 1px;
-            padding: 10px 10px 4px; white-space: nowrap; overflow: hidden;
-        }
+        .nav-section-label { font-size: 9.5px; font-weight: 700; color: #b0b0a8; text-transform: uppercase; letter-spacing: 1px; padding: 10px 10px 4px; white-space: nowrap; overflow: hidden; }
         .nav-sep { height: 1px; background: #f3f4f6; margin: 6px 4px; }
 
-        .nav-link {
-            display: flex; align-items: center; gap: 9px;
-            padding: 8px 10px; border-radius: 8px; color: #4b5563;
-            text-decoration: none; font-size: 13px; font-weight: 500;
-            transition: all 0.12s; margin-bottom: 1px;
-            white-space: nowrap; overflow: hidden; position: relative;
-        }
+        .nav-link { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; color: #4b5563; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.12s; margin-bottom: 1px; white-space: nowrap; overflow: hidden; position: relative; }
         .nav-link:hover { background: #f5f5f0; color: #111827; }
-        .nav-link.active {
-            background: #f0fdf4; color: #15803d; font-weight: 600;
-            border-left: 3px solid #16a34a; padding-left: 7px;
-        }
+        .nav-link.active { background: #f0fdf4; color: #15803d; font-weight: 600; border-left: 3px solid #16a34a; padding-left: 7px; }
         .nav-link svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; }
         .nav-text { overflow: hidden; text-overflow: ellipsis; }
 
-        /* Collapsed tooltip */
-        .sidebar.collapsed .nav-link:hover::after {
-            content: attr(data-tooltip); position: absolute; left: 56px; top: 50%;
-            transform: translateY(-50%); background: #1a1a1a; color: white;
-            font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px;
-            white-space: nowrap; z-index: 100; pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+        .sidebar.collapsed .nav-link:hover::after { content: attr(data-tooltip); position: absolute; left: 56px; top: 50%; transform: translateY(-50%); background: #1a1a1a; color: white; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px; white-space: nowrap; z-index: 100; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-        /* Master data collapsible */
         .master-toggle { cursor: pointer; user-select: none; }
         .master-toggle .toggle-chevron { width: 12px; height: 12px; margin-left: auto; flex-shrink: 0; transition: transform 0.2s; stroke: currentColor; fill: none; }
         .master-toggle.open .toggle-chevron { transform: rotate(180deg); }
@@ -107,7 +84,6 @@
         .master-sub .nav-link { padding-left: 32px; font-size: 12px; color: #6b7280; }
         .master-sub .nav-link.active { padding-left: 29px; }
 
-        /* Bottom */
         .sidebar-bottom { padding: 10px; border-top: 1px solid #f0f0eb; flex-shrink: 0; }
         .user-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: #fafaf8; overflow: hidden; border: 1px solid #f0f0eb; }
         .user-avatar { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #16a34a, #15803d); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
@@ -115,10 +91,7 @@
         .user-name { font-size: 12px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-role { font-size: 10px; color: #9ca3af; margin-top: 1px; }
 
-
-        /* Main */
         .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-
         .topbar { background: white; border-bottom: 1px solid #e8e8e3; padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
         .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .hamburger { display: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e5e7eb; background: white; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; flex-shrink: 0; transition: all 0.12s; }
@@ -175,7 +148,6 @@
         .content-area { flex: 1; overflow-y: auto; padding: 24px; }
         @media (max-width: 480px) { .content-area { padding: 16px; } }
 
-        /* Loading */
         #pageLoader { display:none;position:fixed;inset:0;background:rgba(255,255,255,0.78);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(2px); }
         @keyframes spin-fade { 0%,100%{opacity:1} 50%{opacity:0.15} }
         .sp { position:absolute;width:5px;height:16px;border-radius:3px;background:#15803d;left:50%;top:50%;transform-origin:center 25px; }
@@ -224,7 +196,7 @@
     <div class="sidebar-nav">
 
         @if(auth()->user()->role === 'user')
-        {{-- ===== SIDEBAR USER: hanya Struktur Organisasi ===== --}}
+        {{-- ===== SIDEBAR USER ===== --}}
         <div class="nav-group">
             <div class="nav-section-label">Akses Saya</div>
             <a href="{{ route('struktur-organisasi.index') }}" data-tooltip="Struktur Organisasi" class="nav-link {{ request()->routeIs('struktur-organisasi.*') ? 'active' : '' }}">
@@ -235,7 +207,6 @@
         @else
         {{-- ===== SIDEBAR ADMIN / SUPER ADMIN ===== --}}
 
-        {{-- Beranda --}}
         <div class="nav-group">
             <div class="nav-section-label">Beranda</div>
             <a href="{{ route('dashboard') }}" data-tooltip="Dashboard" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -246,14 +217,13 @@
 
         <div class="nav-sep"></div>
 
-        {{-- Data Karyawan --}}
         <div class="nav-group">
             <div class="nav-section-label">Data Karyawan</div>
             <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span class="nav-text">Profil Karyawan</span>
             </a>
-            <a href="{{ route('history_karyawan.index') }}" data-tooltip="History Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
+            <a href="{{ route('history_karyawan.index') }}" data-tooltip="Riwayat Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="nav-text">Riwayat Jabatan</span>
             </a>
@@ -265,7 +235,6 @@
 
         <div class="nav-sep"></div>
 
-        {{-- Kepejabatan --}}
         <div class="nav-group">
             <div class="nav-section-label">Kepejabatan</div>
             <a href="{{ route('history_pejabat.index') }}" data-tooltip="Pejabat Definitif" class="nav-link {{ request()->routeIs('history_pejabat.*') ? 'active' : '' }}">
@@ -280,7 +249,6 @@
 
         <div class="nav-sep"></div>
 
-        {{-- Assessment --}}
         <div class="nav-group">
             <div class="nav-section-label">Assessment</div>
             <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
@@ -291,7 +259,6 @@
 
         <div class="nav-sep"></div>
 
-        {{-- Layanan --}}
         <div class="nav-group">
             <div class="nav-section-label">Layanan</div>
             <a href="{{ route('surat_penting.index') }}" data-tooltip="Surat Penting" class="nav-link {{ request()->routeIs('surat_penting.*') ? 'active' : '' }}">
@@ -304,19 +271,31 @@
             </a>
         </div>
 
+        <div class="nav-sep"></div>
+
+        {{-- LAPORAN --}}
+        <div class="nav-group">
+            <div class="nav-section-label">Laporan</div>
+            <a href="{{ route('laporan.bulanan') }}" data-tooltip="Laporan Bulanan" class="nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span class="nav-text">Laporan Bulanan</span>
+            </a>
+        </div>
+
         @if(auth()->user()->isSuperAdmin())
         <div class="nav-sep"></div>
 
-        {{-- Administrasi (collapsible) --}}
         <div class="nav-group">
             <div class="nav-section-label">Administrasi</div>
             <a href="{{ route('activity_log.index') }}" data-tooltip="Log Aktivitas" class="nav-link {{ request()->routeIs('activity_log.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 <span class="nav-text">Log Aktivitas</span>
             </a>
+            <a href="{{ route('akun.index') }}" data-tooltip="Manajemen Akun" class="nav-link {{ request()->routeIs('akun.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span class="nav-text">Manajemen Akun</span>
+            </a>
 
-
-            {{-- Master Data collapsible --}}
             <div class="nav-link master-toggle {{ request()->routeIs('master.*') ? 'active open' : '' }}" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
                 <span class="nav-text">Master Data</span>
@@ -439,20 +418,17 @@
         if (!isMobile()) { sidebar.classList.remove('mobile-open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
     });
 
-    // Master Data toggle
     function toggleMaster(el) {
         el.classList.toggle('open');
         el.nextElementSibling.classList.toggle('open');
     }
 
-    // User dropdown
     function toggleUserDropdown() { document.getElementById('userDropdownWrap').classList.toggle('open'); }
     document.addEventListener('click', function(e) {
         const wrap = document.getElementById('userDropdownWrap');
         if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
     });
 
-    // Notifikasi
     let notifOpen = false;
     function toggleNotif() {
         notifOpen = !notifOpen;
@@ -499,7 +475,6 @@
     fetchNotif();
     setInterval(fetchNotif, 5 * 60 * 1000);
 
-    // Loading spinner
     const loader = document.getElementById('pageLoader');
     document.addEventListener('click', function(e) {
         const a = e.target.closest('a[href]');

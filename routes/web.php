@@ -23,6 +23,7 @@ use App\Http\Controllers\MasterJobGradeController;
 use App\Http\Controllers\MasterPersonGradeController;
 use App\Http\Controllers\MasterKodeStrukturController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +59,8 @@ Route::middleware('auth')->group(function () {
         Route::middleware('not_user_role')->group(function () {
             Route::post('/',               [StrukturOrganisasiController::class, 'store'])->name('store');
             Route::post('/salin-periode',  [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
+            Route::post('/rename-group',    [StrukturOrganisasiController::class, 'renameGroup'])->name('rename-group');
+            Route::delete('/delete-group',  [StrukturOrganisasiController::class, 'deleteGroup'])->name('delete-group');
             Route::patch('/{so}',          [StrukturOrganisasiController::class, 'update'])->name('update');
             Route::put('/{so}',            [StrukturOrganisasiController::class, 'update'])->name('update.put');
             Route::delete('/{so}',         [StrukturOrganisasiController::class, 'destroy'])->name('destroy');
@@ -169,6 +172,9 @@ Route::middleware('auth')->group(function () {
 
         // FAQ
         Route::get('/faq', fn() => view('faq'))->name('faq');
+
+        // Laporan
+        Route::get('/laporan/bulanan', [LaporanController::class, 'bulanan'])->name('laporan.bulanan');
 
         // ===== SUPER ADMIN ONLY =====
         Route::middleware('super_admin')->group(function () {
