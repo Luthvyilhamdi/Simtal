@@ -11,7 +11,6 @@
     .page-header { margin-bottom:24px; }
     .page-title { font-size:20px;font-weight:700;color:#111827; }
     .page-sub { font-size:13px;color:#6b7280;margin-top:4px; }
-
     .form-wrap { max-width:100%; }
     .form-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:28px;margin-bottom:16px; }
     .section-header { display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #f3f4f6; }
@@ -19,7 +18,6 @@
     .section-icon svg { width:16px;height:16px;stroke:#16a34a;fill:none;stroke-width:1.8; }
     .section-title { font-size:14px;font-weight:700;color:#111827; }
     .section-sub { font-size:12px;color:#9ca3af;margin-top:1px; }
-
     .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
     .form-group { display:flex;flex-direction:column;gap:6px; }
     .form-group.full { grid-column:1/-1; }
@@ -30,10 +28,27 @@
     .form-input.error-input { border-color:#ef4444; }
     .error-msg { font-size:11px;color:#ef4444; }
     .form-hint { font-size:11px;color:#9ca3af;margin-top:2px; }
-
     .select-wrap { position:relative; }
     .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
+
+    /* Tipe Toggle */
+    .tipe-toggle { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px; }
+    .tipe-option { position:relative; }
+    .tipe-option input[type=radio] { position:absolute;opacity:0;width:0;height:0; }
+    .tipe-label {
+        display:flex;align-items:center;gap:10px;padding:14px 16px;
+        border:2px solid #e5e7eb;border-radius:12px;cursor:pointer;
+        transition:all 0.15s;background:#fafafa;
+    }
+    .tipe-label:hover { border-color:#d1d5db;background:white; }
+    .tipe-option input:checked + .tipe-label {
+        border-color:#16a34a;background:#f0fdf4;
+    }
+    .tipe-label-icon { width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .tipe-label-text { font-size:13px;font-weight:600;color:#111827; }
+    .tipe-label-sub { font-size:11px;color:#9ca3af;margin-top:1px; }
+    .tipe-option input:checked + .tipe-label .tipe-label-text { color:#15803d; }
 
     /* File Upload */
     .file-upload-area { border:2px dashed #d1d5db;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafafa;position:relative; }
@@ -44,8 +59,6 @@
     .file-upload-text { font-size:14px;color:#374151;font-weight:600;margin-bottom:4px; }
     .file-upload-text strong { color:#15803d; }
     .file-upload-hint { font-size:12px;color:#9ca3af; }
-
-    /* File Preview */
     .file-preview { display:none;align-items:center;gap:12px;padding:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-top:10px; }
     .file-preview.show { display:flex; }
     .file-preview-icon { font-size:28px;flex-shrink:0; }
@@ -61,13 +74,10 @@
     .btn-save:hover { background:#166534; }
     .btn-save svg,.btn-cancel svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2; }
     .btn-save svg { stroke:white; }
-
     @media (max-width:640px) {
         .form-grid { grid-template-columns:1fr; }
         .form-group.full { grid-column:1; }
-        .form-actions-card { flex-direction:column;align-items:stretch; }
-        .form-actions-right { flex-direction:column; }
-        .btn-cancel,.btn-save { width:100%;justify-content:center; }
+        .tipe-toggle { grid-template-columns:1fr; }
     }
 </style>
 @endpush
@@ -81,11 +91,51 @@
 
     <div class="page-header">
         <div class="page-title">📤 Upload Surat Penting</div>
-        <div class="page-sub">Upload dokumen atau surat penting karyawan</div>
+        <div class="page-sub">Upload surat karyawan atau dokumen umum / pedoman</div>
     </div>
 
     <form method="POST" action="{{ route('surat_penting.store') }}" enctype="multipart/form-data">
         @csrf
+
+        {{-- Tipe Surat --}}
+        <div class="form-card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div>
+                    <div class="section-title">Tipe Dokumen</div>
+                    <div class="section-sub">Pilih apakah surat ini milik karyawan tertentu atau dokumen umum</div>
+                </div>
+            </div>
+
+            <div class="tipe-toggle">
+                <div class="tipe-option">
+                    <input type="radio" name="tipe" id="tipePersonal" value="personal"
+                        {{ old('tipe', 'personal') === 'personal' ? 'checked' : '' }}
+                        onchange="onTipeChange(this.value)">
+                    <label class="tipe-label" for="tipePersonal">
+                        <div class="tipe-label-icon" style="background:#f0fdf4">👤</div>
+                        <div>
+                            <div class="tipe-label-text">Personal</div>
+                            <div class="tipe-label-sub">Surat milik karyawan tertentu</div>
+                        </div>
+                    </label>
+                </div>
+                <div class="tipe-option">
+                    <input type="radio" name="tipe" id="tipeUmum" value="umum"
+                        {{ old('tipe') === 'umum' ? 'checked' : '' }}
+                        onchange="onTipeChange(this.value)">
+                    <label class="tipe-label" for="tipeUmum">
+                        <div class="tipe-label-icon" style="background:#fff7ed">📋</div>
+                        <div>
+                            <div class="tipe-label-text">Umum / Pedoman</div>
+                            <div class="tipe-label-sub">Pedoman, SOP, kebijakan perusahaan</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
 
         {{-- Info Surat --}}
         <div class="form-card">
@@ -100,11 +150,11 @@
             </div>
 
             <div class="form-grid">
-                {{-- Karyawan --}}
-                <div class="form-group full">
+                {{-- Karyawan (hanya muncul jika tipe Personal) --}}
+                <div class="form-group full" id="fieldKaryawan" style="{{ old('tipe','personal')==='umum' ? 'display:none' : '' }}">
                     <label class="form-label">Karyawan <span class="req">*</span></label>
                     <div class="select-wrap">
-                        <select name="karyawan_id" class="form-input {{ $errors->has('karyawan_id') ? 'error-input' : '' }}">
+                        <select name="karyawan_id" id="inputKaryawan" class="form-input {{ $errors->has('karyawan_id') ? 'error-input' : '' }}">
                             <option value="">-- Pilih Karyawan --</option>
                             @foreach($karyawans as $k)
                                 <option value="{{ $k->id }}" {{ old('karyawan_id') == $k->id ? 'selected' : '' }}>
@@ -118,10 +168,11 @@
 
                 {{-- Judul --}}
                 <div class="form-group full">
-                    <label class="form-label">Judul Surat <span class="req">*</span></label>
+                    <label class="form-label">Judul <span class="req">*</span></label>
                     <input type="text" name="judul" value="{{ old('judul') }}"
                            class="form-input {{ $errors->has('judul') ? 'error-input' : '' }}"
-                           placeholder="cth: SK Pengangkatan Jabatan Manager" />
+                           id="inputJudul"
+                           placeholder="cth: SK Pengangkatan / Pedoman Rekrutmen" />
                     @error('judul')<div class="error-msg">{{ $message }}</div>@enderror
                 </div>
 
@@ -136,17 +187,24 @@
                 <div class="form-group">
                     <label class="form-label">Kategori <span class="req">*</span></label>
                     <div class="select-wrap">
-                        <select name="kategori" class="form-input {{ $errors->has('kategori') ? 'error-input' : '' }}">
+                        <select name="kategori" id="inputKategori" class="form-input {{ $errors->has('kategori') ? 'error-input' : '' }}">
                             <option value="">-- Pilih Kategori --</option>
-                            <option value="sk_jabatan"       {{ old('kategori')=='sk_jabatan' ? 'selected' : '' }}>SK Jabatan</option>
-                            <option value="sk_promosi"       {{ old('kategori')=='sk_promosi' ? 'selected' : '' }}>SK Promosi</option>
-                            <option value="sk_mutasi"        {{ old('kategori')=='sk_mutasi' ? 'selected' : '' }}>SK Mutasi</option>
-                            <option value="sk_pensiun"       {{ old('kategori')=='sk_pensiun' ? 'selected' : '' }}>SK Pensiun</option>
-                            <option value="surat_tugas"      {{ old('kategori')=='surat_tugas' ? 'selected' : '' }}>Surat Tugas</option>
-                            <option value="surat_peringatan" {{ old('kategori')=='surat_peringatan' ? 'selected' : '' }}>Surat Peringatan</option>
-                            <option value="kontrak"          {{ old('kategori')=='kontrak' ? 'selected' : '' }}>Kontrak</option>
-                            <option value="sertifikat"       {{ old('kategori')=='sertifikat' ? 'selected' : '' }}>Sertifikat</option>
-                            <option value="lainnya"          {{ old('kategori')=='lainnya' ? 'selected' : '' }}>Lainnya</option>
+                            <optgroup label="Surat Karyawan" id="groupPersonal">
+                                <option value="sk_jabatan"       {{ old('kategori')=='sk_jabatan' ? 'selected' : '' }}>SK Jabatan</option>
+                                <option value="sk_promosi"       {{ old('kategori')=='sk_promosi' ? 'selected' : '' }}>SK Promosi</option>
+                                <option value="sk_mutasi"        {{ old('kategori')=='sk_mutasi' ? 'selected' : '' }}>SK Mutasi</option>
+                                <option value="sk_pensiun"       {{ old('kategori')=='sk_pensiun' ? 'selected' : '' }}>SK Pensiun</option>
+                                <option value="surat_tugas"      {{ old('kategori')=='surat_tugas' ? 'selected' : '' }}>Surat Tugas</option>
+                                <option value="surat_peringatan" {{ old('kategori')=='surat_peringatan' ? 'selected' : '' }}>Surat Peringatan</option>
+                                <option value="kontrak"          {{ old('kategori')=='kontrak' ? 'selected' : '' }}>Kontrak</option>
+                                <option value="sertifikat"       {{ old('kategori')=='sertifikat' ? 'selected' : '' }}>Sertifikat</option>
+                            </optgroup>
+                            <optgroup label="Dokumen Umum" id="groupUmum">
+                                <option value="pedoman"   {{ old('kategori')=='pedoman' ? 'selected' : '' }}>Pedoman</option>
+                                <option value="prosedur"  {{ old('kategori')=='prosedur' ? 'selected' : '' }}>Prosedur / SOP</option>
+                                <option value="kebijakan" {{ old('kategori')=='kebijakan' ? 'selected' : '' }}>Kebijakan</option>
+                            </optgroup>
+                            <option value="lainnya" {{ old('kategori')=='lainnya' ? 'selected' : '' }}>Lainnya</option>
                         </select>
                     </div>
                     @error('kategori')<div class="error-msg">{{ $message }}</div>@enderror
@@ -172,7 +230,7 @@
                 <div class="form-group full">
                     <label class="form-label">Keterangan</label>
                     <textarea name="keterangan" rows="3" class="form-input" style="resize:vertical;"
-                              placeholder="Catatan tambahan tentang surat ini...">{{ old('keterangan') }}</textarea>
+                              placeholder="Catatan tambahan...">{{ old('keterangan') }}</textarea>
                 </div>
             </div>
         </div>
@@ -203,7 +261,6 @@
                 <span class="file-preview-size" id="previewSize">-</span>
                 <button type="button" class="file-preview-remove" onclick="removeFile()">✕</button>
             </div>
-
             @error('file')<div class="error-msg" style="margin-top:8px">{{ $message }}</div>@enderror
         </div>
 
@@ -227,44 +284,50 @@
 
 @push('scripts')
 <script>
-    function previewFile(input) {
-        if (input.files && input.files[0]) {
-            const file     = input.files[0];
-            const ext      = file.name.split('.').pop().toLowerCase();
-            const icon     = ext === 'pdf' ? '📄' : ['jpg','jpeg','png'].includes(ext) ? '🖼️' : '📎';
-            const size     = file.size >= 1048576
-                ? (file.size / 1048576).toFixed(1) + ' MB'
-                : (file.size / 1024).toFixed(1) + ' KB';
-
-            document.getElementById('previewIcon').textContent = icon;
-            document.getElementById('previewName').textContent = file.name;
-            document.getElementById('previewSize').textContent = size;
-            document.getElementById('filePreview').classList.add('show');
-        }
+function onTipeChange(tipe) {
+    const fieldKaryawan = document.getElementById('fieldKaryawan');
+    const inputKaryawan = document.getElementById('inputKaryawan');
+    if (tipe === 'umum') {
+        fieldKaryawan.style.display = 'none';
+        inputKaryawan.value = '';
+    } else {
+        fieldKaryawan.style.display = '';
     }
+}
 
-    function removeFile() {
-        document.getElementById('fileInput').value = '';
-        document.getElementById('filePreview').classList.remove('show');
+// Init on load
+document.addEventListener('DOMContentLoaded', function() {
+    const checked = document.querySelector('input[name=tipe]:checked');
+    if (checked) onTipeChange(checked.value);
+});
+
+function previewFile(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const ext  = file.name.split('.').pop().toLowerCase();
+        const icon = ext === 'pdf' ? '📄' : ['jpg','jpeg','png'].includes(ext) ? '🖼️' : '📎';
+        const size = file.size >= 1048576
+            ? (file.size / 1048576).toFixed(1) + ' MB'
+            : (file.size / 1024).toFixed(1) + ' KB';
+        document.getElementById('previewIcon').textContent = icon;
+        document.getElementById('previewName').textContent = file.name;
+        document.getElementById('previewSize').textContent = size;
+        document.getElementById('filePreview').classList.add('show');
     }
+}
 
-    // Drag & Drop
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', e => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dragover');
-    });
-    dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        if (files.length) {
-            document.getElementById('fileInput').files = files;
-            previewFile(document.getElementById('fileInput'));
-        }
-    });
+function removeFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('filePreview').classList.remove('show');
+}
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length) { document.getElementById('fileInput').files = files; previewFile(document.getElementById('fileInput')); }
+});
 </script>
 @endpush

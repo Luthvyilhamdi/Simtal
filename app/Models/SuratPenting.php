@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int         $id
- * @property int         $karyawan_id
+ * @property string      $tipe          personal|umum
+ * @property int|null    $karyawan_id
  * @property int         $uploaded_by
  * @property string      $judul
  * @property string|null $nomor_surat
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 class SuratPenting extends Model
 {
     protected $fillable = [
-        'karyawan_id', 'judul', 'nomor_surat', 'kategori',
+        'tipe', 'karyawan_id', 'judul', 'nomor_surat', 'kategori',
         'tanggal_surat', 'tanggal_exp', 'file_path',
         'file_name', 'file_size', 'keterangan', 'uploaded_by',
     ];
@@ -43,6 +44,11 @@ class SuratPenting extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
+    public function getIsPersonalAttribute(): bool
+    {
+        return $this->tipe === 'personal';
+    }
+
     public function getKategoriLabelAttribute(): string
     {
         return match($this->kategori) {
@@ -54,6 +60,9 @@ class SuratPenting extends Model
             'surat_peringatan' => 'Surat Peringatan',
             'kontrak'          => 'Kontrak',
             'sertifikat'       => 'Sertifikat',
+            'pedoman'          => 'Pedoman',
+            'prosedur'         => 'Prosedur/SOP',
+            'kebijakan'        => 'Kebijakan',
             default            => 'Lainnya',
         };
     }
@@ -67,6 +76,7 @@ class SuratPenting extends Model
             'surat_peringatan'                    => ['bg' => '#fee2e2', 'text' => '#dc2626'],
             'kontrak'                             => ['bg' => '#f5f3ff', 'text' => '#7c3aed'],
             'sertifikat'                          => ['bg' => '#fdf4ff', 'text' => '#a21caf'],
+            'pedoman','prosedur','kebijakan'      => ['bg' => '#fff7ed', 'text' => '#c2410c'],
             default                               => ['bg' => '#f3f4f6', 'text' => '#6b7280'],
         };
     }

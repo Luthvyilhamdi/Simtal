@@ -29,6 +29,10 @@ class SuratPentingController extends Controller
             $query->where('kategori', $request->kategori);
         }
 
+        if ($request->tipe) {
+            $query->where('tipe', $request->tipe);
+        }
+
         if ($request->karyawan_id) {
             $query->where('karyawan_id', $request->karyawan_id);
         }
@@ -37,9 +41,11 @@ class SuratPentingController extends Controller
         $karyawans = Karyawan::orderBy('nama')->get();
 
         $stats = [
-            'total'  => SuratPenting::count(),
-            'expire' => SuratPenting::whereNotNull('tanggal_exp')->where('tanggal_exp', '<', now())->count(),
-            'soon'   => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
+            'total'    => SuratPenting::count(),
+            'personal' => SuratPenting::where('tipe', 'personal')->count(),
+            'umum'     => SuratPenting::where('tipe', 'umum')->count(),
+            'expire'   => SuratPenting::whereNotNull('tanggal_exp')->where('tanggal_exp', '<', now())->count(),
+            'soon'     => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
         ];
 
         return view('surat_penting.index', compact('surats', 'karyawans', 'stats'));
@@ -53,11 +59,14 @@ class SuratPentingController extends Controller
 
     public function store(Request $request)
     {
+        $isPersonal = $request->tipe === 'personal';
+
         $request->validate([
-            'karyawan_id'   => 'required|exists:karyawans,id',
+            'tipe'          => 'required|in:personal,umum',
+            'karyawan_id'   => $isPersonal ? 'required|exists:karyawans,id' : 'nullable',
             'judul'         => 'required|string|max:255',
             'nomor_surat'   => 'nullable|string|max:255',
-            'kategori'      => 'required|in:sk_jabatan,sk_promosi,sk_mutasi,sk_pensiun,surat_tugas,surat_peringatan,kontrak,sertifikat,lainnya',
+            'kategori'      => 'required|in:sk_jabatan,sk_promosi,sk_mutasi,sk_pensiun,surat_tugas,surat_peringatan,kontrak,sertifikat,pedoman,prosedur,kebijakan,lainnya',
             'tanggal_surat' => 'required|date',
             'tanggal_exp'   => 'nullable|date|after:tanggal_surat',
             'file'          => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
@@ -70,7 +79,8 @@ class SuratPentingController extends Controller
         $fileSize = $this->formatFileSize($file->getSize());
 
         SuratPenting::create([
-            'karyawan_id'   => $request->karyawan_id,
+            'tipe'          => $request->tipe,
+            'karyawan_id'   => $isPersonal ? $request->karyawan_id : null,
             'judul'         => $request->judul,
             'nomor_surat'   => $request->nomor_surat,
             'kategori'      => $request->kategori,
