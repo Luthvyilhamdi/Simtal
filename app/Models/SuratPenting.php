@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * @property int         $id
+ * @property string      $uuid
  * @property string      $tipe          personal|umum
  * @property int|null    $karyawan_id
  * @property int         $uploaded_by
@@ -24,7 +26,7 @@ use Illuminate\Database\Eloquent\Model;
 class SuratPenting extends Model
 {
     protected $fillable = [
-        'tipe', 'karyawan_id', 'judul', 'nomor_surat', 'kategori',
+        'uuid', 'tipe', 'karyawan_id', 'judul', 'nomor_surat', 'kategori',
         'tanggal_surat', 'tanggal_exp', 'file_path',
         'file_name', 'file_size', 'keterangan', 'uploaded_by',
     ];
@@ -33,6 +35,21 @@ class SuratPenting extends Model
         'tanggal_surat' => 'date',
         'tanggal_exp'   => 'date',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = Str::uuid()->toString();
+            }
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     public function karyawan()
     {
