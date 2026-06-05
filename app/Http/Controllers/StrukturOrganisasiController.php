@@ -153,10 +153,11 @@ class StrukturOrganisasiController extends Controller
     public function salinPeriode(Request $request)
     {
         $request->validate([
-            'dari_bulan' => 'required|integer|min:1|max:12',
-            'dari_tahun' => 'required|integer',
-            'ke_bulan'   => 'required|integer|min:1|max:12',
-            'ke_tahun'   => 'required|integer',
+            'dari_bulan'      => 'required|integer|min:1|max:12',
+            'dari_tahun'      => 'required|integer',
+            'ke_bulan'        => 'required|integer|min:1|max:12',
+            'ke_tahun'        => 'required|integer',
+            'tanpa_karyawan'  => 'nullable|boolean',
         ]);
 
         $dariBulan = $request->dari_bulan;
@@ -175,7 +176,9 @@ class StrukturOrganisasiController extends Controller
             return back()->with('error', "Tidak ada data di periode {$dariBulan}/{$dariTahun}.");
         }
 
-        DB::transaction(function() use ($data, $keBulan, $keTahun) {
+        $tanpaKaryawan = (bool) $request->input('tanpa_karyawan', false);
+
+        DB::transaction(function() use ($data, $keBulan, $keTahun, $tanpaKaryawan) {
             $chunks = $data->map(fn($row) => [
                 'bulan'         => $keBulan,
                 'tahun'         => $keTahun,
@@ -188,11 +191,11 @@ class StrukturOrganisasiController extends Controller
                 'job_grade'     => $row->job_grade,
                 'mc_tko'        => $row->mc_tko,
                 'core'          => $row->core,
-                'karyawan_id'   => $row->karyawan_id,
-                'nik_karyawan'  => $row->nik_karyawan,
-                'nama_karyawan' => $row->nama_karyawan,
-                'pengisian'     => $row->pengisian,
-                'deviasi'       => $row->deviasi,
+                'karyawan_id'   => $tanpaKaryawan ? null : $row->karyawan_id,
+                'nik_karyawan'  => $tanpaKaryawan ? null : $row->nik_karyawan,
+                'nama_karyawan' => $tanpaKaryawan ? null : $row->nama_karyawan,
+                'pengisian'     => $tanpaKaryawan ? 0    : $row->pengisian,
+                'deviasi'       => $tanpaKaryawan ? -$row->mc_tko : $row->deviasi,
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ])->toArray();
@@ -205,7 +208,7 @@ class StrukturOrganisasiController extends Controller
         $namaBulan = Carbon::createFromDate($keTahun, $keBulan, 1)->translatedFormat('F Y');
 
         $this->log('salin', 'Struktur Organisasi', "Periode {$namaBulan}",
-            "Disalin dari {$dariBulan}/{$dariTahun} · {$data->count()} posisi");
+            "Disalin dari {$dariBulan}/{$dariTahun} · {$data->count()} posisi" . ($tanpaKaryawan ? " · tanpa karyawan" : ""));
 
         return redirect()->route('struktur-organisasi.index', ['bulan' => $keBulan, 'tahun' => $keTahun])
                          ->with('success', "Berhasil menyalin {$data->count()} posisi ke periode {$namaBulan}.");
@@ -231,6 +234,20 @@ class StrukturOrganisasiController extends Controller
 
             $this->log('assign', 'Struktur Organisasi', $so->posisi,
                 $karyawan ? "Assign: {$karyawan->nama} ({$karyawan->nik})" : 'Lepas karyawan');
+
+            // Kirim notifikasi ke karyawan yang di-assign
+            if ($karyawan) {
+                $userKaryawan = \App\Models\User::where('nik', $karyawan->nik)->first();
+                if ($userKaryawan) {
+                    \App\Models\Notifikasi::create([
+                        'user_id' => $userKaryawan->id,
+                        'judul'   => '📋 Penugasan SO Baru',
+                        'pesan'   => 'Anda telah di-assign ke posisi "' . $so->posisi . '" pada Struktur Organisasi.',
+                        'tipe'    => 'so_assign',
+                        'level'   => 'info',
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success'       => true,
@@ -502,6 +519,40 @@ class StrukturOrganisasiController extends Controller
             ]),
             $filename
         );
+    }
+
+
+    public function hapusPeriode(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->role !== 'super_admin') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer',
+        ]);
+
+        $bulan = (int) $request->bulan;
+        $tahun = (int) $request->tahun;
+
+        $count = StrukturOrganisasi::where('bulan', $bulan)->where('tahun', $tahun)->count();
+
+        if ($count === 0) {
+            return redirect()->route('struktur-organisasi.index')
+                ->with('error', 'Tidak ada data di periode ini.');
+        }
+
+        StrukturOrganisasi::where('bulan', $bulan)->where('tahun', $tahun)->delete();
+
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F Y');
+        $this->log('hapus', 'Struktur Organisasi', "Periode {$namaBulan}",
+            "Hapus seluruh periode · {$count} posisi dihapus");
+
+        return redirect()->route('struktur-organisasi.index')
+            ->with('success', "Berhasil menghapus {$count} posisi dari periode {$namaBulan}.");
     }
 
     private function buildTree($data)

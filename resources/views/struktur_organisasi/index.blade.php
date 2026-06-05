@@ -4,6 +4,16 @@
 @section('breadcrumb', 'Struktur Organisasi')
 
 @php
+/** @var int $bulan */
+/** @var int $tahun */
+/** @var \Illuminate\Support\Collection $allJabatan */
+/** @var array $tree */
+/** @var array $stats */
+/** @var \Illuminate\Support\Collection $karyawans */
+/** @var \Illuminate\Support\Collection $periodeList */
+/** @var \Illuminate\Support\Collection $direktorats */
+/** @var \Illuminate\Support\Collection $kompartemens */
+/** @var \Illuminate\Support\Collection $fungsionals */
 $namaBulanList = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 $periodeSaatIni = $namaBulanList[$bulan] . ' ' . $tahun;
 $isUser = auth()->user()->isUser();
@@ -61,6 +71,12 @@ $isUser = auth()->user()->isUser();
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
     Salin ke Periode Baru
   </button>
+  @if(auth()->user()->role === 'super_admin')
+  <button onclick="openHapusPeriode()" style="padding:7px 14px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+    Hapus Periode Ini
+  </button>
+  @endif
   @endif
 
   @if($periodeList->count() > 0)
@@ -599,8 +615,25 @@ $isUser = auth()->user()->isUser();
           </select>
         </div>
       </div>
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-top:16px;font-size:12px;color:#185fa5">
-        ℹ️ Posisi, struktur, dan data karyawan akan disalin. Perubahan di periode baru tidak mempengaruhi periode lain.
+      {{-- Opsi karyawan --}}
+      <div style="margin-top:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px">Opsi Salin</div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <div style="position:relative;width:40px;height:22px;flex-shrink:0">
+            <input type="checkbox" name="tanpa_karyawan" id="toggleTanpaKaryawan" value="1"
+              style="opacity:0;width:0;height:0;position:absolute"
+              onchange="updateSalinLabel(this.checked)">
+            <div id="toggleTrack" style="position:absolute;inset:0;background:#e5e7eb;border-radius:20px;transition:background .2s"></div>
+            <div id="toggleThumb" style="position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#111827" id="salinLabel">Salin dengan karyawan</div>
+            <div style="font-size:11px;color:#9ca3af" id="salinDesc">Posisi dan data karyawan akan disalin bersama</div>
+          </div>
+        </label>
+      </div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:#185fa5">
+        ℹ️ Perubahan di periode baru tidak mempengaruhi periode lain.
       </div>
     </div>
     <div style="padding:14px 22px;border-top:1px solid #f3f4f6;display:flex;gap:8px;justify-content:flex-end">
@@ -857,6 +890,43 @@ $isUser = auth()->user()->isUser();
   </div>
 </div>
 
+
+{{-- Data untuk JavaScript --}}
+<script id="soPageData" type="application/json">
+{
+    "bulan": {{ $bulan }},
+    "tahun": {{ $tahun }},
+    "csrf": "{{ csrf_token() }}"
+}
+</script>
+
+@endsection
+
+{{-- ===== MODAL HAPUS PERIODE ===== --}}
+<div id="modalHapusPeriodeBg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;width:420px;max-width:95vw;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+    <div style="padding:24px 24px 16px;text-align:center">
+      <div style="width:52px;height:52px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:8px">Hapus Seluruh Periode?</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:8px">Yakin ingin menghapus <strong style="color:#dc2626">semua data SO periode {{ $periodeSaatIni }}</strong>?</div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;font-size:12px;color:#dc2626;text-align:left">
+        ⚠️ Tindakan ini akan menghapus <strong>{{ $allJabatan->count() }} posisi</strong> secara permanen dan tidak dapat dibatalkan.
+      </div>
+    </div>
+    <div style="padding:16px 24px 20px;display:flex;gap:8px;justify-content:center">
+      <button onclick="closeHapusPeriode()" style="padding:9px 24px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;cursor:pointer;font-family:inherit;font-weight:500">Batal</button>
+      <form id="formHapusPeriode" method="POST" action="{{ route('struktur-organisasi.hapus-periode') }}" style="display:inline">
+        @csrf @method('DELETE')
+        <input type="hidden" name="bulan" value="{{ $bulan }}">
+        <input type="hidden" name="tahun" value="{{ $tahun }}">
+        <button type="submit" style="padding:9px 24px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Ya, Hapus Periode</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 @push('scripts')
 <style>
 @keyframes panelSpin{to{transform:rotate(360deg)}}
@@ -864,6 +934,8 @@ $isUser = auth()->user()->isUser();
 @keyframes toastBar{from{width:calc(100% - 40px)}to{width:0}}
 </style>
 <script>
+const _pd = JSON.parse(document.getElementById('soPageData').textContent);
+
 document.addEventListener('DOMContentLoaded', function() {
   const toast = document.getElementById('toastSuccess');
   if (toast) { setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s'; setTimeout(()=>toast.remove(), 300); }, 3000); }
@@ -910,8 +982,21 @@ function confirmHapus(id,posisi){hapusId=id;document.getElementById('hapusPosisi
 function closeHapus(){document.getElementById('modalHapusBg').style.display='none';hapusId=null;}
 document.getElementById('modalHapusBg').addEventListener('click',function(e){if(e.target===this)closeHapus();});
 
-function openSalin(){document.getElementById('modalSalinBg').style.display='flex';}
+function openSalin(){
+  document.getElementById('modalSalinBg').style.display='flex';
+  // Reset toggle
+  const cb=document.getElementById('toggleTanpaKaryawan');
+  if(cb){cb.checked=false;updateSalinLabel(false);}
+}
+function updateSalinLabel(checked){
+  document.getElementById('toggleTrack').style.background=checked?'#15803d':'#e5e7eb';
+  document.getElementById('toggleThumb').style.left=checked?'21px':'3px';
+  document.getElementById('salinLabel').textContent=checked?'Salin tanpa karyawan':'Salin dengan karyawan';
+  document.getElementById('salinDesc').textContent=checked?'Hanya posisi dan struktur yang disalin':'Posisi dan data karyawan akan disalin bersama';
+}
 function closeSalin(){document.getElementById('modalSalinBg').style.display='none';}
+function openHapusPeriode(){document.getElementById('modalHapusPeriodeBg').style.display='flex';}
+function closeHapusPeriode(){document.getElementById('modalHapusPeriodeBg').style.display='none';}
 document.getElementById('modalSalinBg').addEventListener('click',function(e){if(e.target===this)closeSalin();});
 
 function openPanel(karyawanId){
@@ -935,12 +1020,10 @@ function openPanel(karyawanId){
     document.getElementById('pJG').textContent='JG '+d.job_grade;
     document.getElementById('pPG').textContent='PG '+d.person_grade;
     const currentH = d.history ? d.history.find(h=>h.is_current) : null;
-    const noSk     = currentH?.no_sk     || '-';
-    const tglSk    = currentH?.tanggal_mulai || '-';
+    const noSk = currentH?.no_sk || '-';
+    const tglSk = currentH?.tanggal_mulai || '-';
     const rows=[['Direktorat',d.direktorat],['Kompartemen',d.kompartemen],['Departemen',d.departemen],['No. SK',noSk],['Tanggal SK',tglSk],['Tgl Masuk',d.tanggal_masuk],['Tgl Lahir',d.tanggal_lahir],['Pensiun',d.pensiun],['Lama Bekerja',d.lama_bekerja]];
     document.getElementById('pInfoRows').innerHTML=rows.map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 14px;border-bottom:1px solid #f9fafb;gap:10px"><span style="font-size:11px;color:#9ca3af;flex-shrink:0">${l}</span><span style="font-size:12px;font-weight:500;color:#111827;text-align:right">${v??'-'}</span></div>`).join('');
-
-    // SO Assignments
     const soEl=document.getElementById('pSoHistory');
     const namaBulan=['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
     if(!d.so_assignments||d.so_assignments.length===0){
@@ -948,9 +1031,7 @@ function openPanel(karyawanId){
     }else{
       soEl.innerHTML=d.so_assignments.map(s=>`
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding:10px;background:#f9fafb;border-radius:8px;border:1px solid #f3f4f6">
-          <div style="flex-shrink:0;margin-top:2px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#15803d"></div>
-          </div>
+          <div style="flex-shrink:0;margin-top:2px"><div style="width:8px;height:8px;border-radius:50%;background:#15803d"></div></div>
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:600;color:#111827">${s.posisi}</div>
             <div style="font-size:11px;color:#6b7280;margin-top:2px">${s.direktorat||''} ${s.kompartemen?'· '+s.kompartemen:''}</div>
@@ -962,7 +1043,6 @@ function openPanel(karyawanId){
           </div>
         </div>`).join('');
     }
-    // Assign logs
     if(d.assign_logs&&d.assign_logs.length>0){
       soEl.innerHTML+='<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Log Aktivitas Assign</div>';
       soEl.innerHTML+=d.assign_logs.map(l=>`
@@ -1005,49 +1085,80 @@ function openTambah(tipe,dir,komp,dept,bag){
 function closeTambah(){document.getElementById('modalTambahBg').style.display='none';}
 function submitTambah(){
   const form=document.getElementById('formTambah');
-  if(tambahTipe==='kompartemen'){const val=document.getElementById('inputKompartemen').value.trim();if(!val){alert('Nama kompartemen wajib diisi!');return;}document.getElementById('ftKomp').value=val;document.getElementById('ftPosisiHidden').value='-';document.getElementById('ftMcTkoHidden').value='1';}
-  else if(tambahTipe==='departemen'){const val=document.getElementById('inputDepartemen').value.trim();if(!val){alert('Nama departemen wajib diisi!');return;}document.getElementById('ftDept').value=val;document.getElementById('ftPosisiHidden').value='-';document.getElementById('ftMcTkoHidden').value='1';}
-  else if(tambahTipe==='bagian'){const val=document.getElementById('inputBagian').value.trim();if(!val){alert('Nama bagian wajib diisi!');return;}document.getElementById('ftBag').value=val;document.getElementById('ftPosisiHidden').value='-';document.getElementById('ftMcTkoHidden').value='1';}
+  if(tambahTipe==='kompartemen'){const val=document.getElementById('inputKompartemen').value.trim();if(!val){alert('Nama kompartemen wajib diisi!');return;}document.getElementById('ftKomp').value=val;document.getElementById('ftPosisiHidden').value='-';document.getElementById('ftMcTkoHidden').value='0';}
+  else if(tambahTipe==='departemen'){const val=document.getElementById('inputDepartemen').value.trim();if(!val){alert('Nama departemen wajib diisi!');return;}document.getElementById('ftDept').value=val;document.getElementById('ftPosisiHidden').value='-';document.getElementById('ftMcTkoHidden').value='0';}
+  else if(tambahTipe==='bagian'){const val=document.getElementById('inputBagian').value.trim();if(!val){alert('Nama bagian wajib diisi!');return;}document.getElementById('ftBag').value=val;document.getElementById('ftPosisiHidden').value='-';document.getElementById('ftMcTkoHidden').value='0';}
   else if(tambahTipe==='staff'){const posisi=document.getElementById('inputPosisi').value.trim();if(!posisi){alert('Job Title / Posisi wajib diisi!');return;}document.getElementById('ftPosisiHidden').value=posisi;document.getElementById('ftMcTkoHidden').value=document.getElementById('inputMcTko').value||'';document.getElementById('ftFunc').value=document.getElementById('inputFungsional').value.trim();}
   form.submit();
 }
 document.getElementById('modalTambahBg').addEventListener('click',function(e){if(e.target===this)closeTambah();});
 
 let currentSoId=null,currentMc=1;
-const currentAssignments={};// track karyawan_id terbaru per soId
+const currentAssignments={};
 function openModal(soId,posisi,karyawanId,mc){
   currentSoId=soId;currentMc=mc||1;
   document.getElementById('modalPosisi').textContent=posisi;
-  // Reset search
   document.getElementById('assignSearch').value='';
   document.getElementById('assignSearchClear').style.display='none';
   document.getElementById('assignDropdown').style.display='none';
   document.getElementById('assignSelected').style.display='none';
   document.getElementById('infoCard').style.display='none';
   document.getElementById('kosongCard').style.display='none';
-  // Pakai state terbaru jika ada (setelah AJAX assign)
-  const effectiveId = currentAssignments.hasOwnProperty(soId)
-    ? currentAssignments[soId]
-    : (karyawanId??null);
+  const effectiveId = currentAssignments.hasOwnProperty(soId) ? currentAssignments[soId] : (karyawanId??null);
   document.getElementById('modalSelKaryawan').value=effectiveId||'';
   if(effectiveId){
     const opt=document.querySelector('#modalSelKaryawan option[value="'+effectiveId+'"]');
-    if(opt){
-      selectAssignKaryawan(effectiveId, opt.dataset.nama||'', opt.dataset.nik||'');
-    } else {
-      loadKaryawanInfo(effectiveId);
-    }
+    if(opt){ selectAssignKaryawan(effectiveId, opt.dataset.nama||'', opt.dataset.nik||''); }
+    else { loadKaryawanInfo(effectiveId); }
   } else { showKosong(); }
   document.getElementById('modalBg').style.display='flex';
   setTimeout(()=>document.getElementById('assignSearch').focus(),100);
 }
 function closeModal(){document.getElementById('modalBg').style.display='none';currentSoId=null;}
-function loadKaryawanInfo(id){document.getElementById('infoCard').style.display='none';document.getElementById('kosongCard').style.display='none';if(!id){showKosong();return;}fetch('/api/karyawan/'+id+'/detail').then(r=>r.json()).then(d=>{document.getElementById('iNik').textContent=d.nik??'-';document.getElementById('iJab').textContent=d.jabatan_saat_ini??'-';document.getElementById('iDir').textContent=d.direktorat??'-';document.getElementById('iKomp').textContent=d.kompartemen??'-';document.getElementById('iDept').textContent=d.departemen??'-';document.getElementById('iJg').textContent=d.job_grade??'-';document.getElementById('iPg').textContent=d.person_grade??'-';const dev=1-currentMc;document.getElementById('deviasiVal').textContent=dev;document.getElementById('deviasiVal').style.color=dev<0?'#d97706':(dev>0?'#dc2626':'#15803d');document.getElementById('deviasiBox').style.background=dev<0?'#fef3c7':(dev>0?'#fee2e2':'#dcfce7');document.getElementById('infoCard').style.display='grid';});}
+function loadKaryawanInfo(id){
+  document.getElementById('infoCard').style.display='none';
+  document.getElementById('kosongCard').style.display='none';
+  if(!id){showKosong();return;}
+  fetch('/api/karyawan/'+id+'/detail').then(r=>r.json()).then(d=>{
+    document.getElementById('iNik').textContent=d.nik??'-';
+    document.getElementById('iJab').textContent=d.jabatan_saat_ini??'-';
+    document.getElementById('iDir').textContent=d.direktorat??'-';
+    document.getElementById('iKomp').textContent=d.kompartemen??'-';
+    document.getElementById('iDept').textContent=d.departemen??'-';
+    document.getElementById('iJg').textContent=d.job_grade??'-';
+    document.getElementById('iPg').textContent=d.person_grade??'-';
+    const dev=1-currentMc;
+    document.getElementById('deviasiVal').textContent=dev;
+    document.getElementById('deviasiVal').style.color=dev<0?'#d97706':(dev>0?'#dc2626':'#15803d');
+    document.getElementById('deviasiBox').style.background=dev<0?'#fef3c7':(dev>0?'#fee2e2':'#dcfce7');
+    document.getElementById('infoCard').style.display='grid';
+  });
+}
 function showKosong(){document.getElementById('deviasiKosong').textContent=0-currentMc;document.getElementById('kosongCard').style.display='block';}
-function saveAssign(){const karyawanId=document.getElementById('modalSelKaryawan').value;fetch('/struktur-organisasi/'+currentSoId,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({karyawan_id:karyawanId||null}),}).then(r=>r.json()).then(d=>{if(!d.success)return;currentAssignments[currentSoId]=d.karyawan_id||null;const td=document.getElementById('td-karyawan-'+currentSoId);if(d.nama_karyawan){td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+d.nama_karyawan.substring(0,2).toUpperCase()+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';}else{td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';}const pEl=document.getElementById('pengisian-'+currentSoId);const dEl=document.getElementById('deviasi-'+currentSoId);pEl.textContent=d.pengisian;pEl.style.background=d.pengisian?'#dcfce7':'#f3f4f6';pEl.style.color=d.pengisian?'#15803d':'#6b7280';dEl.textContent=d.deviasi;dEl.style.color=d.warna;dEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');closeModal();});}
+function saveAssign(){
+  const karyawanId=document.getElementById('modalSelKaryawan').value;
+  fetch('/struktur-organisasi/'+currentSoId,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':_pd.csrf},
+    body:JSON.stringify({karyawan_id:karyawanId||null}),
+  }).then(r=>r.json()).then(d=>{
+    if(!d.success)return;
+    currentAssignments[currentSoId]=d.karyawan_id||null;
+    const td=document.getElementById('td-karyawan-'+currentSoId);
+    if(d.nama_karyawan){
+      td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+d.nama_karyawan.substring(0,2).toUpperCase()+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';
+    }else{
+      td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';
+    }
+    const pEl=document.getElementById('pengisian-'+currentSoId);
+    const dEl=document.getElementById('deviasi-'+currentSoId);
+    pEl.textContent=d.pengisian;pEl.style.background=d.pengisian?'#dcfce7':'#f3f4f6';pEl.style.color=d.pengisian?'#15803d':'#6b7280';
+    dEl.textContent=d.deviasi;dEl.style.color=d.warna;dEl.style.background=d.deviasi==0?'#dcfce7':(d.deviasi>0?'#fee2e2':'#fef3c7');
+    closeModal();
+  });
+}
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-// ===== COLLAPSE ALL / EXPAND ALL =====
 function collapseAll(){
   document.querySelectorAll('tr[data-slug]').forEach(tr=>{
     const slug=tr.dataset.slug;
@@ -1063,9 +1174,6 @@ function expandAll(){
   });
 }
 
-
-
-// ===== AVATAR COLOR =====
 function avatarColor(str){
   const colors=['#15803d','#185fa5','#7c3aed','#d97706','#0891b2','#be185d','#dc2626','#374151'];
   let hash=0;
@@ -1073,7 +1181,6 @@ function avatarColor(str){
   return colors[Math.abs(hash)%colors.length];
 }
 
-// ===== EDIT POSISI =====
 let currentEditId=null;
 function openEdit(soId,posisi,jg,mc,core,pengisian){
   currentEditId=soId;
@@ -1104,7 +1211,7 @@ function saveEdit(){
   const pengisian=document.getElementById('editInputPengisian').value;
   fetch('/struktur-organisasi/'+currentEditId+'/posisi',{
     method:'PATCH',
-    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':_pd.csrf},
     body:JSON.stringify({posisi,job_grade:jg||null,mc_tko:mc!==''?mc:null,core,pengisian:pengisian!==''?parseInt(pengisian):null}),
   }).then(r=>r.json()).then(d=>{
     if(!d.success){alert('Gagal menyimpan');return;}
@@ -1131,7 +1238,6 @@ function saveEdit(){
 }
 document.getElementById('modalEditBg').addEventListener('click',function(e){if(e.target===this)closeEdit();});
 
-// ===== HIGHLIGHT NEW ROW =====
 @if(session('new_row_id'))
 document.addEventListener('DOMContentLoaded',function(){
   const newRow=document.getElementById('row-{{ session("new_row_id") }}');
@@ -1146,11 +1252,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 @endif
 
-
-// ===== ASSIGN SEARCH =====
 let assignHighlight=-1;
-
-// Event delegation - no inline onclick, no escaping issues
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('assignDropdownList').addEventListener('click',function(e){
     const item=e.target.closest('[data-assign-id]');
@@ -1189,15 +1291,14 @@ function onAssignSearch(val){
       const color=avatarColor(r.display);
       return '<div data-assign-id="'+r.id+'" data-assign-nama="'+r.nama+'" data-assign-nik="'+r.nik+'" style="padding:8px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid #f3f4f6;color:#111827;display:flex;align-items:center;gap:10px">'
         +'<div style="width:30px;height:30px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">'+initials+'</div>'
-        +'<div><div style="font-size:13px;font-weight:500;color:#111827">'+r.display.split(' — ')[0]+'</div>'
-        +'<div style="font-size:11px;color:#9ca3af">'+r.display.split(' — ')[1]+'</div></div>'
+        +'<div><div style="font-size:13px;font-weight:500;color:#111827">'+r.display.split(' \u2014 ')[0]+'</div>'
+        +'<div style="font-size:11px;color:#9ca3af">'+r.display.split(' \u2014 ')[1]+'</div></div>'
         +'</div>';
     }).join('');
   }
   assignHighlight=-1;
   document.getElementById('assignDropdown').style.display='block';
 }
-
 function onAssignKeydown(e){
   const items=document.querySelectorAll('[data-assign-id]');
   if(!items.length)return;
@@ -1206,11 +1307,10 @@ function onAssignKeydown(e){
   else if(e.key==='Enter'&&assignHighlight>=0&&items[assignHighlight]){items[assignHighlight].click();e.preventDefault();}
   else if(e.key==='Escape'){document.getElementById('assignDropdown').style.display='none';}
 }
-
 function selectAssignKaryawan(id,nama,nik){
   document.getElementById('assignDropdown').style.display='none';
-  const display=document.querySelector('#modalSelKaryawan option[value="'+id+'"]')
-    ?document.querySelector('#modalSelKaryawan option[value="'+id+'"]').textContent.trim():'';
+  const opt=document.querySelector('#modalSelKaryawan option[value="'+id+'"]');
+  const display=opt?opt.textContent.trim():'';
   document.getElementById('assignSearch').value=display;
   const clr=document.getElementById('assignSearchClear');
   if(clr)clr.style.display=id?'block':'none';
@@ -1218,8 +1318,8 @@ function selectAssignKaryawan(id,nama,nik){
     const initials=(display||'?').substring(0,2).toUpperCase();
     document.getElementById('assignSelAvatar').textContent=initials;
     document.getElementById('assignSelAvatar').style.background=avatarColor(display||'');
-    document.getElementById('assignSelNama').textContent=display.split(' — ')[0]||display;
-    document.getElementById('assignSelNik').textContent='NIK: '+(display.split(' — ')[1]||nik||'');
+    document.getElementById('assignSelNama').textContent=display.split(' \u2014 ')[0]||display;
+    document.getElementById('assignSelNik').textContent='NIK: '+(display.split(' \u2014 ')[1]||nik||'');
     document.getElementById('assignSelected').style.display='block';
   }else{
     document.getElementById('assignSelected').style.display='none';
@@ -1229,9 +1329,11 @@ function selectAssignKaryawan(id,nama,nik){
   document.getElementById('modalSelKaryawan').value=id||'';
   if(id)loadKaryawanInfo(id);else showKosong();
 }
+function clearAssign(lepas){
+  selectAssignKaryawan('','','');
+  if(lepas)showKosong();
+}
 
-
-// ===== EDIT / DELETE GROUP =====
 let _groupState = {};
 function openEditGroup(tipe, nama, dir, komp) {
   _groupState = {tipe, nama, dir, komp};
@@ -1249,8 +1351,8 @@ function saveEditGroup() {
   if (baru === _groupState.nama) { closeEditGroup(); return; }
   fetch('/struktur-organisasi/rename-group', {
     method: 'POST',
-    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-    body: JSON.stringify({tipe:_groupState.tipe, lama:_groupState.nama, baru, direktorat:_groupState.dir, kompartemen:_groupState.komp, bulan:{{ $bulan }}, tahun:{{ $tahun }}})
+    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':_pd.csrf},
+    body: JSON.stringify({tipe:_groupState.tipe, lama:_groupState.nama, baru, direktorat:_groupState.dir, kompartemen:_groupState.komp, bulan:_pd.bulan, tahun:_pd.tahun})
   }).then(r=>r.json()).then(d=>{
     if (d.success) { closeEditGroup(); location.reload(); }
     else alert('Gagal menyimpan');
@@ -1269,20 +1371,13 @@ function closeDeleteGroup() { document.getElementById('modalDeleteGroupBg').styl
 function doDeleteGroup() {
   fetch('/struktur-organisasi/delete-group', {
     method: 'DELETE',
-    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-    body: JSON.stringify({tipe:_groupState.tipe, nama:_groupState.nama, direktorat:_groupState.dir, kompartemen:_groupState.komp, bulan:{{ $bulan }}, tahun:{{ $tahun }}})
+    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':_pd.csrf},
+    body: JSON.stringify({tipe:_groupState.tipe, nama:_groupState.nama, direktorat:_groupState.dir, kompartemen:_groupState.komp, bulan:_pd.bulan, tahun:_pd.tahun})
   }).then(r=>r.json()).then(d=>{
     if (d.success) { closeDeleteGroup(); location.reload(); }
     else alert('Gagal menghapus: ' + (d.message||''));
   }).catch(()=>alert('Terjadi kesalahan'));
 }
 document.getElementById('modalDeleteGroupBg').addEventListener('click', function(e){if(e.target===this)closeDeleteGroup();});
-
-function clearAssign(lepas){
-  selectAssignKaryawan('','','');
-  if(lepas)showKosong();
-}
-
 </script>
 @endpush
-@endsection

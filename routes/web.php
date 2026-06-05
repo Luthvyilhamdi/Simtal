@@ -58,7 +58,8 @@ Route::middleware('auth')->group(function () {
 
         Route::middleware('not_user_role')->group(function () {
             Route::post('/',               [StrukturOrganisasiController::class, 'store'])->name('store');
-            Route::post('/salin-periode',  [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
+            Route::post('/salin-periode',   [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
+            Route::delete('/hapus-periode',  [StrukturOrganisasiController::class, 'hapusPeriode'])->name('hapus-periode');
             Route::post('/rename-group',    [StrukturOrganisasiController::class, 'renameGroup'])->name('rename-group');
             Route::delete('/delete-group',  [StrukturOrganisasiController::class, 'deleteGroup'])->name('delete-group');
             Route::patch('/{so}',          [StrukturOrganisasiController::class, 'update'])->name('update');
