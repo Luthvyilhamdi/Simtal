@@ -57,7 +57,8 @@
             background: #16a34a;
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: 700; color: white;
+            font-size: 20px; font-weight: 700; color: white; 
+
         }
         .brand-text h1 { font-size: 20px; font-weight: 600; }
         .brand-text p { font-size: 11px; color: #86efac; margin-top: 2px; }
@@ -139,7 +140,7 @@
     {{-- LEFT PANEL --}}
     <div class="login-left">
         <div class="brand-logo">
-            <div class="brand-icon">S</div>
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width:42px; height:42px; object-fit:contain;">
             <div class="brand-text">
                 <h1>SIMTAL</h1>
                 <p>Sistem Manajemen Talenta</p>
