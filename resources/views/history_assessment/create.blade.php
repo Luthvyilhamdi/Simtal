@@ -158,6 +158,12 @@
                 <input type="text" class="form-input" readonly
                        value="{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} tahun" />
             </div>
+            <div class="form-group full">
+                <label class="form-label">Lembaga Assessor</label>
+                <input type="text" name="lembaga" value="{{ old('lembaga') }}"
+                    class="form-input" placeholder="cth: PT. XYZ Consulting, Lembaga ABC" />
+                <span class="form-hint">Opsional</span>
+            </div>
         </div>
     </div>
 

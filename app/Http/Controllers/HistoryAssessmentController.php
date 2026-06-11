@@ -37,14 +37,15 @@ class HistoryAssessmentController extends Controller
     public function store(Request $request, Karyawan $karyawan)
     {
         $request->validate([
-            'job_stream'            => 'nullable|string',
-            'tanggal_pelaksanaan'   => 'required|date',
-            'tingkat_pengukuran'    => 'nullable|string',
-            'rekomendasi_inti'      => 'nullable|numeric|min:0|max:100',
-            'rekomendasi_primer'    => 'nullable|numeric|min:0|max:100',
-            'rekomendasi_skunder'   => 'nullable|numeric|min:0|max:100',
-            'rekomendasi_final'     => 'nullable|in:ready,ready_with_development,not_ready',
-            'keterangan'            => 'nullable|string',
+            'job_stream'          => 'nullable|string',
+            'tanggal_pelaksanaan' => 'required|date',
+            'tingkat_pengukuran'  => 'nullable|string',
+            'rekomendasi_inti'    => 'nullable|numeric|min:0|max:100',
+            'rekomendasi_primer'  => 'nullable|numeric|min:0|max:100',
+            'rekomendasi_skunder' => 'nullable|numeric|min:0|max:100',
+            'rekomendasi_final'   => 'nullable|in:ready,ready_with_development,not_ready',
+            'keterangan'          => 'nullable|string',
+            'lembaga'             => 'nullable|string|max:255',
         ]);
 
         $karyawan->load(['jobGrade', 'personGrade']);
@@ -68,6 +69,7 @@ class HistoryAssessmentController extends Controller
             'rekomendasi_final'   => $request->rekomendasi_final,
             'tanggal_exp_idp'     => $tanggalExpIdp,
             'keterangan'          => $request->keterangan,
+            'lembaga'             => $request->lembaga,
         ]);
 
         $this->log('tambah', 'Assessment', $karyawan->nama, 'Tgl: ' . $request->tanggal_pelaksanaan);

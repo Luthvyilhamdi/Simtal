@@ -22,6 +22,7 @@ class HistoryAssessment extends Model
         'rekomendasi_final',
         'tanggal_exp_idp',
         'keterangan',
+        'lembaga',
     ];
 
     protected $casts = [
@@ -37,7 +38,6 @@ class HistoryAssessment extends Model
         return $this->belongsTo(Karyawan::class);
     }
 
-    // Label rekomendasi final
     public function getRekomendasiFinalLabelAttribute()
     {
         return match($this->rekomendasi_final) {
@@ -48,7 +48,6 @@ class HistoryAssessment extends Model
         };
     }
 
-    // Warna rekomendasi final
     public function getRekomendasiFinalWarnaAttribute()
     {
         return match($this->rekomendasi_final) {
@@ -59,7 +58,6 @@ class HistoryAssessment extends Model
         };
     }
 
-    // Cek apakah IDP sudah expired
     public function getIsExpiredAttribute()
     {
         return $this->tanggal_exp_idp && $this->tanggal_exp_idp->isPast();

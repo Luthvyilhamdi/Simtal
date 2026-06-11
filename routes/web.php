@@ -25,6 +25,7 @@ use App\Http\Controllers\MasterKodeStrukturController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\TalentPoolController;
+use App\Http\Controllers\PenilaianKaryawanController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -175,6 +176,14 @@ Route::middleware('auth')->group(function () {
             Route::post('/',               [TalentPoolController::class, 'store'])->name('store');
             Route::put('/{talentPool}',    [TalentPoolController::class, 'update'])->name('update');
             Route::delete('/{talentPool}', [TalentPoolController::class, 'destroy'])->name('destroy');
+        });
+
+        // Penilaian Karyawan
+        Route::prefix('karyawan/{karyawan}/penilaian')->name('penilaian_karyawan.')->group(function () {
+            Route::get('/',               [PenilaianKaryawanController::class, 'index'])->name('index');
+            Route::get('/create',         [PenilaianKaryawanController::class, 'create'])->name('create');
+            Route::post('/',              [PenilaianKaryawanController::class, 'store'])->name('store');
+            Route::delete('/{penilaian}', [PenilaianKaryawanController::class, 'destroy'])->name('destroy');
         });
 
         // API AJAX

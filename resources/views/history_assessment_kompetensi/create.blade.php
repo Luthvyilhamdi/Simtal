@@ -102,6 +102,12 @@
                 <label class="form-label">Person Grade</label>
                 <input type="text" class="form-input" value="PG {{ $karyawan->personGrade->person_grade ?? '-' }}" readonly />
             </div>
+            <div class="form-group" style="grid-column:1/-1;">
+                <label class="form-label">Lembaga Assessor</label>
+                <input type="text" name="lembaga" class="form-input"
+                    value="{{ old('lembaga') }}" placeholder="cth: PT. XYZ Consulting, Lembaga ABC" />
+                <span class="form-hint">Opsional</span>
+            </div>
         </div>
     </div>
 

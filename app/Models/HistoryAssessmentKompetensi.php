@@ -20,37 +20,34 @@ class HistoryAssessmentKompetensi extends Model
         'financial', 'commercial', 'people', 'operation', 'technology',
         // Hasil
         'total_competency_under', 'total_qualification_under',
-        'kesimpulan', 'keterangan',
+        'kesimpulan', 'keterangan', 'lembaga',
     ];
 
     protected $casts = [
         'tanggal_assessment' => 'date',
     ];
 
-    // Relasi
     public function karyawan()
     {
         return $this->belongsTo(Karyawan::class);
     }
 
-    // Daftar kompetensi
     public static function competencies(): array
     {
         return [
-            'digital_leadership'                    => 'Digital Leadership',
-            'global_business_savvy'                 => 'Global Business Savvy',
-            'customer_focus'                        => 'Customer Focus',
-            'building_strategic_partnership'        => 'Building Strategic Partnership',
-            'strategic_orientation'                 => 'Strategic Orientation',
-            'driving_execution'                     => 'Driving Execution',
-            'driving_innovation'                    => 'Driving Innovation',
-            'developing_organizational_capabilities'=> 'Developing Organizational Capabilities',
-            'leading_change'                        => 'Leading Change',
-            'managing_diversity'                    => 'Managing Diversity',
+            'digital_leadership'                     => 'Digital Leadership',
+            'global_business_savvy'                  => 'Global Business Savvy',
+            'customer_focus'                         => 'Customer Focus',
+            'building_strategic_partnership'         => 'Building Strategic Partnership',
+            'strategic_orientation'                  => 'Strategic Orientation',
+            'driving_execution'                      => 'Driving Execution',
+            'driving_innovation'                     => 'Driving Innovation',
+            'developing_organizational_capabilities' => 'Developing Organizational Capabilities',
+            'leading_change'                         => 'Leading Change',
+            'managing_diversity'                     => 'Managing Diversity',
         ];
     }
 
-    // Daftar professional qualification
     public static function qualifications(): array
     {
         return [
@@ -62,7 +59,6 @@ class HistoryAssessmentKompetensi extends Model
         ];
     }
 
-    // Hitung total under requirement (nilai < 3)
     public static function hitungUnderCompetency(array $data): int
     {
         $count = 0;
@@ -81,7 +77,6 @@ class HistoryAssessmentKompetensi extends Model
         return $count;
     }
 
-    // Kesimpulan otomatis
     public static function hitungKesimpulan(int $underComp, int $underQual): string
     {
         return ($underComp === 0 && $underQual === 0) ? 'QUALIFIED' : 'NOT QUALIFIED';

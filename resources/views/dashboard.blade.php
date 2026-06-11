@@ -123,6 +123,7 @@
     .komp-stat-num { font-size:20px;font-weight:800;line-height:1; }
     .komp-stat-label { font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px; }
 
+    /* ===== RESPONSIVE ===== */
     @media (max-width:1024px) {
         .kpi-grid { grid-template-columns:repeat(2,1fr); }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr; }
@@ -130,9 +131,74 @@
         .bottom-grid { grid-template-columns:1fr; }
         .pejabat-grid { grid-template-columns:repeat(3,1fr); }
     }
-    @media (max-width:640px) {
-        .kpi-grid { grid-template-columns:1fr 1fr; }
-        .pejabat-grid { grid-template-columns:repeat(3,1fr); }
+    @media (max-width:768px) {
+        /* Welcome */
+        .welcome-card { padding:18px 16px; }
+        .welcome-title { font-size:15px; }
+        .welcome-date { font-size:11px;padding:5px 10px; }
+
+        /* KPI */
+        .kpi-grid { grid-template-columns:1fr 1fr;gap:8px; }
+        .kpi-card { padding:14px 12px; }
+        .kpi-num { font-size:22px; }
+        .kpi-icon { width:36px;height:36px;font-size:16px; }
+
+        /* SO 5-col → 2-col */
+        .so-grid { grid-template-columns:1fr 1fr !important;gap:8px !important; }
+
+        /* Chart grids */
+        .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr;gap:10px; }
+        .chart-card { padding:14px; }
+        .chart-card-title { font-size:12px; }
+
+        /* Talent Pool */
+        .tp-grid { grid-template-columns:1fr !important; }
+
+        /* Bar chart label */
+        .bar-label { min-width:60px;font-size:10px; }
+        .bar-fill { font-size:9px; }
+
+        /* Pejabat */
+        .pejabat-grid { grid-template-columns:repeat(3,1fr);gap:8px; }
+        .pejabat-mini { padding:10px 8px; }
+        .pejabat-num { font-size:20px; }
+        .pejabat-label { font-size:10px; }
+
+        /* Tabel */
+        .tabel-card { overflow-x:auto; }
+        table { font-size:11px; }
+        thead th { padding:8px 10px; }
+        tbody td { padding:8px 10px; }
+
+        /* Bottom list */
+        .bottom-grid { grid-template-columns:1fr;gap:10px; }
+        .list-card-title { font-size:11px; }
+        .list-name { font-size:11px; }
+        .list-sub { font-size:9px; }
+
+        /* Demo */
+        .demo-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:480px) {
+        .kpi-grid { grid-template-columns:1fr 1fr;gap:6px; }
+        .kpi-card { padding:12px 10px; }
+        .kpi-num { font-size:20px; }
+        .kpi-label { font-size:9px; }
+        .kpi-sub { font-size:10px; }
+        .kpi-icon { display:none; }
+
+        .welcome-card { padding:14px 12px; }
+        .welcome-title { font-size:14px; }
+        .welcome-pills { gap:4px; }
+        .welcome-pill { font-size:10px;padding:2px 8px; }
+        .welcome-sub { display:none; }
+
+        .so-grid { grid-template-columns:1fr 1fr !important; }
+        .pejabat-grid { grid-template-columns:repeat(3,1fr);gap:6px; }
+        .pejabat-num { font-size:18px; }
+
+        .sec-title { font-size:11px; }
+        .bar-label { min-width:50px; }
     }
 </style>
 @endpush
@@ -217,7 +283,7 @@ $namaBulanDash = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','A
 $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
 @endphp
 <div class="sec-title">🏗️ Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
-<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px">
+<div class="so-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px">
 
   <div class="kpi-card blue" style="flex-direction:column;align-items:flex-start;gap:6px">
     <div class="kpi-label">Total Posisi</div>
@@ -316,7 +382,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
 
 {{-- TALENT POOL --}}
 <div class="sec-title">🎯 Talent Pool</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+<div class="tp-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
 
     {{-- Tahun Ini --}}
     <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px">

@@ -26,6 +26,7 @@ class HistoryAssessmentKompetensiController extends Controller
             'tanggal_assessment' => 'required|date',
             'periode'            => 'nullable|string',
             'keterangan'         => 'nullable|string',
+            'lembaga'            => 'nullable|string|max:255',
         ];
 
         foreach (array_keys(HistoryAssessmentKompetensi::competencies()) as $key) {
@@ -38,23 +39,17 @@ class HistoryAssessmentKompetensiController extends Controller
         $request->validate($rules);
 
         $data = $request->only(array_merge(
-            ['tanggal_assessment', 'periode', 'keterangan'],
+            ['tanggal_assessment', 'periode', 'keterangan', 'lembaga'],
             array_keys(HistoryAssessmentKompetensi::competencies()),
             array_keys(HistoryAssessmentKompetensi::qualifications())
         ));
 
         $data['karyawan_id'] = $karyawan->id;
 
-        // ===== LOGIKA BARU sesuai tabel kriteria =====
-        // Kompetensi Perilaku:
-        //   QUALIFIED jika: tidak ada rating 1 DAN rating 2 maksimal 3
-        // Professional Qualification:
-        //   QUALIFIED jika: semua nilai >= 2 (tidak ada rating 1)
-
-        $compR1    = 0; // jumlah kompetensi dengan rating 1 (kritis)
-        $compR2    = 0; // jumlah kompetensi dengan rating 2
-        $compUnder = 0; // total kompetensi di bawah standar (rating 1 + rating 2)
-        $qualUnder = 0; // jumlah qualification dengan nilai < 2
+        $compR1    = 0;
+        $compR2    = 0;
+        $compUnder = 0;
+        $qualUnder = 0;
 
         foreach (array_keys(HistoryAssessmentKompetensi::competencies()) as $key) {
             $val = (int) ($data[$key] ?? 0);
@@ -67,12 +62,8 @@ class HistoryAssessmentKompetensiController extends Controller
             if ($val < 2) $qualUnder++;
         }
 
-        // Simpan ke kolom DB
-        // total_competency_under = semua kompetensi < 3 (rating 1 + rating 2)
         $data['total_competency_under']    = $compUnder;
         $data['total_qualification_under'] = $qualUnder;
-
-        // Kesimpulan: QUALIFIED hanya jika semua kondisi terpenuhi
         $data['kesimpulan'] = ($compR1 === 0 && $compR2 <= 3 && $qualUnder === 0)
             ? 'QUALIFIED'
             : 'NOT QUALIFIED';
@@ -87,7 +78,7 @@ class HistoryAssessmentKompetensiController extends Controller
             . ' | Rating1: ' . $compR1
             . ' | Rating2: ' . $compR2
             . ' | QualUnder: ' . $qualUnder
-            . ' | Periode: ' . ($data['periode'] ?? '-')
+            . ' | Lembaga: ' . ($data['lembaga'] ?? '-')
         );
 
         return redirect()

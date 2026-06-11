@@ -36,16 +36,13 @@
     .btn-outline-green svg { width:14px;height:14px;stroke:#15803d;fill:none;stroke-width:2.5; }
     .btn-group { display:flex;gap:10px;flex-wrap:wrap; }
 
-    /* Tab --*/
     .tab-wrap { display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:20px; }
     .tab-btn { flex:1;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;color:#6b7280;background:transparent;transition:all 0.15s;text-align:center; }
     .tab-btn.active { background:white;color:#15803d;box-shadow:0 1px 4px rgba(0,0,0,0.08); }
 
-    /* Assessment Cards */
     .assessment-list { display:flex;flex-direction:column;gap:14px; }
     .acard { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:20px;transition:box-shadow 0.15s; }
     .acard:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
-
     .acard-top { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap; }
     .acard-left { flex:1;min-width:0; }
     .acard-date { font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:6px; }
@@ -66,7 +63,6 @@
     .rekom-fill { height:100%;border-radius:20px;transition:width 0.5s ease; }
     .rekom-pct { font-size:12px;font-weight:700;color:#111827;min-width:36px;text-align:right; }
 
-    /* Kompetensi Grid */
     .komp-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:14px; }
     .komp-item { background:#f9fafb;border-radius:8px;padding:10px 12px; }
     .komp-name { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px; }
@@ -137,7 +133,6 @@
 </div>
 @endif
 
-{{-- Modal Hapus --}}
 <div class="modal-backdrop" id="modalHapus">
     <div class="modal-box">
         <div class="modal-icon-wrap">
@@ -158,7 +153,6 @@
     Kembali ke Profil {{ $karyawan->nama }}
 </a>
 
-{{-- Profile Card --}}
 <div class="profile-card">
     <div class="profile-left">
         <div class="profile-avatar">
@@ -200,7 +194,6 @@
     </div>
 </div>
 
-{{-- Page Header --}}
 <div class="page-header">
     <div>
         <div class="page-title">History Assessment</div>
@@ -218,7 +211,6 @@
     </div>
 </div>
 
-{{-- Tab --}}
 <div class="tab-wrap">
     <button class="tab-btn active" id="tab-rekom" onclick="switchTab('rekom')">
         📋 Assessment Rekomendasi ({{ $assessments->count() }})
@@ -228,7 +220,7 @@
     </button>
 </div>
 
-{{-- ===== TAB REKOMENDASI ===== --}}
+{{-- TAB REKOMENDASI --}}
 <div id="panel-rekom">
     @if($assessments->count() > 0)
     <div class="assessment-list">
@@ -240,6 +232,7 @@
                     <div class="acard-date">
                         📅 {{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}
                         @if($a->tingkat_pengukuran) · <span style="color:#6b7280;">{{ $a->tingkat_pengukuran }}</span> @endif
+                        @if($a->lembaga) · 🏢 <span style="color:#6b7280;">{{ $a->lembaga }}</span> @endif
                     </div>
                     <div class="acard-jabatan">{{ $a->jabatan_saat_ini ?? '-' }}</div>
                     <div class="acard-meta">
@@ -325,7 +318,7 @@
     @endif
 </div>
 
-{{-- ===== TAB KOMPETENSI ===== --}}
+{{-- TAB KOMPETENSI --}}
 <div id="panel-komp" style="display:none;">
     @if($assessmentKompetensi->count() > 0)
     <div class="assessment-list">
@@ -336,6 +329,7 @@
                     <div class="acard-date">
                         📅 {{ $ak->tanggal_assessment->format('d M Y') }}
                         @if($ak->periode) · <span style="color:#6b7280;">Periode: {{ $ak->periode }}</span> @endif
+                        @if($ak->lembaga) · 🏢 <span style="color:#6b7280;">{{ $ak->lembaga }}</span> @endif
                     </div>
                     <div class="acard-jabatan">Assessment Kompetensi</div>
                     <div class="acard-meta">
@@ -357,7 +351,6 @@
                 </div>
             </div>
 
-            {{-- Competencies --}}
             <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Competencies</div>
             <div class="komp-grid">
                 @foreach(\App\Models\HistoryAssessmentKompetensi::competencies() as $key => $label)
@@ -371,7 +364,6 @@
                 @endforeach
             </div>
 
-            {{-- Professional Qualification --}}
             <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-top:8px;">Professional Qualification</div>
             <div class="komp-grid">
                 @foreach(\App\Models\HistoryAssessmentKompetensi::qualifications() as $key => $label)
