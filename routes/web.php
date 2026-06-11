@@ -24,6 +24,7 @@ use App\Http\Controllers\MasterPersonGradeController;
 use App\Http\Controllers\MasterKodeStrukturController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -165,6 +166,15 @@ Route::middleware('auth')->group(function () {
             Route::get('/{suratPenting}',          [SuratPentingController::class, 'show'])->name('show');
             Route::get('/{suratPenting}/download', [SuratPentingController::class, 'download'])->name('download');
             Route::delete('/{suratPenting}',       [SuratPentingController::class, 'destroy'])->name('destroy');
+        });
+
+        // Talent Pool
+        Route::prefix('talent-pool')->name('talent_pool.')->group(function () {
+            Route::get('/',                [TalentPoolController::class, 'index'])->name('index');
+            Route::get('/create',          [TalentPoolController::class, 'create'])->name('create');
+            Route::post('/',               [TalentPoolController::class, 'store'])->name('store');
+            Route::put('/{talentPool}',    [TalentPoolController::class, 'update'])->name('update');
+            Route::delete('/{talentPool}', [TalentPoolController::class, 'destroy'])->name('destroy');
         });
 
         // API AJAX

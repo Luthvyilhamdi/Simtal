@@ -124,6 +124,9 @@
                         <span style="color:#dc2626">● Tidak Aktif</span>
                     @endif
                 </span>
+                @if($isShortlist)
+                <span class="profile-tag" style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0">🟢 Shortlist {{ $shortlistPeriode }}</span>
+                @endif
             </div>
         </div>
     </div>
@@ -308,11 +311,27 @@
 </div>
 
 {{-- BAND & MDG CARD --}}
-@php $sk = $karyawan->statusKenaikan; @endphp
+@php
+    $sk = $karyawan->statusKenaikan;
+
+    // Threshold MDG — shortlist berbeda dari normal
+    $minBand   = $isShortlist ? 24 : 36; // bulan
+    $minJg     = $isShortlist ? 12 : 24;
+    $minPg     = 12; // sama untuk semua
+    $minBandTh = $isShortlist ? 2 : 3;   // tahun (untuk label)
+    $minJgTh   = $isShortlist ? 1 : 2;
+    $minPgTh   = 1;
+@endphp
+
 <div class="band-card">
-    <div class="detail-card-title" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">
+    <div class="detail-card-title" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:8px">
         <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         Band & Masa Dinas Grade (MDG)
+        @if($isShortlist)
+        <span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:none;letter-spacing:0;border:1px solid #bbf7d0">
+            🟢 Shortlist {{ $shortlistPeriode }} — Ketentuan MDG Khusus
+        </span>
+        @endif
     </div>
 
     {{-- Status Kenaikan --}}
@@ -327,8 +346,6 @@
                     Sisa <strong>{{ $sk['sisa_bulan'] }} bulan</strong> lagi untuk syarat terlama
                 </div>
             @endif
-
-            {{-- Checklist Syarat --}}
             @if(!empty($sk['syarat']))
             <div class="syarat-wrap">
                 @foreach($sk['syarat'] as $syarat)
@@ -336,67 +353,79 @@
                      style="background:{{ $syarat['terpenuhi'] ? '#f0fdf4' : '#fef2f2' }};
                             border:1px solid {{ $syarat['terpenuhi'] ? '#bbf7d0' : '#fecaca' }};">
                     <span>{{ $syarat['terpenuhi'] ? '✅' : '❌' }}</span>
-                    <span style="font-weight:600;color:{{ $syarat['terpenuhi'] ? '#15803d' : '#dc2626' }};">
-                        {{ $syarat['label'] }}
-                    </span>
+                    <span style="font-weight:600;color:{{ $syarat['terpenuhi'] ? '#15803d' : '#dc2626' }};">{{ $syarat['label'] }}</span>
                     <span style="color:#6b7280;">({{ $syarat['mdg'] }}/{{ $syarat['min'] }} bln)</span>
                 </div>
                 @endforeach
             </div>
             @endif
-
             @if(!empty($sk['blokir_info']))
-                <div style="font-size:12px;color:#dc2626;margin-top:6px;">
-                    🔒 {{ $sk['blokir_info'] }}
-                </div>
+                <div style="font-size:12px;color:#dc2626;margin-top:6px;">🔒 {{ $sk['blokir_info'] }}</div>
             @endif
         </div>
     </div>
 
     {{-- MDG Grid --}}
+    @php
+        $jgOk   = ($karyawan->mdg_jg_bulan   ?? 0) >= $minJg;
+        $pgOk   = ($karyawan->mdg_pg_bulan   ?? 0) >= $minPg;
+        $bandOk = ($karyawan->mdg_band_bulan ?? 0) >= $minBand;
+    @endphp
     <div class="mdg-grid">
-        <div class="mdg-item">
+        {{-- Job Grade --}}
+        <div class="mdg-item" style="border:1.5px solid {{ $jgOk ? '#bbf7d0' : '#fde68a' }}">
             <div class="mdg-label">MDG Job Grade</div>
-            <div class="mdg-num" style="color:{{ ($karyawan->mdg_jg ?? 0) >= 2 ? '#15803d' : '#d97706' }};">
+            <div class="mdg-num" style="color:{{ $jgOk ? '#15803d' : '#d97706' }};">
                 {{ $karyawan->mdg_jg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span>
             </div>
             @if($karyawan->tanggal_mulai_jg)
                 <div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>
             @endif
-            <div class="mdg-since" style="color:#6b7280;">min 2 tahun</div>
+            <div class="mdg-since" style="color:{{ $isShortlist ? '#15803d' : '#6b7280' }};font-weight:{{ $isShortlist ? '700' : '400' }}">
+                min {{ $minJgTh }} tahun{{ $isShortlist ? ' ✦' : '' }}
+            </div>
         </div>
-        <div class="mdg-item">
+        {{-- Person Grade --}}
+        <div class="mdg-item" style="border:1.5px solid {{ $pgOk ? '#bbf7d0' : '#fde68a' }}">
             <div class="mdg-label">MDG Person Grade</div>
-            <div class="mdg-num" style="color:{{ ($karyawan->mdg_pg ?? 0) >= 1 ? '#15803d' : '#d97706' }};">
+            <div class="mdg-num" style="color:{{ $pgOk ? '#15803d' : '#d97706' }};">
                 {{ $karyawan->mdg_pg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span>
             </div>
             @if($karyawan->tanggal_mulai_pg)
                 <div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_pg->format('d M Y') }}</div>
             @endif
-            <div class="mdg-since" style="color:#6b7280;">min 1 tahun</div>
+            <div class="mdg-since" style="color:#6b7280">min {{ $minPgTh }} tahun</div>
         </div>
-        <div class="mdg-item">
+        {{-- Band --}}
+        <div class="mdg-item" style="border:1.5px solid {{ $bandOk ? '#bbf7d0' : '#fde68a' }}">
             <div class="mdg-label">MDG Band</div>
-            <div class="mdg-num" style="color:{{ $karyawan->mdg_band >= 3 ? '#15803d' : '#d97706' }};">
+            <div class="mdg-num" style="color:{{ $bandOk ? '#15803d' : '#d97706' }};">
                 {{ $karyawan->mdg_band }}<span style="font-size:12px;font-weight:500;"> thn</span>
             </div>
             @if($karyawan->tanggal_mulai_jg)
                 <div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>
             @endif
-            <div class="mdg-since" style="color:#6b7280;">min 3 tahun</div>
+            <div class="mdg-since" style="color:{{ $isShortlist ? '#15803d' : '#6b7280' }};font-weight:{{ $isShortlist ? '700' : '400' }}">
+                min {{ $minBandTh }} tahun{{ $isShortlist ? ' ✦' : '' }}
+            </div>
         </div>
     </div>
 
+    @if($isShortlist)
+    <div style="font-size:11px;color:#15803d;margin-bottom:12px">✦ Ketentuan MDG khusus Shortlist Talent Pool {{ $shortlistPeriode }}</div>
+    @endif
+
     {{-- Progress Bar --}}
     <div class="progress-wrap">
-        @php $pgPct   = min(100, ($karyawan->mdg_pg_bulan   / 12) * 100); @endphp
-        @php $jgPct   = min(100, ($karyawan->mdg_jg_bulan   / 24) * 100); @endphp
-        @php $bandPct = min(100, ($karyawan->mdg_band_bulan / 36) * 100); @endphp
-
+        @php
+            $pgPct   = min(100, (($karyawan->mdg_pg_bulan   ?? 0) / $minPg)   * 100);
+            $jgPct   = min(100, (($karyawan->mdg_jg_bulan   ?? 0) / $minJg)   * 100);
+            $bandPct = min(100, (($karyawan->mdg_band_bulan ?? 0) / $minBand) * 100);
+        @endphp
         <div class="progress-item">
             <div class="progress-label">
                 <span>MDG Person Grade</span>
-                <span>{{ $karyawan->mdg_pg_bulan }} / 12 bulan</span>
+                <span>{{ $karyawan->mdg_pg_bulan ?? 0 }} / {{ $minPg }} bulan</span>
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width:{{ $pgPct }}%;background:{{ $pgPct >= 100 ? '#15803d' : '#f59e0b' }};"></div>
@@ -405,7 +434,7 @@
         <div class="progress-item">
             <div class="progress-label">
                 <span>MDG Job Grade</span>
-                <span>{{ $karyawan->mdg_jg_bulan }} / 24 bulan</span>
+                <span>{{ $karyawan->mdg_jg_bulan ?? 0 }} / {{ $minJg }} bulan</span>
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width:{{ $jgPct }}%;background:{{ $jgPct >= 100 ? '#15803d' : '#3b82f6' }};"></div>
@@ -414,7 +443,7 @@
         <div class="progress-item">
             <div class="progress-label">
                 <span>MDG Band (dari TMT JG)</span>
-                <span>{{ $karyawan->mdg_band_bulan }} / 36 bulan</span>
+                <span>{{ $karyawan->mdg_band_bulan ?? 0 }} / {{ $minBand }} bulan</span>
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width:{{ $bandPct }}%;background:{{ $bandPct >= 100 ? '#15803d' : '#7c3aed' }};"></div>

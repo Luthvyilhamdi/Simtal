@@ -184,21 +184,7 @@
         <div class="kpi-left">
             <div class="kpi-label">Assessment Rekomendasi</div>
             <div class="kpi-num">{{ $totalAssessment }}</div>
-            <div class="kpi-sub">Total assessment rekomendasi</div>
-            <div class="komp-stat-row">
-                <div class="komp-stat-item" style="background:#dcfce7;">
-                    <div class="komp-stat-num" style="color:#15803d;">{{ $assessmentReady }}</div>
-                    <div class="komp-stat-label" style="color:#15803d;">Ready</div>
-                </div>
-                <div class="komp-stat-item" style="background:#fef9c3;">
-                    <div class="komp-stat-num" style="color:#a16207;">{{ $assessmentRWD }}</div>
-                    <div class="komp-stat-label" style="color:#a16207;">Readt With Dev</div>
-                </div>
-                <div class="komp-stat-item" style="background:#fee2e2;">
-                    <div class="komp-stat-num" style="color:#dc2626;">{{ $assessmentNR }}</div>
-                    <div class="komp-stat-label" style="color:#dc2626;">Not Ready</div>
-                </div>
-            </div>
+            <div class="kpi-sub">{{ $assessmentReady }} ready · {{ $assessmentNR }} not ready</div>
             @php $pctReady = $totalAssessment > 0 ? round(($assessmentReady/$totalAssessment)*100) : 0; @endphp
             <span class="kpi-badge" style="background:#f5f3ff;color:#7c3aed;">{{ $pctReady }}% ready rate</span>
         </div>
@@ -219,8 +205,6 @@
                     <div class="komp-stat-label" style="color:#dc2626;">Not Qual.</div>
                 </div>
             </div>
-            @php $pctQualified = $totalKompetensi > 0 ? round(($totalQualified/$totalKompetensi)*100) : 0; @endphp
-            <span class="kpi-badge" style="background:#f0fdfa;color:#0f766e;">{{ $pctQualified }}% qualified rate</span>
         </div>
         <div class="kpi-icon teal">⭐</div>
     </div>
@@ -327,6 +311,89 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
             @endforeach
         </div>
     </div>
+</div>
+
+
+{{-- TALENT POOL --}}
+<div class="sec-title">🎯 Talent Pool</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+
+    {{-- Tahun Ini --}}
+    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+                <div style="font-size:13px;font-weight:700;color:#111827">Talent Pool {{ $talentPool['tahun_ini'] }}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Tahun berjalan</div>
+            </div>
+            <a href="{{ route('talent_pool.index', ['periode' => $talentPool['tahun_ini']]) }}"
+               style="font-size:11px;color:#15803d;font-weight:600;text-decoration:none">Lihat →</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div style="text-align:center;background:#f0fdf4;border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:#15803d">{{ $talentPool['ini']['total'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Total</div>
+            </div>
+            <div style="text-align:center;background:#eff6ff;border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:#1d4ed8">{{ $talentPool['ini']['longlist'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Longlist</div>
+            </div>
+            <div style="text-align:center;background:#dcfce7;border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:#15803d">{{ $talentPool['ini']['shortlist'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Shortlist</div>
+            </div>
+        </div>
+        @if($talentPool['ini']['total'] > 0)
+        <div style="margin-top:14px">
+            @php $pctShortlist = $talentPool['ini']['total'] > 0 ? round(($talentPool['ini']['shortlist']/$talentPool['ini']['total'])*100) : 0; @endphp
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px">
+                <span>Shortlist rate</span>
+                <span style="font-weight:700;color:#15803d">{{ $pctShortlist }}%</span>
+            </div>
+            <div style="height:5px;background:#f3f4f6;border-radius:20px;overflow:hidden">
+                <div style="height:100%;width:{{ $pctShortlist }}%;background:#15803d;border-radius:20px"></div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    {{-- Tahun Lalu --}}
+    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+                <div style="font-size:13px;font-weight:700;color:#111827">Talent Pool {{ $talentPool['tahun_lalu'] }}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Tahun sebelumnya</div>
+            </div>
+            <a href="{{ route('talent_pool.index', ['periode' => $talentPool['tahun_lalu']]) }}"
+               style="font-size:11px;color:#6b7280;font-weight:600;text-decoration:none">Lihat →</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div style="text-align:center;background:#f9fafb;border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:#374151">{{ $talentPool['lalu']['total'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Total</div>
+            </div>
+            <div style="text-align:center;background:#f9fafb;border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:#374151">{{ $talentPool['lalu']['longlist'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Longlist</div>
+            </div>
+            <div style="text-align:center;background:#f9fafb;border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:#374151">{{ $talentPool['lalu']['shortlist'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Shortlist</div>
+            </div>
+        </div>
+        @if($talentPool['lalu']['total'] > 0)
+        <div style="margin-top:14px">
+            @php $pctShortlistLalu = $talentPool['lalu']['total'] > 0 ? round(($talentPool['lalu']['shortlist']/$talentPool['lalu']['total'])*100) : 0; @endphp
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px">
+                <span>Shortlist rate</span>
+                <span style="font-weight:700;color:#6b7280">{{ $pctShortlistLalu }}%</span>
+            </div>
+            <div style="height:5px;background:#f3f4f6;border-radius:20px;overflow:hidden">
+                <div style="height:100%;width:{{ $pctShortlistLalu }}%;background:#9ca3af;border-radius:20px"></div>
+            </div>
+        </div>
+        @endif
+    </div>
+
 </div>
 
 {{-- GRAFIK --}}

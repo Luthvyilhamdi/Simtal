@@ -10,6 +10,7 @@ use App\Models\JobGrade;
 use App\Models\PersonGrade;
 use App\Models\Jabatan;
 use App\Models\KodeStruktur;
+use App\Models\TalentPool;
 use App\Models\User;
 use App\Imports\KaryawanImport;
 use App\Exports\TemplateKaryawanExport;
@@ -99,7 +100,18 @@ class KaryawanController extends Controller
     public function show(Karyawan $karyawan)
     {
         $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur']);
-        return view('karyawan.show', compact('karyawan'));
+
+        // Cek shortlist — prioritas tahun ini, fallback tahun lalu
+        $talentShortlist = TalentPool::where('karyawan_id', $karyawan->id)
+            ->where('klasifikasi', 'shortlist')
+            ->whereIn('periode', [now()->year, now()->year - 1])
+            ->orderBy('periode', 'desc')
+            ->first();
+
+        $isShortlist      = $talentShortlist !== null;
+        $shortlistPeriode = $talentShortlist?->periode;
+
+        return view('karyawan.show', compact('karyawan', 'isShortlist', 'shortlistPeriode'));
     }
 
     public function edit(Karyawan $karyawan)
