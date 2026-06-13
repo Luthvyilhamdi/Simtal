@@ -26,6 +26,8 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\PenilaianKaryawanController;
+use App\Http\Controllers\KalibrasiKaryawanController;
+use App\Http\Controllers\UsulanPromosiController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -185,6 +187,29 @@ Route::middleware('auth')->group(function () {
             Route::post('/',              [PenilaianKaryawanController::class, 'store'])->name('store');
             Route::delete('/{penilaian}', [PenilaianKaryawanController::class, 'destroy'])->name('destroy');
         });
+
+        // Kalibrasi Karyawan
+        Route::prefix('karyawan/{karyawan}/kalibrasi')->name('kalibrasi_karyawan.')->group(function () {
+            Route::get('/',               [KalibrasiKaryawanController::class, 'index'])->name('index');
+            Route::get('/create',         [KalibrasiKaryawanController::class, 'create'])->name('create');
+            Route::post('/',              [KalibrasiKaryawanController::class, 'store'])->name('store');
+            Route::get('/{kalibrasi}/edit', [KalibrasiKaryawanController::class, 'edit'])->name('edit');
+            Route::put('/{kalibrasi}',    [KalibrasiKaryawanController::class, 'update'])->name('update');
+            Route::delete('/{kalibrasi}', [KalibrasiKaryawanController::class, 'destroy'])->name('destroy');
+        });
+
+        // Usulan Promosi
+        Route::prefix('usulan-promosi')->name('usulan_promosi.')->group(function () {
+            Route::get('/',                        [UsulanPromosiController::class, 'index'])->name('index');
+            Route::get('/create',                  [UsulanPromosiController::class, 'create'])->name('create');
+            Route::post('/',                       [UsulanPromosiController::class, 'store'])->name('store');
+            Route::get('/{usulanPromosi}',         [UsulanPromosiController::class, 'show'])->name('show');
+            Route::patch('/{usulanPromosi}/status',[UsulanPromosiController::class, 'updateStatus'])->name('update_status');
+            Route::delete('/{usulanPromosi}',      [UsulanPromosiController::class, 'destroy'])->name('destroy');
+        });
+        Route::get('api/usulan-promosi/karyawan',  [UsulanPromosiController::class, 'getKaryawanData'])->name('usulan_promosi.karyawan_data');
+        Route::get('api/usulan-promosi/assessments',[UsulanPromosiController::class, 'getAssessments'])->name('usulan_promosi.assessments');
+        Route::get('api/karyawan/{karyawan_id}/talent-kpi-preview',[UsulanPromosiController::class, 'getTalentKpiPreview'])->name('usulan_promosi.talent_kpi_preview');
 
         // API AJAX
         Route::get('api/karyawan/{id}/detail',  [StrukturOrganisasiController::class, 'getKaryawanData'])->name('api.karyawan.detail');

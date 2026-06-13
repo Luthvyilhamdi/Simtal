@@ -11,7 +11,7 @@ class Karyawan extends Model
 
     protected $fillable = [
         'nik', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
-        'tanggal_masuk', 'jabatan_id', 'jabatan_saat_ini',
+        'tanggal_masuk', 'jabatan_id', 'jabatan_saat_ini', 'struktural_fungsional',
         'direktorat_id', 'kompartemen_id', 'departemen_id',
         'job_grade_id', 'person_grade_id', 'kode_struktur_id',
         'status', 'foto',

@@ -235,6 +235,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span class="nav-text">Data Talent</span>
             </a>
+            <a href="{{ route('usulan_promosi.index') }}" data-tooltip="Usulan Promosi" class="nav-link {{ request()->routeIs('usulan_promosi.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="18 15 12 9 6 15"/><path d="M12 9v12"/><path d="M4 6h16"/></svg>
+                <span class="nav-text">Usulan Promosi</span>
+            </a>
         </div>
 
         <div class="nav-sep"></div>

@@ -265,7 +265,7 @@
 
 {{-- Table --}}
 <div class="table-card">
-    @if($talents->count() > 0)
+    @if($talents->total() > 0)
     <div class="table-wrap">
         <table>
             <thead>
@@ -286,7 +286,7 @@
                 @foreach($talents as $i => $t)
                 @php $k = $t->karyawan; @endphp
                 <tr>
-                    <td style="color:#9ca3af;font-size:12px">{{ $i + 1 }}</td>
+                    <td style="color:#9ca3af;font-size:12px">{{ ($talents->currentPage() - 1) * $talents->perPage() + $i + 1 }}</td>
                     <td class="td-nik">{{ $k->nik ?? '-' }}</td>
                     <td><div class="td-nama">{{ $k->nama ?? '-' }}</div></td>
                     <td class="td-jabatan">{{ $k->jabatan_saat_ini ?? '-' }}</td>
@@ -322,6 +322,51 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+    {{-- Pagination Footer --}}
+    <div id="paginationFooter" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:8px;">
+        <span>
+            Menampilkan <strong>{{ $talents->firstItem() ?? 0 }}</strong>–<strong>{{ $talents->lastItem() ?? 0 }}</strong>
+            dari <strong>{{ $talents->total() }}</strong> data
+        </span>
+        @if($talents->hasPages())
+        <div style="display:flex;align-items:center;gap:3px;">
+            @if($talents->onFirstPage())
+                <span style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;opacity:0.4;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                </span>
+            @else
+                <a href="{{ $talents->previousPageUrl() }}" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#374151;background:white;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                </a>
+            @endif
+            @php $cur=$talents->currentPage();$last=$talents->lastPage();$s=max(1,$cur-2);$e=min($last,$cur+2); @endphp
+            @if($s > 1)
+                <a href="{{ $talents->url(1) }}" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#374151;background:white;font-size:12px;">1</a>
+                @if($s > 2)<span style="padding:0 2px;color:#9ca3af">…</span>@endif
+            @endif
+            @for($pg = $s; $pg <= $e; $pg++)
+                @if($pg == $cur)
+                    <span style="width:28px;height:28px;border-radius:7px;border:1px solid #15803d;background:#15803d;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">{{ $pg }}</span>
+                @else
+                    <a href="{{ $talents->url($pg) }}" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#374151;background:white;font-size:12px;">{{ $pg }}</a>
+                @endif
+            @endfor
+            @if($e < $last)
+                @if($e < $last - 1)<span style="padding:0 2px;color:#9ca3af">…</span>@endif
+                <a href="{{ $talents->url($last) }}" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#374151;background:white;font-size:12px;">{{ $last }}</a>
+            @endif
+            @if($talents->hasMorePages())
+                <a href="{{ $talents->nextPageUrl() }}" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#374151;background:white;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            @else
+                <span style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;opacity:0.4;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </span>
+            @endif
+        </div>
+        @endif
     </div>
     @else
     <div id="tableBody">

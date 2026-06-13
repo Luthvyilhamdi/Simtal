@@ -43,7 +43,7 @@
         <form method="POST" action="{{ route('karyawan.store') }}" enctype="multipart/form-data">
             @csrf
 
-            {{-- ===== DATA PRIBADI ===== --}}
+            {{-- DATA PRIBADI --}}
             <div class="section-label">👤 Data Pribadi</div>
             <div class="form-grid">
                 <div class="form-group">
@@ -95,7 +95,7 @@
                 </div>
             </div>
 
-            {{-- ===== DATA JABATAN & STRUKTUR ===== --}}
+            {{-- DATA JABATAN & STRUKTUR --}}
             <div class="section-label">🏢 Data Jabatan & Struktur</div>
             <div class="form-grid">
                 <div class="form-group">
@@ -114,6 +114,15 @@
                            placeholder="cth: Associate Officer Talenta Manajemen" />
                     <span class="hint">Jabatan lengkap yang ditampilkan di profil karyawan</span>
                     @error('jabatan_saat_ini')<div class="error">{{ $message }}</div>@enderror
+                </div>
+                <div class="form-group">
+                    <label>Struktural / Fungsional</label>
+                    <select name="struktural_fungsional">
+                        <option value="">-- Pilih --</option>
+                        <option value="Struktural" {{ old('struktural_fungsional')=='Struktural' ? 'selected' : '' }}>Struktural</option>
+                        <option value="Fungsional" {{ old('struktural_fungsional')=='Fungsional' ? 'selected' : '' }}>Fungsional</option>
+                    </select>
+                    @error('struktural_fungsional')<div class="error">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
                     <label>Direktorat *</label>
@@ -157,7 +166,7 @@
                 </div>
             </div>
 
-            {{-- ===== BAND & GRADE ===== --}}
+            {{-- BAND & GRADE --}}
             <div class="section-label">⭐ Band & Grade</div>
             <div class="form-grid">
                 <div class="form-group">
@@ -193,17 +202,16 @@
                 </div>
             </div>
 
-            {{-- MDG Info --}}
             <div class="mdg-info">
                 <strong>📋 Ketentuan Masa Dinas Grade (MDG):</strong>
                 <ul>
                     <li>Naik <strong>Person Grade</strong> → min <strong>1 tahun</strong> TMT PG saat ini</li>
                     <li>Naik <strong>Job Grade</strong> → min <strong>2 tahun</strong> TMT JG saat ini (PG harus = JG)</li>
-                    <li>Naik <strong>Band</strong> → MDG JG min <strong>2 tahun</strong>, MDG PG min <strong>1 tahun</strong>, MDG Band min <strong>3 tahun</strong> (dihitung dari TMT JG saat masuk band)</li>
+                    <li>Naik <strong>Band</strong> → MDG JG min <strong>2 tahun</strong>, MDG PG min <strong>1 tahun</strong>, MDG Band min <strong>3 tahun</strong></li>
                 </ul>
             </div>
 
-            {{-- ===== TMT GRADE ===== --}}
+            {{-- TMT GRADE --}}
             <div class="section-label" style="margin-top:20px;">📅 TMT Grade</div>
             <div class="form-grid">
                 <div class="form-group">

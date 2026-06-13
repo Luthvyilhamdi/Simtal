@@ -31,7 +31,7 @@ class ActivityLogController extends Controller
             $query->whereDate('created_at', $request->tanggal);
         }
 
-        $logs = $query->paginate(20);
+        $logs = $query->paginate(10)->appends(request()->query());
 
         $moduls = ActivityLog::distinct()->pluck('modul')->sort()->values();
 
@@ -40,7 +40,6 @@ class ActivityLogController extends Controller
 
     public function destroy(Request $request)
     {
-        // Hapus semua log (hanya super admin)
         ActivityLog::truncate();
         return redirect()->route('activity_log.index')
             ->with('success', 'Semua log aktivitas berhasil dihapus!');

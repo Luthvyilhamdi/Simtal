@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\PenilaianKaryawan;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PenilaianKaryawanController extends Controller
 {
+    use LogsActivity;
+
     public function index(Karyawan $karyawan, Request $request)
     {
         $query = PenilaianKaryawan::where('karyawan_id', $karyawan->id)
@@ -22,7 +25,7 @@ class PenilaianKaryawanController extends Controller
             $query->where('tipe', $request->tipe);
         }
 
-        $penilaians = $query->get();
+        $penilaians = $query->paginate(10)->appends(request()->query());
 
         $tahuns = PenilaianKaryawan::where('karyawan_id', $karyawan->id)
             ->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
@@ -57,13 +60,22 @@ class PenilaianKaryawanController extends Controller
             'created_by'  => Auth::id(),
         ]);
 
+        $this->log('tambah', 'Penilaian Karyawan', $karyawan->nama,
+            $request->tipe . ' | ' . $request->tahun . ' ' . $request->periode . ' | Nilai: ' . $request->nilai);
+
         return redirect()->route('penilaian_karyawan.index', $karyawan)
             ->with('success', 'Data penilaian berhasil ditambahkan!');
     }
 
     public function destroy(Karyawan $karyawan, PenilaianKaryawan $penilaian)
     {
+        $judul = $penilaian->judul;
+        $tipe  = $penilaian->tipe;
         $penilaian->delete();
+
+        $this->log('hapus', 'Penilaian Karyawan', $karyawan->nama,
+            $tipe . ' | ' . $judul);
+
         return redirect()->route('penilaian_karyawan.index', $karyawan)
             ->with('success', 'Data penilaian berhasil dihapus!');
     }

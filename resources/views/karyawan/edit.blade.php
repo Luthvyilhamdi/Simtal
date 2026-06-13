@@ -255,6 +255,17 @@
                 </div>
                 @error('jabatan_id')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
+            
+            <div class="form-group">
+                <label class="form-label">Struktural / Fungsional</label>
+                <div class="select-wrap">
+                    <select name="struktural_fungsional" class="form-input">
+                        <option value="">-- Pilih --</option>
+                        <option value="Struktural" {{ old('struktural_fungsional', $karyawan->struktural_fungsional) === 'Struktural' ? 'selected' : '' }}>Struktural</option>
+                        <option value="Fungsional" {{ old('struktural_fungsional', $karyawan->struktural_fungsional) === 'Fungsional' ? 'selected' : '' }}>Fungsional</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label class="form-label">Jabatan Saat Ini</label>

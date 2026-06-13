@@ -169,6 +169,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Penilaian
     </a>
+    <a href="{{ route('kalibrasi_karyawan.index', $karyawan) }}" class="btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Kalibrasi
+    </a>
     <a href="{{ route('karyawan.index') }}" class="btn-outline">
         <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         Semua Karyawan
@@ -274,6 +278,18 @@
             <span class="detail-label">Kode Struktur</span>
             <span class="detail-value">
                 <span class="badge badge-purple">{{ $karyawan->kodeStruktur->kode_struktur ?? '-' }}</span>
+            </span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Struktural/Fungsional</span>
+            <span class="detail-value">
+                @if($karyawan->struktural_fungsional)
+                    <span class="badge {{ $karyawan->struktural_fungsional === 'Struktural' ? 'badge-blue' : 'badge-amber' }}">
+                        {{ $karyawan->struktural_fungsional }}
+                    </span>
+                @else
+                    <span style="color:#d1d5db">-</span>
+                @endif
             </span>
         </div>
     </div>
