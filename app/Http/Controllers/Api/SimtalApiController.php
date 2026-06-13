@@ -50,8 +50,10 @@ class SimtalApiController extends Controller
             ->first();
 
         return response()->json([
-            'token'    => $token,
-            'user'     => [
+            'access_token' => $token,
+            'token_type'   => 'Bearer',
+            'expires_in'   => 28800, // 8 jam dalam detik
+            'user'         => [
                 'id'   => $user->id,
                 'name' => $user->name,
                 'email'=> $user->email,
