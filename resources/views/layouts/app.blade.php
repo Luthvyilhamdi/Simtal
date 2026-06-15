@@ -6,6 +6,12 @@
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <title>SIMTAL - @yield('title')</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{-- Baca cookie & pasang class collapsed SEBELUM halaman render (cegah kedip) --}}
+    <script>
+        if (document.cookie.split('; ').find(c => c.startsWith('sidebar_collapsed=1'))) {
+            document.documentElement.classList.add('sidebar-collapsed');
+        }
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f6f4f4; display: flex; height: 100vh; overflow: hidden; }
@@ -24,30 +30,30 @@
             position: relative; z-index: 50; flex-shrink: 0;
             box-shadow: 2px 0 12px rgba(0,0,0,0.04);
         }
-        .sidebar.collapsed { width: 64px; min-width: 64px; }
-        .sidebar.collapsed .brand-name, .sidebar.collapsed .brand-sub,
-        .sidebar.collapsed .nav-section-label, .sidebar.collapsed .nav-text,
-        .sidebar.collapsed .user-info { display: none; }
-        .sidebar.collapsed .nav-link { justify-content: center; padding: 10px; }
-        .sidebar.collapsed .nav-link svg { margin: 0; }
-        .sidebar.collapsed .user-row { justify-content: center; padding: 8px; }
-        .sidebar.collapsed .brand-row { justify-content: center; }
-        .sidebar.collapsed .brand-icon { margin: 0; }
-        .sidebar.collapsed .logout-btn { justify-content: center; padding: 10px; }
-        .sidebar.collapsed .collapse-btn svg { transform: rotate(180deg); }
-        .sidebar.collapsed .nav-sep { display: none; }
+        html.sidebar-collapsed .sidebar { width: 64px; min-width: 64px; }
+        html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
+        html.sidebar-collapsed .sidebar .nav-section-label, html.sidebar-collapsed .sidebar .nav-text,
+        html.sidebar-collapsed .sidebar .user-info { display: none; }
+        html.sidebar-collapsed .sidebar .nav-link { justify-content: center; padding: 10px; }
+        html.sidebar-collapsed .sidebar .nav-link svg { margin: 0; }
+        html.sidebar-collapsed .sidebar .user-row { justify-content: center; padding: 8px; }
+        html.sidebar-collapsed .sidebar .brand-row { justify-content: center; }
+        html.sidebar-collapsed .sidebar .brand-icon { margin: 0; }
+        html.sidebar-collapsed .sidebar .logout-btn { justify-content: center; padding: 10px; }
+        html.sidebar-collapsed .sidebar .collapse-btn svg { transform: rotate(180deg); }
+        html.sidebar-collapsed .sidebar .nav-sep { display: none; }
 
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -248px; height: 100vh; z-index: 50; box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
             .sidebar.mobile-open { left: 0; }
-            .sidebar.collapsed { width: 248px; min-width: 248px; left: -248px; }
-            .sidebar.collapsed .brand-name, .sidebar.collapsed .brand-sub,
-            .sidebar.collapsed .nav-section-label, .sidebar.collapsed .nav-text,
-            .sidebar.collapsed .user-info { display: block; }
-            .sidebar.collapsed .nav-link { justify-content: flex-start; padding: 8px 10px; }
-            .sidebar.collapsed .user-row { justify-content: flex-start; padding: 10px; }
-            .sidebar.collapsed .brand-row { justify-content: flex-start; }
-            .sidebar.collapsed .logout-btn { justify-content: flex-start; padding: 8px 10px; }
+            html.sidebar-collapsed .sidebar { width: 248px; min-width: 248px; left: -248px; }
+            html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
+            html.sidebar-collapsed .sidebar .nav-section-label, html.sidebar-collapsed .sidebar .nav-text,
+            html.sidebar-collapsed .sidebar .user-info { display: block; }
+            html.sidebar-collapsed .sidebar .nav-link { justify-content: flex-start; padding: 8px 10px; }
+            html.sidebar-collapsed .sidebar .user-row { justify-content: flex-start; padding: 10px; }
+            html.sidebar-collapsed .sidebar .brand-row { justify-content: flex-start; }
+            html.sidebar-collapsed .sidebar .logout-btn { justify-content: flex-start; padding: 8px 10px; }
         }
 
         .sidebar-brand { padding: 18px 16px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0eb; flex-shrink: 0; }
@@ -74,7 +80,7 @@
         .nav-link svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; }
         .nav-text { overflow: hidden; text-overflow: ellipsis; }
 
-        .sidebar.collapsed .nav-link:hover::after { content: attr(data-tooltip); position: absolute; left: 56px; top: 50%; transform: translateY(-50%); background: #1a1a1a; color: white; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px; white-space: nowrap; z-index: 100; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        html.sidebar-collapsed .sidebar .nav-link:hover::after { content: attr(data-tooltip); position: absolute; left: 56px; top: 50%; transform: translateY(-50%); background: #1a1a1a; color: white; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px; white-space: nowrap; z-index: 100; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
         .master-toggle { cursor: pointer; user-select: none; }
         .master-toggle .toggle-chevron { width: 12px; height: 12px; margin-left: auto; flex-shrink: 0; transition: transform 0.2s; stroke: currentColor; fill: none; }
@@ -273,10 +279,6 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 <span class="nav-text">Surat Penting</span>
             </a>
-            <a href="https://luthvyilhamdi.github.io/idp-dashboard/" target="_blank" rel="noopener noreferrer" data-tooltip="Progress IDP" class="nav-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                <span class="nav-text">Progress IDP</span>
-            </a>
             <a href="{{ route('faq') }}" data-tooltip="FAQ" class="nav-link {{ request()->routeIs('faq') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 <span class="nav-text">FAQ & Panduan</span>
@@ -365,7 +367,7 @@
 
             <div class="user-dropdown-wrap" id="userDropdownWrap">
                 <button class="user-trigger" onclick="toggleUserDropdown()">
-                    <div class="user-trigger-avatar">{{ initials(auth()->user()->name) }}</div>
+                    <div class="user-trigger-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
                     <div class="user-trigger-info">
                         <div class="user-trigger-name">{{ auth()->user()->name }}</div>
                         <div class="user-trigger-role">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isAdmin() ? 'Administrator' : 'User') }}</div>
@@ -375,7 +377,7 @@
 
                 <div class="user-dropdown-menu" id="userDropdownMenu">
                     <div class="dropdown-header">
-                        <div class="dropdown-avatar-lg">{{ initials(auth()->user()->name) }}</div>
+                        <div class="dropdown-avatar-lg">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
                         <div class="dropdown-header-name">{{ auth()->user()->name }}</div>
                         <div class="dropdown-header-email">{{ auth()->user()->email }}</div>
                         <div class="dropdown-header-badge">
@@ -417,15 +419,17 @@
     const overlay  = document.getElementById('sidebarOverlay');
     const isMobile = () => window.innerWidth <= 768;
 
+    // Desktop collapse (perkecil/perbesar) + simpan ke cookie (cegah kedip)
     function toggleSidebar() {
         if (isMobile()) { closeSidebar(); }
-        else { sidebar.classList.toggle('collapsed'); localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed')); }
+        else {
+            document.documentElement.classList.toggle('sidebar-collapsed');
+            const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
+            document.cookie = 'sidebar_collapsed=' + (isCollapsed ? '1' : '0') + ';path=/;max-age=31536000';
+        }
     }
     function openSidebar()  { sidebar.classList.add('mobile-open'); overlay.classList.add('show'); document.body.style.overflow = 'hidden'; }
     function closeSidebar() { sidebar.classList.remove('mobile-open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
-    window.addEventListener('DOMContentLoaded', () => {
-        if (!isMobile() && localStorage.getItem('sidebarCollapsed') === 'true') sidebar.classList.add('collapsed');
-    });
     window.addEventListener('resize', () => {
         if (!isMobile()) { sidebar.classList.remove('mobile-open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
     });
