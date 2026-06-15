@@ -339,7 +339,7 @@ $bc = [
                     {{-- NAMA --}}
                     <td style="vertical-align:middle;min-width:160px">
                         <div style="display:flex;align-items:center;gap:10px">
-                            <div class="av">{{ strtoupper(substr($u->karyawan->nama??'-',0,2)) }}</div>
+                            <div class="av">{{ initials($u->karyawan->nama) }}</div>
                             <div>
                                 <div class="td-nama">{{ $u->karyawan->nama??'-' }}</div>
                                 <div class="td-nik">{{ $u->karyawan->nik??'-' }}</div>

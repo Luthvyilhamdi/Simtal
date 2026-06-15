@@ -279,7 +279,7 @@
                     <td>
                         <div class="user-info">
                             <div class="user-avatar" style="background:{{ $user->role === 'user' ? '#6b7280' : ($user->isSuperAdmin() ? '#d97706' : '#1d4ed8') }};">
-                                {{ strtoupper(substr($user->name, 0, 2)) }}
+                                {{ initials($user->name) }}
                             </div>
                             <div>
                                 <div class="user-name">

@@ -337,7 +337,7 @@
                                     @if($a->karyawan->foto)
                                         <img src="{{ Storage::url($a->karyawan->foto) }}" alt="">
                                     @else
-                                        {{ strtoupper(substr($a->karyawan->nama, 0, 2)) }}
+                                        {{ initials($a->karyawan->nama) }}
                                     @endif
                                 </div>
                                 <div>
@@ -502,7 +502,7 @@
                                     @if($ak->karyawan->foto)
                                         <img src="{{ Storage::url($ak->karyawan->foto) }}" alt="">
                                     @else
-                                        {{ strtoupper(substr($ak->karyawan->nama, 0, 2)) }}
+                                        {{ initials($ak->karyawan->nama) }}
                                     @endif
                                 </div>
                                 <div>

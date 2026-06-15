@@ -133,7 +133,7 @@
             @if($karyawan && $karyawan->foto)
                 <img src="{{ Storage::url($karyawan->foto) }}" alt="">
             @else
-                {{ strtoupper(substr($user->name, 0, 2)) }}
+                {{ initials($user->name) }}
             @endif
         </div>
         <div style="position:relative;z-index:1;">

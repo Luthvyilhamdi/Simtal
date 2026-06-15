@@ -693,7 +693,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
             <div class="list-item">
                 <div class="list-avatar">
                     @if($a->karyawan->foto)<img src="{{ Storage::url($a->karyawan->foto) }}" alt="">
-                    @else{{ strtoupper(substr($a->karyawan->nama,0,2)) }}@endif
+                    @else{{ initials($a->karyawan->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $a->karyawan->nama }}</div>
@@ -722,7 +722,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
                 <div style="font-size:16px;font-weight:800;color:{{ $warnaClass }};min-width:32px;text-align:center;">{{ $sisaTahun }}th</div>
                 <div class="list-avatar">
                     @if($k->foto)<img src="{{ Storage::url($k->foto) }}" alt="">
-                    @else{{ strtoupper(substr($k->nama,0,2)) }}@endif
+                    @else{{ initials($k->karyawan->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $k->nama }}</div>
@@ -749,7 +749,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
                 <div style="font-size:14px;font-weight:800;color:#ef4444;min-width:30px;text-align:center;">{{ (int) now()->diffInDays($a->tanggal_exp_idp) }}h</div>
                 <div class="list-avatar" style="background:#fef2f2;color:#dc2626;">
                     @if($a->karyawan->foto)<img src="{{ Storage::url($a->karyawan->foto) }}" alt="">
-                    @else{{ strtoupper(substr($a->karyawan->nama,0,2)) }}@endif
+                    @else{{ initials($a->karyawan->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $a->karyawan->nama }}</div>
@@ -772,7 +772,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
             <div class="list-item">
                 <div class="list-avatar">
                     @if($k->foto)<img src="{{ Storage::url($k->foto) }}" alt="">
-                    @else{{ strtoupper(substr($k->nama,0,2)) }}@endif
+                    @else{{ initials($k->karyawan->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $k->nama }}</div>

@@ -365,7 +365,7 @@
 
             <div class="user-dropdown-wrap" id="userDropdownWrap">
                 <button class="user-trigger" onclick="toggleUserDropdown()">
-                    <div class="user-trigger-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+                    <div class="user-trigger-avatar">{{ initials(auth()->user()->name) }}</div>
                     <div class="user-trigger-info">
                         <div class="user-trigger-name">{{ auth()->user()->name }}</div>
                         <div class="user-trigger-role">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isAdmin() ? 'Administrator' : 'User') }}</div>
@@ -375,7 +375,7 @@
 
                 <div class="user-dropdown-menu" id="userDropdownMenu">
                     <div class="dropdown-header">
-                        <div class="dropdown-avatar-lg">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+                        <div class="dropdown-avatar-lg">{{ initials(auth()->user()->name) }}</div>
                         <div class="dropdown-header-name">{{ auth()->user()->name }}</div>
                         <div class="dropdown-header-email">{{ auth()->user()->email }}</div>
                         <div class="dropdown-header-badge">

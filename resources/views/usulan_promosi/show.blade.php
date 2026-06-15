@@ -110,7 +110,7 @@
 <div style="background:white;border-radius:16px;border:1px solid #e5e7eb;padding:24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
     <div style="display:flex;align-items:center;gap:14px">
         <div style="width:48px;height:48px;border-radius:50%;background:#15803d;color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">
-            {{ strtoupper(substr($u->karyawan->nama ?? '-', 0, 2)) }}
+            {{ initials($u->karyawan->nama) }}
         </div>
         <div>
             <div style="font-size:18px;font-weight:700;color:#111827">{{ $u->karyawan->nama ?? '-' }}</div>

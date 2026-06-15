@@ -240,7 +240,7 @@
             <div class="scard-karyawan">
                 <div class="scard-avatar">
                     @if($s->karyawan->foto)<img src="{{ Storage::url($s->karyawan->foto) }}" alt="">
-                    @else{{ strtoupper(substr($s->karyawan->nama, 0, 2)) }}@endif
+                    @else{{ initials($s->karyawan->nama) }}@endif
                 </div>
                 <div>
                     <div class="scard-kname">{{ $s->karyawan->nama }}</div>

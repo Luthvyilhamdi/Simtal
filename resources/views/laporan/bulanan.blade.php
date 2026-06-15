@@ -64,7 +64,7 @@ $namaBulanList = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','A
   <div style="padding:0 16px">
     @forelse($karyawanMasuk as $k)
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f9fafb">
-      <div style="width:30px;height:30px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($k->nama,0,2)) }}</div>
+      <div style="width:30px;height:30px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">{{ initials($k->nama) }}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $k->nama }}</div>
         <div style="font-size:11px;color:#9ca3af">{{ $k->direktorat?->nama_direktorat ?? '-' }}</div>
@@ -90,7 +90,7 @@ $namaBulanList = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','A
   <div style="padding:0 16px">
     @forelse($karyawanKeluar as $k)
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f9fafb">
-      <div style="width:30px;height:30px;border-radius:50%;background:#dc2626;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($k->nama,0,2)) }}</div>
+      <div style="width:30px;height:30px;border-radius:50%;background:#dc2626;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">{{ initials($k->nama) }}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $k->nama }}</div>
         <div style="font-size:11px;color:#9ca3af">{{ $k->direktorat?->nama_direktorat ?? '-' }}</div>
@@ -120,7 +120,7 @@ $namaBulanList = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','A
       <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">{{ $label }} ({{ $list->count() }})</div>
       @foreach($list as $h)
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f9fafb">
-        <div style="width:26px;height:26px;border-radius:50%;background:{{ $bg }};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:{{ $color }};flex-shrink:0">{{ strtoupper(substr($h->karyawan->nama??'?',0,2)) }}</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:{{ $bg }};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:{{ $color }};flex-shrink:0">{{ initials($h->karyawan->nama) }}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $h->karyawan->nama ?? '-' }}</div>
           <div style="font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $h->jabatan_saat_ini ?? '-' }}</div>
@@ -150,7 +150,7 @@ $namaBulanList = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','A
       <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Rekomendasi ({{ $assessments->count() }})</div>
       @foreach($assessments->take(5) as $a)
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f9fafb">
-        <div style="width:26px;height:26px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#7c3aed;flex-shrink:0">{{ strtoupper(substr($a->karyawan->nama??'?',0,2)) }}</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#7c3aed;flex-shrink:0">{{ initials($a->karyawan->nama) }}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $a->karyawan->nama ?? '-' }}</div>
         </div>
@@ -188,7 +188,7 @@ $namaBulanList = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','A
   <div style="padding:14px 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
     @foreach($akanPensiun as $k)
     <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px">
-      <div style="width:32px;height:32px;border-radius:50%;background:#d97706;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($k->nama,0,2)) }}</div>
+      <div style="width:32px;height:32px;border-radius:50%;background:#d97706;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">{{ initials($k->nama) }}</div>
       <div style="min-width:0">
         <div style="font-size:12px;font-weight:600;color:#92400e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $k->nama }}</div>
         <div style="font-size:11px;color:#d97706">{{ $k->direktorat?->nama_direktorat ?? '-' }}</div>

@@ -247,7 +247,7 @@ $isUser = auth()->user()->isUser();
                   <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
                     @if($row->karyawan_id)
                       <div style="display:flex;align-items:center;gap:8px">
-                        <div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($row->nama_karyawan??'?',0,2)) }}</div>
+                        <div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
                         <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
                       </div>
                     @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
@@ -342,7 +342,7 @@ $isUser = auth()->user()->isUser();
                 <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
                   @if($row->karyawan_id)
                     <div style="display:flex;align-items:center;gap:8px">
-                      <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal2?'#15803d':'#185fa5' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($row->nama_karyawan??'?',0,2)) }}</div>
+                      <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal2?'#15803d':'#185fa5' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
                       <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
                     </div>
                   @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
@@ -425,7 +425,7 @@ $isUser = auth()->user()->isUser();
               <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
                 @if($row->karyawan_id)
                   <div style="display:flex;align-items:center;gap:8px">
-                    <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal3?'#15803d':'#374151' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($row->nama_karyawan??'?',0,2)) }}</div>
+                    <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal3?'#15803d':'#374151' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
                     <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
                   </div>
                 @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
@@ -495,7 +495,7 @@ $isUser = auth()->user()->isUser();
           <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
             @if($row->karyawan_id)
               <div style="display:flex;align-items:center;gap:8px">
-                <div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($row->nama_karyawan??'?',0,2)) }}</div>
+                <div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
                 <div>
                   <div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div>
                   <div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div>
@@ -1146,7 +1146,7 @@ function saveAssign(){
     currentAssignments[currentSoId]=d.karyawan_id||null;
     const td=document.getElementById('td-karyawan-'+currentSoId);
     if(d.nama_karyawan){
-      td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+d.nama_karyawan.substring(0,2).toUpperCase()+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';
+      td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+initials(d.nama_karyawan)+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';
     }else{
       td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';
     }
@@ -1179,6 +1179,14 @@ function avatarColor(str){
   let hash=0;
   for(let i=0;i<str.length;i++) hash=str.charCodeAt(i)+((hash<<5)-hash);
   return colors[Math.abs(hash)%colors.length];
+}
+
+function initials(nama, max = 3) {
+  nama = (nama || '').trim();
+  if (nama === '') return '?';
+  const kata = nama.split(/\s+/).filter(Boolean);
+  if (kata.length === 1) return kata[0].substring(0, 2).toUpperCase();
+  return kata.map(k => k.charAt(0)).join('').substring(0, max).toUpperCase();
 }
 
 let currentEditId=null;
@@ -1287,10 +1295,10 @@ function onAssignSearch(val){
     list.innerHTML='<div style="padding:12px 14px;font-size:13px;color:#9ca3af">Tidak ditemukan</div>';
   }else{
     list.innerHTML=results.slice(0,20).map(function(r){
-      const initials=r.display.substring(0,2).toUpperCase();
+      const ini=initials(r.display.split(' \u2014 ')[0]);
       const color=avatarColor(r.display);
       return '<div data-assign-id="'+r.id+'" data-assign-nama="'+r.nama+'" data-assign-nik="'+r.nik+'" style="padding:8px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid #f3f4f6;color:#111827;display:flex;align-items:center;gap:10px">'
-        +'<div style="width:30px;height:30px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">'+initials+'</div>'
+        +'<div style="width:30px;height:30px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0">'+ini+'</div>'
         +'<div><div style="font-size:13px;font-weight:500;color:#111827">'+r.display.split(' \u2014 ')[0]+'</div>'
         +'<div style="font-size:11px;color:#9ca3af">'+r.display.split(' \u2014 ')[1]+'</div></div>'
         +'</div>';
@@ -1315,8 +1323,8 @@ function selectAssignKaryawan(id,nama,nik){
   const clr=document.getElementById('assignSearchClear');
   if(clr)clr.style.display=id?'block':'none';
   if(id){
-    const initials=(display||'?').substring(0,2).toUpperCase();
-    document.getElementById('assignSelAvatar').textContent=initials;
+    const ini=initials(display.split(' \u2014 ')[0]||display);
+    document.getElementById('assignSelAvatar').textContent=ini;
     document.getElementById('assignSelAvatar').style.background=avatarColor(display||'');
     document.getElementById('assignSelNama').textContent=display.split(' \u2014 ')[0]||display;
     document.getElementById('assignSelNik').textContent='NIK: '+(display.split(' \u2014 ')[1]||nik||'');
