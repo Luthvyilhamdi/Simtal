@@ -722,7 +722,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
                 <div style="font-size:16px;font-weight:800;color:{{ $warnaClass }};min-width:32px;text-align:center;">{{ $sisaTahun }}th</div>
                 <div class="list-avatar">
                     @if($k->foto)<img src="{{ Storage::url($k->foto) }}" alt="">
-                    @else{{ initials($k->karyawan->nama) }}@endif
+                    @else{{ initials($k->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $k->nama }}</div>
@@ -772,7 +772,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
             <div class="list-item">
                 <div class="list-avatar">
                     @if($k->foto)<img src="{{ Storage::url($k->foto) }}" alt="">
-                    @else{{ initials($k->karyawan->nama) }}@endif
+                    @else{{ initials($k->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $k->nama }}</div>
