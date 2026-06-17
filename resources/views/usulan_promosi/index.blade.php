@@ -59,6 +59,9 @@
 .spin.show { display: block; }
 @keyframes rot { to { transform: rotate(360deg); } }
 
+/* ===== CONTENT WRAPPER (AJAX search) ===== */
+#upContent { transition: opacity .15s ease; }
+
 /* ===== STATS ===== */
 .stats-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; padding-bottom: 4px; }
 .stats-inner { display: flex; gap: 10px; width: max-content; }
@@ -91,6 +94,17 @@
 .tab-btn.active { color: #15803d; border-bottom-color: #15803d; }
 .tab-count { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: #f3f4f6; color: #6b7280; }
 .tab-btn.active .tab-count { background: #dcfce7; color: #15803d; }
+
+/* ===== TABS BAR (tabs kiri + search kanan, satu baris) ===== */
+.tabs-bar { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 20px; }
+.tabs-scroll { flex: 1; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 2px solid #e5e7eb; }
+.tabs-scroll .tabs-inner { display: flex; width: max-content; }
+.tabs-bar .search-box { margin-bottom: 6px; flex-shrink: 0; }
+@media (max-width: 640px) {
+    .tabs-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+    .tabs-scroll { width: 100%; }
+    .tabs-bar .search-box { width: 100%; margin-bottom: 0; }
+}
 
 /* ===== TABLE CARD ===== */
 .table-card { background: white; border-radius: 14px; border: 1px solid #e5e7eb; overflow: hidden; }
@@ -173,6 +187,9 @@
 .pag-btn.disabled { opacity: .35; pointer-events: none; }
 .pag-row { display: flex; align-items: center; gap: 3px; }
 
+/* Highlight search */
+mark { background: #fef08a; border-radius: 2px; padding: 0 1px; color: inherit; font-weight: 700; }
+
 /* Toast */
 .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; pointer-events: none; }
 .toast { display: flex; align-items: center; gap: 10px; background: white; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; border-radius: 12px; padding: 14px 18px; box-shadow: 0 8px 32px rgba(0,0,0,.12); font-size: 13px; color: #15803d; font-weight: 500; min-width: 280px; position: relative; overflow: hidden; pointer-events: all; animation: tIn .3s forwards; }
@@ -236,27 +253,7 @@
 </div>
 <form id="fHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
 
-{{-- HEADER --}}
-<div class="page-header">
-    <div>
-        <div class="page-title">🏆 Usulan Promosi</div>
-        <div class="page-sub">Manajemen usulan promosi karyawan</div>
-    </div>
-    <div class="header-right">
-        <div class="search-box">
-            <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="sInput" value="{{ request('search') }}" placeholder="Cari nama / NIK..." autocomplete="off">
-            <div class="spin" id="spin"></div>
-            <button class="clear-btn {{ request('search') ? 'visible':'' }}" id="clrBtn" onclick="clearSearch()">×</button>
-        </div>
-        <a href="{{ route('usulan_promosi.create') }}" class="btn-primary">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Buat Usulan
-        </a>
-    </div>
-</div>
-
-{{-- STATS --}}
+{{-- DEFINISI ARRAY (dipakai stats, tabs, panels) --}}
 @php
 $sc = [
     'draft'        => ['Draft',       '#6b7280'],
@@ -267,20 +264,6 @@ $sc = [
     'tanpa_sidang' => ['Tanpa Sidang','#7c3aed'],
     'ditolak'      => ['Ditolak',     '#be185d'],
 ];
-@endphp
-<div class="stats-outer">
-    <div class="stats-inner">
-        @foreach($sc as $k => $v)
-        <div class="stat-card">
-            <div class="stat-lbl"><span class="stat-dot" style="background:{{ $v[1] }}"></span>{{ $v[0] }}</div>
-            <div class="stat-num" style="color:{{ $v[1] }}">{{ $counts[$k] }}</div>
-        </div>
-        @endforeach
-    </div>
-</div>
-
-{{-- TABS --}}
-@php
 $tabs = [
     'draft'        => ['Draft',       '📝'],
     'verif_berkas' => ['Verif Berkas','🔍'],
@@ -297,19 +280,59 @@ $bc = [
     'ditolak'     =>['#fce7f3','#be185d'],
 ];
 @endphp
-<div class="tabs-outer">
-    <div class="tabs-inner">
-        @foreach($tabs as $k => $t)
-        <button class="tab-btn {{ $activeTab===$k?'active':'' }}" onclick="switchTab('{{ $k }}',this)">
-            {{ $t[1] }} {{ $t[0] }} <span class="tab-count">{{ $counts[$k] }}</span>
-        </button>
+
+{{-- HEADER --}}
+<div class="page-header">
+    <div>
+        <div class="page-title">🏆 Usulan Promosi</div>
+        <div class="page-sub">Manajemen usulan promosi karyawan</div>
+    </div>
+    <div class="header-right">
+        <a href="{{ route('usulan_promosi.create') }}" class="btn-primary">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Buat Usulan
+        </a>
+    </div>
+</div>
+
+{{-- STATS (di luar #upContent, angka di-update via JS) --}}
+<div class="stats-outer">
+    <div class="stats-inner">
+        @foreach($sc as $k => $v)
+        <div class="stat-card">
+            <div class="stat-lbl"><span class="stat-dot" data-color="{{ $v[1] }}"></span>{{ $v[0] }}</div>
+            <div class="stat-num" id="stat-{{ $k }}" data-color="{{ $v[1] }}">{{ $counts[$k] }}</div>
+        </div>
         @endforeach
     </div>
 </div>
 
+{{-- TABS + SEARCH (satu baris, di luar #upContent) --}}
+<div class="tabs-bar">
+    <div class="tabs-scroll">
+        <div class="tabs-inner">
+            @foreach($tabs as $k => $t)
+            <button class="tab-btn {{ $activeTab===$k?'active':'' }}" data-tab="{{ $k }}">
+                {{ $t[1] }} {{ $t[0] }} <span class="tab-count" id="cnt-{{ $k }}">{{ $counts[$k] }}</span>
+            </button>
+            @endforeach
+        </div>
+    </div>
+    <div class="search-box">
+        <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="sInput" value="{{ request('search') }}" placeholder="Cari nama / NIK..." autocomplete="off">
+        <div class="spin" id="spin"></div>
+        <button class="clear-btn {{ request('search') ? 'visible':'' }}" id="clrBtn" onclick="clearSearch()">×</button>
+    </div>
+</div>
+
+{{-- ===== KONTEN YANG DI-UPDATE SAAT SEARCH (panel saja) ===== --}}
+<div id="upContent">
+<div id="countData" data-json='@json($counts)' hidden></div>
+
 {{-- PANELS --}}
 @foreach($tabs as $tabKey => $tab)
-<div id="p-{{ $tabKey }}" style="{{ $activeTab===$tabKey?'':'display:none' }}">
+<div id="p-{{ $tabKey }}" @if($activeTab!==$tabKey) style="display:none" @endif>
 <div class="table-card">
     @php $d = $statusGroups[$tabKey]; @endphp
     @if($d->total() > 0)
@@ -375,7 +398,7 @@ $bc = [
 
                     {{-- STATUS --}}
                     <td style="vertical-align:middle;white-space:nowrap">
-                        <span class="badge" style="background:{{ $cl[0] }};color:{{ $cl[1] }}">{{ $u->status_label }}</span>
+                        <span class="badge" data-bg="{{ $cl[0] }}" data-color="{{ $cl[1] }}">{{ $u->status_label }}</span>
                     </td>
 
                     {{-- TINDAK LANJUT --}}
@@ -386,7 +409,8 @@ $bc = [
                             <input type="hidden" name="status" id="svf{{ $u->id }}" value="verif_berkas">
                             <input type="hidden" name="tindak_lanjut" id="tlh{{ $u->id }}" value="{{ $u->tindak_lanjut }}">
                             <div class="act-col">
-                                <select class="act-select" onchange="onTL({{ $u->id }},this.value)">
+                                {{-- Menggunakan data-tl-id agar tidak error di VSCode --}}
+                                <select class="act-select" data-tl-id="{{ $u->id }}">
                                     <option value="">— Pilih —</option>
                                     <option value="sidang"  {{ $u->tindak_lanjut==='sidang' ?'selected':'' }}>Lanjut Sidang</option>
                                     <option value="ditolak" {{ $u->tindak_lanjut==='ditolak'?'selected':'' }}>Ditolak</option>
@@ -409,7 +433,8 @@ $bc = [
                             <input type="hidden" name="tanggal_sidang" value="{{ $u->tanggal_sidang?->format('Y-m-d') }}">
                             <input type="hidden" name="status" id="ssd{{ $u->id }}" value="{{ $u->status }}">
                             <div class="act-col">
-                                <select class="act-select" name="hasil_sidang" onchange="onHS({{ $u->id }},this.value)">
+                                {{-- Menggunakan data-hs-id agar tidak error di VSCode --}}
+                                <select class="act-select" name="hasil_sidang" data-hs-id="{{ $u->id }}">
                                     <option value="">— Pilih —</option>
                                     <option value="lulus"       {{ $u->hasil_sidang==='lulus'      ?'selected':'' }}>Lulus</option>
                                     <option value="tidak_lulus" {{ $u->hasil_sidang==='tidak_lulus'?'selected':'' }}>Tidak Lulus</option>
@@ -435,8 +460,10 @@ $bc = [
                                 <a href="{{ route('usulan_promosi.show',$u) }}" class="btn-ic v" title="Detail">
                                     <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>
+                                {{-- Menggunakan data-url dan data-nama agar tidak error di VSCode --}}
                                 <button type="button" class="btn-ic d" title="Hapus"
-                                    onclick="openModal('{{ route('usulan_promosi.destroy',$u) }}','{{ addslashes($u->karyawan->nama??'') }}')">
+                                    data-url="{{ route('usulan_promosi.destroy',$u) }}"
+                                    data-nama="{{ addslashes($u->karyawan->nama??'') }}">
                                     <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                                 </button>
                             </div>
@@ -486,6 +513,8 @@ $bc = [
 </div>
 @endforeach
 
+</div>{{-- /#upContent --}}
+
 @endsection
 
 @push('scripts')
@@ -499,14 +528,60 @@ function closeToast() {
 }
 window.addEventListener('DOMContentLoaded', () => {
     if(document.getElementById('toast')) setTimeout(closeToast, 3000);
+
+    // Apply warna dari data-* attribute ke style property
+    document.querySelectorAll('[data-color]').forEach(el => {
+        const tag = el.tagName.toLowerCase();
+        if (tag === 'span' && el.classList.contains('stat-dot')) {
+            el.style.background = el.dataset.color;
+        } else {
+            el.style.color = el.dataset.color;
+        }
+    });
+    document.querySelectorAll('[data-bg]').forEach(el => {
+        el.style.background = el.dataset.bg;
+        if (el.dataset.color) el.style.color = el.dataset.color;
+    });
+});
+
+// Delegasi event untuk tab-btn dan tombol hapus
+document.addEventListener('click', function(e) {
+    const tabBtn = e.target.closest('.tab-btn');
+    if (tabBtn && tabBtn.dataset.tab) {
+        switchTab(tabBtn.dataset.tab, tabBtn);
+        return;
+    }
+
+    // Delegasi event untuk tombol hapus (menggunakan data-url dan data-nama)
+    const delBtn = e.target.closest('.btn-ic.d');
+    if (delBtn && delBtn.dataset.url) {
+        openModal(delBtn.dataset.url, delBtn.dataset.nama);
+        return;
+    }
+});
+
+// Delegasi event untuk select tindak lanjut dan hasil sidang
+document.addEventListener('change', function(e) {
+    const tlSel = e.target.closest('select[data-tl-id]');
+    if (tlSel) {
+        onTL(tlSel.dataset.tlId, tlSel.value);
+        return;
+    }
+
+    // Delegasi event untuk select hasil sidang (menggunakan data-hs-id)
+    const hsSel = e.target.closest('select[data-hs-id]');
+    if (hsSel) {
+        onHS(hsSel.dataset.hsId, hsSel.value);
+    }
 });
 
 // Tabs
 function switchTab(tab, btn) {
     document.querySelectorAll('[id^="p-"]').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('p-' + tab).style.display = '';
-    btn.classList.add('active');
+    const panel = document.getElementById('p-' + tab);
+    if (panel) panel.style.display = '';
+    if (btn) btn.classList.add('active');
     const url = new URL(window.location.href);
     url.searchParams.set('tab', tab);
     window.history.pushState({}, '', url.toString());
@@ -547,23 +622,88 @@ function submitHapus() {
 document.getElementById('mHapus').addEventListener('click', e => { if(e.target===document.getElementById('mHapus')) closeModal(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
-// Search
+// ===== REAL-TIME SEARCH (AJAX, tanpa reload halaman) =====
 let sTimer = null;
 const sInp = document.getElementById('sInput');
 const clrB = document.getElementById('clrBtn');
 const spin = document.getElementById('spin');
+
 sInp.addEventListener('input', function() {
     clrB.classList.toggle('visible', this.value.trim().length > 0);
     clearTimeout(sTimer);
-    sTimer = setTimeout(() => doSearch(this.value.trim()), 350);
+    sTimer = setTimeout(() => doSearch(this.value.trim()), 300);
 });
-sInp.addEventListener('keydown', e => { if(e.key==='Enter') { clearTimeout(sTimer); doSearch(sInp.value.trim()); } });
-function clearSearch() { sInp.value=''; clrB.classList.remove('visible'); doSearch(''); sInp.focus(); }
+sInp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { clearTimeout(sTimer); doSearch(sInp.value.trim()); }
+});
+
+function clearSearch() {
+    sInp.value = '';
+    clrB.classList.remove('visible');
+    doSearch('');
+    sInp.focus();
+}
+
 function doSearch(kw) {
     const url = new URL(window.location.href);
-    if(kw) url.searchParams.set('search',kw); else url.searchParams.delete('search');
+    if (kw) url.searchParams.set('search', kw);
+    else url.searchParams.delete('search');
+    // reset semua pagination ke halaman 1
+    ['page_draft','page_verif','page_sidang','page_lulus','page_tidak_lulus','page_tanpa','page_ditolak']
+        .forEach(p => url.searchParams.delete(p));
+
+    window.history.pushState({}, '', url.toString());
+
+    const content = document.getElementById('upContent');
     spin.classList.add('show');
-    window.location.href = url.toString();
+    content.style.opacity = '0.5';
+
+    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const fresh = doc.getElementById('upContent');
+            if (fresh) content.innerHTML = fresh.innerHTML;
+            updateCounts();        // sinkron angka stats & tab (di luar #upContent)
+            content.style.opacity = '1';
+            spin.classList.remove('show');
+            if (kw) highlightText(content, kw);
+        })
+        .catch(() => {
+            content.style.opacity = '1';
+            spin.classList.remove('show');
+        });
 }
+
+// Update angka stats & tab count dari #countData (hasil filter)
+function updateCounts() {
+    const cd = document.getElementById('countData');
+    if (!cd) return;
+    let counts;
+    try { counts = JSON.parse(cd.dataset.json); } catch(e) { return; }
+    Object.keys(counts).forEach(k => {
+        const tc = document.getElementById('cnt-' + k);
+        if (tc) tc.textContent = counts[k];
+        const st = document.getElementById('stat-' + k);
+        if (st) st.textContent = counts[k];
+    });
+}
+
+function highlightText(root, keyword) {
+    const kw = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('(' + kw + ')', 'gi');
+    root.querySelectorAll('.td-nama, .td-nik').forEach(node => {
+        node.innerHTML = node.textContent.replace(regex, '<mark>$1</mark>');
+    });
+}
+
+// Browser back/forward
+window.addEventListener('popstate', () => {
+    const url = new URL(window.location.href);
+    const kw  = url.searchParams.get('search') || '';
+    sInp.value = kw;
+    clrB.classList.toggle('visible', kw.length > 0);
+    doSearch(kw);
+});
 </script>
 @endpush

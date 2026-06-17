@@ -52,8 +52,22 @@
 
     .badge-final { display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700; }
     .badge-dot { width:8px;height:8px;border-radius:50%; }
-    .badge-qualified { background:#dcfce7;color:#15803d; }
-    .badge-notqualified { background:#fee2e2;color:#dc2626; }
+    .badge-qualified   { background:#dcfce7;color:#15803d; }
+    .badge-notqualified{ background:#fee2e2;color:#dc2626; }
+
+    /* FIX: badge rekomendasi final warna via class statis */
+    .badge-rekom-ready { background:#dcfce7;color:#15803d; }
+    .badge-rekom-rwd   { background:#fef3c7;color:#d97706; }
+    .badge-rekom-nr    { background:#fee2e2;color:#dc2626; }
+    .badge-rekom-none  { background:#f3f4f6;color:#6b7280; }
+    .badge-dot-ready   { background:#15803d; }
+    .badge-dot-rwd     { background:#d97706; }
+    .badge-dot-nr      { background:#dc2626; }
+    .badge-dot-none    { background:#6b7280; }
+
+    /* FIX: badge-dot kompetensi via class statis */
+    .badge-dot-qualified    { background:#15803d; }
+    .badge-dot-notqualified { background:#dc2626; }
 
     .rekom-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px; }
     .rekom-item { }
@@ -61,6 +75,10 @@
     .rekom-bar-wrap { display:flex;align-items:center;gap:8px; }
     .rekom-bar { flex:1;height:6px;background:#f3f4f6;border-radius:20px;overflow:hidden; }
     .rekom-fill { height:100%;border-radius:20px;transition:width 0.5s ease; }
+    /* FIX: rekom-fill warna via class statis */
+    .rekom-fill-green { background:#15803d; }
+    .rekom-fill-blue  { background:#3b82f6; }
+    .rekom-fill-amber { background:#f59e0b; }
     .rekom-pct { font-size:12px;font-weight:700;color:#111827;min-width:36px;text-align:right; }
 
     .komp-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:14px; }
@@ -212,10 +230,11 @@
 </div>
 
 <div class="tab-wrap">
-    <button class="tab-btn active" id="tab-rekom" onclick="switchTab('rekom')">
+    {{-- FIX: onclick switchTab pakai this.dataset.tab --}}
+    <button class="tab-btn active" id="tab-rekom" data-tab="rekom" onclick="switchTab(this.dataset.tab)">
         📋 Assessment Rekomendasi ({{ $assessments->count() }})
     </button>
-    <button class="tab-btn" id="tab-komp" onclick="switchTab('komp')">
+    <button class="tab-btn" id="tab-komp" data-tab="komp" onclick="switchTab(this.dataset.tab)">
         ⭐ Assessment Kompetensi ({{ $assessmentKompetensi->count() }})
     </button>
 </div>
@@ -225,7 +244,15 @@
     @if($assessments->count() > 0)
     <div class="assessment-list">
         @foreach($assessments as $a)
-        @php $warna = $a->rekomendasiFinalWarna; @endphp
+        @php
+            $warna   = $a->rekomendasiFinalWarna;
+            $rekomKey = match($a->rekomendasi_final) {
+                'ready'                 => 'ready',
+                'ready_with_development'=> 'rwd',
+                'not_ready'             => 'nr',
+                default                 => 'none',
+            };
+        @endphp
         <div class="acard">
             <div class="acard-top">
                 <div class="acard-left">
@@ -243,8 +270,9 @@
                 </div>
                 <div class="acard-right">
                     @if($a->rekomendasi_final)
-                    <span class="badge-final" style="background:{{ $warna['bg'] }};color:{{ $warna['text'] }};">
-                        <span class="badge-dot" style="background:{{ $warna['text'] }};"></span>
+                    {{-- FIX: style Blade di badge diganti class statis --}}
+                    <span class="badge-final badge-rekom-{{ $rekomKey }}">
+                        <span class="badge-dot badge-dot-{{ $rekomKey }}"></span>
                         {{ $a->rekomendasiFinalLabel }}
                     </span>
                     @endif
@@ -262,21 +290,22 @@
                 <div class="rekom-item">
                     <div class="rekom-label">Rekomendasi Inti</div>
                     <div class="rekom-bar-wrap">
-                        <div class="rekom-bar"><div class="rekom-fill" style="width:{{ $a->rekomendasi_inti ?? 0 }}%;background:#15803d;"></div></div>
+                        {{-- FIX: width Blade diganti data-pct + apply via JS --}}
+                        <div class="rekom-bar"><div class="rekom-fill rekom-fill-green" data-pct="{{ $a->rekomendasi_inti ?? 0 }}"></div></div>
                         <span class="rekom-pct">{{ $a->rekomendasi_inti ?? 0 }}%</span>
                     </div>
                 </div>
                 <div class="rekom-item">
                     <div class="rekom-label">Rekomendasi Primer</div>
                     <div class="rekom-bar-wrap">
-                        <div class="rekom-bar"><div class="rekom-fill" style="width:{{ $a->rekomendasi_primer ?? 0 }}%;background:#3b82f6;"></div></div>
+                        <div class="rekom-bar"><div class="rekom-fill rekom-fill-blue" data-pct="{{ $a->rekomendasi_primer ?? 0 }}"></div></div>
                         <span class="rekom-pct">{{ $a->rekomendasi_primer ?? 0 }}%</span>
                     </div>
                 </div>
                 <div class="rekom-item">
                     <div class="rekom-label">Rekomendasi Sekunder</div>
                     <div class="rekom-bar-wrap">
-                        <div class="rekom-bar"><div class="rekom-fill" style="width:{{ $a->rekomendasi_skunder ?? 0 }}%;background:#f59e0b;"></div></div>
+                        <div class="rekom-bar"><div class="rekom-fill rekom-fill-amber" data-pct="{{ $a->rekomendasi_skunder ?? 0 }}"></div></div>
                         <span class="rekom-pct">{{ $a->rekomendasi_skunder ?? 0 }}%</span>
                     </div>
                 </div>
@@ -323,6 +352,7 @@
     @if($assessmentKompetensi->count() > 0)
     <div class="assessment-list">
         @foreach($assessmentKompetensi as $ak)
+        @php $isQualified = $ak->kesimpulan === 'QUALIFIED'; @endphp
         <div class="acard">
             <div class="acard-top">
                 <div class="acard-left">
@@ -338,8 +368,9 @@
                     </div>
                 </div>
                 <div class="acard-right">
-                    <span class="badge-final {{ $ak->kesimpulan === 'QUALIFIED' ? 'badge-qualified' : 'badge-notqualified' }}">
-                        <span class="badge-dot" style="background:{{ $ak->kesimpulan === 'QUALIFIED' ? '#15803d' : '#dc2626' }};"></span>
+                    {{-- FIX: badge-dot style Blade diganti class statis --}}
+                    <span class="badge-final {{ $isQualified ? 'badge-qualified' : 'badge-notqualified' }}">
+                        <span class="badge-dot {{ $isQualified ? 'badge-dot-qualified' : 'badge-dot-notqualified' }}"></span>
                         {{ $ak->kesimpulan ?? '-' }}
                     </span>
                     <button type="button" class="btn-del"
@@ -401,42 +432,47 @@
 
 @push('scripts')
 <script>
-    function closeToast() {
-        const t = document.getElementById('toast');
-        if (!t) return;
-        t.classList.add('hiding');
-        setTimeout(() => document.getElementById('toastWrap')?.remove(), 300);
-    }
-    window.addEventListener('DOMContentLoaded', () => {
-        if (document.getElementById('toast')) setTimeout(() => closeToast(), 3000);
-    });
+function closeToast() {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.classList.add('hiding');
+    setTimeout(() => document.getElementById('toastWrap')?.remove(), 300);
+}
+window.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('toast')) setTimeout(() => closeToast(), 3000);
 
-    function switchTab(tab) {
-        document.getElementById('panel-rekom').style.display = tab === 'rekom' ? 'block' : 'none';
-        document.getElementById('panel-komp').style.display  = tab === 'komp'  ? 'block' : 'none';
-        document.getElementById('tab-rekom').classList.toggle('active', tab === 'rekom');
-        document.getElementById('tab-komp').classList.toggle('active',  tab === 'komp');
-    }
-
-    let deleteUrl = '';
-    function openModal(url, tgl) {
-        deleteUrl = url;
-        document.getElementById('modalDesc').innerHTML =
-            'Kamu akan menghapus assessment tanggal <strong>' + tgl + '</strong>.<br>Tindakan ini tidak dapat dibatalkan.';
-        document.getElementById('modalHapus').classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-    function closeModal() {
-        document.getElementById('modalHapus').classList.remove('show');
-        document.body.style.overflow = '';
-    }
-    function submitHapus() {
-        document.getElementById('formHapus').action = deleteUrl;
-        document.getElementById('formHapus').submit();
-    }
-    document.getElementById('modalHapus').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
+    // Apply rekom-fill width dari data-pct
+    document.querySelectorAll('.rekom-fill[data-pct]').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
     });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+});
+
+function switchTab(tab) {
+    document.getElementById('panel-rekom').style.display = tab === 'rekom' ? 'block' : 'none';
+    document.getElementById('panel-komp').style.display  = tab === 'komp'  ? 'block' : 'none';
+    document.getElementById('tab-rekom').classList.toggle('active', tab === 'rekom');
+    document.getElementById('tab-komp').classList.toggle('active',  tab === 'komp');
+}
+
+let deleteUrl = '';
+function openModal(url, tgl) {
+    deleteUrl = url;
+    document.getElementById('modalDesc').innerHTML =
+        'Kamu akan menghapus assessment tanggal <strong>' + tgl + '</strong>.<br>Tindakan ini tidak dapat dibatalkan.';
+    document.getElementById('modalHapus').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+    document.getElementById('modalHapus').classList.remove('show');
+    document.body.style.overflow = '';
+}
+function submitHapus() {
+    document.getElementById('formHapus').action = deleteUrl;
+    document.getElementById('formHapus').submit();
+}
+document.getElementById('modalHapus').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
 @endpush

@@ -70,6 +70,10 @@
 
     .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
     @media (max-width:768px) { .grid-2 { grid-template-columns:1fr; } }
+
+    /* Badge warna status (menggantikan style inline Blade) */
+    .badge-shortlist { background:#dcfce7; color:#15803d; }
+    .badge-longlist  { background:#dbeafe; color:#1d4ed8; }
 </style>
 @endpush
 
@@ -118,7 +122,8 @@
         </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="badge" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};font-size:13px;padding:6px 16px">
+        {{-- FIX Ln 121: Blade {{ }} di style dipindah ke data-* lalu diapply JS --}}
+        <span class="badge" data-bg="{{ $color['bg'] }}" data-color="{{ $color['text'] }}" style="font-size:13px;padding:6px 16px">
             {{ $u->status_label }}
         </span>
         <span style="font-size:12px;color:#9ca3af">{{ $u->created_at->format('d M Y') }}</span>
@@ -256,8 +261,9 @@
         <div class="detail-row">
             <span class="detail-label">Klasifikasi</span>
             <span class="detail-value">
+                {{-- FIX Ln 260: Blade {{ }} di style diganti class statis --}}
                 @if($u->talent_pool_klasifikasi)
-                    <span class="badge" style="background:{{ $u->talent_pool_klasifikasi==='shortlist' ? '#dcfce7' : '#dbeafe' }};color:{{ $u->talent_pool_klasifikasi==='shortlist' ? '#15803d' : '#1d4ed8' }}">
+                    <span class="badge badge-{{ $u->talent_pool_klasifikasi }}">
                         {{ ucfirst($u->talent_pool_klasifikasi) }}
                     </span>
                 @else
@@ -292,9 +298,10 @@
             @endphp
             @foreach($u->kalibrasi_snapshot as $k)
             @php $kc = $kalibrasiColor[$k['nilai']] ?? ['#374151','#f3f4f6']; @endphp
+            {{-- FIX Ln 297: Blade {{ }} di style dipindah ke data-* lalu diapply JS --}}
             <div class="detail-row">
                 <span class="detail-label">{{ $k['tahun'] }}</span>
-                <span class="badge" style="background:{{ $kc[1] }};color:{{ $kc[0] }}">{{ $k['nilai'] }}</span>
+                <span class="badge" data-bg="{{ $kc[1] }}" data-color="{{ $kc[0] }}">{{ $k['nilai'] }}</span>
             </div>
             @endforeach
         @else
@@ -356,7 +363,12 @@ function closeToast() {
 }
 window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('toast')) setTimeout(() => closeToast(), 3000);
-});
 
+    // Apply warna dari data-* attribute ke style property
+    document.querySelectorAll('[data-bg]').forEach(el => {
+        if (el.dataset.bg)    el.style.background = el.dataset.bg;
+        if (el.dataset.color) el.style.color = el.dataset.color;
+    });
+});
 </script>
 @endpush

@@ -22,7 +22,6 @@
     .tab-btn { flex:1;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;color:#6b7280;background:transparent;transition:all 0.15s;text-align:center; }
     .tab-btn.active { background:white;color:#15803d;box-shadow:0 1px 4px rgba(0,0,0,0.08); }
 
-    /* Search kecil */
     .search-mini { display:flex;align-items:center;gap:8px;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;width:220px;transition:border-color 0.15s; }
     .search-mini:focus-within { border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,0.1); }
     .search-mini svg { width:14px;height:14px;stroke:#9ca3af;fill:none;flex-shrink:0; }
@@ -64,6 +63,15 @@
     .idp-badge { display:inline-flex;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600; }
     .idp-expired { background:#fee2e2;color:#dc2626; }
     .idp-aktif { background:#dcfce7;color:#15803d; }
+
+    /* FIX: idp tanggal warna via class statis */
+    .idp-tgl-expired { color:#ef4444;font-weight:700; }
+    .idp-tgl-aktif   { color:#374151;font-weight:400; }
+
+    /* FIX: under badge warna via class statis */
+    .under-badge { display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;font-size:16px;font-weight:800; }
+    .under-ok   { background:#f0fdf4;color:#15803d;border:1.5px solid #86efac; }
+    .under-fail { background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5; }
 
     .rekom-bar { display:flex;align-items:center;gap:5px;min-width:90px; }
     .rekom-track { flex:1;height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden; }
@@ -111,40 +119,27 @@
 
     mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
 
-    /* ===== SIDE PANEL DETAIL ===== */
     .side-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:2000;display:none;backdrop-filter:blur(2px); }
     .side-overlay.show { display:block; }
-    .side-panel {
-        position:fixed;right:0;top:0;bottom:0;width:420px;max-width:95vw;
-        background:white;z-index:2001;
-        box-shadow:-8px 0 40px rgba(0,0,0,0.14);
-        display:flex;flex-direction:column;
-        transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
-    }
+    .side-panel { position:fixed;right:0;top:0;bottom:0;width:420px;max-width:95vw;background:white;z-index:2001;box-shadow:-8px 0 40px rgba(0,0,0,0.14);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); }
     .side-panel.show { transform:translateX(0); }
-    .side-panel-header {
-        display:flex;align-items:center;justify-content:space-between;
-        padding:18px 20px;border-bottom:1px solid #f3f4f6;flex-shrink:0;
-    }
+    .side-panel-header { display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #f3f4f6;flex-shrink:0; }
     .side-panel-title { font-size:15px;font-weight:700;color:#111827; }
     .side-close { width:30px;height:30px;border-radius:50%;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6b7280;font-size:18px;transition:all 0.12s; }
     .side-close:hover { background:#fef2f2;border-color:#fecaca;color:#ef4444; }
     .side-panel-body { flex:1;overflow-y:auto;padding:18px 20px; }
 
-    /* Karyawan info di panel */
     .sp-karyawan { display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border-radius:10px;margin-bottom:16px; }
     .sp-avatar { width:40px;height:40px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0; }
     .sp-name { font-size:14px;font-weight:700;color:#111827; }
     .sp-sub { font-size:12px;color:#9ca3af;margin-top:2px; }
 
-    /* Kesimpulan di panel */
     .sp-kesimpulan { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:10px;margin-bottom:16px; }
     .sp-kesimpulan.qualified { background:#dcfce7;border:1px solid #86efac; }
     .sp-kesimpulan.notqualified { background:#fee2e2;border:1px solid #fca5a5; }
     .sp-kesimpulan-label { font-size:12px;font-weight:600;color:#6b7280; }
     .sp-kesimpulan-val { font-size:14px;font-weight:800; }
 
-    /* Score item di panel */
     .sp-section-title { font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:16px;display:flex;align-items:center;gap:6px; }
     .sp-section-title::after { content:'';flex:1;height:1px;background:#f3f4f6; }
     .sp-score-item { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f9fafb; }
@@ -157,16 +152,22 @@
     .sp-score-4 { background:#eff6ff;color:#1d4ed8;border:1.5px solid #93c5fd; }
     .sp-score-na { background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb; }
 
-    /* Summary stats */
     .sp-summary { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px; }
     .sp-stat { background:#f9fafb;border-radius:8px;padding:10px;text-align:center; }
     .sp-stat-num { font-size:20px;font-weight:800;margin-bottom:2px; }
     .sp-stat-label { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase; }
+    /* FIX: sp-stat warna via class statis */
+    .sp-stat-ok   { color:#15803d; }
+    .sp-stat-fail { color:#dc2626; }
 
-    /* Btn detail */
     .btn-detail { width:28px;height:28px;border-radius:7px;border:1px solid #dbeafe;background:#eff6ff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s; }
     .btn-detail:hover { background:#dbeafe;border-color:#93c5fd; }
     .btn-detail svg { width:12px;height:12px;stroke:#2563eb;fill:none;stroke-width:2; }
+
+    /* FIX: rekom-fill warna via class statis */
+    .rekom-fill-green  { background:#15803d; }
+    .rekom-fill-blue   { background:#3b82f6; }
+    .rekom-fill-amber  { background:#f59e0b; }
 
     @media (max-width:900px) { .stats-grid { grid-template-columns:repeat(3,1fr); } }
     @media (max-width:480px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
@@ -240,7 +241,7 @@
     </div>
 </div>
 
-{{-- STATS: 6 cards termasuk Not Qualified --}}
+{{-- STATS --}}
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-num">{{ $stats['total'] + $stats['total_kompetensi'] }}</div>
@@ -270,10 +271,11 @@
 
 {{-- TAB --}}
 <div class="tab-wrap">
-    <button class="tab-btn active" id="tab-rekom" onclick="switchTab('rekom')">
+    {{-- FIX: onclick switchTab pakai data-tab --}}
+    <button class="tab-btn active" id="tab-rekom" data-tab="rekom" onclick="switchTab(this.dataset.tab)">
         📋 Rekomendasi ({{ $stats['total'] }})
     </button>
-    <button class="tab-btn" id="tab-komp" onclick="switchTab('komp')">
+    <button class="tab-btn" id="tab-komp" data-tab="komp" onclick="switchTab(this.dataset.tab)">
         ⭐ Kompetensi ({{ $stats['total_kompetensi'] }})
     </button>
 </div>
@@ -281,7 +283,6 @@
 {{-- ===== PANEL REKOMENDASI ===== --}}
 <div id="panel-rekom">
     <div class="filter-row">
-        {{-- Search kecil realtime --}}
         <div class="search-mini" id="searchWrapRekom">
             <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="searchInputRekom" placeholder="Cari nama / NIK..." value="{{ request('search') }}" autocomplete="off">
@@ -330,6 +331,7 @@
                 </thead>
                 <tbody id="tableBodyRekom">
                     @forelse($assessments as $a)
+                    @php $idpPast = $a->tanggal_exp_idp && \Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast(); @endphp
                     <tr>
                         <td>
                             <div class="karyawan-info">
@@ -352,8 +354,9 @@
                         <td>{{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}</td>
                         <td>
                             @if($a->rekomendasi_inti)
+                            {{-- FIX: width Blade diganti data-pct + apply via JS --}}
                             <div class="rekom-bar">
-                                <div class="rekom-track"><div class="rekom-fill" style="width:{{ $a->rekomendasi_inti }}%;background:#15803d;"></div></div>
+                                <div class="rekom-track"><div class="rekom-fill rekom-fill-green" data-pct="{{ $a->rekomendasi_inti }}"></div></div>
                                 <span class="rekom-pct">{{ $a->rekomendasi_inti }}%</span>
                             </div>
                             @else -
@@ -362,7 +365,7 @@
                         <td>
                             @if($a->rekomendasi_primer)
                             <div class="rekom-bar">
-                                <div class="rekom-track"><div class="rekom-fill" style="width:{{ $a->rekomendasi_primer }}%;background:#3b82f6;"></div></div>
+                                <div class="rekom-track"><div class="rekom-fill rekom-fill-blue" data-pct="{{ $a->rekomendasi_primer }}"></div></div>
                                 <span class="rekom-pct">{{ $a->rekomendasi_primer }}%</span>
                             </div>
                             @else -
@@ -371,7 +374,7 @@
                         <td>
                             @if($a->rekomendasi_skunder)
                             <div class="rekom-bar">
-                                <div class="rekom-track"><div class="rekom-fill" style="width:{{ $a->rekomendasi_skunder }}%;background:#f59e0b;"></div></div>
+                                <div class="rekom-track"><div class="rekom-fill rekom-fill-amber" data-pct="{{ $a->rekomendasi_skunder }}"></div></div>
                                 <span class="rekom-pct">{{ $a->rekomendasi_skunder }}%</span>
                             </div>
                             @else -
@@ -390,8 +393,8 @@
                         </td>
                         <td>
                             @if($a->tanggal_exp_idp)
-                                @php $idpPast = \Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast(); @endphp
-                                <span style="color:{{ $idpPast ? '#ef4444' : '#374151' }};font-weight:{{ $idpPast ? '700' : '400' }};">
+                                {{-- FIX: color Blade diganti class statis --}}
+                                <span class="{{ $idpPast ? 'idp-tgl-expired' : 'idp-tgl-aktif' }}">
                                     {{ \Carbon\Carbon::parse($a->tanggal_exp_idp)->format('d M Y') }}
                                 </span>
                             @else -
@@ -399,7 +402,7 @@
                         </td>
                         <td>
                             @if($a->tanggal_exp_idp)
-                                @if(\Carbon\Carbon::parse($a->tanggal_exp_idp)->isPast())
+                                @if($idpPast)
                                     <span class="idp-badge idp-expired">⚠ Expired</span>
                                 @else
                                     <span class="idp-badge idp-aktif">✓ Aktif</span>
@@ -409,6 +412,7 @@
                             @endif
                         </td>
                         <td>
+                            {{-- FIX: onclick dengan dataset --}}
                             <button type="button" class="btn-del"
                                 data-url="{{ route('history_assessment_all.destroy', $a) }}"
                                 data-nama="{{ $a->karyawan->nama }}"
@@ -444,17 +448,13 @@
                 @php $cur=$assessments->currentPage();$last=$assessments->lastPage();$s=max(1,$cur-2);$e=min($last,$cur+2); @endphp
                 @if($s > 1)
                     <a href="{{ $assessments->url(1) }}" class="page-btn">1</a>
-                    @if($s > 2)
-                        <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
-                    @endif
+                    @if($s > 2)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif
                 @endif
                 @for($i = $s; $i <= $e; $i++)
                     <a href="{{ $assessments->url($i) }}" class="page-btn {{ $i == $cur ? 'active' : '' }}">{{ $i }}</a>
                 @endfor
                 @if($e < $last)
-                    @if($e < $last - 1)
-                        <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
-                    @endif
+                    @if($e < $last - 1)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif
                     <a href="{{ $assessments->url($last) }}" class="page-btn">{{ $last }}</a>
                 @endif
                 @if($assessments->hasMorePages())
@@ -514,18 +514,13 @@
                         <td>{{ $ak->tanggal_assessment->format('d M Y') }}</td>
                         <td>{{ $ak->periode ?? '-' }}</td>
                         <td style="text-align:center;">
-                            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;font-size:16px;font-weight:800;
-                                background:{{ $ak->total_competency_under > 0 ? '#fef2f2' : '#f0fdf4' }};
-                                color:{{ $ak->total_competency_under > 0 ? '#dc2626' : '#15803d' }};
-                                border:1.5px solid {{ $ak->total_competency_under > 0 ? '#fca5a5' : '#86efac' }};">
+                            {{-- FIX: style Blade diganti class statis under-ok/under-fail --}}
+                            <span class="under-badge {{ $ak->total_competency_under > 0 ? 'under-fail' : 'under-ok' }}">
                                 {{ $ak->total_competency_under }}
                             </span>
                         </td>
                         <td style="text-align:center;">
-                            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;font-size:16px;font-weight:800;
-                                background:{{ $ak->total_qualification_under > 0 ? '#fef2f2' : '#f0fdf4' }};
-                                color:{{ $ak->total_qualification_under > 0 ? '#dc2626' : '#15803d' }};
-                                border:1.5px solid {{ $ak->total_qualification_under > 0 ? '#fca5a5' : '#86efac' }};">
+                            <span class="under-badge {{ $ak->total_qualification_under > 0 ? 'under-fail' : 'under-ok' }}">
                                 {{ $ak->total_qualification_under }}
                             </span>
                         </td>
@@ -541,8 +536,8 @@
                         <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;color:#6b7280;font-style:italic;">{{ $ak->keterangan ?? '-' }}</td>
                         <td>
                             @php
-                            $kompLabels   = \App\Models\HistoryAssessmentKompetensi::competencies();
-                            $qualLabels   = \App\Models\HistoryAssessmentKompetensi::qualifications();
+                            $kompLabels = \App\Models\HistoryAssessmentKompetensi::competencies();
+                            $qualLabels = \App\Models\HistoryAssessmentKompetensi::qualifications();
                             $compR1det = 0; $compR2det = 0;
                             foreach (array_keys($kompLabels) as $kKey) {
                                 $vDet = (int)($ak->$kKey ?? 0);
@@ -563,6 +558,7 @@
                             ];
                             @endphp
                             <div style="display:flex;gap:4px;">
+                                {{-- FIX: onclick showDetail pakai this.dataset.detail --}}
                                 <button type="button" class="btn-detail"
                                     data-detail='@json($detail)'
                                     onclick="showDetail(this.dataset.detail)"
@@ -605,17 +601,13 @@
                 @php $curK=$assessmentKompetensi->currentPage();$lastK=$assessmentKompetensi->lastPage();$sK=max(1,$curK-2);$eK=min($lastK,$curK+2); @endphp
                 @if($sK > 1)
                     <a href="{{ $assessmentKompetensi->url(1) }}" class="page-btn">1</a>
-                    @if($sK > 2)
-                        <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
-                    @endif
+                    @if($sK > 2)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif
                 @endif
                 @for($i = $sK; $i <= $eK; $i++)
                     <a href="{{ $assessmentKompetensi->url($i) }}" class="page-btn {{ $i == $curK ? 'active' : '' }}">{{ $i }}</a>
                 @endfor
                 @if($eK < $lastK)
-                    @if($eK < $lastK - 1)
-                        <span class="page-btn disabled" style="border:none;background:transparent;">…</span>
-                    @endif
+                    @if($eK < $lastK - 1)<span class="page-btn disabled" style="border:none;background:transparent;">…</span>@endif
                     <a href="{{ $assessmentKompetensi->url($lastK) }}" class="page-btn">{{ $lastK }}</a>
                 @endif
                 @if($assessmentKompetensi->hasMorePages())
@@ -629,7 +621,7 @@
     </div>
 </div>
 
-{{-- ===== SIDE PANEL DETAIL KOMPETENSI ===== --}}
+{{-- ===== SIDE PANEL ===== --}}
 <div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
 <div class="side-panel" id="sidePanel">
     <div class="side-panel-header">
@@ -653,6 +645,11 @@ function closeToast() {
 window.addEventListener('DOMContentLoaded',function(){
     if(document.getElementById('toast'))setTimeout(function(){closeToast();},3000);
     if(new URLSearchParams(window.location.search).get('tab')==='komp')switchTab('komp');
+
+    // Apply rekom-fill width dari data-pct
+    document.querySelectorAll('.rekom-fill[data-pct]').forEach(function(el){
+        el.style.width = el.dataset.pct + '%';
+    });
 });
 
 // Tab
@@ -709,10 +706,8 @@ function doSearchRekom(keyword){
     url.searchParams.delete('page');
     url.searchParams.set('tab','rekom');
     window.history.pushState({},'',url.toString());
-
     spinner.classList.add('show');
     tableBody.style.opacity='0.5';
-
     fetch(url.toString(),{headers:{'X-Requested-With':'XMLHttpRequest'}})
         .then(function(r){return r.text();})
         .then(function(html){
@@ -724,6 +719,10 @@ function doSearchRekom(keyword){
             tableBody.style.opacity='1';
             spinner.classList.remove('show');
             if(keyword)highlightText(tableBody,keyword);
+            // Re-apply rekom-fill width setelah AJAX
+            tableBody.querySelectorAll('.rekom-fill[data-pct]').forEach(function(el){
+                el.style.width = el.dataset.pct + '%';
+            });
         })
         .catch(function(){tableBody.style.opacity='1';spinner.classList.remove('show');});
 }
@@ -803,15 +802,18 @@ function showDetail(detailJson) {
     }
 
     var qualRows = '';
-    for (var label in d.kualifikasi) {
-        var val = d.kualifikasi[label];
-        var cls = scoreClass(val);
-        var warning2 = (val < 2 && val !== null) ? ' <span style="font-size:10px;color:#dc2626;font-weight:700;">⚠ Under</span>' : '';
+    for (var qlabel in d.kualifikasi) {
+        var qval = d.kualifikasi[qlabel];
+        var qcls = scoreClass(qval);
+        var warning2 = (qval < 2 && qval !== null) ? ' <span style="font-size:10px;color:#dc2626;font-weight:700;">⚠ Under</span>' : '';
         qualRows += '<div class="sp-score-item">'
-            + '<span class="sp-score-label">' + label + warning2 + '</span>'
-            + '<span class="sp-score-val ' + cls + '">' + (val ?? '—') + '</span>'
+            + '<span class="sp-score-label">' + qlabel + warning2 + '</span>'
+            + '<span class="sp-score-val ' + qcls + '">' + (qval ?? '—') + '</span>'
             + '</div>';
     }
+
+    var compUnder = (d.comp_r1 ?? 0) + (d.comp_r2 ?? 0);
+    var qualUnder = d.qual_under;
 
     body.innerHTML =
         '<div class="sp-karyawan">'
@@ -826,8 +828,8 @@ function showDetail(detailJson) {
         + '</div>'
 
         + '<div class="sp-summary">'
-        + '<div class="sp-stat"><div class="sp-stat-num" style="color:' + ((d.comp_r1 + d.comp_r2) > 0 ? '#dc2626' : '#15803d') + ';">' + ((d.comp_r1 ?? 0) + (d.comp_r2 ?? 0)) + '</div><div class="sp-stat-label">Under Competency</div></div>'
-        + '<div class="sp-stat"><div class="sp-stat-num" style="color:' + (d.qual_under > 0 ? '#dc2626' : '#15803d') + ';">' + d.qual_under + '</div><div class="sp-stat-label">Under Qualification</div></div>'
+        + '<div class="sp-stat"><div class="sp-stat-num ' + (compUnder > 0 ? 'sp-stat-fail' : 'sp-stat-ok') + '">' + compUnder + '</div><div class="sp-stat-label">Under Competency</div></div>'
+        + '<div class="sp-stat"><div class="sp-stat-num ' + (qualUnder > 0 ? 'sp-stat-fail' : 'sp-stat-ok') + '">' + qualUnder + '</div><div class="sp-stat-label">Under Qualification</div></div>'
         + '</div>'
 
         + '<div class="sp-section-title">⭐ Kompetensi Perilaku</div>'

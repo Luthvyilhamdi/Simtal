@@ -145,7 +145,8 @@
                     <td style="color:#9ca3af;font-size:12px">{{ ($kalibrasis->currentPage() - 1) * $kalibrasis->perPage() + $i + 1 }}</td>
                     <td style="font-size:15px;font-weight:800;color:#111827">{{ $k->tahun }}</td>
                     <td>
-                        <span class="badge" style="background:{{ $color['bg'] }};color:{{ $color['text'] }}">
+                        {{-- FIX: Blade di style badge diganti data-* lalu apply via JS --}}
+                        <span class="badge" data-bg="{{ $color['bg'] }}" data-color="{{ $color['text'] }}">
                             {{ $k->nilai }} — {{ $k->nilai_label }}
                         </span>
                     </td>
@@ -157,8 +158,10 @@
                             <a href="{{ route('kalibrasi_karyawan.edit', [$karyawan, $k]) }}" class="btn-act edit" title="Edit">
                                 <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </a>
+                            {{-- FIX: onclick dengan route Blade diganti data-url + data-tahun --}}
                             <button type="button" class="btn-act del" title="Hapus"
-                                onclick="openModal('{{ route('kalibrasi_karyawan.destroy', [$karyawan, $k]) }}', '{{ $k->tahun }}')">
+                                data-url="{{ route('kalibrasi_karyawan.destroy', [$karyawan, $k]) }}"
+                                data-tahun="{{ $k->tahun }}">
                                 <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                             </button>
                         </div>
@@ -236,6 +239,18 @@ function closeToast() {
 }
 window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('toast')) setTimeout(() => closeToast(), 3000);
+
+    // Apply badge warna dari data-* (menggantikan style Blade inline)
+    document.querySelectorAll('.badge[data-bg]').forEach(el => {
+        el.style.background = el.dataset.bg;
+        el.style.color = el.dataset.color;
+    });
+});
+
+// Delegasi event untuk tombol hapus (menggantikan onclick dengan route Blade)
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-act.del[data-url]');
+    if (btn) openModal(btn.dataset.url, btn.dataset.tahun);
 });
 
 let deleteUrl = '';

@@ -38,6 +38,17 @@ $isUser = auth()->user()->isUser();
 </div>
 @endif
 
+<style>
+  .badge-pengisian { padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+  .badge-deviasi   { padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+  .badge-core      { padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500; }
+  .av-func         { width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0; }
+  .stat-icon       { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .stat-val        { font-size:20px;font-weight:700;line-height:1; }
+  .posisi-span     { font-size:13px; }
+  .td-posisi-func3 { padding:10px 14px;position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap;box-shadow:2px 0 5px rgba(0,0,0,0.04); }
+</style>
+
 <div>
 
 {{-- PERIODE SELECTOR --}}
@@ -104,11 +115,12 @@ $isUser = auth()->user()->isUser();
     ['label'=>'Deviasi','value'=>$stats['total_dev'],'color'=>'#a32d2d','bg'=>'#fee2e2'],
   ] as $s)
   <div style="background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:14px 18px;display:flex;align-items:center;gap:14px">
-    <div style="width:40px;height:40px;border-radius:10px;background:{{ $s['bg'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ $s['color'] }}" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+    {{-- FIX: Blade di dalam style stroke dan background diganti data-* --}}
+    <div class="stat-icon" data-bg="{{ $s['bg'] }}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" data-stroke="{{ $s['color'] }}" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
     </div>
     <div>
-      <div style="font-size:20px;font-weight:700;color:{{ $s['label']==='Deviasi'&&$s['value']<0?'#a32d2d':'#1a1a1a' }};line-height:1">{{ $s['value'] }}</div>
+      <div class="stat-val" data-label="{{ $s['label'] }}" data-value="{{ $s['value'] }}">{{ $s['value'] }}</div>
       <div style="font-size:11px;color:#9ca3af;margin-top:2px">{{ $s['label'] }}</div>
     </div>
   </div>
@@ -196,7 +208,7 @@ $isUser = auth()->user()->isUser();
         @php $dirSlug = 'dir-'.Str::slug($dirKey); @endphp
 
         {{-- DIREKTORAT --}}
-        <tr onclick="toggleDir('{{ $dirSlug }}')" data-slug="{{ $dirSlug }}" style="cursor:pointer" data-type="dir" data-text="{{ strtolower($dir['label']) }}">
+        <tr data-toggle="dir" data-slug2="{{ $dirSlug }}" data-slug="{{ $dirSlug }}" style="cursor:pointer" data-type="dir" data-text="{{ strtolower($dir['label']) }}">
           <td colspan="{{ $isUser ? 7 : 8 }}" style="padding:0;border-bottom:1px solid #d1fae5">
             <div style="padding:9px 14px;display:flex;align-items:center;gap:8px;background:#f0fdf4">
               <svg id="ic-{{ $dirSlug }}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
@@ -207,15 +219,16 @@ $isUser = auth()->user()->isUser();
               <span style="padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#fee2e2;color:#dc2626">Deviasi: {{ $dir['pengisian']-$dir['mc_tko'] }}</span>
               @endif
               @if(!$isUser)
-              <div style="display:flex;gap:4px;margin-left:8px" onclick="event.stopPropagation()">
-                <button onclick="openTambah('kompartemen','{{ addslashes($dir['label']) }}',null,null,null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#dbeafe;color:#185fa5;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;white-space:nowrap">+ Kompartemen</button>
-                <button onclick="openTambah('staff','{{ addslashes($dir['label']) }}',null,null,null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;cursor:pointer;white-space:nowrap">+ Staff</button>
+              <div style="display:flex;gap:4px;margin-left:8px" >
+                {{-- FIX: onclick dengan Blade diganti data-action + data-* --}}
+                <button data-action="openTambah" data-tipe="kompartemen" data-dir="{{ addslashes($dir['label']) }}" data-komp="" data-dept="" data-bag="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#dbeafe;color:#185fa5;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;white-space:nowrap">+ Kompartemen</button>
+                <button data-action="openTambah" data-tipe="staff" data-dir="{{ addslashes($dir['label']) }}" data-komp="" data-dept="" data-bag="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;cursor:pointer;white-space:nowrap">+ Staff</button>
                 <div style="width:1px;height:16px;background:#e5e7eb"></div>
-                <button onclick="openEditGroup('direktorat','{{ addslashes($dir['label']) }}',null,null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                <button data-action="openEditGroup" data-tipe="direktorat" data-nama="{{ addslashes($dir['label']) }}" data-dir="" data-komp="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
                 </button>
                 @if(auth()->user()->role === 'super_admin')
-                <button onclick="confirmDeleteGroup('direktorat','{{ addslashes($dir['label']) }}',null,null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                <button data-action="confirmDeleteGroup" data-tipe="direktorat" data-nama="{{ addslashes($dir['label']) }}" data-dir="" data-komp="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>Hapus
                 </button>
                 @endif
@@ -241,28 +254,28 @@ $isUser = auth()->user()->isUser();
                   </td>
                   <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af">{{ $row->job_grade }}</span></td>
                   <td style="padding:10px 14px;text-align:center;font-weight:600;color:#111827;white-space:nowrap">{{ $row->mc_tko }}</td>
-                  <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->pengisian?'#dcfce7':'#f3f4f6' }};color:{{ $row->pengisian?'#15803d':'#6b7280' }}">{{ $row->pengisian }}</span></td>
-                  <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->deviasi==0?'#dcfce7':($row->deviasi>0?'#fee2e2':'#fef3c7') }};color:{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
-                  <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:{{ $row->core==='Core'?'#dcfce7':'#dbeafe' }};color:{{ $row->core==='Core'?'#15803d':'#185fa5' }}">{{ $row->core }}</span></td>
+                  <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" class="badge-pengisian" data-val="{{ $row->pengisian }}">{{ $row->pengisian }}</span></td>
+                  <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" class="badge-deviasi" data-val="{{ $row->deviasi }}" data-warna="{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
+                  <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span class="badge-core" data-val="{{ $row->core }}">{{ $row->core }}</span></td>
                   <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
                     @if($row->karyawan_id)
                       <div style="display:flex;align-items:center;gap:8px">
                         <div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
-                        <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
+                        <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" data-action="openPanel" data-id="{{ $row->karyawan_id }}">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
                       </div>
                     @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
                   </td>
                   @if(!$isUser)
                   <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                     <div style="display:flex;gap:4px;justify-content:center">
-                      <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}',{{ $row->pengisian??0 }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                      <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
-                      <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center">
+                      <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                       </button>
                       @if(auth()->user()->role === 'super_admin')
-                        <button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center">
+                        <button data-action="confirmHapus" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center">
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                         </button>
                       @endif
@@ -279,7 +292,7 @@ $isUser = auth()->user()->isUser();
         @php $kompSlug = $dirSlug.'-k-'.Str::slug($kompKey); @endphp
 
         {{-- KOMPARTEMEN --}}
-        <tr class="child-{{ $dirSlug }}" onclick="toggleKomp('{{ $kompSlug }}')" style="cursor:pointer" data-type="komp" data-text="{{ strtolower($komp['label']) }}">
+        <tr class="child-{{ $dirSlug }}" data-toggle="komp" data-slug2="{{ $kompSlug }}" style="cursor:pointer" data-type="komp" data-text="{{ strtolower($komp['label']) }}">
           <td colspan="{{ $isUser ? 7 : 8 }}" style="padding:0;border-bottom:1px solid #e8e8e3">
             <div style="padding:8px 14px 8px 30px;display:flex;align-items:center;gap:8px;background:#eff6ff">
               <svg id="ic-{{ $kompSlug }}" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
@@ -287,15 +300,15 @@ $isUser = auth()->user()->isUser();
               <span style="font-weight:600;font-size:12px;color:#185fa5;flex:1">{{ $komp['label'] }}</span>
               <span style="padding:2px 8px;border-radius:20px;font-size:11px;background:#dbeafe;color:#185fa5">MC: {{ $komp['mc_tko'] }} | Terisi: {{ $komp['pengisian'] }}</span>
               @if(!$isUser)
-              <div style="display:flex;gap:4px;margin-left:8px" onclick="event.stopPropagation()">
-                <button onclick="openTambah('departemen','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}',null,null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#dbeafe;color:#185fa5;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;white-space:nowrap">+ Departemen</button>
-                <button onclick="openTambah('staff','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}',null,null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;cursor:pointer;white-space:nowrap">+ Staff</button>
+              <div style="display:flex;gap:4px;margin-left:8px" >
+                <button data-action="openTambah" data-tipe="departemen" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="" data-bag="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#dbeafe;color:#185fa5;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;white-space:nowrap">+ Departemen</button>
+                <button data-action="openTambah" data-tipe="staff" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="" data-bag="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;cursor:pointer;white-space:nowrap">+ Staff</button>
                 <div style="width:1px;height:16px;background:#e5e7eb"></div>
-                <button onclick="openEditGroup('kompartemen','{{ addslashes($komp['label']) }}','{{ addslashes($dir['label']) }}',null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                <button data-action="openEditGroup" data-tipe="kompartemen" data-nama="{{ addslashes($komp['label']) }}" data-dir="{{ addslashes($dir['label']) }}" data-komp="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
                 </button>
                 @if(auth()->user()->role === 'super_admin')
-                <button onclick="confirmDeleteGroup('kompartemen','{{ addslashes($komp['label']) }}','{{ addslashes($dir['label']) }}',null)" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                <button data-action="confirmDeleteGroup" data-tipe="kompartemen" data-nama="{{ addslashes($komp['label']) }}" data-dir="{{ addslashes($dir['label']) }}" data-komp="" style="padding:3px 8px;font-size:11px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:3px">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>Hapus
                 </button>
                 @endif
@@ -336,25 +349,26 @@ $isUser = auth()->user()->isUser();
                 @endif
                 <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af">{{ $row->job_grade }}</span></td>
                 <td style="padding:10px 14px;text-align:center;font-weight:600;color:#111827;white-space:nowrap">{{ $row->mc_tko }}</td>
-                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->pengisian?'#dcfce7':'#f3f4f6' }};color:{{ $row->pengisian?'#15803d':'#6b7280' }}">{{ $row->pengisian }}</span></td>
-                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->deviasi==0?'#dcfce7':($row->deviasi>0?'#fee2e2':'#fef3c7') }};color:{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
-                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:{{ $row->core==='Core'?'#dcfce7':'#dbeafe' }};color:{{ $row->core==='Core'?'#15803d':'#185fa5' }}">{{ $row->core }}</span></td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" class="badge-pengisian" data-val="{{ $row->pengisian }}">{{ $row->pengisian }}</span></td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" class="badge-deviasi" data-val="{{ $row->deviasi }}" data-warna="{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
+                <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span class="badge-core" data-val="{{ $row->core }}">{{ $row->core }}</span></td>
                 <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
                   @if($row->karyawan_id)
                     <div style="display:flex;align-items:center;gap:8px">
-                      <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal2?'#15803d':'#185fa5' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
-                      <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
+                      {{-- FIX: background Blade diganti data-func, onclick diganti data-action --}}
+                      <div class="av-func" data-func="{{ $isFuncReal2 ? 1 : 0 }}">{{ initials($row->nama_karyawan) }}</div>
+                      <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" data-action="openPanel" data-id="{{ $row->karyawan_id }}">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
                     </div>
                   @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
                 </td>
                 @if(!$isUser)
                 <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                   <div style="display:flex;gap:4px;justify-content:center">
-                    <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}',{{ $row->pengisian??0 }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                      </button>
-                      <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
-                    @if(auth()->user()->role === 'super_admin')<button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
+                    <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+                    @if(auth()->user()->role === 'super_admin')<button data-action="confirmHapus" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
                   </div>
                 </td>
                 @endif
@@ -370,22 +384,22 @@ $isUser = auth()->user()->isUser();
         @php $deptSlug = $kompSlug.'-d-'.Str::slug($deptKey); @endphp
 
         @if($isDeptReal)
-        <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }}" onclick="toggleDept('{{ $deptSlug }}')" style="cursor:pointer" data-type="dept" data-text="{{ strtolower($dept['label']) }}">
+        <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }}" data-toggle="dept" data-slug2="{{ $deptSlug }}" style="cursor:pointer" data-type="dept" data-text="{{ strtolower($dept['label']) }}">
           <td colspan="{{ $isUser ? 7 : 8 }}" style="padding:0;border-bottom:1px solid #f0f0eb">
             <div style="padding:7px 14px 7px 46px;display:flex;align-items:center;gap:6px;background:#fafafa">
               <svg id="ic-{{ $deptSlug }}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
               <span style="font-size:12px;color:#374151;font-weight:500;font-style:italic;flex:1">{{ $dept['label'] }}</span>
               <span style="font-size:11px;color:#9ca3af">MC: {{ $dept['mc_tko'] }} | Terisi: {{ $dept['pengisian'] }}</span>
               @if(!$isUser)
-              <div style="display:flex;gap:4px;margin-left:8px" onclick="event.stopPropagation()">
-                <button onclick="openTambah('bagian','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}','{{ addslashes($dept['label']) }}',null)" style="padding:2px 7px;font-size:10px;font-weight:600;background:#dbeafe;color:#185fa5;border:1px solid #bfdbfe;border-radius:5px;cursor:pointer;white-space:nowrap">+ Bagian</button>
-                <button onclick="openTambah('staff','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}','{{ addslashes($dept['label']) }}',null)" style="padding:2px 7px;font-size:10px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:5px;cursor:pointer;white-space:nowrap">+ Staff</button>
+              <div style="display:flex;gap:4px;margin-left:8px" >
+                <button data-action="openTambah" data-tipe="bagian" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="{{ addslashes($dept['label']) }}" data-bag="" style="padding:2px 7px;font-size:10px;font-weight:600;background:#dbeafe;color:#185fa5;border:1px solid #bfdbfe;border-radius:5px;cursor:pointer;white-space:nowrap">+ Bagian</button>
+                <button data-action="openTambah" data-tipe="staff" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="{{ addslashes($dept['label']) }}" data-bag="" style="padding:2px 7px;font-size:10px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:5px;cursor:pointer;white-space:nowrap">+ Staff</button>
                 <div style="width:1px;height:14px;background:#e5e7eb"></div>
-                <button onclick="openEditGroup('departemen','{{ addslashes($dept['label']) }}','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}')" style="padding:2px 7px;font-size:10px;font-weight:600;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                <button data-action="openEditGroup" data-tipe="departemen" data-nama="{{ addslashes($dept['label']) }}" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" style="padding:2px 7px;font-size:10px;font-weight:600;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:3px">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
                 </button>
                 @if(auth()->user()->role === 'super_admin')
-                <button onclick="confirmDeleteGroup('departemen','{{ addslashes($dept['label']) }}','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}')" style="padding:2px 7px;font-size:10px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                <button data-action="confirmDeleteGroup" data-tipe="departemen" data-nama="{{ addslashes($dept['label']) }}" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" style="padding:2px 7px;font-size:10px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:3px">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>Hapus
                 </button>
                 @endif
@@ -414,30 +428,31 @@ $isUser = auth()->user()->isUser();
             <tr class="child-{{ $dirSlug }} child-{{ $kompSlug }} child-{{ $deptSlug }}" id="row-{{ $row->id }}" style="border-bottom:1px solid #f5f5f0"
               data-search="{{ strtolower($row->posisi.' '.($row->nama_karyawan??'').' '.($row->fungsional??'')) }}"
               data-dir="{{ strtolower($row->direktorat??'') }}" data-komp="{{ strtolower($row->kompartemen??'') }}" data-core="{{ strtolower($row->core??'') }}">
-              <td style="padding:10px 14px 10px {{ $isFuncReal3 ? '76' : '62' }}px;position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap;box-shadow:2px 0 5px rgba(0,0,0,0.04)">
-                <span style="font-size:13px;font-weight:{{ $isFuncReal3 ? '500' : '600' }};color:{{ $isFuncReal3 ? '#111827' : '#374151' }}">{{ $row->posisi }}</span>
+              <td class="td-posisi-func3" data-func3="{{ $isFuncReal3 ? 1 : 0 }}" style="position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap;box-shadow:2px 0 5px rgba(0,0,0,0.04)">
+                {{-- FIX: font-weight dan color Blade diganti class + data-func3 --}}
+                <span class="posisi-span" data-func3="{{ $isFuncReal3 ? 1 : 0 }}">{{ $row->posisi }}</span>
               </td>
               <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af">{{ $row->job_grade }}</span></td>
               <td style="padding:10px 14px;text-align:center;font-weight:600;color:#111827;white-space:nowrap">{{ $row->mc_tko }}</td>
-              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->pengisian?'#dcfce7':'#f3f4f6' }};color:{{ $row->pengisian?'#15803d':'#6b7280' }}">{{ $row->pengisian }}</span></td>
-              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->deviasi==0?'#dcfce7':($row->deviasi>0?'#fee2e2':'#fef3c7') }};color:{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
-              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:{{ $row->core==='Core'?'#dcfce7':'#dbeafe' }};color:{{ $row->core==='Core'?'#15803d':'#185fa5' }}">{{ $row->core }}</span></td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" class="badge-pengisian" data-val="{{ $row->pengisian }}">{{ $row->pengisian }}</span></td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" class="badge-deviasi" data-val="{{ $row->deviasi }}" data-warna="{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
+              <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span class="badge-core" data-val="{{ $row->core }}">{{ $row->core }}</span></td>
               <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
                 @if($row->karyawan_id)
                   <div style="display:flex;align-items:center;gap:8px">
-                    <div style="width:26px;height:26px;border-radius:50%;background:{{ $isFuncReal3?'#15803d':'#374151' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
-                    <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
+                    <div class="av-func" data-func3="{{ $isFuncReal3 ? 1 : 0 }}">{{ initials($row->nama_karyawan) }}</div>
+                    <div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" data-action="openPanel" data-id="{{ $row->karyawan_id }}">{{ $row->nama_karyawan }}</div><div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div></div>
                   </div>
                 @else<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>@endif
               </td>
               @if(!$isUser)
               <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                 <div style="display:flex;gap:4px;justify-content:center">
-                  <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}',{{ $row->pengisian??0 }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                      </button>
-                      <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
-                  @if(auth()->user()->role === 'super_admin')<button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
+                  <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+                  @if(auth()->user()->role === 'super_admin')<button data-action="confirmHapus" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>@endif
                 </div>
               </td>
               @endif
@@ -457,7 +472,7 @@ $isUser = auth()->user()->isUser();
               <span style="font-size:11px;color:#d1d5db">MC: {{ $bag['mc_tko'] }} | Terisi: {{ $bag['pengisian'] }}</span>
               @if(!$isUser)
               <div style="display:flex;gap:4px;margin-left:8px">
-                <button onclick="openTambah('staff','{{ addslashes($dir['label']) }}','{{ addslashes($komp['label']) }}','{{ $isDeptReal ? addslashes($dept['label']) : '' }}','{{ addslashes($bag['label']) }}')" style="padding:2px 7px;font-size:10px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:5px;cursor:pointer;white-space:nowrap">+ Staff</button>
+                <button data-action="openTambah" data-tipe="staff" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="{{ $isDeptReal ? addslashes($dept['label']) : '' }}" data-bag="{{ addslashes($bag['label']) }}" style="padding:2px 7px;font-size:10px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:5px;cursor:pointer;white-space:nowrap">+ Staff</button>
               </div>
               @endif
             </div>
@@ -489,15 +504,15 @@ $isUser = auth()->user()->isUser();
           </td>
           <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af">{{ $row->job_grade }}</span></td>
           <td style="padding:10px 14px;text-align:center;font-weight:600;color:#111827;white-space:nowrap">{{ $row->mc_tko }}</td>
-          <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->pengisian?'#dcfce7':'#f3f4f6' }};color:{{ $row->pengisian?'#15803d':'#6b7280' }}">{{ $row->pengisian }}</span></td>
-          <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" style="padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:{{ $row->deviasi==0?'#dcfce7':($row->deviasi>0?'#fee2e2':'#fef3c7') }};color:{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
-          <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:{{ $row->core==='Core'?'#dcfce7':'#dbeafe' }};color:{{ $row->core==='Core'?'#15803d':'#185fa5' }}">{{ $row->core }}</span></td>
+          <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="pengisian-{{ $row->id }}" class="badge-pengisian" data-val="{{ $row->pengisian }}">{{ $row->pengisian }}</span></td>
+          <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span id="deviasi-{{ $row->id }}" class="badge-deviasi" data-val="{{ $row->deviasi }}" data-warna="{{ $row->warnaDeviasi }}">{{ $row->deviasi }}</span></td>
+          <td style="padding:10px 14px;text-align:center;white-space:nowrap"><span class="badge-core" data-val="{{ $row->core }}">{{ $row->core }}</span></td>
           <td style="padding:10px 14px;white-space:nowrap" id="td-karyawan-{{ $row->id }}">
             @if($row->karyawan_id)
               <div style="display:flex;align-items:center;gap:8px">
                 <div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">{{ initials($row->nama_karyawan) }}</div>
                 <div>
-                  <div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel({{ $row->karyawan_id }})">{{ $row->nama_karyawan }}</div>
+                  <div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" data-action="openPanel" data-id="{{ $row->karyawan_id }}">{{ $row->nama_karyawan }}</div>
                   <div style="font-size:11px;color:#9ca3af">{{ $row->nik_karyawan }}</div>
                 </div>
               </div>
@@ -506,14 +521,14 @@ $isUser = auth()->user()->isUser();
           @if(!$isUser)
           <td style="padding:10px 14px;text-align:center;white-space:nowrap">
             <div style="display:flex;gap:4px;justify-content:center">
-              <button onclick="openEdit({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->job_grade??'null' }},{{ $row->mc_tko }},'{{ $row->core }}',{{ $row->pengisian??0 }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                      </button>
-              <button onclick="openModal({{ $row->id }},'{{ addslashes($row->posisi) }}',{{ $row->karyawan_id??'null' }},{{ $row->mc_tko }})" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center" title="Assign Karyawan">
+              <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center" title="Assign Karyawan">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
               </button>
               @if(auth()->user()->role === 'super_admin')
-                <button onclick="confirmHapus({{ $row->id }},'{{ addslashes($row->posisi) }}')" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center" title="Hapus">
+                <button data-action="confirmHapus" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" style="width:28px;height:28px;border:1px solid #fecaca;border-radius:7px;background:#fff;cursor:pointer;color:#dc2626;display:inline-flex;align-items:center;justify-content:center" title="Hapus">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                 </button>
               @endif
@@ -535,8 +550,6 @@ $isUser = auth()->user()->isUser();
     <span>Total <strong>{{ $allJabatan->count() }}</strong> posisi — Periode <strong>{{ $periodeSaatIni }}</strong></span>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="searchCount" style="display:none;color:#15803d;font-weight:600"></span>
-      @if(!$isUser)
-      @endif
     </div>
   </div>
 </div>
@@ -615,7 +628,6 @@ $isUser = auth()->user()->isUser();
           </select>
         </div>
       </div>
-      {{-- Opsi karyawan --}}
       <div style="margin-top:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px">
         <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px">Opsi Salin</div>
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
@@ -732,7 +744,6 @@ $isUser = auth()->user()->isUser();
       <button onclick="closeModal()" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div style="padding:18px 22px">
-      {{-- Search NIK / Nama --}}
       <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Cari NIK / Nama Karyawan</label>
       <div style="position:relative">
         <div style="display:flex;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;margin-bottom:6px">
@@ -742,12 +753,10 @@ $isUser = auth()->user()->isUser();
             style="border:none;background:none;outline:none;font-size:13px;color:#111827;width:100%">
           <span id="assignSearchClear" onclick="clearAssign()" style="cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;display:none">×</span>
         </div>
-        {{-- Dropdown hasil --}}
         <div id="assignDropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:100;max-height:200px;overflow-y:auto;margin-top:-4px">
           <div id="assignDropdownList"></div>
         </div>
       </div>
-      {{-- Karyawan terpilih --}}
       <div id="assignSelected" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:6px">
         <div style="display:flex;align-items:center;gap:10px">
           <div id="assignSelAvatar" style="width:30px;height:30px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0"></div>
@@ -758,9 +767,7 @@ $isUser = auth()->user()->isUser();
           <button onclick="clearAssign()" style="border:none;background:none;color:#9ca3af;cursor:pointer;font-size:18px;padding:0;line-height:1">×</button>
         </div>
       </div>
-      {{-- Tombol lepas karyawan --}}
       <button onclick="clearAssign(true)" style="font-size:11px;color:#9ca3af;border:none;background:none;cursor:pointer;padding:0;margin-bottom:8px;text-decoration:underline">Lepas karyawan dari posisi ini</button>
-      {{-- Hidden select untuk kompatibilitas --}}
       <select id="modalSelKaryawan" style="display:none" onchange="loadKaryawanInfo(this.value)">
         <option value="">-- Kosong --</option>
         @foreach($karyawans as $k)<option value="{{ $k->id }}" data-nama="{{ strtolower($k->nama) }}" data-nik="{{ strtolower($k->nik) }}" data-display="{{ $k->nama }} — {{ $k->nik }}">{{ $k->nama }} — {{ $k->nik }}</option>@endforeach
@@ -794,9 +801,6 @@ $isUser = auth()->user()->isUser();
   </div>
 </div>
 
-
-
-{{-- ===== MODAL BULK ASSIGN ===== --}}
 {{-- ===== MODAL EDIT POSISI ===== --}}
 <div id="modalEditBg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;width:460px;max-width:95vw;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
@@ -848,7 +852,6 @@ $isUser = auth()->user()->isUser();
   </div>
 </div>
 
-
 {{-- ===== MODAL EDIT GROUP ===== --}}
 <div id="modalEditGroupBg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;width:420px;max-width:95vw;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
@@ -890,13 +893,13 @@ $isUser = auth()->user()->isUser();
   </div>
 </div>
 
-
 {{-- Data untuk JavaScript --}}
 <script id="soPageData" type="application/json">
 {
     "bulan": {{ $bulan }},
     "tahun": {{ $tahun }},
-    "csrf": "{{ csrf_token() }}"
+    "csrf": "{{ csrf_token() }}",
+    "newRowId": @json(session('new_row_id'))
 }
 </script>
 
@@ -936,14 +939,119 @@ $isUser = auth()->user()->isUser();
 <script>
 const _pd = JSON.parse(document.getElementById('soPageData').textContent);
 
+// ===== APPLY DATA-* STYLES ON DOM READY =====
 document.addEventListener('DOMContentLoaded', function() {
-  const toast = document.getElementById('toastSuccess');
-  if (toast) { setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s'; setTimeout(()=>toast.remove(), 300); }, 3000); }
-  const toastErr = document.getElementById('toastError');
-  if (toastErr) { setTimeout(() => { toastErr.style.opacity='0'; toastErr.style.transition='opacity .3s'; setTimeout(()=>toastErr.remove(), 300); }, 4000); }
-  const prog = document.getElementById('toastProgress');
-  if (prog) setTimeout(()=>prog.remove(), 3300);
+    // Toast auto-hide
+    const toast = document.getElementById('toastSuccess');
+    if (toast) { setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s'; setTimeout(()=>toast.remove(), 300); }, 3000); }
+    const toastErr = document.getElementById('toastError');
+    if (toastErr) { setTimeout(() => { toastErr.style.opacity='0'; toastErr.style.transition='opacity .3s'; setTimeout(()=>toastErr.remove(), 300); }, 4000); }
+    const prog = document.getElementById('toastProgress');
+    if (prog) setTimeout(()=>prog.remove(), 3300);
+
+    // Apply stat icon backgrounds
+    document.querySelectorAll('.stat-icon[data-bg]').forEach(el => {
+        el.style.background = el.dataset.bg;
+        const svg = el.querySelector('svg[data-stroke]');
+        if (svg) { svg.setAttribute('stroke', svg.dataset.stroke); }
+    });
+
+    // Apply stat value colors
+    document.querySelectorAll('.stat-val[data-label]').forEach(el => {
+        const isDeviasi = el.dataset.label === 'Deviasi';
+        const val = parseInt(el.dataset.value);
+        el.style.color = (isDeviasi && val < 0) ? '#a32d2d' : '#1a1a1a';
+    });
+
+    // Apply badge-pengisian colors
+    document.querySelectorAll('.badge-pengisian[data-val]').forEach(el => {
+        const val = parseInt(el.dataset.val) || 0;
+        el.style.background = val ? '#dcfce7' : '#f3f4f6';
+        el.style.color = val ? '#15803d' : '#6b7280';
+    });
+
+    // Apply badge-deviasi colors
+    document.querySelectorAll('.badge-deviasi[data-val]').forEach(el => {
+        const val = parseInt(el.dataset.val);
+        el.style.background = val === 0 ? '#dcfce7' : (val > 0 ? '#fee2e2' : '#fef3c7');
+        el.style.color = el.dataset.warna || '#374151';
+    });
+
+    // Apply badge-core colors
+    document.querySelectorAll('.badge-core[data-val]').forEach(el => {
+        const isCore = el.dataset.val === 'Core';
+        el.style.background = isCore ? '#dcfce7' : '#dbeafe';
+        el.style.color = isCore ? '#15803d' : '#185fa5';
+    });
+
+    // Apply avatar colors for func levels
+    document.querySelectorAll('.av-func[data-func]').forEach(el => {
+        el.style.background = el.dataset.func === '1' ? '#15803d' : '#185fa5';
+    });
+    document.querySelectorAll('.av-func[data-func3]').forEach(el => {
+        el.style.background = el.dataset.func3 === '1' ? '#15803d' : '#374151';
+    });
+
+    // Apply posisi-span styles
+    document.querySelectorAll('.posisi-span[data-func3]').forEach(el => {
+        const isFunc = el.dataset.func3 === '1';
+        el.style.fontWeight = isFunc ? '500' : '600';
+        el.style.color = isFunc ? '#111827' : '#374151';
+    });
+
+    // Apply padding td posisi func3 (padding kiri 76px jika fungsional, 62px jika bukan)
+    document.querySelectorAll('.td-posisi-func3[data-func3]').forEach(el => {
+        el.style.paddingLeft = el.dataset.func3 === '1' ? '76px' : '62px';
+        el.style.paddingTop = '10px';
+        el.style.paddingBottom = '10px';
+        el.style.paddingRight = '14px';
+    });
 });
+
+// ===== EVENT DELEGATION =====
+// Listener untuk [data-action] di document — tanpa stopPropagation
+// agar tidak memblokir form submit, onclick, dan event lain
+document.addEventListener('click', function(e) {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    // Jangan stopPropagation — biarkan event bubble normal
+    // (form submit, onclick di modal dll tetap berjalan)
+    const action = el.dataset.action;
+    const d = el.dataset;
+    if (action === 'openEdit') {
+        openEdit(d.id, d.posisi, d.jg !== 'null' ? d.jg : null, d.mc, d.core, d.pengisian);
+    } else if (action === 'openModal') {
+        openModal(d.id, d.posisi, d.karyawan !== 'null' ? d.karyawan : null, d.mc);
+    } else if (action === 'confirmHapus') {
+        confirmHapus(d.id, d.posisi);
+    } else if (action === 'openPanel') {
+        openPanel(d.id);
+    } else if (action === 'openTambah') {
+        openTambah(d.tipe, d.dir || null, d.komp || null, d.dept || null, d.bag || null);
+    } else if (action === 'openEditGroup') {
+        openEditGroup(d.tipe, d.nama, d.dir || null, d.komp || null);
+    } else if (action === 'confirmDeleteGroup') {
+        confirmDeleteGroup(d.tipe, d.nama, d.dir || null, d.komp || null);
+    }
+});
+
+// Listener untuk tr[data-toggle] — pasang langsung per elemen
+// Cek apakah klik berasal dari [data-action] supaya tidak trigger toggle saat klik button
+function bindToggleRows() {
+    document.querySelectorAll('tr[data-toggle]:not([data-bound])').forEach(function(tr) {
+        tr.setAttribute('data-bound', '1');
+        tr.addEventListener('click', function(e) {
+            // Abaikan jika klik dari elemen [data-action] di dalam tr
+            if (e.target.closest('[data-action]')) return;
+            const slug = tr.dataset.slug2;
+            const type = tr.dataset.toggle;
+            if (type === 'dir')  toggleDir(slug);
+            else if (type === 'komp') toggleKomp(slug);
+            else if (type === 'dept') toggleDept(slug);
+        });
+    });
+}
+document.addEventListener('DOMContentLoaded', bindToggleRows);
 
 const stateDir={},stateKomp={},stateDept={};
 function setRows(cls,show){document.querySelectorAll('.'+cls).forEach(r=>r.style.display=show?'':'none');}
@@ -984,7 +1092,6 @@ document.getElementById('modalHapusBg').addEventListener('click',function(e){if(
 
 function openSalin(){
   document.getElementById('modalSalinBg').style.display='flex';
-  // Reset toggle
   const cb=document.getElementById('toggleTanpaKaryawan');
   if(cb){cb.checked=false;updateSalinLabel(false);}
 }
@@ -1146,7 +1253,7 @@ function saveAssign(){
     currentAssignments[currentSoId]=d.karyawan_id||null;
     const td=document.getElementById('td-karyawan-'+currentSoId);
     if(d.nama_karyawan){
-      td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+initials(d.nama_karyawan)+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openPanel('+d.karyawan_id+')">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';
+      td.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">'+initials(d.nama_karyawan)+'</div><div><div style="font-size:12px;font-weight:600;color:#15803d;cursor:pointer;text-decoration:underline;text-underline-offset:2px" data-action="openPanel" data-id="'+d.karyawan_id+'">'+d.nama_karyawan+'</div><div style="font-size:11px;color:#9ca3af">'+(d.nik_karyawan??'')+'</div></div></div>';
     }else{
       td.innerHTML='<span style="color:#d1d5db;font-size:12px;font-style:italic">Belum diisi</span>';
     }
@@ -1246,19 +1353,28 @@ function saveEdit(){
 }
 document.getElementById('modalEditBg').addEventListener('click',function(e){if(e.target===this)closeEdit();});
 
-@if(session('new_row_id'))
+// Highlight dan scroll ke row baru setelah store
 document.addEventListener('DOMContentLoaded',function(){
-  const newRow=document.getElementById('row-{{ session("new_row_id") }}');
-  if(newRow){
-    setTimeout(()=>{
-      newRow.scrollIntoView({behavior:'smooth',block:'center'});
-      newRow.style.transition='background-color 0.5s';
-      newRow.style.backgroundColor='#fef9c3';
-      setTimeout(()=>{newRow.style.backgroundColor='';},2500);
-    },300);
+  if (_pd && _pd.newRowId) {
+    const newRow = document.getElementById('row-' + _pd.newRowId);
+    if (newRow) {
+      // Expand semua parent (direktorat/komp/dept) agar row terlihat
+      const classes = Array.from(newRow.classList).filter(c => c.startsWith('child-'));
+      classes.forEach(cls => {
+        const slug = cls.replace('child-', '');
+        document.querySelectorAll('.' + cls).forEach(r => r.style.display = '');
+        const ic = document.getElementById('ic-' + slug);
+        if (ic) ic.style.transform = 'rotate(0deg)';
+      });
+      setTimeout(() => {
+        newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        newRow.style.transition = 'background-color 0.5s';
+        newRow.style.backgroundColor = '#fef9c3';
+        setTimeout(() => { newRow.style.backgroundColor = ''; }, 2500);
+      }, 400);
+    }
   }
 });
-@endif
 
 let assignHighlight=-1;
 document.addEventListener('DOMContentLoaded',function(){

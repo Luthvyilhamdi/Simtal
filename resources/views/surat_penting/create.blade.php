@@ -32,25 +32,17 @@
     .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
 
-    /* Tipe Toggle */
     .tipe-toggle { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px; }
     .tipe-option { position:relative; }
     .tipe-option input[type=radio] { position:absolute;opacity:0;width:0;height:0; }
-    .tipe-label {
-        display:flex;align-items:center;gap:10px;padding:14px 16px;
-        border:2px solid #e5e7eb;border-radius:12px;cursor:pointer;
-        transition:all 0.15s;background:#fafafa;
-    }
+    .tipe-label { display:flex;align-items:center;gap:10px;padding:14px 16px;border:2px solid #e5e7eb;border-radius:12px;cursor:pointer;transition:all 0.15s;background:#fafafa; }
     .tipe-label:hover { border-color:#d1d5db;background:white; }
-    .tipe-option input:checked + .tipe-label {
-        border-color:#16a34a;background:#f0fdf4;
-    }
+    .tipe-option input:checked + .tipe-label { border-color:#16a34a;background:#f0fdf4; }
     .tipe-label-icon { width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
     .tipe-label-text { font-size:13px;font-weight:600;color:#111827; }
     .tipe-label-sub { font-size:11px;color:#9ca3af;margin-top:1px; }
     .tipe-option input:checked + .tipe-label .tipe-label-text { color:#15803d; }
 
-    /* File Upload */
     .file-upload-area { border:2px dashed #d1d5db;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafafa;position:relative; }
     .file-upload-area:hover { border-color:#16a34a;background:#f0fdf4; }
     .file-upload-area.dragover { border-color:#16a34a;background:#f0fdf4; }
@@ -150,8 +142,8 @@
             </div>
 
             <div class="form-grid">
-                {{-- Karyawan (hanya muncul jika tipe Personal) --}}
-                <div class="form-group full" id="fieldKaryawan" style="{{ old('tipe','personal')==='umum' ? 'display:none' : '' }}">
+                {{-- FIX: style Blade diganti @if Blade murni (tidak di dalam style="") --}}
+                <div class="form-group full" id="fieldKaryawan" @if(old('tipe','personal')==='umum') style="display:none" @endif>
                     <label class="form-label">Karyawan <span class="req">*</span></label>
                     <div class="select-wrap">
                         <select name="karyawan_id" id="inputKaryawan" class="form-input {{ $errors->has('karyawan_id') ? 'error-input' : '' }}">
@@ -295,7 +287,6 @@ function onTipeChange(tipe) {
     }
 }
 
-// Init on load
 document.addEventListener('DOMContentLoaded', function() {
     const checked = document.querySelector('input[name=tipe]:checked');
     if (checked) onTipeChange(checked.value);

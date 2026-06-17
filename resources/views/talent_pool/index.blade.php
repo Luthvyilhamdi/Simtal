@@ -308,12 +308,16 @@
                     </td>
                     <td>
                         <div class="td-actions">
+                            {{-- FIX: Ganti onclick="{{ }}" dengan data-* attributes agar VSCode tidak error --}}
                             <button type="button" class="btn-act edit"
-                                onclick="openEdit({{ $t->id }}, '{{ $t->klasifikasi }}', '{{ addslashes($t->catatan ?? '') }}')">
+                                data-id="{{ $t->id }}"
+                                data-klas="{{ $t->klasifikasi }}"
+                                data-catatan="{{ addslashes($t->catatan ?? '') }}">
                                 <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
                             <button type="button" class="btn-act del"
-                                onclick="openHapus({{ $t->id }}, '{{ addslashes($k->nama ?? '') }}')">
+                                data-id="{{ $t->id }}"
+                                data-nama="{{ addslashes($k->nama ?? '') }}">
                                 <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                             </button>
                         </div>
@@ -438,6 +442,19 @@ function submitFilter() {
     });
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeHapus(); closeEdit(); } });
+
+// FIX: Delegasi event untuk tombol edit & hapus (menggantikan onclick inline yang error di VSCode)
+document.addEventListener('click', function(e) {
+    const editBtn = e.target.closest('.btn-act.edit');
+    if (editBtn) {
+        openEdit(editBtn.dataset.id, editBtn.dataset.klas, editBtn.dataset.catatan);
+        return;
+    }
+    const delBtn = e.target.closest('.btn-act.del');
+    if (delBtn) {
+        openHapus(delBtn.dataset.id, delBtn.dataset.nama);
+    }
+});
 
 // === REAL-TIME SEARCH ===
 let searchTimer = null;

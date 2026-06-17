@@ -119,7 +119,7 @@
                     <div class="template-desc">Template dengan contoh 1 karyawan 5 jabatan</div>
                 </div>
             </div>
-            <button type="button" class="btn-download-tpl" onclick="triggerDownload('{{ route('history_karyawan.import.template') }}')">
+            <button type="button" class="btn-download-tpl" data-url="{{ route('history_karyawan.import.template') }}" onclick="triggerDownload(this.dataset.url)">
                 ⬇ Download Template
             </button>
         </div>

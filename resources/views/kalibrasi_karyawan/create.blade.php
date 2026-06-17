@@ -35,11 +35,8 @@
     .nilai-card { display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid #e5e7eb;border-radius:12px;cursor:pointer;transition:all .15s;background:#fafafa; }
     .nilai-card input { display:none; }
     .nilai-card:hover { border-color:#d1d5db;background:#f5f5f0; }
-    .nilai-card.sel { border-color:var(--sel-color);background:var(--sel-bg); }
     .nilai-dot { width:14px;height:14px;border-radius:50%;background:#d1d5db;flex-shrink:0;transition:background .15s; }
-    .nilai-card.sel .nilai-dot { background:var(--sel-color); }
     .nilai-name { font-size:13px;font-weight:700;color:#374151; }
-    .nilai-card.sel .nilai-name { color:var(--sel-color); }
     .nilai-desc { font-size:11px;color:#9ca3af;margin-top:1px; }
 
     .form-actions-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
@@ -120,10 +117,12 @@
                 <label class="form-label">Nilai Kalibrasi <span class="req">*</span></label>
                 <div class="nilai-group">
                     @foreach($nilaiList as $key => $opt)
+                    {{-- FIX: onclick dan style CSS var diganti data-* + class Blade ternary --}}
                     <label class="nilai-card {{ $selectedNilai === $key ? 'sel' : '' }}"
                            id="nilai-{{ $key }}"
-                           style="--sel-color:{{ $opt['color'] }};--sel-bg:{{ $opt['bg'] }}"
-                           onclick="selectNilai('{{ $key }}')">
+                           data-nilai="{{ $key }}"
+                           data-color="{{ $opt['color'] }}"
+                           data-bg="{{ $opt['bg'] }}">
                         <input type="radio" name="nilai" value="{{ $key }}"
                                {{ $selectedNilai === $key ? 'checked' : '' }}>
                         <div class="nilai-dot"></div>
@@ -165,25 +164,53 @@
 
 @push('scripts')
 <script>
-const nilaiColors = {
-    'FEE': { color:'#15803d', bg:'#f0fdf4' },
-    'EXE': { color:'#1d4ed8', bg:'#eff6ff' },
-    'MEE': { color:'#374151', bg:'#f9fafb' },
-    'BEE': { color:'#d97706', bg:'#fffbeb' },
-    'FBE': { color:'#dc2626', bg:'#fef2f2' },
-};
-function selectNilai(val) {
-    Object.keys(nilaiColors).forEach(k => {
-        const el = document.getElementById('nilai-' + k);
+// Warna setiap nilai — diambil dari data-* agar tidak ada Blade di JS/style
+const nilaiColors = {};
+document.querySelectorAll('.nilai-card[data-nilai]').forEach(function(el) {
+    nilaiColors[el.dataset.nilai] = {
+        color: el.dataset.color,
+        bg:    el.dataset.bg
+    };
+});
+
+function applyNilaiStyle(key, isSelected) {
+    const el = document.getElementById('nilai-' + key);
+    if (!el) return;
+    if (isSelected) {
+        el.classList.add('sel');
+        el.style.borderColor = nilaiColors[key].color;
+        el.style.background  = nilaiColors[key].bg;
+        const dot  = el.querySelector('.nilai-dot');
+        const name = el.querySelector('.nilai-name');
+        if (dot)  dot.style.background = nilaiColors[key].color;
+        if (name) name.style.color     = nilaiColors[key].color;
+    } else {
         el.classList.remove('sel');
-        el.style.removeProperty('--sel-color');
-        el.style.removeProperty('--sel-bg');
-    });
-    const sel = document.getElementById('nilai-' + val);
-    sel.classList.add('sel');
-    sel.style.setProperty('--sel-color', nilaiColors[val].color);
-    sel.style.setProperty('--sel-bg', nilaiColors[val].bg);
-    document.querySelector(`input[name="nilai"][value="${val}"]`).checked = true;
+        el.style.borderColor = '';
+        el.style.background  = '';
+        const dot  = el.querySelector('.nilai-dot');
+        const name = el.querySelector('.nilai-name');
+        if (dot)  dot.style.background = '';
+        if (name) name.style.color     = '';
+    }
 }
+
+function selectNilai(key) {
+    Object.keys(nilaiColors).forEach(k => applyNilaiStyle(k, k === key));
+    const radio = document.querySelector('input[name="nilai"][value="' + key + '"]');
+    if (radio) radio.checked = true;
+}
+
+// Delegasi klik pada label nilai-card (menggantikan onclick Blade)
+document.addEventListener('click', function(e) {
+    const card = e.target.closest('.nilai-card[data-nilai]');
+    if (card) selectNilai(card.dataset.nilai);
+});
+
+// Apply style untuk nilai yang sudah dipilih saat halaman load (edit mode)
+document.addEventListener('DOMContentLoaded', function() {
+    const checked = document.querySelector('input[name="nilai"]:checked');
+    if (checked) applyNilaiStyle(checked.value, true);
+});
 </script>
 @endpush

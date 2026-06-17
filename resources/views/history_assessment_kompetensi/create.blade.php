@@ -22,20 +22,17 @@
     .error-msg { font-size:11px;color:#ef4444; }
     .form-hint { font-size:11px;color:#9ca3af;margin-top:2px; }
 
-    /* Criteria Info Box */
     .criteria-box { background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:#92400e; }
     .criteria-box strong { color:#78350f; }
     .criteria-box ul { margin:6px 0 0 16px; }
     .criteria-box ul li { margin-bottom:3px; }
 
-    /* Kompetensi Table */
     .komp-table { width:100%;border-collapse:collapse; }
     .komp-table th { font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;background:#f9fafb;border:1px solid #e5e7eb;text-align:left; }
     .komp-table td { padding:10px 12px;border:1px solid #e5e7eb;vertical-align:middle; }
     .komp-table tr:hover td { background:#fafafa; }
     .komp-name { font-size:13px;font-weight:600;color:#111827; }
 
-    /* Score Buttons */
     .score-group { display:flex;gap:6px; }
     .score-btn { width:40px;height:36px;border-radius:8px;border:1.5px solid #e5e7eb;background:white;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;color:#6b7280; }
     .score-btn:hover { border-color:#16a34a;color:#15803d;background:#f0fdf4; }
@@ -44,7 +41,12 @@
     .score-btn.sel-3 { background:#f0fdf4;border-color:#86efac;color:#16a34a; }
     .score-btn.sel-4 { background:#eff6ff;border-color:#93c5fd;color:#1d4ed8; }
 
-    /* Hasil Preview */
+    /* Display score span warna via class */
+    .score-disp         { font-size:18px;font-weight:800; }
+    .score-disp-empty   { color:#d1d5db; }
+    .score-disp-ok      { color:#15803d; }
+    .score-disp-warn    { color:#dc2626; }
+
     .hasil-preview { background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-top:16px; }
     .hasil-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6; }
     .hasil-row:last-child { border-bottom:none; }
@@ -54,7 +56,6 @@
     .badge-not { background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700; }
     .badge-pending { background:#f3f4f6;color:#6b7280;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700; }
 
-    /* Status indicator */
     .crit-ok  { display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:4px; }
     .crit-err { display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:4px; }
     .crit-gray{ display:inline-block;width:8px;height:8px;border-radius:50%;background:#d1d5db;margin-right:4px; }
@@ -158,23 +159,31 @@
                 </thead>
                 <tbody>
                     @foreach($competencies as $key => $label)
+                    @php $oldVal = old($key); @endphp
                     <tr>
                         <td><div class="komp-name">{{ $label }}</div></td>
                         <td>
                             <div class="score-group">
+                                {{-- Gunakan onclick langsung tanpa Blade — data dibaca dari data-* attribute --}}
                                 @for($i = 1; $i <= 4; $i++)
-                                <button type="button" class="score-btn {{ old($key) == $i ? 'sel-'.$i : '' }}"
-                                        onclick="selectScore('{{ $key }}', {{ $i }}, this, 'comp')">
+                                <button type="button"
+                                    class="score-btn {{ $oldVal == $i ? 'sel-'.$i : '' }}"
+                                    data-field="{{ $key }}"
+                                    data-val="{{ $i }}"
+                                    data-type="comp"
+                                    onclick="selectScore(this.dataset.field, parseInt(this.dataset.val), this, this.dataset.type)">
                                     {{ $i }}
                                 </button>
                                 @endfor
-                                <input type="hidden" name="{{ $key }}" id="input_{{ $key }}" value="{{ old($key) }}" />
+                                <input type="hidden" name="{{ $key }}" id="input_{{ $key }}" value="{{ $oldVal }}" />
                             </div>
                             @error($key)<div class="error-msg">{{ $message }}</div>@enderror
                         </td>
                         <td style="text-align:center;">
-                            <span id="display_{{ $key }}" style="font-size:18px;font-weight:800;color:{{ old($key) ? (old($key) < 3 ? '#dc2626' : '#15803d') : '#d1d5db' }};">
-                                {{ old($key) ?? '—' }}
+                            {{-- FIX: style color Blade diganti class statis --}}
+                            <span id="display_{{ $key }}"
+                                class="score-disp {{ $oldVal ? ($oldVal < 3 ? 'score-disp-warn' : 'score-disp-ok') : 'score-disp-empty' }}">
+                                {{ $oldVal ?? '—' }}
                             </span>
                         </td>
                     </tr>
@@ -206,23 +215,31 @@
                 </thead>
                 <tbody>
                     @foreach($qualifications as $key => $label)
+                    @php $oldVal = old($key); @endphp
                     <tr>
                         <td><div class="komp-name">{{ $label }}</div></td>
                         <td>
                             <div class="score-group">
+                                {{-- Gunakan onclick langsung tanpa Blade — data dibaca dari data-* attribute --}}
                                 @for($i = 1; $i <= 4; $i++)
-                                <button type="button" class="score-btn {{ old($key) == $i ? 'sel-'.$i : '' }}"
-                                        onclick="selectScore('{{ $key }}', {{ $i }}, this, 'qual')">
+                                <button type="button"
+                                    class="score-btn {{ $oldVal == $i ? 'sel-'.$i : '' }}"
+                                    data-field="{{ $key }}"
+                                    data-val="{{ $i }}"
+                                    data-type="qual"
+                                    onclick="selectScore(this.dataset.field, parseInt(this.dataset.val), this, this.dataset.type)">
                                     {{ $i }}
                                 </button>
                                 @endfor
-                                <input type="hidden" name="{{ $key }}" id="input_{{ $key }}" value="{{ old($key) }}" />
+                                <input type="hidden" name="{{ $key }}" id="input_{{ $key }}" value="{{ $oldVal }}" />
                             </div>
                             @error($key)<div class="error-msg">{{ $message }}</div>@enderror
                         </td>
                         <td style="text-align:center;">
-                            <span id="display_{{ $key }}" style="font-size:18px;font-weight:800;color:{{ old($key) ? (old($key) < 2 ? '#dc2626' : '#15803d') : '#d1d5db' }};">
-                                {{ old($key) ?? '—' }}
+                            {{-- FIX: style color Blade diganti class statis --}}
+                            <span id="display_{{ $key }}"
+                                class="score-disp {{ $oldVal ? ($oldVal < 2 ? 'score-disp-warn' : 'score-disp-ok') : 'score-disp-empty' }}">
+                                {{ $oldVal ?? '—' }}
                             </span>
                         </td>
                     </tr>
@@ -235,7 +252,6 @@
         <div class="hasil-preview">
             <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;">📊 Preview Hasil</div>
 
-            {{-- Kompetensi detail --}}
             <div class="hasil-row">
                 <span class="hasil-label">
                     <span class="crit-gray" id="dot_comp_r1"></span>
@@ -274,25 +290,38 @@
 
 </form>
 
+{{-- Data untuk JS disimpan di data-* attribute — aman dari parser VSCode --}}
+<div id="assessmentMeta"
+    data-competencies="{{ implode(',', array_keys($competencies)) }}"
+    data-qualifications="{{ implode(',', array_keys($qualifications)) }}"
+    style="display:none"></div>
+
 @endsection
 
 @push('scripts')
 <script>
-const competencies   = @json(array_keys($competencies));
-const qualifications = @json(array_keys($qualifications));
+const _meta          = document.getElementById('assessmentMeta');
+const competencies   = _meta.dataset.competencies.split(',');
+const qualifications = _meta.dataset.qualifications.split(',');
+
+// Bind langsung ke setiap score-btn — script ini sudah di bawah semua HTML
+// jadi DOM sudah ready, tidak perlu DOMContentLoaded
+updatePreview();
 
 function selectScore(field, val, btn, type) {
+    // Reset semua button di group yang sama
     btn.closest('.score-group').querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
     btn.className = 'score-btn sel-' + val;
     document.getElementById('input_' + field).value = val;
 
+    // Update display span — pakai class statis, tidak pakai style inline
     const disp = document.getElementById('display_' + field);
     disp.textContent = val;
+    disp.className = 'score-disp';
     if (type === 'comp') {
-        disp.style.color = val < 3 ? '#dc2626' : '#15803d';
+        disp.classList.add(val < 3 ? 'score-disp-warn' : 'score-disp-ok');
     } else {
-        // Qualification: merah jika < 2
-        disp.style.color = val < 2 ? '#dc2626' : '#15803d';
+        disp.classList.add(val < 2 ? 'score-disp-warn' : 'score-disp-ok');
     }
     updatePreview();
 }
@@ -301,7 +330,6 @@ function updatePreview() {
     let compR1 = 0, compR2 = 0, qualR1 = 0;
     let allFilled = true;
 
-    // Hitung kompetensi
     competencies.forEach(f => {
         const val = parseInt(document.getElementById('input_' + f).value);
         if (!val) { allFilled = false; return; }
@@ -309,19 +337,16 @@ function updatePreview() {
         if (val === 2) compR2++;
     });
 
-    // Hitung qualification
     qualifications.forEach(f => {
         const val = parseInt(document.getElementById('input_' + f).value);
         if (!val) { allFilled = false; return; }
-        if (val < 2) qualR1++; // nilai < 2 = tidak memenuhi minimal
+        if (val < 2) qualR1++;
     });
 
-    // Update display
     document.getElementById('preview_comp_r1').textContent = compR1;
     document.getElementById('preview_comp_r2').textContent = compR2;
     document.getElementById('preview_qual_r1').textContent = qualR1;
 
-    // Update dot indicators
     const setDot = (id, ok) => {
         const el = document.getElementById(id);
         el.className = ok ? 'crit-ok' : (allFilled ? 'crit-err' : 'crit-gray');
@@ -335,11 +360,9 @@ function updatePreview() {
     setDot('dot_comp_r2', compR2ok);
     setDot('dot_qual_r1', qualOk);
 
-    // Update r2 color
     const r2el = document.getElementById('preview_comp_r2');
     r2el.style.color = compR2 > 3 ? '#dc2626' : (compR2 > 0 ? '#d97706' : '#374151');
 
-    // Kesimpulan
     const el = document.getElementById('preview_kesimpulan');
     if (!allFilled) {
         el.textContent = 'Belum lengkap';
@@ -353,6 +376,6 @@ function updatePreview() {
     }
 }
 
-window.addEventListener('DOMContentLoaded', updatePreview);
+
 </script>
 @endpush

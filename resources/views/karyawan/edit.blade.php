@@ -442,7 +442,7 @@
         {{-- Info MDG Band --}}
         <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-top:12px;font-size:12px;color:#374151;">
             📊 <strong>MDG Band</strong> (dari TMT JG saat masuk band):
-            <strong style="color:{{ $karyawan->mdg_band_bulan >= 36 ? '#15803d' : '#d97706' }};">
+            <strong class="{{ $karyawan->mdg_band_bulan >= 36 ? 'text-ok' : 'text-warn' }}">
                 {{ $karyawan->mdg_band_bulan }} bulan
             </strong>
             dari min 36 bulan untuk naik Band

@@ -189,7 +189,7 @@
                     <td style="font-size:12px;color:#6b7280;max-width:160px">{{ $p->keterangan ? \Illuminate\Support\Str::limit($p->keterangan, 50) : '-' }}</td>
                     <td>
                         <button type="button" class="btn-del"
-                            onclick="openModal('{{ route('penilaian_karyawan.destroy', [$karyawan, $p]) }}', '{{ addslashes($p->judul) }}')">
+                            data-url="{{ route('penilaian_karyawan.destroy', [$karyawan, $p]) }}"data-judul="{{ addslashes($p->judul) }}"onclick="openModal(this.dataset.url, this.dataset.judul)">
                             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                         </button>
                     </td>
