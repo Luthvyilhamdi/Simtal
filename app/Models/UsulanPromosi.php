@@ -11,6 +11,7 @@ class UsulanPromosi extends Model
         'jabatan_saat_ini', 'job_grade_saat_ini', 'person_grade_saat_ini',
         'band_saat_ini', 'struktural_fungsional', 'departemen_saat_ini', 'kompartemen_saat_ini',
         'jabatan_tujuan', 'job_grade_promosi', 'person_grade_promosi',
+        'direktorat_tujuan_id', 'kompartemen_tujuan_id', 'departemen_tujuan_id',
         'assessment_id', 'hasil_assessment', 'tanggal_berlaku_assessment', 'level_ukur',
         'tanggal_usulan',
         'mdg_band_ok', 'mdg_jg_ok', 'mdg_pg_ok',
@@ -20,16 +21,19 @@ class UsulanPromosi extends Model
         'mc_tersedia', 'hasil_evaluasi',
         'tindak_lanjut', 'tanggal_sidang', 'hasil_sidang',
         'status', 'catatan', 'created_by',
+        'no_sk', 'tmt', 'sk_diproses',
     ];
 
     protected $casts = [
         'tanggal_usulan'            => 'date',
         'tanggal_berlaku_assessment' => 'date',
         'tanggal_sidang'            => 'date',
+        'tmt'                       => 'date',
         'mdg_band_ok'               => 'boolean',
         'mdg_jg_ok'                 => 'boolean',
         'mdg_pg_ok'                 => 'boolean',
         'mc_tersedia'               => 'boolean',
+        'sk_diproses'               => 'boolean',
         'kpi_snapshot'              => 'array',
         'kalibrasi_snapshot'        => 'array',
     ];
@@ -38,6 +42,11 @@ class UsulanPromosi extends Model
     public function assessment() { return $this->belongsTo(HistoryAssessment::class, 'assessment_id'); }
     public function talentPool() { return $this->belongsTo(TalentPool::class, 'talent_pool_id'); }
     public function createdBy()  { return $this->belongsTo(User::class, 'created_by'); }
+
+    // Unit tujuan promosi
+    public function direktoratTujuan()  { return $this->belongsTo(Direktorat::class, 'direktorat_tujuan_id'); }
+    public function kompartemenTujuan() { return $this->belongsTo(Kompartemen::class, 'kompartemen_tujuan_id'); }
+    public function departemenTujuan()  { return $this->belongsTo(Departemen::class, 'departemen_tujuan_id'); }
 
     public function getStatusLabelAttribute(): string
     {

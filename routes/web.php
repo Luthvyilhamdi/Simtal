@@ -205,6 +205,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/',                       [UsulanPromosiController::class, 'store'])->name('store');
             Route::get('/{usulanPromosi}',         [UsulanPromosiController::class, 'show'])->name('show');
             Route::patch('/{usulanPromosi}/status',[UsulanPromosiController::class, 'updateStatus'])->name('update_status');
+            Route::patch('/{usulanPromosi}/terbitkan-sk',  [UsulanPromosiController::class, 'terbitkanSk'])->name('terbitkan_sk');
             Route::delete('/{usulanPromosi}',      [UsulanPromosiController::class, 'destroy'])->name('destroy');
         });
         Route::get('api/usulan-promosi/karyawan',  [UsulanPromosiController::class, 'getKaryawanData'])->name('usulan_promosi.karyawan_data');

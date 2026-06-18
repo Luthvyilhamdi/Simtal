@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-    /* Welcome */
     .welcome-card {
         background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
         border-radius: 14px; padding: 24px 28px; margin-bottom: 20px;
@@ -23,7 +22,6 @@
     .pill-amber { background:rgba(245,158,11,0.3);color:#fcd34d; }
     .welcome-date { font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:20px; }
 
-    /* KPI */
     .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px; }
     .kpi-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
     .kpi-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.07); }
@@ -44,18 +42,15 @@
     .kpi-icon.amber  { background:#fffbeb; }
     .kpi-icon.teal   { background:#ecfeff; }
 
-    /* Section title */
     .sec-title { font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px; }
     .sec-title::after { content:'';flex:1;height:1px;background:#f3f4f6; }
 
-    /* Chart cards */
     .chart-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
     .chart-grid-3 { display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px; }
     .chart-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px; }
     .chart-card-title { font-size:13px;font-weight:700;color:#111827;margin-bottom:3px; }
     .chart-card-sub { font-size:11px;color:#9ca3af;margin-bottom:14px; }
 
-    /* Bar chart */
     .bar-chart { display:flex;flex-direction:column;gap:8px; }
     .bar-row { display:flex;align-items:center;gap:8px; }
     .bar-label { font-size:11px;color:#6b7280;font-weight:600;min-width:80px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
@@ -63,7 +58,17 @@
     .bar-fill { height:100%;border-radius:5px;display:flex;align-items:center;padding-left:7px;font-size:10px;font-weight:700;color:white;transition:width 0.8s ease;min-width:28px; }
     .bar-val { font-size:11px;font-weight:700;color:#374151;min-width:26px;text-align:right; }
 
-    /* Pie */
+    /* FIX: bar-fill warna via class statis */
+    .bar-fill-blue   { background:#2563eb; }
+    .bar-fill-purple { background:#7c3aed; }
+    /* FIX: bar-val deviasi warna via class statis */
+    .bar-val-neg  { color:#ef4444; }
+    .bar-val-pos  { color:#16a34a; }
+    .bar-val-zero { color:#6b7280; }
+    .bar-fill-neg  { background:#ef4444; }
+    .bar-fill-pos  { background:#16a34a; }
+    .bar-fill-zero { background:#6b7280; }
+
     .pie-legend { display:flex;flex-direction:column;gap:8px;flex:1; }
     .pie-item { display:flex;align-items:center;gap:7px; }
     .pie-dot { width:9px;height:9px;border-radius:50%;flex-shrink:0; }
@@ -71,18 +76,15 @@
     .pie-item-val { font-size:12px;font-weight:700;color:#111827; }
     .pie-item-pct { font-size:10px;color:#9ca3af;margin-left:3px; }
 
-    /* Demografi */
     .demo-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
     .demo-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px; }
 
-    /* Pejabat mini cards */
     .pejabat-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px; }
     .pejabat-mini { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:14px;text-align:center; }
     .pejabat-num { font-size:26px;font-weight:800; }
     .pejabat-label { font-size:11px;font-weight:700;margin-top:3px;letter-spacing:0.5px; }
     .pejabat-sub { font-size:10px;color:#9ca3af;margin-top:2px; }
 
-    /* Tabel Direktorat */
     .tabel-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:18px; }
     .tabel-header { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f3f4f6; }
     .tabel-title { font-size:13px;font-weight:700;color:#111827; }
@@ -96,7 +98,6 @@
     .progress-mini { height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:3px; }
     .progress-mini-fill { height:100%;border-radius:20px; }
 
-    /* Bottom cards */
     .bottom-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
     .list-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden; }
     .list-card-header { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f3f4f6; }
@@ -117,13 +118,24 @@
     .view-all { font-size:11px;color:#16a34a;text-decoration:none;font-weight:600; }
     .view-all:hover { text-decoration:underline; }
 
-    /* Kompetensi stat mini */
     .komp-stat-row { display:flex;align-items:center;gap:8px;margin-top:8px; }
     .komp-stat-item { flex:1;text-align:center;padding:8px 6px;border-radius:8px; }
     .komp-stat-num { font-size:20px;font-weight:800;line-height:1; }
     .komp-stat-label { font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px; }
 
-    /* ===== RESPONSIVE ===== */
+    /* FIX: pejabat warna via class statis */
+    .pejabat-svp { color:#d97706; }
+    .pejabat-vp  { color:#1d4ed8; }
+    .pejabat-spm { color:#7c3aed; }
+    .pejabat-pm  { color:#15803d; }
+    .pejabat-pgs { color:#0891b2; }
+    .pejabat-pjs { color:#be185d; }
+
+    /* FIX: pensiun warna via class statis */
+    .pensiun-kritis { color:#ef4444; }
+    .pensiun-warn   { color:#f59e0b; }
+    .pensiun-normal { color:#6b7280; }
+
     @media (max-width:1024px) {
         .kpi-grid { grid-template-columns:repeat(2,1fr); }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr; }
@@ -132,51 +144,32 @@
         .pejabat-grid { grid-template-columns:repeat(3,1fr); }
     }
     @media (max-width:768px) {
-        /* Welcome */
         .welcome-card { padding:18px 16px; }
         .welcome-title { font-size:15px; }
         .welcome-date { font-size:11px;padding:5px 10px; }
-
-        /* KPI */
         .kpi-grid { grid-template-columns:1fr 1fr;gap:8px; }
         .kpi-card { padding:14px 12px; }
         .kpi-num { font-size:22px; }
         .kpi-icon { width:36px;height:36px;font-size:16px; }
-
-        /* SO 5-col → 2-col */
         .so-grid { grid-template-columns:1fr 1fr !important;gap:8px !important; }
-
-        /* Chart grids */
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr;gap:10px; }
         .chart-card { padding:14px; }
         .chart-card-title { font-size:12px; }
-
-        /* Talent Pool */
         .tp-grid { grid-template-columns:1fr !important; }
-
-        /* Bar chart label */
         .bar-label { min-width:60px;font-size:10px; }
         .bar-fill { font-size:9px; }
-
-        /* Pejabat */
         .pejabat-grid { grid-template-columns:repeat(3,1fr);gap:8px; }
         .pejabat-mini { padding:10px 8px; }
         .pejabat-num { font-size:20px; }
         .pejabat-label { font-size:10px; }
-
-        /* Tabel */
         .tabel-card { overflow-x:auto; }
         table { font-size:11px; }
         thead th { padding:8px 10px; }
         tbody td { padding:8px 10px; }
-
-        /* Bottom list */
         .bottom-grid { grid-template-columns:1fr;gap:10px; }
         .list-card-title { font-size:11px; }
         .list-name { font-size:11px; }
         .list-sub { font-size:9px; }
-
-        /* Demo */
         .demo-grid { grid-template-columns:1fr; }
     }
     @media (max-width:480px) {
@@ -186,17 +179,14 @@
         .kpi-label { font-size:9px; }
         .kpi-sub { font-size:10px; }
         .kpi-icon { display:none; }
-
         .welcome-card { padding:14px 12px; }
         .welcome-title { font-size:14px; }
         .welcome-pills { gap:4px; }
         .welcome-pill { font-size:10px;padding:2px 8px; }
         .welcome-sub { display:none; }
-
         .so-grid { grid-template-columns:1fr 1fr !important; }
         .pejabat-grid { grid-template-columns:repeat(3,1fr);gap:6px; }
         .pejabat-num { font-size:18px; }
-
         .sec-title { font-size:11px; }
         .bar-label { min-width:50px; }
     }
@@ -204,6 +194,19 @@
 @endpush
 
 @section('content')
+
+{{-- Data untuk Chart.js — di luar script agar tidak ada Blade di dalam script --}}
+<div id="dashMeta"
+    data-tren-bulan='@json($trenBulan)'
+    data-assessment-chart='@json($assessmentChart)'
+    data-tren-kompetensi='@json($trenKompetensi)'
+    data-gender-l="{{ $genderChart['L'] }}"
+    data-gender-p="{{ $genderChart['P'] }}"
+    data-total-qualified="{{ $totalQualified }}"
+    data-total-not-qualified="{{ $totalNotQualified }}"
+    data-so-core="{{ $soCore }}"
+    data-so-non-core="{{ $soNonCore }}"
+    style="display:none"></div>
 
 {{-- WELCOME --}}
 <div class="welcome-card">
@@ -276,11 +279,12 @@
     </div>
 </div>
 
-
 {{-- SO CORE & NON CORE --}}
 @php
 $namaBulanDash = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
+$pctCoreTerisi    = $soCoreMc > 0 ? round(($soCoreTerisi/$soCoreMc)*100) : 0;
+$pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100) : 0;
 @endphp
 <div class="sec-title">🏗️ Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
 <div class="so-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px">
@@ -301,35 +305,33 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
     <div class="kpi-label">Terisi</div>
     <div class="kpi-num">{{ $soTerisi }}</div>
     <div class="kpi-sub">{{ $pctTerisi }}% dari MC/TKO</div>
+    {{-- FIX: width Blade diganti data-pct + apply via JS --}}
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div style="height:100%;width:{{ $pctTerisi }}%;background:#16a34a;border-radius:20px"></div>
+      <div class="progress-mini-fill" data-pct="{{ $pctTerisi }}" style="background:#16a34a;height:100%;border-radius:20px;"></div>
     </div>
   </div>
 
   <div class="kpi-card" style="border-top:3px solid #2563eb;flex-direction:column;align-items:flex-start;gap:6px">
-    @php $pctCoreTerisi = $soCoreMc > 0 ? round(($soCoreTerisi/$soCoreMc)*100) : 0; @endphp
     <div class="kpi-label" style="color:#9ca3af">Core — Keterisian</div>
     <div class="kpi-num" style="color:#2563eb">{{ $soCoreTerisi }} <span style="font-size:14px;color:#9ca3af">/ {{ $soCoreMc }}</span></div>
     <div class="kpi-sub">{{ $pctCoreTerisi }}% terisi · {{ $soCore }} posisi Core</div>
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div style="height:100%;width:{{ $pctCoreTerisi }}%;background:#2563eb;border-radius:20px"></div>
+      <div class="progress-mini-fill" data-pct="{{ $pctCoreTerisi }}" style="background:#2563eb;height:100%;border-radius:20px;"></div>
     </div>
   </div>
 
   <div class="kpi-card" style="border-top:3px solid #7c3aed;flex-direction:column;align-items:flex-start;gap:6px">
-    @php $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100) : 0; @endphp
     <div class="kpi-label" style="color:#9ca3af">Non Core — Keterisian</div>
     <div class="kpi-num" style="color:#7c3aed">{{ $soNonCoreTerisi }} <span style="font-size:14px;color:#9ca3af">/ {{ $soNonCoreMc }}</span></div>
     <div class="kpi-sub">{{ $pctNonCoreTerisi }}% terisi · {{ $soNonCore }} posisi Non Core</div>
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div style="height:100%;width:{{ $pctNonCoreTerisi }}%;background:#7c3aed;border-radius:20px"></div>
+      <div class="progress-mini-fill" data-pct="{{ $pctNonCoreTerisi }}" style="background:#7c3aed;height:100%;border-radius:20px;"></div>
     </div>
   </div>
 
 </div>
 
-
-{{-- SO CHARTS: Core/NonCore Pie + Deviasi per Direktorat --}}
+{{-- SO CHARTS --}}
 <div class="chart-grid-2" style="margin-bottom:18px">
     <div class="chart-card">
         <div class="chart-card-title">Core vs Non Core</div>
@@ -362,23 +364,23 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
         <div class="bar-chart" style="margin-top:6px">
             @foreach($soPerDirektorat as $d)
             @php
-                $devVal  = (int) $d->deviasi;
-                $barW    = min(100, round(abs($devVal) / $maxDev * 100));
-                $barColor = $devVal < 0 ? '#ef4444' : ($devVal > 0 ? '#16a34a' : '#6b7280');
+                $devVal   = (int) $d->deviasi;
+                $barW     = min(100, round(abs($devVal) / $maxDev * 100));
+                $devClass = $devVal < 0 ? 'neg' : ($devVal > 0 ? 'pos' : 'zero');
                 $shortName = Str::limit(str_replace(['Direktorat ', 'Directorat '], '', $d->direktorat), 20);
             @endphp
+            {{-- FIX: style color Blade diganti class statis bar-val-neg/pos/zero --}}
             <div class="bar-row">
                 <div class="bar-label" title="{{ $d->direktorat }}">{{ $shortName }}</div>
                 <div class="bar-track">
-                    <div class="bar-fill" style="width:{{ $barW }}%;background:{{ $barColor }};">{{ $devVal }}</div>
+                    <div class="bar-fill bar-fill-{{ $devClass }}" data-pct="{{ $barW }}">{{ $devVal }}</div>
                 </div>
-                <div class="bar-val" style="color:{{ $barColor }}">{{ $devVal }}</div>
+                <div class="bar-val bar-val-{{ $devClass }}">{{ $devVal }}</div>
             </div>
             @endforeach
         </div>
     </div>
 </div>
-
 
 {{-- TALENT POOL --}}
 <div class="sec-title">🎯 Talent Pool</div>
@@ -409,14 +411,14 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
             </div>
         </div>
         @if($talentPool['ini']['total'] > 0)
+        @php $pctShortlist = round(($talentPool['ini']['shortlist']/$talentPool['ini']['total'])*100); @endphp
         <div style="margin-top:14px">
-            @php $pctShortlist = $talentPool['ini']['total'] > 0 ? round(($talentPool['ini']['shortlist']/$talentPool['ini']['total'])*100) : 0; @endphp
             <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px">
                 <span>Shortlist rate</span>
                 <span style="font-weight:700;color:#15803d">{{ $pctShortlist }}%</span>
             </div>
             <div style="height:5px;background:#f3f4f6;border-radius:20px;overflow:hidden">
-                <div style="height:100%;width:{{ $pctShortlist }}%;background:#15803d;border-radius:20px"></div>
+                <div class="progress-mini-fill" data-pct="{{ $pctShortlist }}" style="background:#15803d;height:100%;border-radius:20px;"></div>
             </div>
         </div>
         @endif
@@ -447,14 +449,14 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
             </div>
         </div>
         @if($talentPool['lalu']['total'] > 0)
+        @php $pctShortlistLalu = round(($talentPool['lalu']['shortlist']/$talentPool['lalu']['total'])*100); @endphp
         <div style="margin-top:14px">
-            @php $pctShortlistLalu = $talentPool['lalu']['total'] > 0 ? round(($talentPool['lalu']['shortlist']/$talentPool['lalu']['total'])*100) : 0; @endphp
             <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px">
                 <span>Shortlist rate</span>
                 <span style="font-weight:700;color:#6b7280">{{ $pctShortlistLalu }}%</span>
             </div>
             <div style="height:5px;background:#f3f4f6;border-radius:20px;overflow:hidden">
-                <div style="height:100%;width:{{ $pctShortlistLalu }}%;background:#9ca3af;border-radius:20px"></div>
+                <div class="progress-mini-fill" data-pct="{{ $pctShortlistLalu }}" style="background:#9ca3af;height:100%;border-radius:20px;"></div>
             </div>
         </div>
         @endif
@@ -479,7 +481,8 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
                 @php $totalA = max($totalAssessment, 1); @endphp
                 @foreach($assessmentChart as $a)
                 <div class="pie-item">
-                    <div class="pie-dot" style="background:{{ $a['color'] }};"></div>
+                    {{-- FIX: style Blade diganti data-color + apply via JS --}}
+                    <div class="pie-dot" data-color="{{ $a['color'] }}"></div>
                     <span class="pie-item-label">{{ $a['label'] }}</span>
                     <span class="pie-item-val">{{ $a['value'] }}</span>
                     <span class="pie-item-pct">({{ round(($a['value']/$totalA)*100) }}%)</span>
@@ -528,10 +531,12 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
         @php $maxDir = $distribusiDirektorat->max('total') ?: 1; @endphp
         <div class="bar-chart">
             @foreach($distribusiDirektorat->take(8) as $d)
+            @php $pctDir = round(($d['total']/$maxDir)*100); @endphp
             <div class="bar-row">
                 <div class="bar-label" title="{{ $d['nama'] }}">{{ Str::limit($d['nama'], 18) }}</div>
                 <div class="bar-track">
-                    <div class="bar-fill" style="width:{{ ($d['total']/$maxDir)*100 }}%;background:#2563eb;">{{ $d['total'] }}</div>
+                    {{-- FIX: width Blade diganti data-pct --}}
+                    <div class="bar-fill bar-fill-blue" data-pct="{{ $pctDir }}">{{ $d['total'] }}</div>
                 </div>
                 <div class="bar-val">{{ $d['total'] }}</div>
             </div>
@@ -544,10 +549,11 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
         @php $maxJG = $distribusiJobGrade->max('total') ?: 1; @endphp
         <div class="bar-chart">
             @foreach($distribusiJobGrade->take(8) as $j)
+            @php $pctJG = round(($j['total']/$maxJG)*100); @endphp
             <div class="bar-row">
                 <div class="bar-label">{{ $j['nama'] }}</div>
                 <div class="bar-track">
-                    <div class="bar-fill" style="width:{{ ($j['total']/$maxJG)*100 }}%;background:#7c3aed;">{{ $j['total'] }}</div>
+                    <div class="bar-fill bar-fill-purple" data-pct="{{ $pctJG }}">{{ $j['total'] }}</div>
                 </div>
                 <div class="bar-val">{{ $j['total'] }}</div>
             </div>
@@ -586,11 +592,16 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
         @php $maxUsia=max(array_values($usiaChart))?:1; @endphp
         <div class="bar-chart" style="margin-top:6px;">
             @foreach($usiaChart as $label => $val)
-            @php $colors=['< 30'=>'#06b6d4','30-39'=>'#2563eb','40-49'=>'#7c3aed','50+'=>'#d97706'];$color=$colors[$label]??'#6b7280'; @endphp
+            @php
+                $colors=['< 30'=>'#06b6d4','30-39'=>'#2563eb','40-49'=>'#7c3aed','50+'=>'#d97706'];
+                $usiaColor = $colors[$label] ?? '#6b7280';
+                $pctUsia   = round(($val/$maxUsia)*100);
+            @endphp
             <div class="bar-row">
                 <div class="bar-label">{{ $label }} thn</div>
                 <div class="bar-track">
-                    <div class="bar-fill" style="width:{{ ($val/$maxUsia)*100 }}%;background:{{ $color }};">{{ $val }}</div>
+                    {{-- FIX: width dan background Blade diganti data-pct + data-color --}}
+                    <div class="bar-fill" data-pct="{{ $pctUsia }}" data-color="{{ $usiaColor }}">{{ $val }}</div>
                 </div>
                 <div class="bar-val">{{ $val }}</div>
             </div>
@@ -602,10 +613,11 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
 {{-- PEJABAT --}}
 <div class="sec-title">⭐ Statistik Pejabat</div>
 <div class="pejabat-grid">
-    @foreach([['SVP',$pejabatSVP,'#d97706'],['VP',$pejabatVP,'#1d4ed8'],['SPM',$pejabatSPM,'#7c3aed'],['PM',$pejabatPM,'#15803d'],['PGS',$pgsAktif,'#0891b2'],['PJS',$pjsAktif,'#be185d']] as [$label,$val,$color])
+    @foreach([['SVP',$pejabatSVP,'svp'],['VP',$pejabatVP,'vp'],['SPM',$pejabatSPM,'spm'],['PM',$pejabatPM,'pm'],['PGS',$pgsAktif,'pgs'],['PJS',$pjsAktif,'pjs']] as [$label,$val,$cls])
     <div class="pejabat-mini">
-        <div class="pejabat-num" style="color:{{ $color }};">{{ $val }}</div>
-        <div class="pejabat-label" style="color:{{ $color }};">{{ $label }}</div>
+        {{-- FIX: style Blade diganti class statis per jabatan --}}
+        <div class="pejabat-num pejabat-{{ $cls }}">{{ $val }}</div>
+        <div class="pejabat-label pejabat-{{ $cls }}">{{ $label }}</div>
         <div class="pejabat-sub">Aktif</div>
     </div>
     @endforeach
@@ -645,7 +657,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
                     <td class="center"><span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['aktif'] }}</span></td>
                     <td class="center" style="min-width:90px;">
                         <div style="font-size:10px;color:#6b7280;margin-bottom:2px;">{{ $proporsi }}%</div>
-                        <div class="progress-mini"><div class="progress-mini-fill" style="width:{{ $proporsi }}%;background:#2563eb;"></div></div>
+                        <div class="progress-mini"><div class="progress-mini-fill" data-pct="{{ $proporsi }}" style="background:#2563eb;"></div></div>
                     </td>
                     <td class="center">
                         @if($r['promosi'] > 0)<span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['promosi'] }}</span>
@@ -663,7 +675,7 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
                     <td class="center" style="min-width:80px;">
                         @if($r['assessment'] > 0)
                             <div style="font-size:10px;color:#6b7280;margin-bottom:2px;">{{ $readyRate }}%</div>
-                            <div class="progress-mini"><div class="progress-mini-fill" style="width:{{ $readyRate }}%;background:#16a34a;"></div></div>
+                            <div class="progress-mini"><div class="progress-mini-fill" data-pct="{{ $readyRate }}" style="background:#16a34a;"></div></div>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
                     <td class="center">
@@ -717,9 +729,14 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
         </div>
         <div class="list-card-body">
             @forelse($akanPensiun as $k)
-            @php $usia=\Carbon\Carbon::parse($k->tanggal_lahir)->age;$sisaTahun=56-$usia;$warnaClass=$sisaTahun<=1?'#ef4444':($sisaTahun<=2?'#f59e0b':'#6b7280'); @endphp
+            @php
+                $usia       = \Carbon\Carbon::parse($k->tanggal_lahir)->age;
+                $sisaTahun  = 56 - $usia;
+                $pensiunClass = $sisaTahun <= 1 ? 'pensiun-kritis' : ($sisaTahun <= 2 ? 'pensiun-warn' : 'pensiun-normal');
+            @endphp
             <div class="list-item">
-                <div style="font-size:16px;font-weight:800;color:{{ $warnaClass }};min-width:32px;text-align:center;">{{ $sisaTahun }}th</div>
+                {{-- FIX: style color Blade diganti class statis --}}
+                <div style="font-size:16px;font-weight:800;min-width:32px;text-align:center;" class="{{ $pensiunClass }}">{{ $sisaTahun }}th</div>
                 <div class="list-avatar">
                     @if($k->foto)<img src="{{ Storage::url($k->foto) }}" alt="">
                     @else{{ initials($k->nama) }}@endif
@@ -800,15 +817,45 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
 Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
 Chart.defaults.color = '#6b7280';
 
-const trenData = @json($trenBulan);
+// Baca semua data dari dashMeta data-* (menghindari Blade directive di dalam script)
+var _m              = document.getElementById('dashMeta');
+var trenData        = JSON.parse(_m.dataset.trenBulan);
+var pieData         = JSON.parse(_m.dataset.assessmentChart);
+var kompTren        = JSON.parse(_m.dataset.trenKompetensi);
+var genderL         = parseInt(_m.dataset.genderL);
+var genderP         = parseInt(_m.dataset.genderP);
+var totalQualified  = parseInt(_m.dataset.totalQualified);
+var totalNotQualified = parseInt(_m.dataset.totalNotQualified);
+var soCore          = parseInt(_m.dataset.soCore);
+var soNonCore       = parseInt(_m.dataset.soNonCore);
+
+// Apply semua data-pct (progress bar dan bar-fill)
+document.addEventListener('DOMContentLoaded', function() {
+    // progress-mini-fill: width dari data-pct
+    document.querySelectorAll('.progress-mini-fill[data-pct]').forEach(function(el) {
+        el.style.width = el.dataset.pct + '%';
+    });
+
+    // bar-fill: width dari data-pct, warna dari data-color (usia chart)
+    document.querySelectorAll('.bar-fill[data-pct]').forEach(function(el) {
+        el.style.width = el.dataset.pct + '%';
+        if (el.dataset.color) el.style.background = el.dataset.color;
+    });
+
+    // pie-dot: warna dari data-color
+    document.querySelectorAll('.pie-dot[data-color]').forEach(function(el) {
+        el.style.background = el.dataset.color;
+    });
+});
+
 new Chart(document.getElementById('trenChart'), {
     type: 'bar',
     data: {
-        labels: trenData.map(d => d.bulan),
+        labels: trenData.map(function(d) { return d.bulan; }),
         datasets: [
-            { label:'Promosi', data:trenData.map(d=>d.promosi), backgroundColor:'#16a34a', borderRadius:3 },
-            { label:'Mutasi',  data:trenData.map(d=>d.mutasi),  backgroundColor:'#2563eb', borderRadius:3 },
-            { label:'Demosi',  data:trenData.map(d=>d.demosi),  backgroundColor:'#ef4444', borderRadius:3 },
+            { label:'Promosi', data:trenData.map(function(d){return d.promosi;}), backgroundColor:'#16a34a', borderRadius:3 },
+            { label:'Mutasi',  data:trenData.map(function(d){return d.mutasi;}),  backgroundColor:'#2563eb', borderRadius:3 },
+            { label:'Demosi',  data:trenData.map(function(d){return d.demosi;}),  backgroundColor:'#ef4444', borderRadius:3 },
         ]
     },
     options: {
@@ -824,12 +871,11 @@ new Chart(document.getElementById('trenChart'), {
     }
 });
 
-const pieData = @json($assessmentChart);
 new Chart(document.getElementById('pieChart'), {
     type:'doughnut',
     data: {
-        labels: pieData.map(d=>d.label),
-        datasets:[{ data:pieData.map(d=>d.value), backgroundColor:pieData.map(d=>d.color), borderWidth:2, borderColor:'#fff' }]
+        labels: pieData.map(function(d){return d.label;}),
+        datasets:[{ data:pieData.map(function(d){return d.value;}), backgroundColor:pieData.map(function(d){return d.color;}), borderWidth:2, borderColor:'#fff' }]
     },
     options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
 });
@@ -838,20 +884,18 @@ new Chart(document.getElementById('genderChart'), {
     type:'doughnut',
     data: {
         labels:['Laki-laki','Perempuan'],
-        datasets:[{ data:[{{ $genderChart['L'] }},{{ $genderChart['P'] }}], backgroundColor:['#2563eb','#ec4899'], borderWidth:2, borderColor:'#fff' }]
+        datasets:[{ data:[genderL, genderP], backgroundColor:['#2563eb','#ec4899'], borderWidth:2, borderColor:'#fff' }]
     },
     options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
 });
 
-// Chart Kompetensi — tren QUALIFIED vs NOT QUALIFIED
-const kompTren = @json($trenKompetensi);
 new Chart(document.getElementById('kompChart'), {
     type: 'bar',
     data: {
-        labels: kompTren.map(d => d.bulan),
+        labels: kompTren.map(function(d){return d.bulan;}),
         datasets: [
-            { label:'QUALIFIED',     data:kompTren.map(d=>d.qualified),     backgroundColor:'#15803d', borderRadius:3 },
-            { label:'NOT QUALIFIED', data:kompTren.map(d=>d.not_qualified),  backgroundColor:'#ef4444', borderRadius:3 },
+            { label:'QUALIFIED',     data:kompTren.map(function(d){return d.qualified;}),     backgroundColor:'#15803d', borderRadius:3 },
+            { label:'NOT QUALIFIED', data:kompTren.map(function(d){return d.not_qualified;}),  backgroundColor:'#ef4444', borderRadius:3 },
         ]
     },
     options: {
@@ -872,7 +916,7 @@ new Chart(document.getElementById('kompPieChart'), {
     data: {
         labels:['QUALIFIED','NOT QUALIFIED'],
         datasets:[{
-            data:[{{ $totalQualified }}, {{ $totalNotQualified }}],
+            data:[totalQualified, totalNotQualified],
             backgroundColor:['#15803d','#ef4444'],
             borderWidth:2, borderColor:'#fff'
         }]
@@ -880,13 +924,12 @@ new Chart(document.getElementById('kompPieChart'), {
     options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
 });
 
-// SO Core vs Non Core Pie
 new Chart(document.getElementById('soCorePie'), {
     type: 'doughnut',
     data: {
         labels: ['Core', 'Non Core'],
         datasets: [{
-            data: [{{ $soCore }}, {{ $soNonCore }}],
+            data: [soCore, soNonCore],
             backgroundColor: ['#2563eb', '#7c3aed'],
             borderWidth: 2,
             borderColor: '#fff'
@@ -898,6 +941,5 @@ new Chart(document.getElementById('soCorePie'), {
         plugins: { legend: { display: false } }
     }
 });
-
 </script>
 @endpush

@@ -5,12 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Karyawan;
 use App\Models\UsulanPromosi;
 use App\Models\HistoryAssessment;
+use App\Models\HistoryJabatan;
 use App\Models\TalentPool;
 use App\Models\PenilaianKaryawan;
 use App\Models\KalibrasiKaryawan;
+use App\Models\Jabatan;
+use App\Models\JobGrade;
+use App\Models\PersonGrade;
+use App\Models\KodeStruktur;
+use App\Models\Direktorat;
+use App\Models\Kompartemen;
+use App\Models\Departemen;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UsulanPromosiController extends Controller
 {
@@ -20,8 +29,11 @@ class UsulanPromosiController extends Controller
     {
         $search = $request->search;
 
-        $baseQuery = function($status) use ($search) {
-            $q = UsulanPromosi::with(['karyawan', 'karyawan.departemen', 'karyawan.kompartemen', 'createdBy'])
+        $with = ['karyawan', 'karyawan.departemen', 'karyawan.kompartemen', 'karyawan.direktorat',
+                 'direktoratTujuan', 'kompartemenTujuan', 'departemenTujuan', 'createdBy'];
+
+        $baseQuery = function($status) use ($search, $with) {
+            $q = UsulanPromosi::with($with)
                 ->where('status', $status)
                 ->orderBy('created_at', 'desc');
             if ($search) {
@@ -33,8 +45,8 @@ class UsulanPromosiController extends Controller
             return $q;
         };
 
-        $tanpaSidangQuery = function() use ($search) {
-            $q = UsulanPromosi::with(['karyawan', 'karyawan.departemen', 'karyawan.kompartemen', 'createdBy'])
+        $tanpaSidangQuery = function() use ($search, $with) {
+            $q = UsulanPromosi::with($with)
                 ->where('status', 'lulus')
                 ->where('hasil_sidang', 'tanpa_sidang')
                 ->orderBy('created_at', 'desc');
@@ -69,41 +81,59 @@ class UsulanPromosiController extends Controller
 
         $activeTab = $request->tab ?? 'draft';
 
-        return view('usulan_promosi.index', compact('statusGroups', 'counts', 'activeTab'));
+        // Master data untuk form Terbit SK (dropdown)
+        $jabatans      = Jabatan::orderBy('nama_jabatan')->get();
+        $jobGrades     = JobGrade::orderByRaw('CAST(job_grade AS UNSIGNED)')->get();
+        $personGrades  = PersonGrade::orderByRaw('CAST(person_grade AS UNSIGNED)')->get();
+        $kodeStrukturs = KodeStruktur::all();
+        $direktorats   = Direktorat::all();
+        $kompartemens  = Kompartemen::all();
+        $departemens   = Departemen::all();
+
+        return view('usulan_promosi.index', compact(
+            'statusGroups', 'counts', 'activeTab',
+            'jabatans', 'jobGrades', 'personGrades', 'kodeStrukturs',
+            'direktorats', 'kompartemens', 'departemens'
+        ));
     }
 
     public function create()
     {
-        $karyawans = Karyawan::where('status', 'aktif')->orderBy('nama')->get();
-        return view('usulan_promosi.create', compact('karyawans'));
+        $karyawans    = Karyawan::where('status', 'aktif')->orderBy('nama')->get();
+        $direktorats  = Direktorat::all();
+        $kompartemens = Kompartemen::all();
+        $departemens  = Departemen::all();
+
+        return view('usulan_promosi.create', compact('karyawans', 'direktorats', 'kompartemens', 'departemens'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'karyawan_id'          => 'required|exists:karyawans,id',
-            'jabatan_tujuan'       => 'required|string|max:255',
-            'job_grade_promosi'    => 'nullable|string',
-            'person_grade_promosi' => 'nullable|string',
-            'assessment_id'        => 'nullable|exists:history_assessments,id',
-            'tanggal_usulan'       => 'nullable|date',
-            'absensi'              => 'nullable|string',
-            'kehadiran'            => 'nullable|string',
-            'periode_penilaian'    => 'nullable|string',
-            'tata_kelola'          => 'nullable|string',
-            'mc_tersedia'          => 'nullable|boolean',
-            'hasil_evaluasi'       => 'nullable|string',
-            'catatan'              => 'nullable|string|max:1000',
+            'karyawan_id'           => 'required|exists:karyawans,id',
+            'jabatan_tujuan'        => 'required|string|max:255',
+            'job_grade_promosi'     => 'nullable|string',
+            'person_grade_promosi'  => 'nullable|string',
+            'direktorat_tujuan_id'  => 'nullable|exists:direktorat,id',
+            'kompartemen_tujuan_id' => 'nullable|exists:kompartemen,id',
+            'departemen_tujuan_id'  => 'nullable|exists:departemen,id',
+            'assessment_id'         => 'nullable|exists:history_assessments,id',
+            'tanggal_usulan'        => 'nullable|date',
+            'absensi'               => 'nullable|string',
+            'kehadiran'             => 'nullable|string',
+            'periode_penilaian'     => 'nullable|string',
+            'tata_kelola'           => 'nullable|string',
+            'mc_tersedia'           => 'nullable|boolean',
+            'hasil_evaluasi'        => 'nullable|string',
+            'catatan'               => 'nullable|string|max:1000',
         ]);
 
         $karyawan = Karyawan::with(['jobGrade', 'personGrade', 'departemen', 'kompartemen'])->find($request->karyawan_id);
 
-        // Snapshot MDG
         $mdgBandOk = ($karyawan->mdg_band_bulan ?? 0) >= 36;
         $mdgJgOk   = ($karyawan->mdg_jg_bulan   ?? 0) >= 24;
         $mdgPgOk   = ($karyawan->mdg_pg_bulan   ?? 0) >= 12;
 
-        // Snapshot KPI 3 tahun terakhir
         $tahunIni = now()->year;
         $kpiSnapshot = PenilaianKaryawan::where('karyawan_id', $karyawan->id)
             ->where('tipe', 'KPI')
@@ -112,19 +142,16 @@ class UsulanPromosiController extends Controller
             ->get(['tahun', 'periode', 'judul', 'nilai'])
             ->toArray();
 
-        // Snapshot Kalibrasi 2 tahun terakhir
         $kalibrasiSnapshot = KalibrasiKaryawan::where('karyawan_id', $karyawan->id)
             ->whereIn('tahun', [$tahunIni, $tahunIni - 1, $tahunIni - 2])
             ->orderBy('tahun', 'desc')
             ->get(['tahun', 'nilai', 'keterangan'])
             ->toArray();
 
-        // Snapshot Talent Pool tahun lalu
         $talentPool = TalentPool::where('karyawan_id', $karyawan->id)
             ->where('periode', $tahunIni - 1)
             ->first();
 
-        // Snapshot assessment
         $assessment = null;
         $hasilAssessment = null;
         $tanggalBerlaku  = null;
@@ -148,6 +175,9 @@ class UsulanPromosiController extends Controller
             'jabatan_tujuan'            => $request->jabatan_tujuan,
             'job_grade_promosi'         => $request->job_grade_promosi,
             'person_grade_promosi'      => $request->person_grade_promosi,
+            'direktorat_tujuan_id'      => $request->direktorat_tujuan_id,
+            'kompartemen_tujuan_id'     => $request->kompartemen_tujuan_id,
+            'departemen_tujuan_id'      => $request->departemen_tujuan_id,
             'assessment_id'             => $request->assessment_id,
             'hasil_assessment'          => $hasilAssessment,
             'tanggal_berlaku_assessment' => $tanggalBerlaku,
@@ -181,7 +211,8 @@ class UsulanPromosiController extends Controller
 
     public function show(UsulanPromosi $usulanPromosi)
     {
-        $usulanPromosi->load(['karyawan', 'assessment', 'talentPool']);
+        $usulanPromosi->load(['karyawan', 'assessment', 'talentPool',
+            'direktoratTujuan', 'kompartemenTujuan', 'departemenTujuan']);
         return view('usulan_promosi.show', compact('usulanPromosi'));
     }
 
@@ -206,10 +237,102 @@ class UsulanPromosiController extends Controller
         ]);
 
         $this->log('edit', 'Usulan Promosi', $usulanPromosi->karyawan->nama,
-            $statusLama . ' → ' . $usulanPromosi->status_label);
+            $statusLama . ' -> ' . $usulanPromosi->status_label);
 
         return redirect()->route('usulan_promosi.show', $usulanPromosi)
             ->with('success', 'Status usulan berhasil diperbarui!');
+    }
+
+    /**
+     * Terbitkan SK untuk usulan yang sudah LULUS.
+     * Unit (direktorat/kompartemen/departemen) diambil dari form (default = unit tujuan usulan),
+     * jadi promosi yang memindahkan unit ikut tercatat dengan benar.
+     */
+    public function terbitkanSk(Request $request, UsulanPromosi $usulanPromosi)
+    {
+        $request->validate([
+            'no_sk'            => 'required|string|max:255',
+            'tmt'              => 'required|date',
+            'jabatan_id'       => 'required|exists:jabatan,id',
+            'job_grade_id'     => 'required|exists:job_grade,id',
+            'person_grade_id'  => 'required|exists:person_grade,id',
+            'kode_struktur_id' => 'required|exists:kode_struktur,id',
+            'direktorat_id'    => 'required|exists:direktorat,id',
+            'kompartemen_id'   => 'required|exists:kompartemen,id',
+            'departemen_id'    => 'required|exists:departemen,id',
+            'keterangan'       => 'nullable|string|max:1000',
+        ]);
+
+        if ($usulanPromosi->status !== 'lulus') {
+            return back()->with('error', 'SK hanya bisa diterbitkan untuk usulan berstatus Lulus.');
+        }
+        if ($usulanPromosi->sk_diproses) {
+            return back()->with('error', 'SK untuk usulan ini sudah pernah diterbitkan.');
+        }
+
+        $karyawan    = Karyawan::findOrFail($usulanPromosi->karyawan_id);
+        $jabatanBaru = Jabatan::find($request->jabatan_id);
+        $namaJabatan = $jabatanBaru->nama_jabatan ?? $usulanPromosi->jabatan_tujuan;
+        $tmt         = $request->tmt;
+
+        DB::transaction(function () use ($request, $usulanPromosi, $karyawan, $namaJabatan, $tmt) {
+
+            HistoryJabatan::where('karyawan_id', $karyawan->id)
+                ->where('is_current', true)
+                ->update([
+                    'is_current'      => false,
+                    'tanggal_selesai' => $tmt,
+                ]);
+
+            HistoryJabatan::create([
+                'karyawan_id'      => $karyawan->id,
+                'jabatan_id'       => $request->jabatan_id,
+                'jabatan_saat_ini' => $namaJabatan,
+                'direktorat_id'    => $request->direktorat_id,
+                'kompartemen_id'   => $request->kompartemen_id,
+                'departemen_id'    => $request->departemen_id,
+                'job_grade_id'     => $request->job_grade_id,
+                'person_grade_id'  => $request->person_grade_id,
+                'kode_struktur_id' => $request->kode_struktur_id,
+                'tanggal_mulai'    => $tmt,
+                'tanggal_selesai'  => null,
+                'tipe'             => 'promosi',
+                'keterangan'       => $request->keterangan ?: ('Promosi via usulan. No. SK: ' . $request->no_sk),
+                'no_sk'            => $request->no_sk,
+                'tanggal_sk'       => $tmt,
+                'is_current'       => true,
+            ]);
+
+            $update = [
+                'jabatan_id'       => $request->jabatan_id,
+                'jabatan_saat_ini' => $namaJabatan,
+                'kode_struktur_id' => $request->kode_struktur_id,
+                'direktorat_id'    => $request->direktorat_id,
+                'kompartemen_id'   => $request->kompartemen_id,
+                'departemen_id'    => $request->departemen_id,
+            ];
+            if ((int) $karyawan->job_grade_id !== (int) $request->job_grade_id) {
+                $update['job_grade_id']     = $request->job_grade_id;
+                $update['tanggal_mulai_jg'] = $tmt;
+            }
+            if ((int) $karyawan->person_grade_id !== (int) $request->person_grade_id) {
+                $update['person_grade_id']  = $request->person_grade_id;
+                $update['tanggal_mulai_pg'] = $tmt;
+            }
+            $karyawan->update($update);
+
+            $usulanPromosi->update([
+                'no_sk'       => $request->no_sk,
+                'tmt'         => $tmt,
+                'sk_diproses' => true,
+            ]);
+        });
+
+        $this->log('edit', 'Usulan Promosi', $karyawan->nama,
+            'Terbit SK ' . $request->no_sk . ' -> ' . $namaJabatan . ' (TMT ' . $tmt . ')');
+
+        return redirect()->route('usulan_promosi.index', ['tab' => 'lulus'])
+            ->with('success', 'SK berhasil diterbitkan. Riwayat jabatan & posisi karyawan diperbarui!');
     }
 
     public function destroy(UsulanPromosi $usulanPromosi)
@@ -223,7 +346,6 @@ class UsulanPromosiController extends Controller
             ->with('success', 'Usulan promosi berhasil dihapus!');
     }
 
-    // AJAX: ambil data karyawan + assessment list
     public function getKaryawanData(Request $request)
     {
         $karyawan = Karyawan::with(['jobGrade', 'personGrade', 'jabatan'])
@@ -234,6 +356,7 @@ class UsulanPromosiController extends Controller
             ->where('status', 'aktif')
             ->limit(10)
             ->get(['id', 'nik', 'nama', 'jabatan_saat_ini', 'job_grade_id', 'person_grade_id',
+                   'direktorat_id', 'kompartemen_id', 'departemen_id',
                    'struktural_fungsional', 'tanggal_mulai_jg', 'tanggal_mulai_pg']);
 
         return response()->json($karyawan->map(fn($k) => [
@@ -245,6 +368,9 @@ class UsulanPromosiController extends Controller
             'person_grade'          => $k->personGrade->person_grade ?? '-',
             'band'                  => $k->band,
             'struktural_fungsional' => $k->struktural_fungsional ?? '-',
+            'direktorat_id'         => $k->direktorat_id,
+            'kompartemen_id'        => $k->kompartemen_id,
+            'departemen_id'         => $k->departemen_id,
             'mdg_jg_bulan'          => $k->mdg_jg_bulan,
             'mdg_pg_bulan'          => $k->mdg_pg_bulan,
             'mdg_band_bulan'        => $k->mdg_band_bulan,
@@ -268,7 +394,6 @@ class UsulanPromosiController extends Controller
         ]));
     }
 
-    // API: talent pool + KPI + kalibrasi preview
     public function getTalentKpiPreview(Request $request)
     {
         $karyawan  = Karyawan::find($request->karyawan_id);

@@ -12,7 +12,6 @@
     .page-title { font-size:20px;font-weight:700;color:#111827;margin-bottom:4px; }
     .page-sub { font-size:13px;color:#6b7280;margin-bottom:20px; }
 
-    /* TYPE SELECTOR */
     .type-selector { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px; }
     .type-card { background:white;border:2px solid #e5e7eb;border-radius:14px;padding:18px 20px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden; }
     .type-card:hover { border-color:#c4b5fd; }
@@ -36,7 +35,7 @@
     .template-info { display:flex;align-items:center;gap:10px; }
     .template-name { font-size:13px;font-weight:700;color:#111827; }
     .template-desc { font-size:11px;color:#6b7280;margin-top:2px; }
-    .btn-download-tpl { display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background 0.15s; }
+    .btn-download-tpl { display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background 0.15s;border:none;cursor:pointer;font-family:inherit; }
     .btn-download-tpl:hover { background:#6d28d9; }
 
     .kolom-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px; }
@@ -80,6 +79,7 @@
     .toast { display:flex;align-items:center;gap:10px;background:white;border-left:4px solid #ef4444;border:1px solid #fecaca;border-radius:12px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#dc2626;font-weight:500;min-width:260px;pointer-events:all;animation:toastIn 0.35s forwards; }
     .toast-close { border:none;background:transparent;color:#9ca3af;cursor:pointer;font-size:18px;padding:0;margin-left:auto; }
     @keyframes toastIn { from{opacity:0;transform:translateX(110%);}to{opacity:1;transform:translateX(0);} }
+    @keyframes spin { to{transform:rotate(360deg)} }
 
     @media (max-width:640px) {
         .type-selector { grid-template-columns:1fr; }
@@ -101,6 +101,14 @@
 </div>
 @endif
 
+{{-- FIX: route di data-* agar tidak ada Blade di dalam script --}}
+<div id="importMeta"
+    data-route-rekom="{{ route('history_assessment_all.import.store') }}"
+    data-route-komp="{{ route('history_assessment_all.import.store.kompetensi') }}"
+    data-tpl-rekom="{{ route('history_assessment_all.import.template') }}"
+    data-tpl-komp="{{ route('history_assessment_all.import.template.kompetensi') }}"
+    style="display:none"></div>
+
 <a href="{{ route('history_assessment_all.index') }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Kembali ke History Assessment
@@ -109,7 +117,7 @@
 <div class="page-title">📥 Import Data Assessment</div>
 <div class="page-sub">Pilih jenis assessment yang ingin diimport, lalu upload file Excel</div>
 
-{{-- ===== STEP 0: PILIH JENIS ===== --}}
+{{-- STEP 1: PILIH JENIS --}}
 <div class="step-card">
     <div class="step-header" style="margin-bottom:12px;">
         <div class="step-num">1</div>
@@ -119,14 +127,14 @@
         </div>
     </div>
     <div class="type-selector">
-        <label class="type-card selected" id="cardRekom" onclick="selectType('rekom')">
+        <label class="type-card selected" id="cardRekom" data-type="rekom" onclick="selectType(this.dataset.type)">
             <input type="radio" name="jenis" value="rekom" checked>
             <div class="type-icon">📋</div>
             <div class="type-title">Assessment Rekomendasi</div>
             <div class="type-desc">Data hasil penilaian kesiapan karyawan: Ready, Ready with Development, atau Not Ready.</div>
             <span class="type-badge rekom">Rek. Inti · Primer · Sekunder · Final</span>
         </label>
-        <label class="type-card" id="cardKomp" onclick="selectType('komp')">
+        <label class="type-card" id="cardKomp" data-type="komp" onclick="selectType(this.dataset.type)">
             <input type="radio" name="jenis" value="komp">
             <div class="type-icon">⭐</div>
             <div class="type-title">Assessment Kompetensi</div>
@@ -136,7 +144,7 @@
     </div>
 </div>
 
-{{-- ===== STEP 2: TEMPLATE ===== --}}
+{{-- STEP 2: TEMPLATE --}}
 <div class="step-card">
     <div class="step-header">
         <div class="step-num">2</div>
@@ -156,7 +164,10 @@
                     <div class="template-desc">Template dengan contoh data Assessment Rekomendasi</div>
                 </div>
             </div>
-            <button type="button" class="btn-download-tpl" onclick="triggerDownload('{{ route('history_assessment_all.import.template') }}')">
+            {{-- FIX: onclick Blade diganti data-url + this.dataset.url --}}
+            <button type="button" class="btn-download-tpl"
+                data-url="{{ route('history_assessment_all.import.template') }}"
+                onclick="triggerDownload(this.dataset.url)">
                 ⬇ Download Template
             </button>
         </div>
@@ -224,7 +235,10 @@
                     <div class="template-desc">Template dengan semua kolom Kompetensi Perilaku dan Qualification</div>
                 </div>
             </div>
-            <button type="button" class="btn-download-tpl" onclick="triggerDownload('{{ route('history_assessment_all.import.template.kompetensi') }}')">
+            {{-- FIX: onclick Blade diganti data-url + this.dataset.url --}}
+            <button type="button" class="btn-download-tpl"
+                data-url="{{ route('history_assessment_all.import.template.kompetensi') }}"
+                onclick="triggerDownload(this.dataset.url)">
                 ⬇ Download Template
             </button>
         </div>
@@ -270,7 +284,7 @@
     </div>
 </div>
 
-{{-- ===== STEP 3: UPLOAD ===== --}}
+{{-- STEP 3: UPLOAD --}}
 <div class="step-card">
     <div class="step-header">
         <div class="step-num">3</div>
@@ -342,34 +356,32 @@
 
 @push('scripts')
 <script>
+// Baca route dari data-* agar tidak ada Blade di dalam script
+var _meta       = document.getElementById('importMeta');
+var routeRekom  = _meta.dataset.routeRekom;
+var routeKomp   = _meta.dataset.routeKomp;
+
 var currentType = 'rekom';
 
 function selectType(type) {
     currentType = type;
     document.getElementById('inputJenis').value = type;
 
-    // Update card UI
     document.getElementById('cardRekom').classList.toggle('selected', type === 'rekom');
     document.getElementById('cardKomp').classList.toggle('selected',  type === 'komp');
 
-    // Toggle template info
     document.getElementById('tplRekom').style.display = type === 'rekom' ? 'block' : 'none';
     document.getElementById('tplKomp').style.display  = type === 'komp'  ? 'block' : 'none';
 
-    // Update form action
-    var routeRekom = '{{ route("history_assessment_all.import.store") }}';
-    var routeKomp  = '{{ route("history_assessment_all.import.store.kompetensi") }}';
+    // FIX: route dibaca dari _meta, bukan dari Blade di dalam script
     document.getElementById('importForm').action = type === 'rekom' ? routeRekom : routeKomp;
 
-    // Update tombol import
-    var btnText = type === 'rekom'
+    var btn = document.getElementById('btnImport');
+    btn.innerHTML = type === 'rekom'
         ? '📥 Import Assessment Rekomendasi'
         : '📥 Import Assessment Kompetensi';
-    var btn = document.getElementById('btnImport');
-    btn.innerHTML = btnText;
     btn.disabled = !document.getElementById('fileInput').files.length;
 
-    // Update warning
     if (type === 'komp') {
         document.getElementById('warningText').innerHTML =
             '<strong>Perhatian:</strong> NIK tidak ditemukan akan dilewati. Nilai kompetensi harus <strong>1–4</strong> (integer). Kesimpulan QUALIFIED/NOT QUALIFIED dihitung otomatis oleh sistem.';
@@ -382,7 +394,6 @@ function selectType(type) {
         document.getElementById('info2').innerHTML = '<span style="color:#15803d;font-weight:700;">✓</span> Tgl Exp IDP otomatis +2 tahun';
     }
 
-    // Reset file
     removeFile();
 }
 
@@ -405,7 +416,6 @@ function removeFile() {
     document.getElementById('btnImport').disabled = true;
 }
 
-// Drag & drop
 var dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
@@ -418,39 +428,29 @@ dropZone.addEventListener('drop', function(e) {
     }
 });
 
-// Submit loading
 document.getElementById('importForm').addEventListener('submit', function() {
     var btn = document.getElementById('btnImport');
     btn.disabled = true;
     btn.innerHTML = '⏳ Mengimport...';
 });
 
-// ===== DOWNLOAD TEMPLATE (tanpa trigger spinner halaman) =====
 function triggerDownload(url) {
-    // Tampil toast download
     var toast = document.getElementById('downloadToast');
     toast.style.display = 'flex';
-
-    // Trigger lewat iframe tersembunyi — halaman tidak navigasi
-    var iframe = document.getElementById('downloadFrame');
-    iframe.src = url;
-
-    // Sembunyikan toast setelah 4 detik
+    document.getElementById('downloadFrame').src = url;
     setTimeout(function() {
         toast.style.opacity = '0';
         setTimeout(function() {
             toast.style.display = 'none';
             toast.style.opacity = '1';
-            iframe.src = 'about:blank';
+            document.getElementById('downloadFrame').src = 'about:blank';
         }, 400);
     }, 4000);
 }
 </script>
 
-{{-- Hidden iframe untuk download tanpa navigasi --}}
 <iframe id="downloadFrame" src="about:blank" style="display:none;"></iframe>
 
-{{-- Toast notif download --}}
 <div id="downloadToast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;
     background:white;border:1px solid #ddd6fe;border-left:4px solid #7c3aed;border-radius:12px;
     padding:12px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);

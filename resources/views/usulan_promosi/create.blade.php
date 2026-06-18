@@ -166,7 +166,7 @@
             </div>
             <div>
                 <div class="section-title">Usulan Promosi</div>
-                <div class="section-sub">Jabatan dan grade yang diusulkan</div>
+                <div class="section-sub">Jabatan, grade, dan unit yang diusulkan</div>
             </div>
         </div>
 
@@ -188,7 +188,44 @@
                 <input type="text" name="person_grade_promosi" value="{{ old('person_grade_promosi') }}"
                     class="form-input" placeholder="cth: 16" />
             </div>
+
+            {{-- ==== UNIT TUJUAN ==== --}}
+            <div class="form-group full">
+                <label class="form-label">Direktorat Tujuan</label>
+                <div class="select-wrap">
+                    <select name="direktorat_tujuan_id" id="dirTujuan" class="form-input">
+                        <option value="">— Pilih Direktorat —</option>
+                        @foreach($direktorats as $d)
+                        <option value="{{ $d->id }}" {{ old('direktorat_tujuan_id')==$d->id ? 'selected' : '' }}>{{ $d->nama_direktorat ?? $d->nama ?? ('#'.$d->id) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-hint">Default mengikuti unit karyawan. Ubah jika promosi memindahkan unit.</div>
+            </div>
             <div class="form-group">
+                <label class="form-label">Kompartemen Tujuan</label>
+                <div class="select-wrap">
+                    <select name="kompartemen_tujuan_id" id="kompTujuan" class="form-input">
+                        <option value="">— Pilih Kompartemen —</option>
+                        @foreach($kompartemens as $kp)
+                        <option value="{{ $kp->id }}" {{ old('kompartemen_tujuan_id')==$kp->id ? 'selected' : '' }}>{{ $kp->nama_kompartemen ?? ('#'.$kp->id) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Departemen Tujuan</label>
+                <div class="select-wrap">
+                    <select name="departemen_tujuan_id" id="deptTujuan" class="form-input">
+                        <option value="">— Pilih Departemen —</option>
+                        @foreach($departemens as $dp)
+                        <option value="{{ $dp->id }}" {{ old('departemen_tujuan_id')==$dp->id ? 'selected' : '' }}>{{ $dp->nama_departemen ?? ('#'.$dp->id) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group full">
                 <label class="form-label">Tanggal Usulan</label>
                 <input type="date" name="tanggal_usulan" value="{{ old('tanggal_usulan', now()->format('Y-m-d')) }}"
                     class="form-input" />
@@ -368,11 +405,18 @@ function selectKaryawan(k) {
     // Update info box
     document.getElementById('karyawanNama').textContent = k.nama;
     document.getElementById('karyawanJabatan').textContent = k.jabatan_saat_ini ?? '-';
-    document.getElementById('karyawanInitial').textContent = k.nama.substring(0, 2).toUpperCase();
+    document.getElementById('karyawanInitial').textContent = (typeof initials === 'function')
+        ? initials(k.nama) : k.nama.substring(0, 2).toUpperCase();
     document.getElementById('infoJG').textContent = 'JG ' + k.job_grade;
     document.getElementById('infoPG').textContent = 'PG ' + k.person_grade;
     document.getElementById('infoBand').textContent = k.band;
     document.getElementById('infoStruk').textContent = k.struktural_fungsional ?? '-';
+
+    // Default unit tujuan = unit karyawan saat ini (bisa diubah jika pindah unit)
+    const setSel = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val ?? '') === null ? '' : (val ?? ''); };
+    setSel('dirTujuan',  k.direktorat_id);
+    setSel('kompTujuan', k.kompartemen_id);
+    setSel('deptTujuan', k.departemen_id);
 
     // MDG check
     const mdgHtml = [
@@ -383,9 +427,7 @@ function selectKaryawan(k) {
     document.getElementById('infoMDG').innerHTML = mdgHtml;
     document.getElementById('karyawanInfoBox').classList.add('show');
 
-    // Load assessments
     loadAssessments(k.id);
-    // Load talent/kpi preview
     loadTalentKpi(k.id);
 }
 
@@ -442,7 +484,6 @@ function loadTalentKpi(karyawanId) {
             const el = document.getElementById('talentKpiPreview');
             let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
 
-            // Talent Pool
             html += '<div><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">Talent Pool Tahun Lalu</div>';
             if (data.talent_pool) {
                 const klasBg = data.talent_pool.klasifikasi === 'shortlist' ? '#dcfce7' : '#dbeafe';
@@ -456,8 +497,7 @@ function loadTalentKpi(karyawanId) {
             }
             html += '</div>';
 
-            // KPI
-            html += '<div><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">KPI 3 Tahun Terakhir</div>';
+            html += '<div><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">KPI 4 Tahun Terakhir</div>';
             if (data.kpi && data.kpi.length) {
                 html += '<div style="display:flex;flex-direction:column;gap:6px">' +
                     data.kpi.map(k => `<div style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center">
@@ -469,8 +509,7 @@ function loadTalentKpi(karyawanId) {
             }
             html += '</div>';
 
-            // Kalibrasi
-            html += '</div><div style="margin-top:14px"><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">Kalibrasi 2 Tahun Terakhir</div>';
+            html += '</div><div style="margin-top:14px"><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">Kalibrasi 3 Tahun Terakhir</div>';
             if (data.kalibrasi && data.kalibrasi.length) {
                 const colorMap = { FEE:'#15803d', EXE:'#1d4ed8', MEE:'#374151', BEE:'#d97706', FBE:'#dc2626' };
                 const bgMap    = { FEE:'#dcfce7', EXE:'#dbeafe', MEE:'#f3f4f6', BEE:'#fef3c7', FBE:'#fee2e2' };
