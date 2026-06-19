@@ -36,6 +36,8 @@
         html.sidebar-collapsed .sidebar .user-info { display: none; }
         html.sidebar-collapsed .sidebar .nav-link { justify-content: center; padding: 10px; }
         html.sidebar-collapsed .sidebar .nav-link svg { margin: 0; }
+        html.sidebar-collapsed .sidebar .toggle-chevron { display: none; }
+        html.sidebar-collapsed .sidebar .master-sub { display: none; }
         html.sidebar-collapsed .sidebar .user-row { justify-content: center; padding: 8px; }
         html.sidebar-collapsed .sidebar .brand-row { justify-content: center; }
         html.sidebar-collapsed .sidebar .brand-icon { margin: 0; }
@@ -50,7 +52,10 @@
             html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
             html.sidebar-collapsed .sidebar .nav-section-label, html.sidebar-collapsed .sidebar .nav-text,
             html.sidebar-collapsed .sidebar .user-info { display: block; }
+            html.sidebar-collapsed .sidebar .toggle-chevron { display: block; }
+            html.sidebar-collapsed .sidebar .master-sub.open { display: block; }
             html.sidebar-collapsed .sidebar .nav-link { justify-content: flex-start; padding: 8px 10px; }
+            html.sidebar-collapsed .sidebar .master-sub .nav-link { padding-left: 32px; }
             html.sidebar-collapsed .sidebar .user-row { justify-content: flex-start; padding: 10px; }
             html.sidebar-collapsed .sidebar .brand-row { justify-content: flex-start; }
             html.sidebar-collapsed .sidebar .logout-btn { justify-content: flex-start; padding: 8px 10px; }
@@ -86,7 +91,7 @@
         .master-toggle .toggle-chevron { width: 12px; height: 12px; margin-left: auto; flex-shrink: 0; transition: transform 0.2s; stroke: currentColor; fill: none; }
         .master-toggle.open .toggle-chevron { transform: rotate(180deg); }
         .master-sub { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
-        .master-sub.open { max-height: 400px; }
+        .master-sub.open { max-height: 520px; }
         .master-sub .nav-link { padding-left: 32px; font-size: 12px; color: #6b7280; }
         .master-sub .nav-link.active { padding-left: 29px; }
 
@@ -224,47 +229,68 @@
         <div class="nav-sep"></div>
 
         <div class="nav-group">
-            <div class="nav-section-label">Data Karyawan</div>
-            <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span class="nav-text">Profil Karyawan</span>
-            </a>
-            <a href="{{ route('history_karyawan.index') }}" data-tooltip="Riwayat Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="nav-text">Riwayat Jabatan</span>
-            </a>
-            <a href="{{ route('struktur-organisasi.index') }}" data-tooltip="Struktur Organisasi" class="nav-link {{ request()->routeIs('struktur-organisasi.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
-                <span class="nav-text">Struktur Organisasi</span>
-            </a>
-            <a href="{{ route('talent_pool.index') }}" data-tooltip="Data Talent" class="nav-link {{ request()->routeIs('talent_pool.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                <span class="nav-text">Data Talent</span>
-            </a>
-            <a href="{{ route('usulan_promosi.index') }}" data-tooltip="Usulan Promosi" class="nav-link {{ request()->routeIs('usulan_promosi.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="18 15 12 9 6 15"/><path d="M12 9v12"/><path d="M4 6h16"/></svg>
-                <span class="nav-text">Usulan Promosi</span>
-            </a>
-        </div>
+            <div class="nav-section-label">Menu Utama</div>
 
-        <div class="nav-sep"></div>
-
-        <div class="nav-group">
-            <div class="nav-section-label">Kepejabatan</div>
-            <a href="{{ route('history_pejabat.index') }}" data-tooltip="Pejabat Definitif" class="nav-link {{ request()->routeIs('history_pejabat.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                <span class="nav-text">Pejabat Definitif</span>
-            </a>
-            <a href="{{ route('pgs_pjs.index') }}" data-tooltip="PGS & PJS" class="nav-link {{ request()->routeIs('pgs_pjs.*') ? 'active' : '' }}">
+            {{-- Data Karyawan (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span class="nav-text">PGS & PJS</span>
-            </a>
-        </div>
+                <span class="nav-text">Data Karyawan</span>
+                <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="master-sub {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*') ? 'open' : '' }}">
+                <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span class="nav-text">Profil Karyawan</span>
+                </a>
+                <a href="{{ route('history_karyawan.index') }}" data-tooltip="Riwayat Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span class="nav-text">Riwayat Jabatan</span>
+                </a>
+                <a href="{{ route('struktur-organisasi.index') }}" data-tooltip="Struktur Organisasi" class="nav-link {{ request()->routeIs('struktur-organisasi.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
+                    <span class="nav-text">Struktur Organisasi</span>
+                </a>
+            </div>
 
-        <div class="nav-sep"></div>
+            {{-- Manajemen Talenta (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*') ? 'active open' : '' }}" data-tooltip="Manajemen Talenta" onclick="toggleMaster(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                <span class="nav-text">Manajemen Talenta</span>
+                <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="master-sub {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*') ? 'open' : '' }}">
+                <a href="{{ route('talent_pool.index') }}" data-tooltip="Data Talent" class="nav-link {{ request()->routeIs('talent_pool.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span class="nav-text">Data Talent</span>
+                </a>
+                <a href="{{ route('usulan_promosi.index') }}" data-tooltip="Usulan Promosi" class="nav-link {{ request()->routeIs('usulan_promosi.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="18 15 12 9 6 15"/><path d="M12 9v12"/><path d="M4 6h16"/></svg>
+                    <span class="nav-text">Usulan Promosi</span>
+                </a>
+                <a href="{{ route('usulan_mutasi.index') }}" data-tooltip="Rotasi & Mutasi" class="nav-link {{ request()->routeIs('usulan_mutasi.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg>
+                    <span class="nav-text">Rotasi &amp; Mutasi</span>
+                </a>
+            </div>
 
-        <div class="nav-group">
-            <div class="nav-section-label">Assessment</div>
+            {{-- Kepejabatan (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'active open' : '' }}" data-tooltip="Kepejabatan" onclick="toggleMaster(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <span class="nav-text">Kepejabatan</span>
+                <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="master-sub {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'open' : '' }}">
+                <a href="{{ route('history_pejabat.index') }}" data-tooltip="Pejabat Definitif" class="nav-link {{ request()->routeIs('history_pejabat.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span class="nav-text">Pejabat Definitif</span>
+                </a>
+                <a href="{{ route('pgs_pjs.index') }}" data-tooltip="PGS & PJS" class="nav-link {{ request()->routeIs('pgs_pjs.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span class="nav-text">PGS & PJS</span>
+                </a>
+            </div>
+
+            {{-- Assessment (link langsung) --}}
             <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 <span class="nav-text">History Assessment</span>
@@ -274,26 +300,30 @@
         <div class="nav-sep"></div>
 
         <div class="nav-group">
-            <div class="nav-section-label">Layanan</div>
-            <a href="{{ route('surat_penting.index') }}" data-tooltip="Surat Penting" class="nav-link {{ request()->routeIs('surat_penting.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <span class="nav-text">Surat Penting</span>
-            </a>
-            <a href="https://luthvyilhamdi.github.io/idp-dashboard/" target="_blank" rel="noopener noreferrer" data-tooltip="Progress IDP" class="nav-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                <span class="nav-text">Progress IDP</span>
-            </a>
-            <a href="{{ route('faq') }}" data-tooltip="FAQ" class="nav-link {{ request()->routeIs('faq') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <span class="nav-text">FAQ & Panduan</span>
-            </a>
-        </div>
+            <div class="nav-section-label">Layanan & Laporan</div>
 
-        <div class="nav-sep"></div>
+            {{-- Layanan (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('surat_penting.*','faq') ? 'active open' : '' }}" data-tooltip="Layanan" onclick="toggleMaster(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                <span class="nav-text">Layanan</span>
+                <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="master-sub {{ request()->routeIs('surat_penting.*','faq') ? 'open' : '' }}">
+                <a href="{{ route('surat_penting.index') }}" data-tooltip="Surat Penting" class="nav-link {{ request()->routeIs('surat_penting.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span class="nav-text">Surat Penting</span>
+                </a>
+                <a href="https://luthvyilhamdi.github.io/idp-dashboard/" target="_blank" rel="noopener noreferrer" data-tooltip="Progress IDP" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span class="nav-text">Progress IDP</span>
+                </a>
+                <a href="{{ route('faq') }}" data-tooltip="FAQ" class="nav-link {{ request()->routeIs('faq') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span class="nav-text">FAQ & Panduan</span>
+                </a>
+            </div>
 
-        {{-- LAPORAN --}}
-        <div class="nav-group">
-            <div class="nav-section-label">Laporan</div>
+            {{-- Laporan (link langsung) --}}
             <a href="{{ route('laporan.bulanan') }}" data-tooltip="Laporan Bulanan" class="nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 <span class="nav-text">Laporan Bulanan</span>
@@ -314,7 +344,7 @@
                 <span class="nav-text">Manajemen Akun</span>
             </a>
 
-            <div class="nav-link master-toggle {{ request()->routeIs('master.*') ? 'active open' : '' }}" onclick="toggleMaster(this)">
+            <div class="nav-link master-toggle {{ request()->routeIs('master.*') ? 'active open' : '' }}" data-tooltip="Master Data" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
                 <span class="nav-text">Master Data</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -438,9 +468,17 @@
         if (!isMobile()) { sidebar.classList.remove('mobile-open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
     });
 
+    // Accordion eksklusif: buka satu grup -> grup lain otomatis tertutup
     function toggleMaster(el) {
-        el.classList.toggle('open');
-        el.nextElementSibling.classList.toggle('open');
+        const willOpen = !el.classList.contains('open');
+        document.querySelectorAll('.sidebar-nav .master-toggle.open').forEach(t => {
+            t.classList.remove('open');
+            if (t.nextElementSibling) t.nextElementSibling.classList.remove('open');
+        });
+        if (willOpen) {
+            el.classList.add('open');
+            if (el.nextElementSibling) el.nextElementSibling.classList.add('open');
+        }
     }
 
     function toggleUserDropdown() { document.getElementById('userDropdownWrap').classList.toggle('open'); }

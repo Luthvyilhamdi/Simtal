@@ -28,6 +28,7 @@ use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\PenilaianKaryawanController;
 use App\Http\Controllers\KalibrasiKaryawanController;
 use App\Http\Controllers\UsulanPromosiController;
+use App\Http\Controllers\UsulanMutasiController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -212,6 +213,13 @@ Route::middleware('auth')->group(function () {
         Route::get('api/usulan-promosi/assessments',[UsulanPromosiController::class, 'getAssessments'])->name('usulan_promosi.assessments');
         Route::get('api/karyawan/{karyawan_id}/talent-kpi-preview',[UsulanPromosiController::class, 'getTalentKpiPreview'])->name('usulan_promosi.talent_kpi_preview');
 
+        Route::prefix('usulan-mutasi')->name('usulan_mutasi.')->group(function () {
+            Route::get('/',                             [UsulanMutasiController::class, 'index'])->name('index');
+            Route::get('/create',                       [UsulanMutasiController::class, 'create'])->name('create');
+            Route::post('/',                            [UsulanMutasiController::class, 'store'])->name('store');
+            Route::patch('/{usulanMutasi}/terbitkan-sk',[UsulanMutasiController::class, 'terbitkanSk'])->name('terbitkan_sk');
+            Route::delete('/{usulanMutasi}',            [UsulanMutasiController::class, 'destroy'])->name('destroy');
+        });
         // API AJAX
         Route::get('api/karyawan/{id}/detail',  [StrukturOrganisasiController::class, 'getKaryawanData'])->name('api.karyawan.detail');
         Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
