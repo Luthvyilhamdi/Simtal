@@ -234,7 +234,7 @@
             {{-- Data Karyawan (accordion) --}}
             <div class="nav-link master-toggle {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span class="nav-text">Data Karyawan</span>
+                <span class="nav-text">Data</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*') ? 'open' : '' }}">
