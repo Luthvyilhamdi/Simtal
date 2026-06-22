@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\HistoryJabatan;
-use App\Models\HistoryPejabat;
 use App\Models\Jabatan;
 use App\Models\Direktorat;
 use App\Models\Kompartemen;
@@ -71,14 +70,6 @@ class HistoryJabatanController extends Controller
             $jgLama = $karyawan->job_grade_id;
             $pgLama = $karyawan->person_grade_id;
 
-            $historyLama = HistoryJabatan::where('karyawan_id', $karyawan->id)
-                ->where('is_current', true)
-                ->first();
-
-            $jabatanLamaModel = $historyLama
-                ? Jabatan::find($historyLama->jabatan_id)
-                : null;
-
             // Tutup history lama
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
@@ -88,7 +79,8 @@ class HistoryJabatanController extends Controller
                 ]);
 
             // Buat history baru
-            $historyBaru = HistoryJabatan::create([
+            // (Sinkronisasi ke Pejabat Definitif ditangani otomatis oleh event model HistoryJabatan)
+            HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,
                 'jabatan_id'       => $request->jabatan_id,
                 'jabatan_saat_ini' => $request->jabatan_saat_ini,
@@ -130,35 +122,6 @@ class HistoryJabatanController extends Controller
             }
 
             $karyawan->update($updateData);
-
-            // History Pejabat
-            $karyawan->load(['direktorat', 'kompartemen', 'departemen', 'jobGrade', 'personGrade']);
-            $jabatanBaru = Jabatan::find($request->jabatan_id);
-
-            if ($jabatanLamaModel && HistoryPejabat::isDipantau($jabatanLamaModel->nama_jabatan)) {
-                HistoryPejabat::where('karyawan_id', $karyawan->id)
-                    ->whereNull('tanggal_selesai')
-                    ->update(['tanggal_selesai' => $request->tanggal_mulai]);
-            }
-
-            if ($jabatanBaru && HistoryPejabat::isDipantau($jabatanBaru->nama_jabatan)) {
-                HistoryPejabat::create([
-                    'karyawan_id'        => $karyawan->id,
-                    'history_jabatan_id' => $historyBaru->id,
-                    'jabatan'            => HistoryPejabat::ekstrakTipe($jabatanBaru->nama_jabatan),
-                    'jabatan_saat_ini'   => $request->jabatan_saat_ini,
-                    'direktorat'         => $karyawan->direktorat->nama_direktorat ?? null,
-                    'kompartemen'        => $karyawan->kompartemen->nama_kompartemen ?? null,
-                    'departemen'         => $karyawan->departemen->nama_departemen ?? null,
-                    'job_grade'          => $karyawan->jobGrade->job_grade ?? null,
-                    'person_grade'       => $karyawan->personGrade->person_grade ?? null,
-                    'no_sk'              => $request->no_sk,
-                    'tanggal_sk'         => $request->tanggal_sk,
-                    'tanggal_mulai'      => $request->tanggal_mulai,
-                    'tanggal_selesai'    => null,
-                    'keterangan'         => $request->keterangan,
-                ]);
-            }
         });
 
         $this->log(
@@ -175,10 +138,9 @@ class HistoryJabatanController extends Controller
 
     public function destroy(Karyawan $karyawan, HistoryJabatan $historyJabatan)
     {
-        $wasCurrent   = $historyJabatan->is_current;
-        $jabatanModel = Jabatan::find($historyJabatan->jabatan_id);
-        $isDipantau   = $jabatanModel && HistoryPejabat::isDipantau($jabatanModel->nama_jabatan);
+        $wasCurrent = $historyJabatan->is_current;
 
+        // Hapus history (record Pejabat Definitif terkait ikut terhapus otomatis via event model)
         $historyJabatan->delete();
 
         if ($wasCurrent) {
@@ -201,12 +163,6 @@ class HistoryJabatanController extends Controller
                     'tanggal_mulai_jg' => $prev->tanggal_mulai,
                     'tanggal_mulai_pg' => $prev->tanggal_mulai,
                 ]);
-            }
-
-            if ($isDipantau) {
-                HistoryPejabat::where('karyawan_id', $karyawan->id)
-                    ->whereNull('tanggal_selesai')
-                    ->delete();
             }
         }
 

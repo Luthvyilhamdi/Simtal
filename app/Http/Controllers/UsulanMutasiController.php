@@ -63,7 +63,8 @@ class UsulanMutasiController extends Controller
         $request->validate([
             'karyawan_id'             => 'required|exists:karyawans,id',
             'jenis'                   => 'required|in:rotasi,mutasi',
-            'jabatan_tujuan_id'       => 'required|exists:jabatan,id',
+            'jabatan_tujuan'          => 'required|string|max:255',   // teks (label)
+            'jabatan_tujuan_id'       => 'required|exists:jabatan,id', // master (struktur)
             'direktorat_tujuan_id'    => 'required|exists:direktorat,id',
             'kompartemen_tujuan_id'   => 'required|exists:kompartemen,id',
             'departemen_tujuan_id'    => 'required|exists:departemen,id',
@@ -79,14 +80,15 @@ class UsulanMutasiController extends Controller
             'karyawan_id'             => $karyawan->id,
             'jenis'                   => $request->jenis,
             // snapshot posisi awal
-            'jabatan_saat_ini'        => $karyawan->jabatan_saat_ini,
+            'jabatan_saat_ini'        => $karyawan->jabatan_saat_ini ?: optional($karyawan->jabatan)->nama_jabatan,
             'direktorat_saat_ini'     => optional($karyawan->direktorat)->nama_direktorat ?? optional($karyawan->direktorat)->nama,
             'kompartemen_saat_ini'    => optional($karyawan->kompartemen)->nama_kompartemen,
             'departemen_saat_ini'     => optional($karyawan->departemen)->nama_departemen,
             'job_grade_saat_ini'      => optional($karyawan->jobGrade)->job_grade,
             'person_grade_saat_ini'   => optional($karyawan->personGrade)->person_grade,
-            // tujuan
-            'jabatan_tujuan_id'       => $request->jabatan_tujuan_id,
+            // tujuan: teks + master
+            'jabatan_tujuan'          => $request->jabatan_tujuan,      // teks (label)
+            'jabatan_tujuan_id'       => $request->jabatan_tujuan_id,   // master (struktur)
             'direktorat_tujuan_id'    => $request->direktorat_tujuan_id,
             'kompartemen_tujuan_id'   => $request->kompartemen_tujuan_id,
             'departemen_tujuan_id'    => $request->departemen_tujuan_id,
@@ -106,7 +108,8 @@ class UsulanMutasiController extends Controller
 
     /**
      * Terbitkan SK rotasi/mutasi. Grade TIDAK berubah.
-     * Otomatis tutup riwayat jabatan lama & buat riwayat baru (tipe: mutasi).
+     * jabatan_id  → diambil dari jabatan master tujuan (jabatan_tujuan_id)
+     * jabatan_saat_ini (label) → diambil dari teks jabatan_tujuan
      */
     public function terbitkanSk(Request $request, UsulanMutasi $usulanMutasi)
     {
@@ -122,12 +125,13 @@ class UsulanMutasiController extends Controller
 
         $karyawan    = Karyawan::findOrFail($usulanMutasi->karyawan_id);
         $jabatanBaru = Jabatan::find($usulanMutasi->jabatan_tujuan_id);
-        $namaJabatan = $jabatanBaru->nama_jabatan ?? $usulanMutasi->jabatan_saat_ini;
+        // Label = teks jabatan tujuan; fallback ke nama master, lalu snapshot lama
+        $namaJabatan = $usulanMutasi->jabatan_tujuan
+            ?: ($jabatanBaru->nama_jabatan ?? $usulanMutasi->jabatan_saat_ini);
         $tmt         = $request->tmt;
 
-        // Pastikan grade karyawan tersedia (tetap dipakai apa adanya)
-        if (!$karyawan->job_grade_id || !$karyawan->person_grade_id) {
-            return back()->with('error', 'Data Job Grade / Person Grade karyawan belum lengkap.');
+        if (!$usulanMutasi->jabatan_tujuan_id || !$karyawan->job_grade_id || !$karyawan->person_grade_id) {
+            return back()->with('error', 'Data jabatan tujuan / grade karyawan belum lengkap.');
         }
 
         DB::transaction(function () use ($request, $usulanMutasi, $karyawan, $namaJabatan, $tmt) {
@@ -138,8 +142,8 @@ class UsulanMutasiController extends Controller
 
             HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,
-                'jabatan_id'       => $usulanMutasi->jabatan_tujuan_id,
-                'jabatan_saat_ini' => $namaJabatan,
+                'jabatan_id'       => $usulanMutasi->jabatan_tujuan_id,   // master (struktur)
+                'jabatan_saat_ini' => $namaJabatan,                       // teks (label)
                 'direktorat_id'    => $usulanMutasi->direktorat_tujuan_id,
                 'kompartemen_id'   => $usulanMutasi->kompartemen_tujuan_id,
                 'departemen_id'    => $usulanMutasi->departemen_tujuan_id,
@@ -156,7 +160,6 @@ class UsulanMutasiController extends Controller
                 'is_current'       => true,
             ]);
 
-            // Update posisi terkini karyawan (grade & TMT grade TIDAK diubah)
             $karyawan->update([
                 'jabatan_id'       => $usulanMutasi->jabatan_tujuan_id,
                 'jabatan_saat_ini' => $namaJabatan,

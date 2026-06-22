@@ -10,7 +10,7 @@ class UsulanPromosi extends Model
         'karyawan_id',
         'jabatan_saat_ini', 'job_grade_saat_ini', 'person_grade_saat_ini',
         'band_saat_ini', 'struktural_fungsional', 'departemen_saat_ini', 'kompartemen_saat_ini',
-        'jabatan_tujuan', 'job_grade_promosi', 'person_grade_promosi',
+        'jabatan_tujuan', 'jabatan_tujuan_id', 'job_grade_promosi', 'person_grade_promosi',
         'direktorat_tujuan_id', 'kompartemen_tujuan_id', 'departemen_tujuan_id',
         'assessment_id', 'hasil_assessment', 'tanggal_berlaku_assessment', 'level_ukur',
         'tanggal_usulan',
@@ -42,6 +42,9 @@ class UsulanPromosi extends Model
     public function assessment() { return $this->belongsTo(HistoryAssessment::class, 'assessment_id'); }
     public function talentPool() { return $this->belongsTo(TalentPool::class, 'talent_pool_id'); }
     public function createdBy()  { return $this->belongsTo(User::class, 'created_by'); }
+
+    // Jabatan master tujuan
+    public function jabatanTujuan() { return $this->belongsTo(Jabatan::class, 'jabatan_tujuan_id'); }
 
     // Unit tujuan promosi
     public function direktoratTujuan()  { return $this->belongsTo(Direktorat::class, 'direktorat_tujuan_id'); }

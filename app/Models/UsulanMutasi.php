@@ -10,7 +10,7 @@ class UsulanMutasi extends Model
         'karyawan_id', 'jenis',
         'jabatan_saat_ini', 'direktorat_saat_ini', 'kompartemen_saat_ini', 'departemen_saat_ini',
         'job_grade_saat_ini', 'person_grade_saat_ini',
-        'jabatan_tujuan_id', 'direktorat_tujuan_id', 'kompartemen_tujuan_id', 'departemen_tujuan_id',
+        'jabatan_tujuan', 'jabatan_tujuan_id', 'direktorat_tujuan_id', 'kompartemen_tujuan_id', 'departemen_tujuan_id',
         'kode_struktur_tujuan_id',
         'alasan', 'tanggal_usulan',
         'status', 'no_sk', 'tmt', 'sk_diproses',

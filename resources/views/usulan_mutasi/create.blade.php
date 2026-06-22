@@ -162,16 +162,29 @@
         </div>
 
         <div class="form-grid">
+            {{-- 1) JABATAN TUJUAN (teks isi) --}}
             <div class="form-group full">
                 <label class="form-label">Jabatan Tujuan <span class="req">*</span></label>
+                <input type="text" name="jabatan_tujuan" id="jabatanTujuan"
+                    value="{{ old('jabatan_tujuan') }}"
+                    class="form-input {{ $errors->has('jabatan_tujuan')?'error-input':'' }}"
+                    placeholder="Ketik jabatan tujuan (judul yang akan tampil)…" autocomplete="off">
+                <div class="form-hint">Label jabatan yang akan tampil di riwayat & profil karyawan.</div>
+                @error('jabatan_tujuan')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+
+            {{-- 2) JABATAN MASTER (dropdown) --}}
+            <div class="form-group full">
+                <label class="form-label">Jabatan (Master) <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="jabatan_tujuan_id" class="form-input {{ $errors->has('jabatan_tujuan_id')?'error-input':'' }}" required>
-                        <option value="">— Pilih Jabatan —</option>
+                    <select name="jabatan_tujuan_id" id="jabatanMaster" class="form-input {{ $errors->has('jabatan_tujuan_id')?'error-input':'' }}" required>
+                        <option value="">— Pilih Jabatan Master —</option>
                         @foreach($jabatans as $jb)
                         <option value="{{ $jb->id }}" {{ old('jabatan_tujuan_id')==$jb->id?'selected':'' }}>{{ $jb->nama_jabatan }}</option>
                         @endforeach
                     </select>
                 </div>
+                <div class="form-hint">Untuk struktur & deteksi tingkat pejabat (SVP/VP/SPM/PM).</div>
                 @error('jabatan_tujuan_id')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
 
@@ -277,6 +290,18 @@ function searchKaryawan(q) {
         });
 }
 function hideDd() { document.getElementById('searchDd').classList.remove('show'); }
+
+// tandai kalau user mengetik jabatan tujuan manual → jangan ditimpa master
+let jtTouched = {{ old('jabatan_tujuan') ? 'true' : 'false' }};
+document.getElementById('jabatanTujuan').addEventListener('input', () => { jtTouched = true; });
+
+// pilih master → auto-isi teks jabatan tujuan jika masih kosong / belum diketik manual
+document.getElementById('jabatanMaster').addEventListener('change', function () {
+    const jt = document.getElementById('jabatanTujuan');
+    if (jtTouched && jt.value.trim() !== '') return;
+    const opt = this.options[this.selectedIndex];
+    jt.value = (opt && opt.value) ? opt.textContent.trim() : '';
+});
 
 function selectKaryawan(k) {
     document.getElementById('karyawanId').value = k.id;

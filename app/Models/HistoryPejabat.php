@@ -65,7 +65,33 @@ class HistoryPejabat extends Model
         };
     }
 
-    // Cek apakah jabatan ini dipantau
+    /**
+     * Resolusi tingkat pejabat dari sebuah jabatan.
+     * Prioritas: kolom level_pejabat (master jabatan) → parsing nama_jabatan → parsing label teks.
+     * Mengembalikan SVP/VP/SPM/PM atau null jika bukan pejabat.
+     */
+    public static function resolveTier(?Jabatan $jabatan, ?string $labelText = null): ?string
+    {
+        // 1) Sumber paling akurat: kolom level_pejabat di master jabatan
+        if ($jabatan && !empty($jabatan->level_pejabat)) {
+            return strtoupper($jabatan->level_pejabat);
+        }
+        // 2) Fallback: parsing nama master jabatan (perilaku lama)
+        if ($jabatan && !empty($jabatan->nama_jabatan)) {
+            if ($t = self::ekstrakTipe($jabatan->nama_jabatan)) {
+                return $t;
+            }
+        }
+        // 3) Fallback terakhir: parsing label teks (berguna untuk mutasi jabatan teks bebas)
+        if (!empty($labelText)) {
+            if ($t = self::ekstrakTipe($labelText)) {
+                return $t;
+            }
+        }
+        return null;
+    }
+
+    // Cek apakah jabatan ini dipantau (berbasis teks — dipertahankan untuk kompatibilitas)
     public static function isDipantau(string $namaJabatan): bool
     {
         foreach (self::JABATAN_DIPANTAU as $j) {
@@ -76,7 +102,7 @@ class HistoryPejabat extends Model
         return false;
     }
 
-    // Ekstrak tipe jabatan (SVP/VP/SPM/PM)
+    // Ekstrak tipe jabatan (SVP/VP/SPM/PM) dari teks
     public static function ekstrakTipe(string $namaJabatan): ?string
     {
         foreach (self::JABATAN_DIPANTAU as $j) {

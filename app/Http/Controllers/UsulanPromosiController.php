@@ -100,11 +100,12 @@ class UsulanPromosiController extends Controller
     public function create()
     {
         $karyawans    = Karyawan::where('status', 'aktif')->orderBy('nama')->get();
+        $jabatans     = Jabatan::orderBy('nama_jabatan')->get();   // master jabatan untuk dropdown
         $direktorats  = Direktorat::all();
         $kompartemens = Kompartemen::all();
         $departemens  = Departemen::all();
 
-        return view('usulan_promosi.create', compact('karyawans', 'direktorats', 'kompartemens', 'departemens'));
+        return view('usulan_promosi.create', compact('karyawans', 'jabatans', 'direktorats', 'kompartemens', 'departemens'));
     }
 
     public function store(Request $request)
@@ -112,6 +113,7 @@ class UsulanPromosiController extends Controller
         $request->validate([
             'karyawan_id'           => 'required|exists:karyawans,id',
             'jabatan_tujuan'        => 'required|string|max:255',
+            'jabatan_tujuan_id'     => 'required|exists:jabatan,id',   // master (struktur)
             'job_grade_promosi'     => 'nullable|string',
             'person_grade_promosi'  => 'nullable|string',
             'direktorat_tujuan_id'  => 'nullable|exists:direktorat,id',
@@ -172,7 +174,8 @@ class UsulanPromosiController extends Controller
             'person_grade_saat_ini'     => $karyawan->personGrade->person_grade ?? null,
             'band_saat_ini'             => $karyawan->band,
             'struktural_fungsional'     => $karyawan->struktural_fungsional,
-            'jabatan_tujuan'            => $request->jabatan_tujuan,
+            'jabatan_tujuan'            => $request->jabatan_tujuan,      // teks (label)
+            'jabatan_tujuan_id'         => $request->jabatan_tujuan_id,   // master (struktur)
             'job_grade_promosi'         => $request->job_grade_promosi,
             'person_grade_promosi'      => $request->person_grade_promosi,
             'direktorat_tujuan_id'      => $request->direktorat_tujuan_id,
@@ -245,15 +248,17 @@ class UsulanPromosiController extends Controller
 
     /**
      * Terbitkan SK untuk usulan yang sudah LULUS.
-     * Unit (direktorat/kompartemen/departemen) diambil dari form (default = unit tujuan usulan),
-     * jadi promosi yang memindahkan unit ikut tercatat dengan benar.
+     * jabatan_id  → diambil dari jabatan master tujuan (jabatan_tujuan_id) yang dipilih saat create.
+     *               (fallback ke jabatan_id form jika usulan lama belum punya jabatan_tujuan_id)
+     * jabatan_saat_ini (label) → diambil dari teks jabatan_tujuan.
+     * Unit & grade tetap diambil dari form SK.
      */
     public function terbitkanSk(Request $request, UsulanPromosi $usulanPromosi)
     {
         $request->validate([
             'no_sk'            => 'required|string|max:255',
             'tmt'              => 'required|date',
-            'jabatan_id'       => 'required|exists:jabatan,id',
+            'jabatan_id'       => 'nullable|exists:jabatan,id',   // opsional: master sudah dipilih saat create
             'job_grade_id'     => 'required|exists:job_grade,id',
             'person_grade_id'  => 'required|exists:person_grade,id',
             'kode_struktur_id' => 'required|exists:kode_struktur,id',
@@ -270,12 +275,19 @@ class UsulanPromosiController extends Controller
             return back()->with('error', 'SK untuk usulan ini sudah pernah diterbitkan.');
         }
 
+        // Jabatan master diambil dari usulan (dipilih saat create); fallback ke form
+        $jabatanId = $usulanPromosi->jabatan_tujuan_id ?: $request->jabatan_id;
+        if (!$jabatanId) {
+            return back()->with('error', 'Jabatan (master) belum ditentukan pada usulan ini.');
+        }
+
         $karyawan    = Karyawan::findOrFail($usulanPromosi->karyawan_id);
-        $jabatanBaru = Jabatan::find($request->jabatan_id);
-        $namaJabatan = $jabatanBaru->nama_jabatan ?? $usulanPromosi->jabatan_tujuan;
+        $jabatanBaru = Jabatan::find($jabatanId);
+        // Label = teks jabatan tujuan; fallback ke nama master
+        $namaJabatan = $usulanPromosi->jabatan_tujuan ?: ($jabatanBaru->nama_jabatan ?? '-');
         $tmt         = $request->tmt;
 
-        DB::transaction(function () use ($request, $usulanPromosi, $karyawan, $namaJabatan, $tmt) {
+        DB::transaction(function () use ($request, $usulanPromosi, $karyawan, $jabatanId, $namaJabatan, $tmt) {
 
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
@@ -286,8 +298,8 @@ class UsulanPromosiController extends Controller
 
             HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,
-                'jabatan_id'       => $request->jabatan_id,
-                'jabatan_saat_ini' => $namaJabatan,
+                'jabatan_id'       => $jabatanId,        // master (struktur) dari create
+                'jabatan_saat_ini' => $namaJabatan,      // teks (label)
                 'direktorat_id'    => $request->direktorat_id,
                 'kompartemen_id'   => $request->kompartemen_id,
                 'departemen_id'    => $request->departemen_id,
@@ -304,7 +316,7 @@ class UsulanPromosiController extends Controller
             ]);
 
             $update = [
-                'jabatan_id'       => $request->jabatan_id,
+                'jabatan_id'       => $jabatanId,
                 'jabatan_saat_ini' => $namaJabatan,
                 'kode_struktur_id' => $request->kode_struktur_id,
                 'direktorat_id'    => $request->direktorat_id,
