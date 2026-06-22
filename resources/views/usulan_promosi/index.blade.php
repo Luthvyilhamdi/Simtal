@@ -284,13 +284,9 @@ mark { background: #fef08a; border-radius: 2px; padding: 0 1px; color: inherit; 
                     <input type="date" name="tmt" id="skTmt" class="sk-inp" required>
                 </div>
                 <div>
-                    <label class="sk-lbl">Jabatan Baru <span class="sk-req">*</span></label>
-                    <select name="jabatan_id" id="skJabatan" class="sk-inp" required>
-                        <option value="">— Pilih Jabatan —</option>
-                        @foreach($jabatans as $jb)
-                        <option value="{{ $jb->id }}" data-nama="{{ $jb->nama_jabatan }}">{{ $jb->nama_jabatan }}</option>
-                        @endforeach
-                    </select>
+                    <label class="sk-lbl">Jabatan Tujuan</label>
+                    <input type="text" id="skJabatanInfo" class="sk-inp" style="background:#f9fafb" readonly>
+                    <div style="font-size:11px;color:#9ca3af;margin-top:4px">Diambil dari usulan — dipakai otomatis saat SK terbit.</div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                     <div>
@@ -356,7 +352,7 @@ mark { background: #fef08a; border-radius: 2px; padding: 0 1px; color: inherit; 
                 </div>
                 <div style="display:flex;gap:8px;font-size:11px;color:#6b7280;background:#fafafa;border:1px solid #f3f4f6;border-radius:8px;padding:9px 11px;line-height:1.5">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="#9ca3af" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <div>Menyimpan akan otomatis membuat <strong>riwayat jabatan baru</strong> (tipe: promosi) &amp; memperbarui <strong>posisi terkini karyawan</strong>. Direktorat, kompartemen &amp; departemen mengikuti data karyawan saat ini.</div>
+                    <div>Jabatan tujuan diambil dari usulan. Menyimpan akan otomatis membuat <strong>riwayat jabatan baru</strong> (tipe: promosi) &amp; memperbarui <strong>posisi terkini karyawan</strong>. Jika jabatan tujuan termasuk tingkat pejabat (SVP/VP/SPM/PM), otomatis tercatat di Pejabat Definitif.</div>
                 </div>
             </div>
             <div class="modal-acts" style="margin-top:18px">
@@ -598,7 +594,7 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
                     <td style="min-width:200px">
                         <div class="pos-block tujuan">
                         <div class="pos-title">Posisi Baru</div>
-                        <div class="pos-row"><span class="pos-lbl">Jabatan</span><span class="pos-val" style="font-weight:600;color:#111827">{{ $u->jabatan_tujuan }}</span></div>
+                        <div class="pos-row"><span class="pos-lbl">Jabatan</span><span class="pos-val" style="font-weight:600;color:#111827">{{ $u->jabatan_tujuan }}@if(optional($u->jabatanTujuan)->nama_jabatan)<span style="display:block;font-size:10px;color:#9ca3af;font-weight:500">Master: {{ $u->jabatanTujuan->nama_jabatan }}</span>@endif</span></div>
                         <div class="pos-row"><span class="pos-lbl">Direktorat</span><span class="pos-val">{{ optional($u->direktoratTujuan)->nama_direktorat ?? optional($u->direktoratTujuan)->nama ?? optional($u->karyawan->direktorat)->nama_direktorat ?? optional($u->karyawan->direktorat)->nama ?? '-' }}</span></div>
                         <div class="pos-row"><span class="pos-lbl">Kompartemen</span><span class="pos-val">{{ optional($u->kompartemenTujuan)->nama_kompartemen ?? $u->karyawan->kompartemen->nama_kompartemen ?? '-' }}</span></div>
                         <div class="pos-row"><span class="pos-lbl">Departemen</span><span class="pos-val">{{ optional($u->departemenTujuan)->nama_departemen ?? $u->karyawan->departemen->nama_departemen ?? '-' }}</span></div>
@@ -902,8 +898,8 @@ function openSk(btn) {
     document.getElementById('skNoSk').value = '';
     document.getElementById('skTmt').value = '';
     document.getElementById('skKode').value = '';
-    // pre-select best-effort dari data usulan (teks → cocokkan ke master)
-    preselectSk('skJabatan', 'data-nama', d.jab);
+    // jabatan tujuan tampil read-only; dipakai otomatis dari usulan saat terbit SK
+    document.getElementById('skJabatanInfo').value = d.jab || '';
     preselectSk('skJg', 'data-val', d.jg);
     preselectSk('skPg', 'data-val', d.pg);
     // unit langsung pakai ID (default = unit tujuan usulan)

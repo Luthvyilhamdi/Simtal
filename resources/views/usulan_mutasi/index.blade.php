@@ -414,7 +414,7 @@ $outcomes = [
                     <td style="min-width:200px">
                         <div class="pos-block tujuan">
                         <div class="pos-title">Posisi Tujuan</div>
-                        <div class="pos-row"><span class="pos-lbl">Jabatan</span><span class="pos-val" style="font-weight:600;color:#111827">{{ optional($u->jabatanTujuan)->nama_jabatan ?? '-' }}</span></div>
+                        <div class="pos-row"><span class="pos-lbl">Jabatan</span><span class="pos-val" style="font-weight:600;color:#111827">{{ $u->jabatan_tujuan ?? optional($u->jabatanTujuan)->nama_jabatan ?? '-' }}@if($u->jabatan_tujuan && optional($u->jabatanTujuan)->nama_jabatan)<span style="display:block;font-size:10px;color:#9ca3af;font-weight:500">Master: {{ $u->jabatanTujuan->nama_jabatan }}</span>@endif</span></div>
                         <div class="pos-row"><span class="pos-lbl">Direktorat</span><span class="pos-val">{{ $dirTo ?? '-' }}</span></div>
                         <div class="pos-row"><span class="pos-lbl">Kompartemen</span><span class="pos-val">{{ optional($u->kompartemenTujuan)->nama_kompartemen ?? '-' }}</span></div>
                         <div class="pos-row"><span class="pos-lbl">Departemen</span><span class="pos-val">{{ optional($u->departemenTujuan)->nama_departemen ?? '-' }}</span></div>
