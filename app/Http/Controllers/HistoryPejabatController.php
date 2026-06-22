@@ -3,11 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\HistoryPejabat;
+use App\Models\User;
 use App\Exports\HistoryPejabatExport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HistoryPejabatController extends Controller
 {
+    private function checkSuperAdmin(): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+    }
+
     public function index(Request $request)
     {
         $query = HistoryPejabat::with('karyawan');
@@ -55,5 +66,22 @@ class HistoryPejabatController extends Controller
         $filename = 'history-pejabat-' . now()->format('d-m-Y') . '.xlsx';
 
         return (new HistoryPejabatExport($jabatan, $search))->download($filename);
+    }
+
+    /**
+     * Hapus satu record History Pejabat — khusus super admin.
+     * Catatan: record History Jabatan sumbernya TIDAK ikut terhapus.
+     */
+    public function destroy(HistoryPejabat $historyPejabat)
+    {
+        $this->checkSuperAdmin();
+
+        $nama = optional($historyPejabat->karyawan)->nama ?? '-';
+        $jab  = $historyPejabat->jabatan;
+
+        $historyPejabat->delete();
+
+        return redirect()->route('history_pejabat.index')
+            ->with('success', "History pejabat {$jab} — {$nama} berhasil dihapus.");
     }
 }

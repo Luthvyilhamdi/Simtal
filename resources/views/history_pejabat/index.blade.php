@@ -63,6 +63,11 @@
 
     .durasi-chip { display:inline-flex;padding:2px 7px;border-radius:5px;background:#f3f4f6;font-size:11px;color:#6b7280;font-weight:600; }
 
+    /* Tombol hapus (super admin) */
+    .btn-del { width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s; }
+    .btn-del:hover { background:#fef2f2;border-color:#fecaca; }
+    .btn-del svg { width:12px;height:12px;stroke:#ef4444;fill:none;stroke-width:2; }
+
     .table-footer { display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:8px; }
     .pagination-wrap { display:flex;align-items:center;gap:3px; }
     .page-btn { width:27px;height:27px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#374151;cursor:pointer;text-decoration:none;transition:all 0.12s; }
@@ -77,12 +82,70 @@
 
     mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
 
+    /* Toast */
+    .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
+    .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:260px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s forwards; }
+    .toast.hiding { animation:toastOut 0.3s forwards; }
+    .toast-icon { width:20px;height:20px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .toast-icon svg { width:11px;height:11px;stroke:#16a34a;fill:none;stroke-width:2.5; }
+    .toast-close { border:none;background:transparent;color:#9ca3af;cursor:pointer;font-size:16px;padding:0;margin-left:auto; }
+    .toast-progress { position:absolute;bottom:0;left:0;height:3px;background:#16a34a;animation:toastProgress 3s linear forwards; }
+    @keyframes toastIn { from{opacity:0;transform:translateX(110%);}to{opacity:1;transform:translateX(0);} }
+    @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translateX(110%);} }
+    @keyframes toastProgress { from{width:100%;}to{width:0%;} }
+
+    /* Modal hapus */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center; }
+    .modal-backdrop.show { display:flex; }
+    .modal-box { background:white;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center; }
+    .modal-icon-wrap { width:50px;height:50px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 14px; }
+    .modal-icon-wrap svg { width:22px;height:22px;stroke:#ef4444;fill:none;stroke-width:1.8; }
+    .modal-title { font-size:16px;font-weight:700;color:#111827;margin-bottom:8px; }
+    .modal-desc { font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:20px; }
+    .modal-actions { display:flex;gap:8px; }
+    .modal-btn { flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all 0.15s; }
+    .modal-btn.cancel { background:#f9fafb;color:#374151;border:1px solid #e5e7eb; }
+    .modal-btn.danger { background:#ef4444;color:white; }
+    .modal-btn.danger:hover { background:#dc2626; }
+
     @media (max-width:768px) { .stats-grid { grid-template-columns:repeat(3,1fr); } }
     @media (max-width:480px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
 </style>
 @endpush
 
 @section('content')
+
+@php $isSA = auth()->user()->isSuperAdmin(); @endphp
+
+{{-- TOAST --}}
+@if(session('success'))
+<div class="toast-wrap" id="toastWrap">
+    <div class="toast" id="toast">
+        <div class="toast-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>{{ session('success') }}</div>
+        <button class="toast-close" onclick="closeToast()">×</button>
+        <div class="toast-progress"></div>
+    </div>
+</div>
+@endif
+
+{{-- MODAL HAPUS (super admin) --}}
+@if($isSA)
+<div class="modal-backdrop" id="modalHapus">
+    <div class="modal-box">
+        <div class="modal-icon-wrap">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+        <div class="modal-title">Hapus History Pejabat?</div>
+        <div class="modal-desc" id="modalDesc">Tindakan ini tidak dapat dibatalkan.</div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal()">Batal</button>
+            <button class="modal-btn danger" onclick="submitHapus()">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+<form id="formHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
+@endif
 
 {{-- PAGE HEADER --}}
 <div class="page-header">
@@ -168,6 +231,7 @@
                         <th>Tgl SK</th>
                         <th>Tgl Mulai</th>
                         <th>Lama Menjabat</th>
+                        @if($isSA)<th>Aksi</th>@endif
                     </tr>
                 </thead>
                 <tbody id="tableBodyAktif">
@@ -199,10 +263,21 @@
                         <td>{{ $h->tanggal_sk ? $h->tanggal_sk->format('d M Y') : '-' }}</td>
                         <td>{{ $h->tanggal_mulai->format('d M Y') }}</td>
                         <td><span class="durasi-chip">{{ $h->durasi }}</span></td>
+                        @if($isSA)
+                        <td>
+                            <button type="button" class="btn-del"
+                                data-url="{{ route('history_pejabat.destroy', $h) }}"
+                                data-nama="{{ $h->karyawan->nama }}"
+                                data-jab="{{ $h->jabatan }}"
+                                onclick="openModal(this.dataset.url, this.dataset.nama, this.dataset.jab)">
+                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                            </button>
+                        </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="12">
+                        <td colspan="{{ $isSA ? 13 : 12 }}">
                             <div class="empty-state">
                                 <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                                 <p>Tidak ada pejabat aktif</p>
@@ -275,6 +350,7 @@
                         <th>Tgl Mulai</th>
                         <th>Tgl Selesai</th>
                         <th>Durasi</th>
+                        @if($isSA)<th>Aksi</th>@endif
                     </tr>
                 </thead>
                 <tbody id="tableBodySelesai">
@@ -307,10 +383,21 @@
                         <td>{{ $h->tanggal_mulai->format('d M Y') }}</td>
                         <td>{{ $h->tanggal_selesai->format('d M Y') }}</td>
                         <td><span class="durasi-chip">{{ $h->durasi }}</span></td>
+                        @if($isSA)
+                        <td>
+                            <button type="button" class="btn-del"
+                                data-url="{{ route('history_pejabat.destroy', $h) }}"
+                                data-nama="{{ $h->karyawan->nama }}"
+                                data-jab="{{ $h->jabatan }}"
+                                onclick="openModal(this.dataset.url, this.dataset.nama, this.dataset.jab)">
+                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                            </button>
+                        </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="13">
+                        <td colspan="{{ $isSA ? 14 : 13 }}">
                             <div class="empty-state">
                                 <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                                 <p>Belum ada history pejabat yang selesai</p>
@@ -361,6 +448,39 @@
 
 @push('scripts')
 <script>
+@if($isSA)
+// ===== MODAL HAPUS =====
+var deleteUrl = '';
+function openModal(url, nama, jab) {
+    deleteUrl = url;
+    document.getElementById('modalDesc').innerHTML =
+        'Hapus history pejabat <strong>' + jab + '</strong> untuk <strong>' + nama + '</strong>?<br>Tindakan ini tidak dapat dibatalkan.';
+    document.getElementById('modalHapus').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+    document.getElementById('modalHapus').classList.remove('show');
+    document.body.style.overflow = '';
+}
+function submitHapus() {
+    document.getElementById('formHapus').action = deleteUrl;
+    document.getElementById('formHapus').submit();
+}
+document.getElementById('modalHapus').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+@endif
+
+// ===== TOAST =====
+function closeToast() {
+    var t = document.getElementById('toast'); if(!t) return;
+    t.classList.add('hiding');
+    setTimeout(function(){ var w=document.getElementById('toastWrap'); if(w) w.remove(); }, 300);
+}
+window.addEventListener('DOMContentLoaded', function(){
+    if (document.getElementById('toast')) setTimeout(closeToast, 3000);
+});
+
+// ===== SEARCH =====
 var searchTimer = null;
 var searchInput = document.getElementById('searchInput');
 var clearBtn    = document.getElementById('clearBtn');

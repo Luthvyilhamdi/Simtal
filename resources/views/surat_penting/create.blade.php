@@ -32,6 +32,16 @@
     .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
 
+    /* Search karyawan (ketik nama / NIK) */
+    .search-karyawan-wrap { position:relative; }
+    .search-karyawan-dropdown { position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid #e5e7eb;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:280px;overflow-y:auto;display:none;margin-top:4px; }
+    .search-karyawan-dropdown.show { display:block; }
+    .search-karyawan-item { padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background .1s; }
+    .search-karyawan-item:last-child { border-bottom:none; }
+    .search-karyawan-item:hover { background:#f0fdf4; }
+    .ski-nama { font-size:13px;font-weight:600;color:#111827; }
+    .ski-meta { font-size:11px;color:#9ca3af;margin-top:2px; }
+
     .tipe-toggle { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px; }
     .tipe-option { position:relative; }
     .tipe-option input[type=radio] { position:absolute;opacity:0;width:0;height:0; }
@@ -142,19 +152,18 @@
             </div>
 
             <div class="form-grid">
-                {{-- FIX: style Blade diganti @if Blade murni (tidak di dalam style="") --}}
+                {{-- Karyawan (search ketik nama / NIK) --}}
+                @php $oldKaryawan = old('karyawan_id') ? $karyawans->firstWhere('id', old('karyawan_id')) : null; @endphp
                 <div class="form-group full" id="fieldKaryawan" @if(old('tipe','personal')==='umum') style="display:none" @endif>
                     <label class="form-label">Karyawan <span class="req">*</span></label>
-                    <div class="select-wrap">
-                        <select name="karyawan_id" id="inputKaryawan" class="form-input {{ $errors->has('karyawan_id') ? 'error-input' : '' }}">
-                            <option value="">-- Pilih Karyawan --</option>
-                            @foreach($karyawans as $k)
-                                <option value="{{ $k->id }}" {{ old('karyawan_id') == $k->id ? 'selected' : '' }}>
-                                    {{ $k->nama }} — NIK {{ $k->nik }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="search-karyawan-wrap">
+                        <input type="text" id="searchKaryawan" autocomplete="off"
+                               class="form-input {{ $errors->has('karyawan_id') ? 'error-input' : '' }}"
+                               placeholder="Ketik nama atau NIK karyawan..."
+                               value="{{ $oldKaryawan ? $oldKaryawan->nama.' — NIK '.$oldKaryawan->nik : '' }}">
+                        <div class="search-karyawan-dropdown" id="dropdownKaryawan"></div>
                     </div>
+                    <input type="hidden" name="karyawan_id" id="inputKaryawan" value="{{ old('karyawan_id') }}">
                     @error('karyawan_id')<div class="error-msg">{{ $message }}</div>@enderror
                 </div>
 
@@ -276,12 +285,73 @@
 
 @push('scripts')
 <script>
+// ===== DATA KARYAWAN (untuk search sisi-klien) =====
+const KARYAWAN_LIST = @json($karyawans->map(fn($k) => ['id' => $k->id, 'nama' => $k->nama, 'nik' => $k->nik])->values());
+
+const searchKaryawan   = document.getElementById('searchKaryawan');
+const dropdownKaryawan = document.getElementById('dropdownKaryawan');
+const inputKaryawan    = document.getElementById('inputKaryawan');
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderDropdown(list) {
+    if (!list.length) {
+        dropdownKaryawan.innerHTML = '<div style="padding:12px 14px;font-size:13px;color:#9ca3af">Tidak ditemukan</div>';
+    } else {
+        dropdownKaryawan.innerHTML = list.map(k =>
+            '<div class="search-karyawan-item" onclick="pilihKaryawan(' + k.id + ')">'
+            + '<div class="ski-nama">' + escapeHtml(k.nama) + '</div>'
+            + '<div class="ski-meta">NIK ' + escapeHtml('' + k.nik) + '</div>'
+            + '</div>'
+        ).join('');
+    }
+    dropdownKaryawan.classList.add('show');
+}
+
+function cariKaryawan(q) {
+    q = q.trim().toLowerCase();
+    if (q.length < 1) { hideDropdown(); return; }
+    const hasil = KARYAWAN_LIST.filter(k =>
+        k.nama.toLowerCase().includes(q) || ('' + k.nik).toLowerCase().includes(q)
+    ).slice(0, 30);
+    renderDropdown(hasil);
+}
+
+function pilihKaryawan(id) {
+    const k = KARYAWAN_LIST.find(x => x.id === id);
+    if (!k) return;
+    inputKaryawan.value = k.id;
+    searchKaryawan.value = k.nama + ' — NIK ' + k.nik;
+    hideDropdown();
+}
+
+function hideDropdown() { dropdownKaryawan.classList.remove('show'); }
+
+if (searchKaryawan) {
+    searchKaryawan.addEventListener('input', function() {
+        inputKaryawan.value = ''; // reset pilihan saat user mengetik ulang
+        cariKaryawan(this.value);
+    });
+    searchKaryawan.addEventListener('focus', function() {
+        if (!inputKaryawan.value && this.value.trim().length >= 1) cariKaryawan(this.value);
+    });
+}
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-karyawan-wrap')) hideDropdown();
+});
+
+// ===== TOGGLE TIPE =====
 function onTipeChange(tipe) {
     const fieldKaryawan = document.getElementById('fieldKaryawan');
-    const inputKaryawan = document.getElementById('inputKaryawan');
     if (tipe === 'umum') {
         fieldKaryawan.style.display = 'none';
         inputKaryawan.value = '';
+        if (searchKaryawan) searchKaryawan.value = '';
+        hideDropdown();
     } else {
         fieldKaryawan.style.display = '';
     }
@@ -292,6 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checked) onTipeChange(checked.value);
 });
 
+// ===== FILE PREVIEW =====
 function previewFile(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];

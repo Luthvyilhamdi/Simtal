@@ -160,6 +160,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('history-pejabat')->name('history_pejabat.')->group(function () {
             Route::get('/',       [HistoryPejabatController::class, 'index'])->name('index');
             Route::get('/export', [HistoryPejabatController::class, 'export'])->name('export');
+            Route::delete('/{historyPejabat}', [HistoryPejabatController::class, 'destroy'])->name('destroy');
         });
 
         // Surat Penting
