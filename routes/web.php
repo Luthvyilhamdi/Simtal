@@ -11,6 +11,7 @@ use App\Http\Controllers\ImportAssessmentController;
 use App\Http\Controllers\ImportHistoryJabatanController;
 use App\Http\Controllers\PgsPjsController;
 use App\Http\Controllers\HistoryPejabatController;
+use App\Http\Controllers\HistoryPenilaianKalibrasiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AkunController;
 use App\Http\Controllers\NotifikasiController;
@@ -161,6 +162,22 @@ Route::middleware('auth')->group(function () {
             Route::get('/',       [HistoryPejabatController::class, 'index'])->name('index');
             Route::get('/export', [HistoryPejabatController::class, 'export'])->name('export');
             Route::delete('/{historyPejabat}', [HistoryPejabatController::class, 'destroy'])->name('destroy');
+        });
+
+        // History Penilaian & Kalibrasi
+        Route::prefix('history-penilaian-kalibrasi')->name('history_penilaian_kalibrasi.')->group(function () {
+            Route::get('/',                 [HistoryPenilaianKalibrasiController::class, 'index'])->name('index');
+            Route::get('/export/penilaian', [HistoryPenilaianKalibrasiController::class, 'exportPenilaian'])->name('export.penilaian');
+            Route::get('/export/kalibrasi', [HistoryPenilaianKalibrasiController::class, 'exportKalibrasi'])->name('export.kalibrasi');
+            Route::delete('/penilaian/{penilaian}', [HistoryPenilaianKalibrasiController::class, 'destroyPenilaian'])->name('penilaian.destroy');
+            Route::delete('/kalibrasi/{kalibrasi}', [HistoryPenilaianKalibrasiController::class, 'destroyKalibrasi'])->name('kalibrasi.destroy');
+
+            Route::middleware('super_admin')->group(function () {
+                Route::post('/import/penilaian',         [HistoryPenilaianKalibrasiController::class, 'importPenilaian'])->name('import.penilaian');
+                Route::get('/import/penilaian/template', [HistoryPenilaianKalibrasiController::class, 'templatePenilaian'])->name('template.penilaian');
+                Route::post('/import/kalibrasi',         [HistoryPenilaianKalibrasiController::class, 'importKalibrasi'])->name('import.kalibrasi');
+                Route::get('/import/kalibrasi/template', [HistoryPenilaianKalibrasiController::class, 'templateKalibrasi'])->name('template.kalibrasi');
+            });
         });
 
         // Surat Penting

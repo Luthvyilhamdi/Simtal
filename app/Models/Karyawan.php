@@ -38,6 +38,8 @@ class Karyawan extends Model
     public function historyAssessment(){ return $this->hasMany(HistoryAssessment::class); }
     public function pgsPjs()           { return $this->hasMany(PgsPjs::class); }
     public function suratPenting()     { return $this->hasMany(SuratPenting::class); }
+    public function penilaians()       { return $this->hasMany(PenilaianKaryawan::class); }
+    public function kalibrasis()       { return $this->hasMany(KalibrasiKaryawan::class); }
     public function pejabatAktif()
     {
         return $this->hasOne(\App\Models\HistoryPejabat::class)
@@ -87,43 +89,36 @@ class Karyawan extends Model
     }
 
     // ===== MDG (Masa Dinas Grade) =====
-
-    // MDG Person Grade dalam tahun
     public function getMdgPgAttribute(): ?int
     {
         if (!$this->tanggal_mulai_pg) return null;
         return (int) $this->tanggal_mulai_pg->diffInYears(now());
     }
 
-    // MDG Person Grade dalam bulan
     public function getMdgPgBulanAttribute(): int
     {
         if (!$this->tanggal_mulai_pg) return 0;
         return (int) $this->tanggal_mulai_pg->diffInMonths(now());
     }
 
-    // MDG Job Grade dalam tahun
     public function getMdgJgAttribute(): ?int
     {
         if (!$this->tanggal_mulai_jg) return null;
         return (int) $this->tanggal_mulai_jg->diffInYears(now());
     }
 
-    // MDG Job Grade dalam bulan
     public function getMdgJgBulanAttribute(): int
     {
         if (!$this->tanggal_mulai_jg) return 0;
         return (int) $this->tanggal_mulai_jg->diffInMonths(now());
     }
 
-    // MDG Band = dari tanggal_mulai_jg (otomatis saat JG berubah ke band baru)
     public function getMdgBandBulanAttribute(): int
     {
         if (!$this->tanggal_mulai_jg) return 0;
         return (int) $this->tanggal_mulai_jg->diffInMonths(now());
     }
 
-    // MDG Band dalam tahun
     public function getMdgBandAttribute(): int
     {
         return (int) floor($this->mdg_band_bulan / 12);
@@ -139,13 +134,12 @@ class Karyawan extends Model
 
         $mdgPgBulan   = $this->mdg_pg_bulan;
         $mdgJgBulan   = $this->mdg_jg_bulan;
-        $mdgBandBulan = $this->mdg_band_bulan; // = mdg_jg_bulan (dari tanggal_mulai_jg)
+        $mdgBandBulan = $this->mdg_band_bulan;
 
-        $pgMemenuhi   = $mdgPgBulan >= 12;   // MDG PG >= 1 tahun
-        $jgMemenuhi   = $mdgJgBulan >= 24;   // MDG JG >= 2 tahun
-        $bandMemenuhi = $mdgBandBulan >= 36; // MDG Band >= 3 tahun (dari TMT JG)
+        $pgMemenuhi   = $mdgPgBulan >= 12;
+        $jgMemenuhi   = $mdgJgBulan >= 24;
+        $bandMemenuhi = $mdgBandBulan >= 36;
 
-        // STEP 1: PG < JG → naik PG dulu
         if ($pg < $jg) {
             return [
                 'status'      => 'naik_pg',
@@ -167,8 +161,6 @@ class Karyawan extends Model
             ];
         }
 
-        // STEP 2: JG belum max → naik JG
-        // Syarat: MDG JG >= 2 tahun DAN MDG PG >= 1 tahun
         if ($jg < $maxJg) {
             $eligible  = $jgMemenuhi && $pgMemenuhi;
             $sisaBulan = 0;
@@ -201,8 +193,6 @@ class Karyawan extends Model
             ];
         }
 
-        // STEP 3: JG & PG max → naik Band
-        // Syarat: MDG JG >= 2 tahun DAN MDG PG >= 1 tahun DAN MDG Band >= 3 tahun
         if ($band !== 'Band 1') {
             $eligible  = $jgMemenuhi && $pgMemenuhi && $bandMemenuhi;
             $sisaBulan = 0;
@@ -245,7 +235,6 @@ class Karyawan extends Model
             ];
         }
 
-        // PUNCAK
         return [
             'status'      => 'puncak',
             'eligible'    => false,
@@ -261,6 +250,6 @@ class Karyawan extends Model
 
     public function getRouteKeyName(): string
     {
-    return 'nik';
+        return 'nik';
     }
 }

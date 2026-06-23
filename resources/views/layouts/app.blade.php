@@ -295,6 +295,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 <span class="nav-text">History Assessment</span>
             </a>
+            <a href="{{ route('history_penilaian_kalibrasi.index') }}" data-tooltip="Penilaian & Kalibrasi" class="nav-link {{ request()->routeIs('history_penilaian_kalibrasi.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
+                <span class="nav-text">Penilaian &amp; Kalibrasi</span>
+            </a>
         </div>
 
         <div class="nav-sep"></div>
