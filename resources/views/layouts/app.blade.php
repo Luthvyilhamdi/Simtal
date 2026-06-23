@@ -14,7 +14,7 @@
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f6f4f4; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f9fafb; display: flex; height: 100vh; overflow: hidden; }
 
         .sidebar-overlay {
             display: none; position: fixed; inset: 0;
@@ -24,11 +24,11 @@
 
         .sidebar {
             width: 248px; min-width: 248px; background: white;
-            border-right: 1px solid #e8e8e3; display: flex; flex-direction: column;
-            height: 100vh; overflow-y: auto;
+            border-right: 1px solid #e5e7eb; display: flex; flex-direction: column;
+            height: 100vh; overflow: visible;
             transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
             position: relative; z-index: 50; flex-shrink: 0;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+            box-shadow: 1px 0 0 rgba(15,23,42,.02), 2px 0 16px rgba(15,23,42,.03);
         }
         html.sidebar-collapsed .sidebar { width: 64px; min-width: 64px; }
         html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
@@ -61,52 +61,63 @@
             html.sidebar-collapsed .sidebar .logout-btn { justify-content: flex-start; padding: 8px 10px; }
         }
 
-        .sidebar-brand { padding: 18px 16px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0eb; flex-shrink: 0; }
+        .sidebar-brand { padding: 18px 16px 14px; display: flex; align-items: center; border-bottom: 1px solid #f3f4f6; flex-shrink: 0; }
         .brand-row { display: flex; align-items: center; gap: 10px; overflow: hidden; }
         .brand-icon { width: 34px; height: 34px; flex-shrink: 0; background: #f0fdf4; border-radius: 9px; display: flex; align-items: center; justify-content: center; border: 1px solid #bbf7d0; }
         .brand-icon img { width: 22px; height: 22px; object-fit: contain; }
-        .brand-name { font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 1.2px; white-space: nowrap; }
-        .brand-sub { font-size: 10px; color: #9ca3af; margin-top: 1px; white-space: nowrap; font-weight: 400; }
-        .collapse-btn { width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; border: 1px solid #e5e7eb; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9ca3af; transition: all 0.2s; }
-        .collapse-btn:hover { background: #f5f5f0; color: #6b7280; }
-        .collapse-btn svg { width: 12px; height: 12px; transition: transform 0.25s; }
+        .brand-name { font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 1px; white-space: nowrap; }
+        .brand-sub { font-size: 10px; color: #9ca3af; margin-top: 1px; white-space: nowrap; font-weight: 500; }
 
-        .sidebar-nav { flex: 1; padding: 10px 10px; overflow-y: auto; overflow-x: hidden; }
+        /* Collapse handle: bulat, menempel di tepi border sidebar (pola umum sidebar app corporate) */
+        .collapse-btn {
+            position: absolute; top: 31px; right: -13px;
+            width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+            border: 1px solid #e5e7eb; background: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #6b7280; z-index: 55;
+            box-shadow: 0 1px 3px rgba(15,23,42,.1);
+            transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+        }
+        .collapse-btn:hover { background: #15803d; border-color: #15803d; color: white; box-shadow: 0 3px 10px rgba(21,128,61,.3); transform: scale(1.08); }
+        .collapse-btn:active { transform: scale(0.94); }
+        .collapse-btn svg { width: 12px; height: 12px; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+        .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; overflow-x: hidden; }
         .sidebar-nav::-webkit-scrollbar { width: 3px; }
         .sidebar-nav::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
 
-        .nav-group { margin-bottom: 6px; }
-        .nav-section-label { font-size: 9.5px; font-weight: 700; color: #b0b0a8; text-transform: uppercase; letter-spacing: 1px; padding: 10px 10px 4px; white-space: nowrap; overflow: hidden; }
-        .nav-sep { height: 1px; background: #f3f4f6; margin: 6px 4px; }
+        .nav-group { margin-bottom: 8px; }
+        .nav-section-label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .6px; padding: 10px 10px 5px; white-space: nowrap; overflow: hidden; }
+        .nav-sep { height: 1px; background: #f3f4f6; margin: 8px 4px; }
 
-        .nav-link { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; color: #4b5563; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.12s; margin-bottom: 1px; white-space: nowrap; overflow: hidden; position: relative; }
-        .nav-link:hover { background: #f5f5f0; color: #111827; }
-        .nav-link.active { background: #f0fdf4; color: #15803d; font-weight: 600; border-left: 3px solid #16a34a; padding-left: 7px; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: 9px; color: #374151; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.12s; margin-bottom: 2px; white-space: nowrap; overflow: hidden; position: relative; }
+        .nav-link:hover { background: #f3f4f6; color: #111827; }
+        .nav-link.active { background: #15803d; color: white; font-weight: 600; box-shadow: 0 1px 2px rgba(21,128,61,.2); }
+        .nav-link.active:hover { background: #166534; color: white; }
         .nav-link svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; }
         .nav-text { overflow: hidden; text-overflow: ellipsis; }
 
-        html.sidebar-collapsed .sidebar .nav-link:hover::after { content: attr(data-tooltip); position: absolute; left: 56px; top: 50%; transform: translateY(-50%); background: #1a1a1a; color: white; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px; white-space: nowrap; z-index: 100; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        html.sidebar-collapsed .sidebar .nav-link:hover::after { content: attr(data-tooltip); position: absolute; left: 56px; top: 50%; transform: translateY(-50%); background: #111827; color: white; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px; white-space: nowrap; z-index: 100; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
         .master-toggle { cursor: pointer; user-select: none; }
         .master-toggle .toggle-chevron { width: 12px; height: 12px; margin-left: auto; flex-shrink: 0; transition: transform 0.2s; stroke: currentColor; fill: none; }
         .master-toggle.open .toggle-chevron { transform: rotate(180deg); }
         .master-sub { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
         .master-sub.open { max-height: 520px; }
-        .master-sub .nav-link { padding-left: 32px; font-size: 12px; color: #6b7280; }
-        .master-sub .nav-link.active { padding-left: 29px; }
+        .master-sub .nav-link { padding-left: 32px; font-size: 12.5px; color: #6b7280; }
 
-        .sidebar-bottom { padding: 10px; border-top: 1px solid #f0f0eb; flex-shrink: 0; }
-        .user-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: #fafaf8; overflow: hidden; border: 1px solid #f0f0eb; }
+        .sidebar-bottom { padding: 10px; border-top: 1px solid #f3f4f6; flex-shrink: 0; }
+        .user-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: #f9fafb; overflow: hidden; border: 1px solid #f3f4f6; }
         .user-avatar { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #16a34a, #15803d); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
         .user-info { overflow: hidden; flex: 1; }
         .user-name { font-size: 12px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-role { font-size: 10px; color: #9ca3af; margin-top: 1px; }
 
         .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-        .topbar { background: white; border-bottom: 1px solid #e8e8e3; padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
+        .topbar { background: white; border-bottom: 1px solid #e5e7eb; padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
         .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .hamburger { display: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e5e7eb; background: white; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; flex-shrink: 0; transition: all 0.12s; }
-        .hamburger:hover { background: #f5f5f0; }
+        .hamburger:hover { background: #f3f4f6; }
         .hamburger svg { width: 18px; height: 18px; }
         @media (max-width: 768px) { .hamburger { display: flex; } }
 
@@ -199,7 +210,7 @@
                 <div class="brand-sub">Talent Management System</div>
             </div>
         </div>
-        <button class="collapse-btn" id="collapseBtn" onclick="toggleSidebar()">
+        <button class="collapse-btn" id="collapseBtn" onclick="toggleSidebar()" title="Perkecil/perbesar sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
     </div>
@@ -543,7 +554,7 @@
         if (!a) return;
         const href = a.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank') return;
-        if (href.includes('/export') || href.includes('/download') || a.getAttribute('download') !== null) return;
+        if (href.includes('/export') || href.includes('/download') || href.includes('template') || a.getAttribute('download') !== null) return;
         loader.style.display = 'flex';
     });
     document.addEventListener('submit', function(e) { loader.style.display = 'flex'; });

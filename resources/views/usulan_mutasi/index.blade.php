@@ -75,16 +75,23 @@
 .flow-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .flow-tag { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .6px; width: 84px; flex-shrink: 0; }
 
-/* Outcome pills (Menunggu SK / Selesai) */
-.outcomes { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; overflow-x: auto; }
-.outcome-tab {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 13px; border-radius: 20px; border: 1.5px solid #e5e7eb;
-    background: white; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
-    color: #6b7280; white-space: nowrap; transition: all .15s;
-}
-.outcome-tab:hover { border-color: #d1d5db; }
-.outcome-count { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; background: #f3f4f6; color: #6b7280; }
+/* Stepper (Menunggu SK -> Selesai) */
+.stepper { display: flex; align-items: center; flex: 1; min-width: 0; overflow-x: auto; }
+.step-item { display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent; cursor: pointer; font-family: inherit; padding: 4px 6px; border-radius: 8px; transition: background .12s; white-space: nowrap; }
+.step-item:hover { background: #f9fafb; }
+.step-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: white; color: #9ca3af; border: 2px solid #e5e7eb; flex-shrink: 0; transition: all .15s; box-sizing: border-box; }
+.step-check { width: 12px; height: 12px; stroke: white; fill: none; stroke-width: 3; display: none; }
+.step-item.is-done .step-circle { background: #15803d; border-color: #15803d; color: white; }
+.step-item.is-done .step-check { display: block; }
+.step-item.is-done .step-num { display: none; }
+.step-item.is-active .step-circle { background: #1d4ed8; border-color: #1d4ed8; color: white; box-shadow: 0 0 0 3px rgba(29,78,216,.15); }
+.step-label { font-size: 13px; font-weight: 600; color: #9ca3af; }
+.step-item.is-done .step-label { color: #6b7280; }
+.step-item.is-active .step-label { color: #111827; font-weight: 700; }
+.step-count { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; background: #f3f4f6; color: #6b7280; }
+.step-item.is-active .step-count { background: #dbeafe; color: #1d4ed8; }
+.step-connector { width: 26px; height: 2px; background: #e5e7eb; flex-shrink: 0; margin: 0 2px; }
+.step-connector.is-done { background: #15803d; }
 
 /* ===== TABLE CARD ===== */
 .table-card { background: white; border-radius: 14px; border: 1px solid #e5e7eb; overflow: hidden; }
@@ -285,11 +292,10 @@ $tabs = [
     'menunggu' => 'Menunggu SK',
     'selesai'  => 'Selesai',
 ];
-// Hasil/status — pill warnanya sama dengan $sc supaya konsisten
-$outcomes = [
-    'menunggu' => ['Menunggu SK', '#d97706', '#fef3c7'],
-    'selesai'  => ['Selesai',     '#15803d', '#dcfce7'],
-];
+// Tahapan proses (linear): Menunggu SK -> Selesai
+$steps = ['menunggu' => 'Menunggu SK', 'selesai' => 'Selesai'];
+$stepOrder = ['menunggu' => 0, 'selesai' => 1];
+$activeStepIdx = $stepOrder[$activeTab] ?? 2; // 2 = sudah lewat semua tahap
 @endphp
 
 {{-- HEADER --}}
@@ -318,24 +324,24 @@ $outcomes = [
     </div>
 </div>
 
-{{-- WORKFLOW BAR: status (pill) + search --}}
+{{-- WORKFLOW BAR: tahap proses (stepper) + search --}}
 <div class="flow-card">
     <div class="flow-row">
-        <span class="flow-tag">Status</span>
-        <div class="outcomes">
-            @foreach($outcomes as $k => $o)
-            @php
-                $oActive = $activeTab === $k;
-                $ocText = $oActive ? $o[1] : '#6b7280';
-                $ocBorder = $oActive ? $o[1] : '#e5e7eb';
-                $ocBg = $oActive ? $o[2] : 'white';
-                $ocCountBg = $oActive ? 'white' : '#f3f4f6';
-            @endphp
-            <button class="outcome-tab {{ $oActive?'active':'' }}"
-                style="color:{{ $ocText }};border-color:{{ $ocBorder }};background:{{ $ocBg }}"
-                onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}">
-                {{ $o[0] }} <span class="outcome-count" style="background:{{ $ocCountBg }};color:{{ $ocText }}">{{ $counts[$k] }}</span>
+        <span class="flow-tag">Tahap Proses</span>
+        <div class="stepper">
+            @foreach($steps as $k => $label)
+            @php $idx = $stepOrder[$k]; $state = $idx < $activeStepIdx ? 'is-done' : ($idx === $activeStepIdx ? 'is-active' : ''); @endphp
+            <button class="step-item {{ $state }}" onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}">
+                <span class="step-circle">
+                    <svg class="step-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span class="step-num">{{ $idx + 1 }}</span>
+                </span>
+                <span class="step-label">{{ $label }}</span>
+                <span class="step-count">{{ $counts[$k] }}</span>
             </button>
+            @if(!$loop->last)
+            <span class="step-connector {{ $idx < $activeStepIdx ? 'is-done' : '' }}"></span>
+            @endif
             @endforeach
         </div>
         <div class="search-box">
@@ -523,27 +529,24 @@ window.addEventListener('DOMContentLoaded', () => {
     if(document.getElementById('toast')) setTimeout(closeToast, 3000);
 });
 
-// Tabs (pill status Menunggu SK / Selesai)
-const OUTCOME_COLORS = {
-    menunggu: ['#d97706', '#fef3c7'],
-    selesai:  ['#15803d', '#dcfce7'],
-};
+// Tabs (stepper Menunggu SK -> Selesai)
+const STEP_ORDER = { menunggu: 0, selesai: 1 };
 
 function switchTab(tab) {
     document.querySelectorAll('[id^="p-"]').forEach(p => p.style.display = 'none');
     const panel = document.getElementById('p-' + tab);
     if (panel) panel.style.display = '';
 
-    document.querySelectorAll('.outcome-tab').forEach(b => {
-        const isActive = b.dataset.tabkey === tab;
-        b.classList.toggle('active', isActive);
-        const countEl = b.querySelector('.outcome-count');
-        const colors = OUTCOME_COLORS[b.dataset.tabkey];
-        const [text, bg] = isActive && colors ? colors : ['#6b7280', 'white'];
-        b.style.color = text;
-        b.style.borderColor = isActive ? text : '#e5e7eb';
-        b.style.background = bg;
-        if (countEl) { countEl.style.background = isActive ? 'white' : '#f3f4f6'; countEl.style.color = text; }
+    // Step sebelum tab aktif ditandai selesai (is-done), tab aktif ditandai is-active
+    const activeIdx = STEP_ORDER[tab] ?? 2; // 2 = sudah lewat semua tahap
+    document.querySelectorAll('.step-item').forEach(b => {
+        const idx = STEP_ORDER[b.dataset.tabkey];
+        b.classList.remove('is-active', 'is-done');
+        if (idx < activeIdx) b.classList.add('is-done');
+        else if (idx === activeIdx) b.classList.add('is-active');
+    });
+    document.querySelectorAll('.step-connector').forEach((c, i) => {
+        c.classList.toggle('is-done', i < activeIdx);
     });
 
     const url = new URL(window.location.href);
@@ -654,7 +657,7 @@ function updateCounts() {
     Object.keys(counts).forEach(k => {
         const st = document.getElementById('stat-' + k);
         if (st) st.textContent = counts[k];
-        document.querySelectorAll('[data-tabkey="' + k + '"] .outcome-count')
+        document.querySelectorAll('[data-tabkey="' + k + '"] .step-count')
             .forEach(el => el.textContent = counts[k]);
     });
 }

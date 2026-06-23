@@ -113,8 +113,9 @@
     .modal-btn.green:hover { background:#166534; }
 
     /* Import modal */
-    .imp-file { display:block;width:100%;border:2px dashed #d1d5db;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fafafa;font-size:12px;color:#6b7280;margin-bottom:12px; }
-    .imp-file input { display:block;width:100%;margin-top:8px;font-size:12px; }
+    .imp-file { display:block;width:100%;border:2px dashed #d1d5db;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fafafa;font-size:12px;color:#6b7280;margin-bottom:12px;transition:all .15s; }
+    .imp-file:hover { border-color:#15803d;background:#f0fdf4;color:#15803d; }
+    .imp-file input[type="file"] { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
     .imp-cols { font-size:11px;color:#6b7280;background:#f9fafb;border:1px solid #f3f4f6;border-radius:8px;padding:10px 12px;line-height:1.6;margin-bottom:12px;text-align:left; }
     .imp-cols code { background:#eef2ff;color:#4338ca;padding:1px 5px;border-radius:4px;font-size:11px; }
     .tmpl-link { display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#15803d;text-decoration:none;margin-bottom:14px; }
@@ -192,7 +193,7 @@
             Download Template</a>
         <form method="POST" action="{{ route('history_penilaian_kalibrasi.import.penilaian') }}" enctype="multipart/form-data">
             @csrf
-            <label class="imp-file">Pilih file Excel/CSV<input type="file" name="file" accept=".xlsx,.xls,.csv" required></label>
+            <label class="imp-file">Pilih file Excel/CSV<input type="file" name="file" accept=".xlsx,.xls,.csv" required onchange="updateImpFileLabel(this)"></label>
             <div class="modal-actions">
                 <button type="button" class="modal-btn cancel" onclick="closeImport('Pen')">Batal</button>
                 <button type="submit" class="modal-btn green">Import</button>
@@ -210,7 +211,7 @@
             Download Template</a>
         <form method="POST" action="{{ route('history_penilaian_kalibrasi.import.kalibrasi') }}" enctype="multipart/form-data">
             @csrf
-            <label class="imp-file">Pilih file Excel/CSV<input type="file" name="file" accept=".xlsx,.xls,.csv" required></label>
+            <label class="imp-file">Pilih file Excel/CSV<input type="file" name="file" accept=".xlsx,.xls,.csv" required onchange="updateImpFileLabel(this)"></label>
             <div class="modal-actions">
                 <button type="button" class="modal-btn cancel" onclick="closeImport('Kal')">Batal</button>
                 <button type="submit" class="modal-btn green">Import</button>
@@ -519,6 +520,7 @@ document.getElementById('modalHapus').addEventListener('click', function(e){ if(
 function openImport(w){ var m=document.getElementById('modalImport'+w); if(m){ m.classList.add('show'); document.body.style.overflow='hidden'; } }
 function closeImport(w){ var m=document.getElementById('modalImport'+w); if(m){ m.classList.remove('show'); document.body.style.overflow=''; } }
 ['Pen','Kal'].forEach(function(w){ var m=document.getElementById('modalImport'+w); if(m) m.addEventListener('click', function(e){ if(e.target===this) closeImport(w); }); });
+function updateImpFileLabel(input){ if(input.files && input.files[0]) input.closest('label').childNodes[0].textContent = input.files[0].name; }
 
 // ===== SIDE PANEL =====
 function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }

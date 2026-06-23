@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\TalentPool;
 use App\Models\Karyawan;
+use App\Exports\TalentPoolExport;
+use App\Exports\TemplateTalentPoolExport;
+use App\Imports\TalentPoolImport;
 use App\Traits\LogsActivity;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -107,8 +111,8 @@ class TalentPoolController extends Controller
 
     public function destroy(TalentPool $talentPool)
     {
-        $periode  = $talentPool->periode;
-        $nama     = $talentPool->karyawan->nama ?? '-';
+        $periode     = $talentPool->periode;
+        $nama        = $talentPool->karyawan->nama ?? '-';
         $klasifikasi = $talentPool->klasifikasi;
         $talentPool->delete();
 
@@ -117,5 +121,78 @@ class TalentPoolController extends Controller
 
         return redirect()->route('talent_pool.index', ['periode' => $periode])
             ->with('success', 'Karyawan berhasil dihapus dari Talent Pool!');
+    }
+
+    // ===== EXPORT =====
+    public function export(Request $request)
+    {
+        $filename = 'talent-pool-' . ($request->periode ?? now()->year) . '-' . now()->format('d-m-Y') . '.xlsx';
+        return Excel::download(
+            new TalentPoolExport(
+                $request->periode,
+                $request->klasifikasi,
+                $request->search
+            ),
+            $filename
+        );
+    }
+
+    // ===== IMPORT =====
+    public function importPage()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+        return view('talent_pool.import');
+    }
+
+    public function import(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], [
+            'file.required' => 'File wajib dipilih.',
+            'file.mimes'    => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            'file.max'      => 'Ukuran file maksimal 10MB.',
+        ]);
+
+        try {
+            $import = new TalentPoolImport();
+            Excel::import($import, $request->file('file'));
+
+            $msg = "Berhasil mengimport {$import->getImported()} data talent pool.";
+            if ($import->getSkipped() > 0) {
+                $msg .= " {$import->getSkipped()} data dilewati (NIK tidak ditemukan / duplikat / format salah).";
+            }
+
+            $this->log('import', 'Talent Pool', 'Import Excel', "Berhasil import {$import->getImported()} data");
+
+            return redirect()->route('talent_pool.index')->with('success', $msg);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses fitur ini.');
+        }
+
+        return Excel::download(
+            new TemplateTalentPoolExport(),
+            'template-import-talent-pool.xlsx'
+        );
     }
 }

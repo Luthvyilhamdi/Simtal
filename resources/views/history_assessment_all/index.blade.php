@@ -208,37 +208,6 @@
         <div class="page-title">History Assessment</div>
         <div class="page-sub">Riwayat assessment seluruh karyawan</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        @if(auth()->user()->isSuperAdmin())
-        <a href="{{ route('history_assessment_all.import') }}"
-           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Import
-        </a>
-        @endif
-        <div style="position:relative;" id="exportWrap">
-            <button onclick="toggleExportMenu()" id="exportBtn"
-                style="display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:11px;height:11px;" id="exportChevron"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div id="exportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:white;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;min-width:210px;z-index:100;">
-                <a href="{{ route('history_assessment_all.export', request()->query()) }}"
-                   style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;border-bottom:1px solid #f3f4f6;transition:background 0.12s;"
-                   onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
-                    <span style="width:26px;height:26px;border-radius:7px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:14px;">📋</span>
-                    Export Rekomendasi
-                </a>
-                <a href="{{ route('history_assessment_all.export.kompetensi', request()->query()) }}"
-                   style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;transition:background 0.12s;"
-                   onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'">
-                    <span style="width:26px;height:26px;border-radius:7px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:14px;">⭐</span>
-                    Export Kompetensi
-                </a>
-            </div>
-        </div>
-    </div>
 </div>
 
 {{-- STATS --}}
@@ -308,6 +277,38 @@
                 <a href="{{ route('history_assessment_all.index') }}" class="btn-reset">× Reset</a>
             @endif
         </form>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('history_assessment_all.import') }}"
+               style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import
+            </a>
+            @endif
+            <div style="position:relative;" id="exportWrap">
+                <button onclick="toggleExportMenu()" id="exportBtn"
+                    style="display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:11px;height:11px;" id="exportChevron"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div id="exportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:white;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;min-width:210px;z-index:100;">
+                    <a href="{{ route('history_assessment_all.export', request()->query()) }}"
+                       style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;border-bottom:1px solid #f3f4f6;transition:background 0.12s;"
+                       onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
+                        <span style="width:26px;height:26px;border-radius:7px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:14px;">📋</span>
+                        Export Rekomendasi
+                    </a>
+                    <a href="{{ route('history_assessment_all.export.kompetensi', request()->query()) }}"
+                       style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;transition:background 0.12s;"
+                       onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'">
+                        <span style="width:26px;height:26px;border-radius:7px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:14px;">⭐</span>
+                        Export Kompetensi
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="table-card">

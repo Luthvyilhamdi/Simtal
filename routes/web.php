@@ -197,6 +197,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/',               [TalentPoolController::class, 'store'])->name('store');
             Route::put('/{talentPool}',    [TalentPoolController::class, 'update'])->name('update');
             Route::delete('/{talentPool}', [TalentPoolController::class, 'destroy'])->name('destroy');
+            Route::get('/export',        [TalentPoolController::class, 'export'])->name('export');
+            Route::get('/import',        [TalentPoolController::class, 'importPage'])->name('import');
+            Route::post('/import',       [TalentPoolController::class, 'import'])->name('import.store');
+            Route::get('/import/template',[TalentPoolController::class, 'downloadTemplate'])->name('import.template');
         });
 
         // Penilaian Karyawan

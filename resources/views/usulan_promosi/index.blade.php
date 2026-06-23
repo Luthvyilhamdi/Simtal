@@ -80,14 +80,17 @@
 .stepper { display: flex; align-items: center; flex: 1; min-width: 0; overflow-x: auto; }
 .step-item { display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent; cursor: pointer; font-family: inherit; padding: 4px 6px; border-radius: 8px; transition: background .12s; white-space: nowrap; }
 .step-item:hover { background: #f9fafb; }
-.step-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #f3f4f6; color: #9ca3af; flex-shrink: 0; transition: all .15s; }
-.step-item.is-done .step-circle { background: #15803d; color: white; }
-.step-item.is-active .step-circle { background: #15803d; color: white; box-shadow: 0 0 0 3px rgba(21,128,61,.15); }
+.step-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: white; color: #9ca3af; border: 2px solid #e5e7eb; flex-shrink: 0; transition: all .15s; box-sizing: border-box; }
+.step-check { width: 12px; height: 12px; stroke: white; fill: none; stroke-width: 3; display: none; }
+.step-item.is-done .step-circle { background: #15803d; border-color: #15803d; color: white; }
+.step-item.is-done .step-check { display: block; }
+.step-item.is-done .step-num { display: none; }
+.step-item.is-active .step-circle { background: #1d4ed8; border-color: #1d4ed8; color: white; box-shadow: 0 0 0 3px rgba(29,78,216,.15); }
 .step-label { font-size: 13px; font-weight: 600; color: #9ca3af; }
-.step-item.is-done .step-label,
-.step-item.is-active .step-label { color: #111827; }
+.step-item.is-done .step-label { color: #6b7280; }
+.step-item.is-active .step-label { color: #111827; font-weight: 700; }
 .step-count { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; background: #f3f4f6; color: #6b7280; }
-.step-item.is-active .step-count { background: #dcfce7; color: #15803d; }
+.step-item.is-active .step-count { background: #dbeafe; color: #1d4ed8; }
 .step-connector { width: 26px; height: 2px; background: #e5e7eb; flex-shrink: 0; margin: 0 2px; }
 .step-connector.is-done { background: #15803d; }
 
@@ -494,7 +497,10 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
             @foreach($steps as $k => $label)
             @php $idx = $stepOrder[$k]; $state = $idx < $activeStepIdx ? 'is-done' : ($idx === $activeStepIdx ? 'is-active' : ''); @endphp
             <button class="step-item {{ $state }}" onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}">
-                <span class="step-circle">{{ $idx + 1 }}</span>
+                <span class="step-circle">
+                    <svg class="step-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span class="step-num">{{ $idx + 1 }}</span>
+                </span>
                 <span class="step-label">{{ $label }}</span>
                 <span class="step-count">{{ $counts[$k] }}</span>
             </button>

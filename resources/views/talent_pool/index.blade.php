@@ -11,7 +11,6 @@
     .btn-primary:hover { background:#166534; }
     .btn-primary svg { width:13px;height:13px;stroke:white;fill:none;stroke-width:2.5; }
 
-    /* Search mini */
     .search-mini { display:flex;align-items:center;gap:8px;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;width:220px;transition:border-color .15s; }
     .search-mini:focus-within { border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
     .search-mini svg { width:14px;height:14px;stroke:#9ca3af;fill:none;flex-shrink:0; }
@@ -23,7 +22,6 @@
     .search-spinner.show { display:block; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* Stats */
     .stats-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px; }
     .stat-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;display:flex;align-items:center;gap:14px; }
     .stat-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
@@ -31,14 +29,12 @@
     .stat-num { font-size:24px;font-weight:800;color:#111827; }
     .stat-label { font-size:12px;color:#6b7280;margin-top:1px; }
 
-    /* Filter bar */
     .filter-bar { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
     .filter-select { border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 14px;font-size:13px;font-family:inherit;color:#111827;background:white;outline:none;cursor:pointer;appearance:none;padding-right:28px; }
     .filter-select:focus { border-color:#15803d; }
     .select-wrap { position:relative; }
     .select-wrap::after { content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
 
-    /* Table */
     .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
     .table-wrap { overflow-x:auto; }
     table { width:100%;border-collapse:collapse; }
@@ -62,12 +58,10 @@
     .btn-act.del svg { stroke:#ef4444; }
     .btn-act svg { width:13px;height:13px;fill:none;stroke-width:2; }
 
-    /* Empty */
     .empty-state { text-align:center;padding:60px 20px; }
     .empty-state svg { width:48px;height:48px;margin:0 auto 12px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
     .empty-state p { font-size:14px;font-weight:600;color:#6b7280;margin-bottom:4px; }
 
-    /* Toast */
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
     .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:280px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn .35s cubic-bezier(.4,0,.2,1) forwards; }
     .toast.hiding { animation:toastOut .3s forwards; }
@@ -79,7 +73,6 @@
     @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translateX(110%);} }
     @keyframes toastProgress { from{width:100%;}to{width:0%;} }
 
-    /* Modal */
     .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center; }
     .modal-backdrop.show { display:flex; }
     .modal-box { background:white;border-radius:16px;padding:28px;width:100%;max-width:400px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;animation:modalIn .25s cubic-bezier(.4,0,.2,1); }
@@ -92,6 +85,8 @@
     .modal-btn.cancel { background:#f9fafb;color:#374151;border:1px solid #e5e7eb; }
     .modal-btn.danger { background:#ef4444;color:white; }
     .modal-btn.danger:hover { background:#dc2626; }
+    .modal-btn.green { background:#15803d;color:white; }
+    .modal-btn.green:hover { background:#166534; }
     @keyframes modalIn { from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);} }
     .edit-modal-box { background:white;border-radius:16px;padding:28px;width:100%;max-width:440px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn .25s cubic-bezier(.4,0,.2,1); }
     .edit-modal-title { font-size:16px;font-weight:700;color:#111827;margin-bottom:18px; }
@@ -107,6 +102,14 @@
     .klas-name { font-size:13px;font-weight:700;color:#374151; }
     .klas-card.sel-longlist  .klas-name { color:#1d4ed8; }
     .klas-card.sel-shortlist .klas-name { color:#15803d; }
+
+    /* Import modal */
+    .imp-cols { font-size:11px;color:#6b7280;background:#f9fafb;border:1px solid #f3f4f6;border-radius:8px;padding:10px 12px;line-height:1.6;margin-bottom:12px;text-align:left; }
+    .imp-cols code { background:#eef2ff;color:#4338ca;padding:1px 5px;border-radius:4px;font-size:11px; }
+    .imp-file-label { display:block;width:100%;border:2px dashed #d1d5db;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#fafafa;font-size:12px;color:#6b7280;margin-bottom:12px;box-sizing:border-box;transition:all .15s; }
+    .imp-file-label:hover { border-color:#15803d;background:#f0fdf4;color:#15803d; }
+    .imp-file-label input[type="file"] { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    .imp-tmpl { display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#15803d;text-decoration:none;margin-bottom:14px; }
 
     @media (max-width:640px) {
         .stats-row { grid-template-columns:1fr; }
@@ -177,16 +180,61 @@
     </div>
 </div>
 
+{{-- Modal Import --}}
+@if(auth()->user()->isSuperAdmin())
+<div class="modal-backdrop" id="modalImport">
+    <div class="modal-box" style="max-width:440px;text-align:left;">
+        <div class="modal-title" style="text-align:left;margin-bottom:12px;">📥 Import Talent Pool</div>
+        <div class="imp-cols">
+            Kolom: <code>NIK</code> <code>Periode</code> <code>Klasifikasi</code> <code>Catatan</code><br>
+            Klasifikasi: <strong>longlist</strong> atau <strong>shortlist</strong> · Duplikat dilewati otomatis
+        </div>
+        <a href="{{ route('talent_pool.import.template') }}"
+           id="btnTemplate"
+           class="imp-tmpl"
+           onclick="startDownload(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="dlText">Download Template</span>
+        </a>
+        <form method="POST" action="{{ route('talent_pool.import.store') }}" enctype="multipart/form-data" id="importForm">
+            @csrf
+            <label class="imp-file-label" id="importLabel">
+                📄 Pilih file Excel/CSV
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required onchange="updateImportLabel(this)" />
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn cancel" onclick="closeImport()">Batal</button>
+                <button type="submit" class="modal-btn green" id="btnImport" onclick="startImport(this)">Import</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
 {{-- PAGE HEADER --}}
 <div class="page-header">
     <div>
         <div class="page-title">🎯 Data Talent Pool</div>
         <div class="page-sub">Daftar karyawan Longlist & Shortlist per periode</div>
     </div>
-    <a href="{{ route('talent_pool.create') }}" class="btn-primary">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Tambah Talent
-    </a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        @if(auth()->user()->isSuperAdmin())
+        <button onclick="openImport()"
+           style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Import
+        </button>
+        @endif
+        <a href="{{ route('talent_pool.export', request()->query()) }}"
+           style="display:inline-flex;align-items:center;gap:8px;background:#7c3aed;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Excel
+        </a>
+        <a href="{{ route('talent_pool.create') }}" class="btn-primary">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Talent
+        </a>
+    </div>
 </div>
 
 {{-- Stats --}}
@@ -224,7 +272,6 @@
 <div class="filter-bar">
     <form method="GET" action="{{ route('talent_pool.index') }}" id="filterForm" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
         <input type="hidden" name="search" id="searchHidden" value="{{ request('search') }}">
-        {{-- Semua di kanan: search dulu, baru filter --}}
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <div class="search-mini">
                 <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -253,15 +300,6 @@
         </div>
     </form>
 </div>
-
-{{-- Hitung MDG di luar loop --}}
-@php
-    function fmtBulanTalent($b) {
-        if ($b === null) return '-';
-        $th = floor($b / 12); $bl = $b % 12;
-        return ($th > 0 ? $th.'th ' : '').($bl > 0 ? $bl.'bl' : ($th == 0 ? '0bl' : ''));
-    }
-@endphp
 
 {{-- Table --}}
 <div class="table-card">
@@ -302,13 +340,11 @@
                     <td>
                         <span class="badge badge-{{ $t->klasifikasi }}">{{ $t->klasifikasi_label }}</span>
                     </td>
-
                     <td style="font-size:12px;color:#6b7280;max-width:160px">
                         {{ $t->catatan ? \Illuminate\Support\Str::limit($t->catatan, 40) : '-' }}
                     </td>
                     <td>
                         <div class="td-actions">
-                            {{-- FIX: Ganti onclick="{{ }}" dengan data-* attributes agar VSCode tidak error --}}
                             <button type="button" class="btn-act edit"
                                 data-id="{{ $t->id }}"
                                 data-klas="{{ $t->klasifikasi }}"
@@ -327,7 +363,6 @@
             </tbody>
         </table>
     </div>
-    {{-- Pagination Footer --}}
     <div id="paginationFooter" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:8px;">
         <span>
             Menampilkan <strong>{{ $talents->firstItem() ?? 0 }}</strong>–<strong>{{ $talents->lastItem() ?? 0 }}</strong>
@@ -373,12 +408,40 @@
         @endif
     </div>
     @else
-    <div id="tableBody">
-        <div class="empty-state">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <p>Belum ada data talent untuk periode {{ $periode }}</p>
-            <span style="font-size:12px">Klik "Tambah Talent" untuk mulai menambahkan</span>
-        </div>
+    {{-- Empty state — ditampilkan di dalam tbody agar posisi center di dalam tabel --}}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>NIK</th>
+                    <th>Nama Karyawan</th>
+                    <th>Jabatan Saat Ini</th>
+                    <th>Job Grade</th>
+                    <th>Person Grade</th>
+                    <th>Band</th>
+                    <th>Klasifikasi</th>
+                    <th>Catatan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td colspan="10">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            @if(request('search'))
+                                <p>Tidak ada data talent yang cocok dengan "<strong>{{ request('search') }}</strong>"</p>
+                                <span style="font-size:12px;color:#9ca3af">Coba kata kunci lain atau hapus filter pencarian</span>
+                            @else
+                                <p>Belum ada data talent untuk periode {{ $periode }}</p>
+                                <span style="font-size:12px;color:#9ca3af">Klik "Tambah Talent" untuk mulai menambahkan</span>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     @endif
 </div>
@@ -430,30 +493,74 @@ function selectKlas(val) {
     document.querySelector(`input[name="klasifikasi"][value="${val}"]`).checked = true;
 }
 
-// Filter submit — bawa search value supaya tidak hilang saat ganti periode/klasifikasi
+// ===== IMPORT MODAL =====
+function openImport() {
+    const m = document.getElementById('modalImport');
+    if (m) { m.classList.add('show'); document.body.style.overflow = 'hidden'; }
+}
+function closeImport() {
+    const m = document.getElementById('modalImport');
+    if (m) {
+        m.classList.remove('show');
+        document.body.style.overflow = '';
+        document.getElementById('importForm').reset();
+        const lbl = document.getElementById('importLabel');
+        if (lbl) lbl.childNodes[0].textContent = '📄 Pilih file Excel/CSV';
+        const btn = document.getElementById('btnImport');
+        if (btn) { btn.disabled = false; btn.textContent = 'Import'; }
+    }
+}
+function updateImportLabel(input) {
+    if (input.files && input.files[0]) {
+        input.closest('label').childNodes[0].textContent = '📄 ' + input.files[0].name;
+    }
+}
+function startImport(btn) {
+    const fileInput = document.querySelector('#importForm input[type="file"]');
+    if (!fileInput || !fileInput.files || !fileInput.files.length) return;
+    btn.disabled = true;
+    btn.textContent = 'Mengimport...';
+}
+function startDownload(el) {
+    const text = document.getElementById('dlText');
+    text.textContent      = '✓ Mengunduh...';
+    el.style.pointerEvents = 'none';
+    setTimeout(() => {
+        text.textContent      = 'Download Template';
+        el.style.pointerEvents = '';
+    }, 2500);
+}
+
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        const btn = document.getElementById('btnImport');
+        if (btn) { btn.disabled = false; btn.textContent = 'Import'; }
+    }
+});
+
+const modalImport = document.getElementById('modalImport');
+if (modalImport) modalImport.addEventListener('click', function(e) { if (e.target === this) closeImport(); });
+
 function submitFilter() {
     document.getElementById('searchHidden').value = document.getElementById('searchInput').value;
     document.getElementById('filterForm').submit();
 }
 
 ['modalHapus','modalEdit'].forEach(id => {
-    document.getElementById(id).addEventListener('click', function(e) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', function(e) {
         if (e.target === this) { closeHapus(); closeEdit(); }
     });
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeHapus(); closeEdit(); } });
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeHapus(); closeEdit(); closeImport(); }
+});
 
-// FIX: Delegasi event untuk tombol edit & hapus (menggantikan onclick inline yang error di VSCode)
 document.addEventListener('click', function(e) {
     const editBtn = e.target.closest('.btn-act.edit');
-    if (editBtn) {
-        openEdit(editBtn.dataset.id, editBtn.dataset.klas, editBtn.dataset.catatan);
-        return;
-    }
+    if (editBtn) { openEdit(editBtn.dataset.id, editBtn.dataset.klas, editBtn.dataset.catatan); return; }
     const delBtn = e.target.closest('.btn-act.del');
-    if (delBtn) {
-        openHapus(delBtn.dataset.id, delBtn.dataset.nama);
-    }
+    if (delBtn) { openHapus(delBtn.dataset.id, delBtn.dataset.nama); }
 });
 
 // === REAL-TIME SEARCH ===
