@@ -23,6 +23,7 @@ class AkunController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
+            'nik'      => 'required|string|max:30|unique:users,nik',
             'email'    => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role'     => 'required|in:user,admin,super_admin',
@@ -30,6 +31,7 @@ class AkunController extends Controller
 
         User::create([
             'name'     => $request->name,
+            'nik'      => $request->nik,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
@@ -44,12 +46,14 @@ class AkunController extends Controller
     {
         $request->validate([
             'name'  => 'required|string|max:255',
+            'nik'   => 'required|string|max:30|unique:users,nik,' . $akun->id,
             'email' => 'required|email|unique:users,email,' . $akun->id,
             'role'  => 'required|in:user,admin,super_admin',
         ]);
 
         $data = [
             'name'  => $request->name,
+            'nik'   => $request->nik,
             'email' => $request->email,
             'role'  => $request->role,
         ];

@@ -142,6 +142,11 @@
                 <input type="text" name="name" id="editName" class="form-input" required />
             </div>
             <div class="form-group">
+                <label class="form-label">NIK</label>
+                <input type="text" name="nik" id="editNik" class="form-input" required />
+                <span class="form-hint">Dipakai untuk login. Harus sama dengan NIK di Data Karyawan.</span>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Email</label>
                 <input type="email" name="email" id="editEmail" class="form-input" required />
             </div>
@@ -212,6 +217,15 @@
                 <input type="text" name="name" value="{{ old('name') }}"
                        class="form-input" placeholder="Nama lengkap" required />
                 @error('name')
+                    <div class="error-msg">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">NIK *</label>
+                <input type="text" name="nik" value="{{ old('nik') }}"
+                       class="form-input" placeholder="Nomor Induk Karyawan" required />
+                <span class="form-hint">Dipakai untuk login ke SIMTAL.</span>
+                @error('nik')
                     <div class="error-msg">{{ $message }}</div>
                 @enderror
             </div>
@@ -289,6 +303,11 @@
                                     @endif
                                 </div>
                                 <div class="user-email">{{ $user->email }}</div>
+                                @if($user->nik)
+                                    <div class="user-email">NIK {{ $user->nik }}</div>
+                                @else
+                                    <span class="role-badge" style="background:#fef2f2;color:#dc2626;margin-top:3px;">NIK belum diisi</span>
+                                @endif
                             </div>
                         </div>
                     </td>
@@ -307,11 +326,12 @@
                             <button type="button" class="btn-edit-sm"
                                 data-id="{{ $user->id }}"
                                 data-name="{{ $user->name }}"
+                                data-nik="{{ $user->nik }}"
                                 data-email="{{ $user->email }}"
                                 data-role="{{ $user->role }}"
                                 data-url="{{ route('akun.update', $user) }}"
                                 onclick="openEditModal(this)">
-                                ✏️ Edit
+                                Edit
                             </button>
                             <button type="button"
                                 class="btn-del-sm {{ $user->id === auth()->id() ? 'disabled' : '' }}"
@@ -398,6 +418,7 @@
     // Modal Edit
     function openEditModal(btn) {
         document.getElementById('editName').value  = btn.dataset.name;
+        document.getElementById('editNik').value   = btn.dataset.nik;
         document.getElementById('editEmail').value = btn.dataset.email;
         document.getElementById('editRole').value  = btn.dataset.role;
         document.getElementById('formEdit').action = btn.dataset.url;

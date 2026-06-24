@@ -180,9 +180,9 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" value="{{ old('email') }}"
-                       placeholder="email@example.com" required autofocus />
+                <label>NIK</label>
+                <input type="text" name="nik" value="{{ old('nik') }}"
+                       placeholder="Nomor Induk Karyawan" inputmode="numeric" required autofocus />
             </div>
             <div class="form-group">
                 <label>Password</label>
