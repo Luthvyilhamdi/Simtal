@@ -68,19 +68,19 @@
         .brand-name { font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 1px; white-space: nowrap; }
         .brand-sub { font-size: 10px; color: #9ca3af; margin-top: 1px; white-space: nowrap; font-weight: 500; }
 
-        /* Collapse handle: bulat, menempel di tepi border sidebar (pola umum sidebar app corporate) */
+        /* Collapse handle: kapsul menempel di tepi border sidebar, ikon double-chevron khas app corporate */
         .collapse-btn {
-            position: absolute; top: 31px; right: -13px;
-            width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
-            border: 1px solid #e5e7eb; background: white;
+            position: absolute; top: 27px; right: -14px;
+            width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0;
+            border: 1px solid #e5e7eb; background: linear-gradient(180deg, #ffffff, #f9fafb);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: #6b7280; z-index: 55;
-            box-shadow: 0 1px 3px rgba(15,23,42,.1);
-            transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: 0 2px 6px rgba(15,23,42,.08), 0 0 0 3px white;
+            transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
         }
-        .collapse-btn:hover { background: #15803d; border-color: #15803d; color: white; box-shadow: 0 3px 10px rgba(21,128,61,.3); transform: scale(1.08); }
-        .collapse-btn:active { transform: scale(0.94); }
-        .collapse-btn svg { width: 12px; height: 12px; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .collapse-btn:hover { background: linear-gradient(135deg, #16a34a, #15803d); border-color: #15803d; color: white; box-shadow: 0 6px 16px rgba(21,128,61,.35), 0 0 0 3px white; transform: scale(1.08); }
+        .collapse-btn:active { transform: scale(0.92); }
+        .collapse-btn svg { width: 14px; height: 14px; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
 
         .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; overflow-x: hidden; }
         .sidebar-nav::-webkit-scrollbar { width: 3px; }
@@ -92,8 +92,8 @@
 
         .nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: 9px; color: #374151; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.12s; margin-bottom: 2px; white-space: nowrap; overflow: hidden; position: relative; }
         .nav-link:hover { background: #f3f4f6; color: #111827; }
-        .nav-link.active { background: #15803d; color: white; font-weight: 600; box-shadow: 0 1px 2px rgba(21,128,61,.2); }
-        .nav-link.active:hover { background: #166534; color: white; }
+        .nav-link.active { background: #d6f5e6; color: #0f9b6e; font-weight: 700; box-shadow: none; }
+        .nav-link.active:hover { background: #c4f0db; color: #0f9b6e; }
         .nav-link svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; }
         .nav-text { overflow: hidden; text-overflow: ellipsis; }
 
@@ -211,7 +211,7 @@
             </div>
         </div>
         <button class="collapse-btn" id="collapseBtn" onclick="toggleSidebar()" title="Perkecil/perbesar sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="17 17 12 12 17 7"/></svg>
         </button>
     </div>
 
@@ -301,15 +301,22 @@
                 </a>
             </div>
 
-            {{-- Assessment (link langsung) --}}
-            <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
+            {{-- Assessment & Penilaian (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*') ? 'active open' : '' }}" data-tooltip="Assessment & Penilaian" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                <span class="nav-text">History Assessment</span>
-            </a>
-            <a href="{{ route('history_penilaian_kalibrasi.index') }}" data-tooltip="Penilaian & Kalibrasi" class="nav-link {{ request()->routeIs('history_penilaian_kalibrasi.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
-                <span class="nav-text">Penilaian &amp; Kalibrasi</span>
-            </a>
+                <span class="nav-text">Assessment & Penilaian</span>
+                <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="master-sub {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*') ? 'open' : '' }}">
+                <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    <span class="nav-text">History Assessment</span>
+                </a>
+                <a href="{{ route('history_penilaian_kalibrasi.index') }}" data-tooltip="Penilaian & Kalibrasi" class="nav-link {{ request()->routeIs('history_penilaian_kalibrasi.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
+                    <span class="nav-text">Penilaian &amp; Kalibrasi</span>
+                </a>
+            </div>
         </div>
 
         <div class="nav-sep"></div>
