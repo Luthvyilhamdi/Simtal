@@ -35,7 +35,8 @@
     .kpi-num { font-size:28px;font-weight:800;color:#111827;line-height:1;margin-bottom:5px; }
     .kpi-sub { font-size:11px;color:#6b7280; }
     .kpi-badge { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:5px;display:inline-block; }
-    .kpi-icon { width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+    .kpi-icon { width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .kpi-icon svg { width:20px;height:20px;fill:none;stroke-width:1.8; }
     .kpi-icon.green  { background:#f0fdf4; }
     .kpi-icon.blue   { background:#eff6ff; }
     .kpi-icon.purple { background:#f5f3ff; }
@@ -78,6 +79,10 @@
 
     .demo-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
     .demo-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px; }
+
+    .so-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px; }
+    .tp-grid { display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px; }
+    @media (min-width:880px) { .tp-grid { grid-template-columns:1fr 1fr; } }
 
     .pejabat-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px; }
     .pejabat-mini { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:14px;text-align:center; }
@@ -150,12 +155,12 @@
         .kpi-grid { grid-template-columns:1fr 1fr;gap:8px; }
         .kpi-card { padding:14px 12px; }
         .kpi-num { font-size:22px; }
-        .kpi-icon { width:36px;height:36px;font-size:16px; }
-        .so-grid { grid-template-columns:1fr 1fr !important;gap:8px !important; }
+        .kpi-icon { width:36px;height:36px; }
+        .kpi-icon svg { width:16px;height:16px; }
+        .so-grid { gap:8px; }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr;gap:10px; }
         .chart-card { padding:14px; }
         .chart-card-title { font-size:12px; }
-        .tp-grid { grid-template-columns:1fr !important; }
         .bar-label { min-width:60px;font-size:10px; }
         .bar-fill { font-size:9px; }
         .pejabat-grid { grid-template-columns:repeat(3,1fr);gap:8px; }
@@ -178,13 +183,13 @@
         .kpi-num { font-size:20px; }
         .kpi-label { font-size:9px; }
         .kpi-sub { font-size:10px; }
-        .kpi-icon { display:none; }
+        .kpi-icon { width:30px;height:30px; }
+        .kpi-icon svg { width:15px;height:15px; }
         .welcome-card { padding:14px 12px; }
         .welcome-title { font-size:14px; }
         .welcome-pills { gap:4px; }
         .welcome-pill { font-size:10px;padding:2px 8px; }
         .welcome-sub { display:none; }
-        .so-grid { grid-template-columns:1fr 1fr !important; }
         .pejabat-grid { grid-template-columns:repeat(3,1fr);gap:6px; }
         .pejabat-num { font-size:18px; }
         .sec-title { font-size:11px; }
@@ -208,10 +213,21 @@
     data-so-non-core="{{ $soNonCore }}"
     style="display:none"></div>
 
+@php
+$icoUsers     = '<svg viewBox="0 0 24 24" stroke="#15803d"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+$icoTrendDash = '<svg viewBox="0 0 24 24" stroke="#1d4ed8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>';
+$icoClipDash  = '<svg viewBox="0 0 24 24" stroke="#7c3aed"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+$icoStarDash  = '<svg viewBox="0 0 24 24" stroke="#0891b2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+@endphp
+
 {{-- WELCOME --}}
+@php
+$roleDotDash = auth()->user()->isSuperAdmin() ? '#4ade80' : (auth()->user()->isAdmin() ? '#93c5fd' : '#d1d5db');
+$roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isAdmin() ? 'Administrator' : 'User');
+@endphp
 <div class="welcome-card">
     <div style="position:relative;z-index:1;">
-        <div class="welcome-title">Selamat Datang, {{ auth()->user()->name }} 👋</div>
+        <div class="welcome-title">Selamat Datang, {{ auth()->user()->name }}</div>
         <div class="welcome-sub">Sistem Manajemen Talenta — Ringkasan data per hari ini</div>
         <div class="welcome-pills">
             <span class="welcome-pill pill-green">{{ $karyawanAktif }} Karyawan Aktif</span>
@@ -220,9 +236,13 @@
         </div>
     </div>
     <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-        <div class="welcome-date">📅 {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);">
-            {{ auth()->user()->isSuperAdmin() ? '⭐ Super Admin' : (auth()->user()->isAdmin() ? '🔵 Administrator' : '👤 User') }}
+        <div class="welcome-date">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);display:flex;align-items:center;gap:5px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:{{ $roleDotDash }};display:inline-block"></span>
+            {{ $roleNameDash }}
         </div>
     </div>
 </div>
@@ -238,7 +258,7 @@
             <span class="kpi-badge" style="background:#dcfce7;color:#15803d;">+{{ $karyawanBaru }} bulan ini</span>
             @endif
         </div>
-        <div class="kpi-icon green">👥</div>
+        <div class="kpi-icon green">{!! $icoUsers !!}</div>
     </div>
     <div class="kpi-card blue">
         <div class="kpi-left">
@@ -247,7 +267,7 @@
             <div class="kpi-sub">Tahun {{ now()->year }}</div>
             <span class="kpi-badge" style="background:#dbeafe;color:#1d4ed8;">{{ $promosiThisYear }} promosi · {{ $mutasiThisYear }} mutasi</span>
         </div>
-        <div class="kpi-icon blue">📈</div>
+        <div class="kpi-icon blue">{!! $icoTrendDash !!}</div>
     </div>
     <div class="kpi-card purple">
         <div class="kpi-left">
@@ -257,7 +277,7 @@
             @php $pctReady = $totalAssessment > 0 ? round(($assessmentReady/$totalAssessment)*100) : 0; @endphp
             <span class="kpi-badge" style="background:#f5f3ff;color:#7c3aed;">{{ $pctReady }}% ready rate</span>
         </div>
-        <div class="kpi-icon purple">📋</div>
+        <div class="kpi-icon purple">{!! $icoClipDash !!}</div>
     </div>
     <div class="kpi-card teal">
         <div class="kpi-left">
@@ -275,7 +295,7 @@
                 </div>
             </div>
         </div>
-        <div class="kpi-icon teal">⭐</div>
+        <div class="kpi-icon teal">{!! $icoStarDash !!}</div>
     </div>
 </div>
 
@@ -286,8 +306,8 @@ $pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
 $pctCoreTerisi    = $soCoreMc > 0 ? round(($soCoreTerisi/$soCoreMc)*100) : 0;
 $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100) : 0;
 @endphp
-<div class="sec-title">🏗️ Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
-<div class="so-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px">
+<div class="sec-title">Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+<div class="so-grid">
 
   <div class="kpi-card blue" style="flex-direction:column;align-items:flex-start;gap:6px">
     <div class="kpi-label">Total Posisi</div>
@@ -383,8 +403,8 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 </div>
 
 {{-- TALENT POOL --}}
-<div class="sec-title">🎯 Talent Pool</div>
-<div class="tp-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+<div class="sec-title">Talent Pool</div>
+<div class="tp-grid">
 
     {{-- Tahun Ini --}}
     <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px">
@@ -465,7 +485,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 </div>
 
 {{-- GRAFIK --}}
-<div class="sec-title">📊 Analitik & Grafik</div>
+<div class="sec-title">Analitik & Grafik</div>
 <div class="chart-grid-3">
     <div class="chart-card">
         <div class="chart-card-title">Tren Pergerakan Jabatan</div>
@@ -611,7 +631,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 </div>
 
 {{-- PEJABAT --}}
-<div class="sec-title">⭐ Statistik Pejabat</div>
+<div class="sec-title">Statistik Pejabat</div>
 <div class="pejabat-grid">
     @foreach([['SVP',$pejabatSVP,'svp'],['VP',$pejabatVP,'vp'],['SPM',$pejabatSPM,'spm'],['PM',$pejabatPM,'pm'],['PGS',$pgsAktif,'pgs'],['PJS',$pjsAktif,'pjs']] as [$label,$val,$cls])
     <div class="pejabat-mini">
@@ -624,7 +644,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 </div>
 
 {{-- RINGKASAN DIREKTORAT --}}
-<div class="sec-title">🏢 Ringkasan per Direktorat</div>
+<div class="sec-title">Ringkasan per Direktorat</div>
 <div class="tabel-card">
     <div class="tabel-header">
         <div class="tabel-title">Karyawan & Aktivitas per Direktorat · {{ now()->year }}</div>
@@ -693,11 +713,11 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 </div>
 
 {{-- PEMANTAUAN --}}
-<div class="sec-title">📋 Pemantauan & Aktivitas</div>
+<div class="sec-title">Pemantauan & Aktivitas</div>
 <div class="bottom-grid">
     <div class="list-card">
         <div class="list-card-header">
-            <div class="list-card-title">🕐 Aktivitas Jabatan Terbaru</div>
+            <div class="list-card-title">Aktivitas Jabatan Terbaru</div>
             <a href="{{ route('history_karyawan.index') }}" class="view-all">Lihat Semua →</a>
         </div>
         <div class="list-card-body">
@@ -724,7 +744,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 
     <div class="list-card">
         <div class="list-card-header">
-            <div class="list-card-title">🎯 Mendekati Pensiun</div>
+            <div class="list-card-title">Mendekati Pensiun</div>
             <span style="font-size:10px;color:#9ca3af;">Usia ≥ 53 tahun</span>
         </div>
         <div class="list-card-body">
@@ -750,14 +770,14 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 </div>
             </div>
             @empty
-            <div style="text-align:center;padding:18px;color:#9ca3af;font-size:12px;">✅ Tidak ada</div>
+            <div style="text-align:center;padding:18px;color:#9ca3af;font-size:12px;">Tidak ada</div>
             @endforelse
         </div>
     </div>
 
     <div class="list-card">
         <div class="list-card-header">
-            <div class="list-card-title">⚠️ Assessment Akan Expire</div>
+            <div class="list-card-title">Assessment Akan Expire</div>
             <span style="font-size:10px;color:#9ca3af;">30 hari ke depan</span>
         </div>
         <div class="list-card-body">
@@ -774,14 +794,14 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 </div>
             </div>
             @empty
-            <div style="text-align:center;padding:18px;color:#9ca3af;font-size:12px;">✅ Tidak ada</div>
+            <div style="text-align:center;padding:18px;color:#9ca3af;font-size:12px;">Tidak ada</div>
             @endforelse
         </div>
     </div>
 
     <div class="list-card">
         <div class="list-card-header">
-            <div class="list-card-title">🆕 Karyawan Terbaru</div>
+            <div class="list-card-title">Karyawan Terbaru</div>
             <a href="{{ route('karyawan.index') }}" class="view-all">Lihat Semua →</a>
         </div>
         <div class="list-card-body">

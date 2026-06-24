@@ -288,7 +288,7 @@
             @endif
             <div style="position:relative;" id="exportWrap">
                 <button onclick="toggleExportMenu()" id="exportBtn"
-                    style="display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;">
+                    style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Export
                     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:11px;height:11px;" id="exportChevron"><polyline points="6 9 12 15 18 9"/></svg>

@@ -226,9 +226,9 @@
         </button>
         @endif
         <a href="{{ route('talent_pool.export', request()->query()) }}"
-           style="display:inline-flex;align-items:center;gap:8px;background:#7c3aed;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
+           style="display:inline-flex;align-items:center;gap:8px;background:#374151;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export Excel
+            Export
         </a>
         <a href="{{ route('talent_pool.create') }}" class="btn-primary">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
