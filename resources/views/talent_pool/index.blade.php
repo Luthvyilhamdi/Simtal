@@ -46,7 +46,7 @@
     .td-nik { font-size:12px;color:#6b7280;font-weight:600; }
     .td-nama { font-weight:600;color:#111827; }
     .td-jabatan { font-size:12px;color:#6b7280; }
-    .badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700; }
+    .badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap; }
     .badge-longlist  { background:#dbeafe;color:#1d4ed8; }
     .badge-shortlist { background:#dcfce7;color:#15803d; }
     .badge-band { background:#fdf4ff;color:#a21caf; }
@@ -69,6 +69,10 @@
     .toast-icon svg { width:12px;height:12px;stroke:#16a34a;fill:none;stroke-width:2.5; }
     .toast-close { border:none;background:transparent;color:#9ca3af;cursor:pointer;font-size:18px;padding:0;margin-left:auto; }
     .toast-progress { position:absolute;bottom:0;left:0;height:3px;background:#16a34a;animation:toastProgress 3s linear forwards; }
+    .toast.error { border-color:#fecaca; border-left-color:#dc2626; color:#dc2626; }
+    .toast.error .toast-icon { background:#fee2e2; }
+    .toast.error .toast-icon svg { stroke:#dc2626; }
+    .toast.error .toast-progress { background:#dc2626; }
     @keyframes toastIn { from{opacity:0;transform:translateX(110%);}to{opacity:1;transform:translateX(0);} }
     @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translateX(110%);} }
     @keyframes toastProgress { from{width:100%;}to{width:0%;} }
@@ -126,6 +130,17 @@
         <div class="toast-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div>{{ session('success') }}</div>
         <button class="toast-close" onclick="closeToast()">×</button>
+        <div class="toast-progress"></div>
+    </div>
+</div>
+@endif
+
+@if(session('error') || $errors->any())
+<div class="toast-wrap" id="toastWrapError">
+    <div class="toast error" id="toastError">
+        <div class="toast-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <div>{{ session('error') ?: $errors->first() }}</div>
+        <button class="toast-close" onclick="closeToastError()">×</button>
         <div class="toast-progress"></div>
     </div>
 </div>
@@ -204,7 +219,7 @@
             </label>
             <div class="modal-actions">
                 <button type="button" class="modal-btn cancel" onclick="closeImport()">Batal</button>
-                <button type="submit" class="modal-btn green" id="btnImport" onclick="startImport(this)">Import</button>
+                <button type="submit" class="modal-btn green" id="btnImport">Import</button>
             </div>
         </form>
     </div>
@@ -456,8 +471,15 @@ function closeToast() {
     t.classList.add('hiding');
     setTimeout(() => document.getElementById('toastWrap')?.remove(), 300);
 }
+function closeToastError() {
+    const t = document.getElementById('toastError');
+    if (!t) return;
+    t.classList.add('hiding');
+    setTimeout(() => document.getElementById('toastWrapError')?.remove(), 300);
+}
 window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('toast')) setTimeout(() => closeToast(), 3000);
+    if (document.getElementById('toastError')) setTimeout(() => closeToastError(), 6000);
 });
 
 let hapusId = '';
@@ -515,12 +537,12 @@ function updateImportLabel(input) {
         input.closest('label').childNodes[0].textContent = '📄 ' + input.files[0].name;
     }
 }
-function startImport(btn) {
-    const fileInput = document.querySelector('#importForm input[type="file"]');
-    if (!fileInput || !fileInput.files || !fileInput.files.length) return;
-    btn.disabled = true;
-    btn.textContent = 'Mengimport...';
-}
+document.getElementById('importForm')?.addEventListener('submit', function(e) {
+    const fileInput = this.querySelector('input[type="file"]');
+    if (!fileInput || !fileInput.files || !fileInput.files.length) { e.preventDefault(); return; }
+    const btn = document.getElementById('btnImport');
+    if (btn) { setTimeout(() => { btn.disabled = true; btn.textContent = 'Mengimport...'; }, 0); }
+});
 function startDownload(el) {
     const text = document.getElementById('dlText');
     text.textContent      = '✓ Mengunduh...';

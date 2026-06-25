@@ -18,6 +18,18 @@ class TalentPoolImport implements ToModel, WithHeadingRow, SkipsOnError
     protected int $imported = 0;
     protected int $skipped  = 0;
 
+    protected array $karyawanIdByNik;
+    protected array $existingCombos;
+
+    public function __construct()
+    {
+        $this->karyawanIdByNik = Karyawan::pluck('id', 'nik')->all();
+        $this->existingCombos  = TalentPool::select('karyawan_id', 'periode')
+            ->get()
+            ->mapWithKeys(fn ($t) => [$t->karyawan_id . '-' . $t->periode => true])
+            ->all();
+    }
+
     public function model(array $row)
     {
         $nik         = trim($row['nik'] ?? '');
@@ -30,22 +42,24 @@ class TalentPoolImport implements ToModel, WithHeadingRow, SkipsOnError
             return null;
         }
 
-        $karyawan = Karyawan::where('nik', $nik)->first();
-        if (!$karyawan) {
+        $karyawanId = $this->karyawanIdByNik[$nik] ?? null;
+        if (!$karyawanId) {
             $this->skipped++;
             return null;
         }
 
-        // Skip duplikat
-        if (TalentPool::where('karyawan_id', $karyawan->id)->where('periode', $periode)->exists()) {
+        // Skip duplikat (sudah ada di DB, atau muncul dobel di file yang sama)
+        $comboKey = $karyawanId . '-' . $periode;
+        if (isset($this->existingCombos[$comboKey])) {
             $this->skipped++;
             return null;
         }
+        $this->existingCombos[$comboKey] = true;
 
         $this->imported++;
 
         return new TalentPool([
-            'karyawan_id' => $karyawan->id,
+            'karyawan_id' => $karyawanId,
             'periode'     => $periode,
             'klasifikasi' => $klasifikasi,
             'catatan'     => $catatan,
