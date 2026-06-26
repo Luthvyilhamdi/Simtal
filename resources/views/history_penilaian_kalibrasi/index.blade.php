@@ -259,7 +259,7 @@
         @if(request('search') || request('tahun'))<a href="{{ route('history_penilaian_kalibrasi.index', ['tab'=>'penilaian']) }}" class="btn-reset">× Reset</a>@endif
         <div class="spacer"></div>
         @if($isSA)<button class="btn-act btn-import" onclick="openImport('Pen')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>@endif
-        <a href="{{ route('history_penilaian_kalibrasi.export.penilaian', request()->only('search','tahun')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</a>
+        <a href="{{ route('history_penilaian_kalibrasi.export.penilaian', request()->only('search','tahun')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Penilaian</a>
     </div>
 
     <div class="table-card" id="cardPenilaian">
@@ -346,7 +346,7 @@
         @if(request('search_kalibrasi') || request('tahun_kalibrasi'))<a href="{{ route('history_penilaian_kalibrasi.index', ['tab'=>'kalibrasi']) }}" class="btn-reset">× Reset</a>@endif
         <div class="spacer"></div>
         @if($isSA)<button class="btn-act btn-import" onclick="openImport('Kal')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>@endif
-        <a href="{{ route('history_penilaian_kalibrasi.export.kalibrasi', request()->only('search_kalibrasi','tahun_kalibrasi')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</a>
+        <a href="{{ route('history_penilaian_kalibrasi.export.kalibrasi', request()->only('search_kalibrasi','tahun_kalibrasi')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Kalibrasi</a>
     </div>
 
     <div class="table-card" id="cardKalibrasi">
