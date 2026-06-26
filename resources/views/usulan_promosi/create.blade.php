@@ -541,8 +541,8 @@ function loadTalentKpi(karyawanId) {
 
             html += '</div><div style="margin-top:14px"><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">Kalibrasi 3 Tahun Terakhir</div>';
             if (data.kalibrasi && data.kalibrasi.length) {
-                const colorMap = { FEE:'#15803d', EXE:'#1d4ed8', MEE:'#374151', BEE:'#d97706', FBE:'#dc2626' };
-                const bgMap    = { FEE:'#dcfce7', EXE:'#dbeafe', MEE:'#f3f4f6', BEE:'#fef3c7', FBE:'#fee2e2' };
+                const colorMap = { FEE:'#15803d', EXE:'#1d4ed8', PEE:'#0e7490', MEE:'#374151', ME:'#4b5563', SME:'#ca8a04', PME:'#ea580c', BEE:'#d97706', NME:'#b91c1c', FBE:'#dc2626' };
+                const bgMap    = { FEE:'#dcfce7', EXE:'#dbeafe', PEE:'#ecfeff', MEE:'#f3f4f6', ME:'#f3f4f6', SME:'#fef9c3', PME:'#ffedd5', BEE:'#fef3c7', NME:'#fee2e2', FBE:'#fee2e2' };
                 html += '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
                     data.kalibrasi.map(k => `<div style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:10px 16px;text-align:center">
                         <div style="font-size:12px;color:#6b7280">${k.tahun}</div>

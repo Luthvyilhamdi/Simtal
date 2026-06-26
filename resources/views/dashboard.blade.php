@@ -48,6 +48,7 @@
 
     .chart-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
     .chart-grid-3 { display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px; }
+    .so-status-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
     .chart-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px; }
     .chart-card-title { font-size:13px;font-weight:700;color:#111827;margin-bottom:3px; }
     .chart-card-sub { font-size:11px;color:#9ca3af;margin-bottom:14px; }
@@ -144,6 +145,7 @@
     @media (max-width:1024px) {
         .kpi-grid { grid-template-columns:repeat(2,1fr); }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr; }
+        .so-status-grid { grid-template-columns:1fr; }
         .demo-grid { grid-template-columns:1fr; }
         .bottom-grid { grid-template-columns:1fr; }
         .pejabat-grid { grid-template-columns:repeat(3,1fr); }
@@ -159,6 +161,7 @@
         .kpi-icon svg { width:16px;height:16px; }
         .so-grid { gap:8px; }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr;gap:10px; }
+        .so-status-grid { grid-template-columns:1fr;gap:10px; }
         .chart-card { padding:14px; }
         .chart-card-title { font-size:12px; }
         .bar-label { min-width:60px;font-size:10px; }
@@ -176,6 +179,19 @@
         .list-name { font-size:11px; }
         .list-sub { font-size:9px; }
         .demo-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:640px) {
+        .tabel-card table thead { display:none; }
+        .tabel-card table, .tabel-card tbody, .tabel-card tr, .tabel-card td { display:block; width:100%; }
+        .tabel-card tbody tr { border-bottom:8px solid #f9fafb; padding:14px 16px; }
+        .tabel-card tbody tr:last-child { border-bottom:none; }
+        .tabel-card tbody td { border-bottom:none; padding:5px 0; text-align:left !important; }
+        .tabel-card tbody td.dir-name { font-size:14px; padding-bottom:8px; margin-bottom:4px; border-bottom:1px solid #f3f4f6; }
+        .tabel-card tbody td[data-label]::before {
+            content:attr(data-label); display:block; font-size:10px; font-weight:700; color:#9ca3af;
+            text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;
+        }
+        .tabel-card .progress-mini { max-width:160px; }
     }
     @media (max-width:480px) {
         .kpi-grid { grid-template-columns:1fr 1fr;gap:6px; }
@@ -352,54 +368,64 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 </div>
 
 {{-- SO CHARTS --}}
-<div class="chart-grid-2" style="margin-bottom:18px">
-    <div class="chart-card">
-        <div class="chart-card-title">Core vs Non Core</div>
-        <div class="chart-card-sub">Distribusi posisi Struktur Organisasi {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
-        <div style="display:flex;align-items:center;gap:20px;margin-top:6px">
-            <canvas id="soCorePie" width="130" height="130" style="flex-shrink:0"></canvas>
-            <div style="flex:1">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-                    <div style="width:10px;height:10px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
-                    <div style="flex:1;font-size:12px;color:#374151">Core</div>
-                    <div style="font-size:15px;font-weight:800;color:#2563eb">{{ $soCore }}</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-                    <div style="width:10px;height:10px;border-radius:50%;background:#7c3aed;flex-shrink:0"></div>
-                    <div style="flex:1;font-size:12px;color:#374151">Non Core</div>
-                    <div style="font-size:15px;font-weight:800;color:#7c3aed">{{ $soNonCore }}</div>
-                </div>
-                <div style="margin-top:14px;padding-top:10px;border-top:1px solid #f3f4f6">
-                    <div style="font-size:11px;color:#9ca3af">Terisi Core: <strong style="color:#2563eb">{{ $soCoreTerisi }}</strong> / {{ $soCoreMc }}</div>
-                    <div style="font-size:11px;color:#9ca3af;margin-top:3px">Terisi Non Core: <strong style="color:#7c3aed">{{ $soNonCoreTerisi }}</strong> / {{ $soNonCoreMc }}</div>
-                </div>
+<div class="chart-card" style="margin-bottom:18px">
+    <div class="chart-card-title">Core vs Non Core</div>
+    <div class="chart-card-sub">Distribusi posisi Struktur Organisasi {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+    <div style="display:flex;align-items:center;gap:20px;margin-top:6px">
+        <canvas id="soCorePie" width="130" height="130" style="flex-shrink:0"></canvas>
+        <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <div style="width:10px;height:10px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
+                <div style="flex:1;font-size:12px;color:#374151">Core</div>
+                <div style="font-size:15px;font-weight:800;color:#2563eb">{{ $soCore }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <div style="width:10px;height:10px;border-radius:50%;background:#7c3aed;flex-shrink:0"></div>
+                <div style="flex:1;font-size:12px;color:#374151">Non Core</div>
+                <div style="font-size:15px;font-weight:800;color:#7c3aed">{{ $soNonCore }}</div>
+            </div>
+            <div style="margin-top:14px;padding-top:10px;border-top:1px solid #f3f4f6">
+                <div style="font-size:11px;color:#9ca3af">Terisi Core: <strong style="color:#2563eb">{{ $soCoreTerisi }}</strong> / {{ $soCoreMc }}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:3px">Terisi Non Core: <strong style="color:#7c3aed">{{ $soNonCoreTerisi }}</strong> / {{ $soNonCoreMc }}</div>
             </div>
         </div>
     </div>
+</div>
 
+{{-- SO STATUS PENGISIAN: DIREKTORAT, KOMPARTEMEN, DEPARTEMEN --}}
+<div class="so-status-grid" style="margin-bottom:18px">
+    @foreach([
+        ['label' => 'Status Pengisian per Direktorat',  'data' => $soPerDirektorat,  'sub' => 'Posisi MC/TKO tersedia: belum terisi vs total tersedia', 'strip' => true],
+        ['label' => 'Status Pengisian per Kompartemen', 'data' => $soPerKompartemen, 'sub' => 'Diurutkan dari yang belum terisi terbanyak', 'strip' => false],
+        ['label' => 'Status Pengisian per Departemen',  'data' => $soPerDepartemen,  'sub' => 'Diurutkan dari yang belum terisi terbanyak', 'strip' => false],
+    ] as $grp)
     <div class="chart-card">
-        <div class="chart-card-title">Deviasi per Direktorat</div>
-        <div class="chart-card-sub">Selisih MC/TKO vs Pengisian (negatif = kurang terisi)</div>
-        @php $maxDev = $soPerDirektorat->max(fn($d) => abs($d->deviasi)) ?: 1; @endphp
+        <div class="chart-card-title">{{ $grp['label'] }}</div>
+        <div class="chart-card-sub">{{ $grp['sub'] }}</div>
+        @php $maxKosongGrp = $grp['data']->max('belum_terisi') ?: 1; @endphp
         <div class="bar-chart" style="margin-top:6px">
-            @foreach($soPerDirektorat as $d)
+            @forelse($grp['data'] as $d)
             @php
-                $devVal   = (int) $d->deviasi;
-                $barW     = min(100, round(abs($devVal) / $maxDev * 100));
-                $devClass = $devVal < 0 ? 'neg' : ($devVal > 0 ? 'pos' : 'zero');
-                $shortName = Str::limit(str_replace(['Direktorat ', 'Directorat '], '', $d->direktorat), 20);
+                $kosong    = (int) $d->belum_terisi;
+                $barW      = $kosong > 0 ? min(100, round($kosong / $maxKosongGrp * 100)) : 0;
+                $devClass  = $kosong > 0 ? 'neg' : 'pos';
+                $shortName = $grp['strip']
+                    ? Str::limit(str_replace(['Direktorat ', 'Directorat '], '', $d->nama), 18)
+                    : Str::limit($d->nama, 18);
             @endphp
-            {{-- FIX: style color Blade diganti class statis bar-val-neg/pos/zero --}}
             <div class="bar-row">
-                <div class="bar-label" title="{{ $d->direktorat }}">{{ $shortName }}</div>
+                <div class="bar-label" title="{{ $d->nama }}">{{ $shortName }}</div>
                 <div class="bar-track">
-                    <div class="bar-fill bar-fill-{{ $devClass }}" data-pct="{{ $barW }}">{{ $devVal }}</div>
+                    <div class="bar-fill bar-fill-{{ $devClass }}" data-pct="{{ $barW }}">{{ $kosong }}</div>
                 </div>
-                <div class="bar-val bar-val-{{ $devClass }}">{{ $devVal }}</div>
+                <div class="bar-val" style="color:#9ca3af">{{ $d->terisi }}/{{ $d->tersedia }}</div>
             </div>
-            @endforeach
+            @empty
+            <div style="font-size:12px;color:#9ca3af;text-align:center;padding:12px 0">Tidak ada data</div>
+            @endforelse
         </div>
     </div>
+    @endforeach
 </div>
 
 {{-- TALENT POOL --}}
@@ -672,33 +698,33 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                     $proporsi  = $totalKaryawan > 0 ? round(($r['aktif']/$totalKaryawan)*100) : 0;
                 @endphp
                 <tr>
-                    <td style="font-weight:600;color:#111827;">{{ $r['nama'] }}</td>
-                    <td class="center">{{ $r['total'] }}</td>
-                    <td class="center"><span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['aktif'] }}</span></td>
-                    <td class="center" style="min-width:90px;">
+                    <td class="dir-name" style="font-weight:600;color:#111827;">{{ $r['nama'] }}</td>
+                    <td class="center" data-label="Total">{{ $r['total'] }}</td>
+                    <td class="center" data-label="Aktif"><span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['aktif'] }}</span></td>
+                    <td class="center" data-label="Proporsi" style="min-width:90px;">
                         <div style="font-size:10px;color:#6b7280;margin-bottom:2px;">{{ $proporsi }}%</div>
                         <div class="progress-mini"><div class="progress-mini-fill" data-pct="{{ $proporsi }}" style="background:#2563eb;"></div></div>
                     </td>
-                    <td class="center">
+                    <td class="center" data-label="Promosi {{ now()->year }}">
                         @if($r['promosi'] > 0)<span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['promosi'] }}</span>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
-                    <td class="center">
+                    <td class="center" data-label="Mutasi {{ now()->year }}">
                         @if($r['mutasi'] > 0)<span style="background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['mutasi'] }}</span>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
-                    <td class="center">{{ $r['assessment'] ?: '—' }}</td>
-                    <td class="center">
+                    <td class="center" data-label="Assessment">{{ $r['assessment'] ?: '—' }}</td>
+                    <td class="center" data-label="Ready">
                         @if($r['ready'] > 0)<span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['ready'] }}</span>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
-                    <td class="center" style="min-width:80px;">
+                    <td class="center" data-label="Ready Rate" style="min-width:80px;">
                         @if($r['assessment'] > 0)
                             <div style="font-size:10px;color:#6b7280;margin-bottom:2px;">{{ $readyRate }}%</div>
                             <div class="progress-mini"><div class="progress-mini-fill" data-pct="{{ $readyRate }}" style="background:#16a34a;"></div></div>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
-                    <td class="center">
+                    <td class="center" data-label="Qualified">
                         @if(isset($r['qualified']) && $r['qualified'] > 0)
                             <span style="background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['qualified'] }}</span>
                         @else<span style="color:#d1d5db;">—</span>@endif

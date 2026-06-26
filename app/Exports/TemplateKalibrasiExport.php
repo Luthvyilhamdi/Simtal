@@ -13,7 +13,7 @@ class TemplateKalibrasiExport implements FromArray, WithHeadings, WithStyles, Sh
 {
     public function array(): array
     {
-        // Nilai valid: FEE, EXE, MEE, BEE, FBE — satu baris per (karyawan, tahun)
+        // Nilai valid: FEE, EXE, PEE, MEE, ME, SME, PME, BEE, NME, FBE — satu baris per (karyawan, tahun)
         return [
             ['1234567', 'Contoh Karyawan', 2025, 'EXE', 'Catatan opsional'],
             ['1234567', 'Contoh Karyawan', 2024, 'MEE', ''],

@@ -102,6 +102,35 @@
     @media (max-width:768px) {
         .master-wrap { grid-template-columns:1fr; }
         .form-card { position:static; }
+        .table-card { overflow-x:visible; }
+    }
+
+    @media (max-width:640px) {
+        .page-header { margin-bottom:18px; }
+        .page-title { font-size:19px; }
+        .form-card { padding:18px; }
+
+        .table-header { padding:14px 16px; }
+        table thead { display:none; }
+        table, tbody, tr, td { display:block; width:100%; }
+        tbody tr { border-bottom:8px solid #f9fafb; padding:14px 16px; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover td { background:transparent; }
+        tbody td { border-bottom:none; padding:6px 0; }
+        tbody td[data-label]:not(.no-label)::before {
+            content: attr(data-label);
+            display:block; font-size:10px; font-weight:700; color:#9ca3af;
+            text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;
+        }
+        td.col-index { display:none; }
+        .user-info { gap:12px; }
+        .action-btns { margin-top:4px; }
+
+        .modal-box { padding:20px; }
+    }
+
+    @media (max-width:380px) {
+        .form-card { padding:14px; }
     }
 </style>
 @endpush
@@ -289,8 +318,8 @@
             <tbody>
                 @forelse($users as $user)
                 <tr>
-                    <td style="color:#9ca3af;">{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
-                    <td>
+                    <td class="col-index" style="color:#9ca3af;">{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
+                    <td class="no-label">
                         <div class="user-info">
                             <div class="user-avatar" style="background:{{ $user->role === 'user' ? '#6b7280' : ($user->isSuperAdmin() ? '#d97706' : '#1d4ed8') }};">
                                 {{ initials($user->name) }}
@@ -311,7 +340,7 @@
                             </div>
                         </div>
                     </td>
-                    <td>
+                    <td data-label="Role">
                         @if($user->isSuperAdmin())
                             <span class="role-badge role-super">⭐ Super Admin</span>
                         @elseif($user->role === 'user')
@@ -320,8 +349,8 @@
                             <span class="role-badge role-admin">🔵 Admin</span>
                         @endif
                     </td>
-                    <td style="font-size:12px;">{{ $user->created_at->format('d M Y') }}</td>
-                    <td>
+                    <td data-label="Terdaftar" style="font-size:12px;">{{ $user->created_at->format('d M Y') }}</td>
+                    <td data-label="Action">
                         <div class="action-btns">
                             <button type="button" class="btn-edit-sm"
                                 data-id="{{ $user->id }}"

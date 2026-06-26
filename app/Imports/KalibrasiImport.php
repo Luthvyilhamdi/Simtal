@@ -14,22 +14,30 @@ class KalibrasiImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
     protected int $rowCount     = 0;
     protected int $skippedCount = 0;
+    protected array $skipReasons = [];
 
     // Kalibrasi unik per (karyawan, tahun) → updateOrCreate
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
-            $nik = trim((string) ($row['nik'] ?? ''));
-            if ($nik === '') { $this->skippedCount++; continue; }
+        foreach ($rows as $i => $row) {
+            $baris = $i + 2; // +1 untuk index ke-1, +1 lagi karena baris 1 adalah header
+
+            // Bersihkan seluruh whitespace (termasuk non-breaking space hasil copy-paste), bukan cuma ujungnya
+            $nikRaw = (string) ($row['nik'] ?? '');
+            $nik = preg_replace('/[\x{00A0}\s]+/u', '', $nikRaw);
+
+            if ($nik === '') { $this->skip($baris, "NIK kosong"); continue; }
 
             $karyawan = Karyawan::where('nik', $nik)->first();
-            if (!$karyawan) { $this->skippedCount++; continue; }
+            if (!$karyawan) { $this->skip($baris, "NIK \"{$nik}\" tidak ditemukan di Data Karyawan"); continue; }
 
             $tahun = (int) ($row['tahun'] ?? 0);
-            if ($tahun < 2000 || $tahun > 2100) { $this->skippedCount++; continue; }
+            if ($tahun < 2000 || $tahun > 2100) { $this->skip($baris, "Tahun \"{$tahun}\" tidak valid (NIK {$nik})"); continue; }
 
             $nilai = strtoupper(trim((string) ($row['nilai'] ?? '')));
-            if (!in_array($nilai, ['FEE', 'EXE', 'MEE', 'BEE', 'FBE'], true)) { $this->skippedCount++; continue; }
+            if (!in_array($nilai, ['FEE', 'EXE', 'PEE', 'MEE', 'ME', 'SME', 'PME', 'BEE', 'NME', 'FBE'], true)) {
+                $this->skip($baris, "Nilai \"{$nilai}\" tidak valid (NIK {$nik})"); continue;
+            }
 
             KalibrasiKaryawan::updateOrCreate(
                 ['karyawan_id' => $karyawan->id, 'tahun' => $tahun],
@@ -43,7 +51,16 @@ class KalibrasiImport implements ToCollection, WithHeadingRow, WithChunkReading
         }
     }
 
+    protected function skip(int $baris, string $alasan): void
+    {
+        $this->skippedCount++;
+        if (count($this->skipReasons) < 5) {
+            $this->skipReasons[] = "Baris {$baris}: {$alasan}";
+        }
+    }
+
     public function chunkSize(): int { return 200; }
     public function getRowCount(): int { return $this->rowCount; }
     public function getSkippedCount(): int { return $this->skippedCount; }
+    public function getSkipReasons(): array { return $this->skipReasons; }
 }

@@ -113,21 +113,26 @@ class DashboardController extends Controller
         $soCoreMc        = $soStats->core_mc        ?? 0;
         $soNonCoreMc     = $soStats->non_core_mc    ?? 0;
 
-        $soPerDirektorat = \App\Models\StrukturOrganisasi::where('bulan', $soBulan)
+        // Status pengisian: per posisi yang MC/TKO-nya tersedia (mc_tko > 0),
+        // dihitung terisi atau belum terisi (bukan selisih angka mc vs pengisian).
+        $soStatusQuery = fn ($kolom) => StrukturOrganisasi::where('bulan', $soBulan)
             ->where('tahun', $soTahun)
             ->where('posisi', '!=', '-')
-            ->whereNotNull('direktorat')
-            ->selectRaw('
-                direktorat,
-                SUM(mc_tko) as mc,
-                SUM(pengisian) as terisi,
-                SUM(deviasi) as deviasi,
-                SUM(CASE WHEN core = "Core" THEN 1 ELSE 0 END) as core,
-                SUM(CASE WHEN core = "Non Core" THEN 1 ELSE 0 END) as non_core
-            ')
-            ->groupBy('direktorat')
-            ->orderByRaw('ABS(SUM(deviasi)) DESC')
-            ->get();
+            ->where('mc_tko', '>', 0)
+            ->whereNotNull($kolom)
+            ->where($kolom, '!=', '')
+            ->selectRaw("
+                {$kolom} as nama,
+                COUNT(*) as tersedia,
+                SUM(CASE WHEN pengisian > 0 THEN 1 ELSE 0 END) as terisi,
+                SUM(CASE WHEN pengisian = 0 THEN 1 ELSE 0 END) as belum_terisi
+            ")
+            ->groupBy($kolom)
+            ->orderByDesc('belum_terisi');
+
+        $soPerDirektorat  = $soStatusQuery('direktorat')->get();
+        $soPerKompartemen = $soStatusQuery('kompartemen')->get();
+        $soPerDepartemen  = $soStatusQuery('dept')->get();
 
         // === CHART: Tren Jabatan ===
         $trenBulan = [];
@@ -226,7 +231,8 @@ class DashboardController extends Controller
             'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
             'karyawanTerbaru', 'genderChart', 'usiaChart',
             'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
-            'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc', 'soPerDirektorat'
+            'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc',
+            'soPerDirektorat', 'soPerKompartemen', 'soPerDepartemen'
         ));
     }
 }

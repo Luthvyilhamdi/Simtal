@@ -294,7 +294,7 @@
         <div class="detail-card-title">🎯 Kalibrasi 2 Tahun Terakhir</div>
         @if($u->kalibrasi_snapshot && count($u->kalibrasi_snapshot))
             @php
-                $kalibrasiColor = ['FEE'=>['#15803d','#dcfce7'],'EXE'=>['#1d4ed8','#dbeafe'],'MEE'=>['#374151','#f3f4f6'],'BEE'=>['#d97706','#fef3c7'],'FBE'=>['#dc2626','#fee2e2']];
+                $kalibrasiColor = ['FEE'=>['#15803d','#dcfce7'],'EXE'=>['#1d4ed8','#dbeafe'],'PEE'=>['#0e7490','#ecfeff'],'MEE'=>['#374151','#f3f4f6'],'ME'=>['#4b5563','#f3f4f6'],'SME'=>['#ca8a04','#fef9c3'],'PME'=>['#ea580c','#ffedd5'],'BEE'=>['#d97706','#fef3c7'],'NME'=>['#b91c1c','#fee2e2'],'FBE'=>['#dc2626','#fee2e2']];
             @endphp
             @foreach($u->kalibrasi_snapshot as $k)
             @php $kc = $kalibrasiColor[$k['nilai']] ?? ['#374151','#f3f4f6']; @endphp

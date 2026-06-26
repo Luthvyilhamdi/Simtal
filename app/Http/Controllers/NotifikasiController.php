@@ -65,10 +65,13 @@ class NotifikasiController extends Controller
     }
 
     // Halaman semua notifikasi
-    public function index()
+    public function index(Request $request)
     {
-        $notifikasis = Notifikasi::orderBy('created_at', 'desc')->paginate(20);
-        $unread      = Notifikasi::where('is_read', false)->count();
+        $notifikasis = Notifikasi::when($request->tipe, fn($q, $tipe) => $q->where('tipe', $tipe))
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+        $unread = Notifikasi::where('is_read', false)->count();
         return view('notifikasi.index', compact('notifikasis', 'unread'));
     }
 }

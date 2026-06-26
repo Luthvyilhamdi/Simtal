@@ -168,7 +168,7 @@
 <div class="filter-row">
     <div class="search-mini">
         <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Cari judul / nama / nomor..." value="{{ request('search') }}" autocomplete="off">
+        <input type="text" id="searchInput" placeholder="Cari judul / nama / NIK / nomor..." value="{{ request('search') }}" autocomplete="off">
         <div class="search-spinner" id="searchSpinner"></div>
         <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
     </div>
@@ -199,13 +199,7 @@
             </optgroup>
             <option value="lainnya" {{ request('kategori')=='lainnya' ? 'selected' : '' }}>Lainnya</option>
         </select>
-        <select name="karyawan_id" class="filter-select" onchange="this.form.submit()">
-            <option value="">Semua Karyawan</option>
-            @foreach($karyawans as $k)
-                <option value="{{ $k->id }}" {{ request('karyawan_id') == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
-            @endforeach
-        </select>
-        @if(request()->hasAny(['search','kategori','karyawan_id','tipe']))
+        @if(request()->hasAny(['search','kategori','tipe']))
             <a href="{{ route('surat_penting.index') }}" class="btn-reset">× Reset</a>
         @endif
     </form>

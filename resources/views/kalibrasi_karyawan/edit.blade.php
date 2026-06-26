@@ -70,11 +70,16 @@
 
 @php
     $nilaiList = [
-        'FEE' => ['label' => 'Far Exceeded Expectation', 'color' => '#15803d', 'bg' => '#f0fdf4'],
-        'EXE' => ['label' => 'Exceeds Expectation',      'color' => '#1d4ed8', 'bg' => '#eff6ff'],
-        'MEE' => ['label' => 'Meet Expectation',          'color' => '#374151', 'bg' => '#f9fafb'],
-        'BEE' => ['label' => 'Below Expectation',         'color' => '#d97706', 'bg' => '#fffbeb'],
-        'FBE' => ['label' => 'Far Below Expectation',     'color' => '#dc2626', 'bg' => '#fef2f2'],
+        'FEE' => ['label' => 'Far Exceeded Expectation',       'color' => '#15803d', 'bg' => '#f0fdf4'],
+        'EXE' => ['label' => 'Exceeds Expectation',            'color' => '#1d4ed8', 'bg' => '#eff6ff'],
+        'PEE' => ['label' => 'Partially Exceeds Expectation',  'color' => '#0e7490', 'bg' => '#ecfeff'],
+        'MEE' => ['label' => 'Meet Expectation',               'color' => '#374151', 'bg' => '#f9fafb'],
+        'ME'  => ['label' => 'Meet Expectation',               'color' => '#4b5563', 'bg' => '#f9fafb'],
+        'SME' => ['label' => 'Somewhat Meet Expectation',      'color' => '#ca8a04', 'bg' => '#fefce8'],
+        'PME' => ['label' => 'Partially Meets Expectation',    'color' => '#ea580c', 'bg' => '#fff7ed'],
+        'BEE' => ['label' => 'Below Expectation',              'color' => '#d97706', 'bg' => '#fffbeb'],
+        'NME' => ['label' => 'Does Not Meet Expectation',      'color' => '#b91c1c', 'bg' => '#fef2f2'],
+        'FBE' => ['label' => 'Far Below Expectation',          'color' => '#dc2626', 'bg' => '#fef2f2'],
     ];
     $selectedNilai = old('nilai', $kalibrasi->nilai ?? '');
 @endphp

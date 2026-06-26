@@ -33,7 +33,7 @@ class KalibrasiKaryawanController extends Controller
     {
         $request->validate([
             'tahun'      => 'required|integer|min:2000|max:2100',
-            'nilai'      => 'required|in:FEE,EXE,MEE,BEE,FBE',
+            'nilai'      => 'required|in:FEE,EXE,PEE,MEE,ME,SME,PME,BEE,NME,FBE',
             'keterangan' => 'nullable|string|max:500',
         ]);
 
@@ -67,7 +67,7 @@ class KalibrasiKaryawanController extends Controller
     public function update(Request $request, Karyawan $karyawan, KalibrasiKaryawan $kalibrasi)
     {
         $request->validate([
-            'nilai'      => 'required|in:FEE,EXE,MEE,BEE,FBE',
+            'nilai'      => 'required|in:FEE,EXE,PEE,MEE,ME,SME,PME,BEE,NME,FBE',
             'keterangan' => 'nullable|string|max:500',
         ]);
 

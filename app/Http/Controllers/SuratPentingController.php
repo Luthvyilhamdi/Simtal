@@ -20,7 +20,8 @@ class SuratPentingController extends Controller
                 $q->where('judul', 'like', '%'.$request->search.'%')
                   ->orWhere('nomor_surat', 'like', '%'.$request->search.'%')
                   ->orWhereHas('karyawan', function($q2) use ($request) {
-                      $q2->where('nama', 'like', '%'.$request->search.'%');
+                      $q2->where('nama', 'like', '%'.$request->search.'%')
+                         ->orWhere('nik', 'like', '%'.$request->search.'%');
                   });
             });
         }
@@ -37,8 +38,7 @@ class SuratPentingController extends Controller
             $query->where('karyawan_id', $request->karyawan_id);
         }
 
-        $surats    = $query->paginate(15);
-        $karyawans = Karyawan::orderBy('nama')->get();
+        $surats = $query->paginate(15);
 
         $stats = [
             'total'    => SuratPenting::count(),
@@ -48,7 +48,7 @@ class SuratPentingController extends Controller
             'soon'     => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
         ];
 
-        return view('surat_penting.index', compact('surats', 'karyawans', 'stats'));
+        return view('surat_penting.index', compact('surats', 'stats'));
     }
 
     public function create()

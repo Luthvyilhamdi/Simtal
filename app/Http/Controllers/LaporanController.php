@@ -66,7 +66,7 @@ class LaporanController extends Controller
         $stats = [
             'karyawan_masuk'   => $karyawanMasuk->count(),
             'karyawan_keluar'  => $karyawanKeluar->count(),
-            'total_pergerakan' => $pergerakan->count(),
+            'total_pergerakan' => $promosi->count() + $mutasi->count() + $demosi->count(),
             'promosi'          => $promosi->count(),
             'mutasi'           => $mutasi->count(),
             'demosi'           => $demosi->count(),

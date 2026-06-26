@@ -163,7 +163,9 @@ class HistoryPenilaianKalibrasiController extends Controller
             $skipped  = $import->getSkippedCount();
 
             $msg = "Berhasil import {$imported} data kalibrasi.";
-            if ($skipped > 0) $msg .= " {$skipped} baris dilewati (NIK tidak ditemukan / nilai tidak valid).";
+            if ($skipped > 0) {
+                $msg .= " {$skipped} baris dilewati. Contoh: " . implode(' | ', $import->getSkipReasons());
+            }
 
             $this->log('import', 'Kalibrasi', 'Import Excel', "Import {$imported} data kalibrasi");
 
