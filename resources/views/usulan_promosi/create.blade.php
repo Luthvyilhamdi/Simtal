@@ -382,6 +382,7 @@
 <script>
 let searchTimer = null;
 let selectedKaryawanId = null;
+let selectedKaryawanData = null; // simpan data karyawan terpilih untuk dipakai ulang
 
 // ===== SEARCH KARYAWAN =====
 document.getElementById('searchKaryawan').addEventListener('input', function() {
@@ -427,12 +428,13 @@ document.getElementById('jabatanMaster').addEventListener('change', function () 
 });
 
 function selectKaryawan(k) {
-    selectedKaryawanId = k.id;
+    selectedKaryawanId  = k.id;
+    selectedKaryawanData = k;
     document.getElementById('karyawanId').value = k.id;
     document.getElementById('searchKaryawan').value = k.nama + ' — NIK ' + k.nik;
     hideDropdown();
 
-    // Update info box
+    // Update info box header
     document.getElementById('karyawanNama').textContent = k.nama;
     document.getElementById('karyawanJabatan').textContent = k.jabatan_saat_ini ?? '-';
     document.getElementById('karyawanInitial').textContent = (typeof initials === 'function')
@@ -448,17 +450,42 @@ function selectKaryawan(k) {
     setSel('kompTujuan', k.kompartemen_id);
     setSel('deptTujuan', k.departemen_id);
 
-    // MDG check
-    const mdgHtml = [
-        { label: 'MDG Band', ok: k.mdg_band_bulan >= 36, val: k.mdg_band_bulan + ' bln / 36 bln' },
-        { label: 'MDG JG',   ok: k.mdg_jg_bulan   >= 24, val: k.mdg_jg_bulan   + ' bln / 24 bln' },
-        { label: 'MDG PG',   ok: k.mdg_pg_bulan   >= 12, val: k.mdg_pg_bulan   + ' bln / 12 bln' },
-    ].map(m => `<span class="mdg-check ${m.ok ? 'mdg-ok' : 'mdg-no'}">${m.ok ? '✅' : '❌'} ${m.label}: ${m.val}</span>`).join('');
-    document.getElementById('infoMDG').innerHTML = mdgHtml;
+    // Tampilkan info box dulu (MDG akan diisi setelah talent pool dimuat)
+    document.getElementById('infoMDG').innerHTML = '<span style="color:#9ca3af;font-size:11px">Memuat status MDG...</span>';
     document.getElementById('karyawanInfoBox').classList.add('show');
 
     loadAssessments(k.id);
-    loadTalentKpi(k.id);
+
+    // loadTalentKpi sekaligus hitung MDG via callback
+    loadTalentKpi(k.id, function(talentPool) {
+        renderMdgCheck(k, talentPool);
+    });
+}
+
+// ===== RENDER MDG CHECK (shortlist-aware) =====
+function renderMdgCheck(k, talentPool) {
+    const isShortlist = talentPool && talentPool.klasifikasi === 'shortlist';
+    const minBand = isShortlist ? 24 : 36;
+    const minJg   = isShortlist ? 12 : 24;
+    const minPg   = 12;
+
+    const items = [
+        { label: 'MDG Band', ok: k.mdg_band_bulan >= minBand, val: k.mdg_band_bulan + ' bln / ' + minBand + ' bln' + (isShortlist ? ' ✦' : '') },
+        { label: 'MDG JG',   ok: k.mdg_jg_bulan   >= minJg,   val: k.mdg_jg_bulan   + ' bln / ' + minJg   + ' bln' + (isShortlist ? ' ✦' : '') },
+        { label: 'MDG PG',   ok: k.mdg_pg_bulan   >= minPg,   val: k.mdg_pg_bulan   + ' bln / ' + minPg   + ' bln' },
+    ];
+
+    let html = items.map(m =>
+        `<span class="mdg-check ${m.ok ? 'mdg-ok' : 'mdg-no'}">${m.ok ? '✅' : '❌'} ${m.label}: ${m.val}</span>`
+    ).join('');
+
+    if (isShortlist) {
+        html += `<div style="font-size:10px;color:#15803d;margin-top:6px;width:100%">
+            ✦ Ketentuan MDG khusus Shortlist Talent Pool ${talentPool.periode}
+        </div>`;
+    }
+
+    document.getElementById('infoMDG').innerHTML = html;
 }
 
 // ===== LOAD ASSESSMENTS =====
@@ -507,7 +534,8 @@ function selectAssessment(id, label, tglBerlaku, levelUkur) {
 }
 
 // ===== LOAD TALENT & KPI =====
-function loadTalentKpi(karyawanId) {
+// callback(talentPool) dipanggil setelah data berhasil dimuat
+function loadTalentKpi(karyawanId, callback) {
     fetch(`/api/karyawan/${karyawanId}/talent-kpi-preview`)
         .then(r => r.json())
         .then(data => {
@@ -516,7 +544,7 @@ function loadTalentKpi(karyawanId) {
 
             html += '<div><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px">Talent Pool Tahun Lalu</div>';
             if (data.talent_pool) {
-                const klasBg = data.talent_pool.klasifikasi === 'shortlist' ? '#dcfce7' : '#dbeafe';
+                const klasBg  = data.talent_pool.klasifikasi === 'shortlist' ? '#dcfce7' : '#dbeafe';
                 const klasTxt = data.talent_pool.klasifikasi === 'shortlist' ? '#15803d' : '#1d4ed8';
                 html += `<div style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:12px">
                     <span style="font-size:12px;font-weight:700;color:#111827">Periode ${data.talent_pool.periode}</span>
@@ -555,10 +583,19 @@ function loadTalentKpi(karyawanId) {
 
             el.innerHTML = html;
             el.style.textAlign = 'left';
+
+            // Panggil callback dengan data talent pool agar MDG check bisa dihitung
+            if (typeof callback === 'function') {
+                callback(data.talent_pool);
+            }
         })
         .catch(() => {
             document.getElementById('talentKpiPreview').innerHTML =
                 '<div style="color:#9ca3af;font-size:13px;text-align:center">Gagal memuat data</div>';
+            // Tetap panggil callback dengan null agar MDG fallback ke threshold normal
+            if (typeof callback === 'function') {
+                callback(null);
+            }
         });
 }
 

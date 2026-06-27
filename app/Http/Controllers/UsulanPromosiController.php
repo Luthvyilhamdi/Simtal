@@ -132,11 +132,23 @@ class UsulanPromosiController extends Controller
 
         $karyawan = Karyawan::with(['jobGrade', 'personGrade', 'departemen', 'kompartemen'])->find($request->karyawan_id);
 
-        $mdgBandOk = ($karyawan->mdg_band_bulan ?? 0) >= 36;
-        $mdgJgOk   = ($karyawan->mdg_jg_bulan   ?? 0) >= 24;
-        $mdgPgOk   = ($karyawan->mdg_pg_bulan   ?? 0) >= 12;
-
         $tahunIni = now()->year;
+
+        // Cek shortlist talent pool tahun lalu — menentukan threshold MDG
+        $talentPool = TalentPool::where('karyawan_id', $karyawan->id)
+            ->where('periode', $tahunIni - 1)
+            ->first();
+
+        $isShortlist = $talentPool && $talentPool->klasifikasi === 'shortlist';
+
+        // Threshold MDG: shortlist lebih longgar (Band 24 bln, JG 12 bln), normal (Band 36 bln, JG 24 bln)
+        $minBand = $isShortlist ? 24 : 36;
+        $minJg   = $isShortlist ? 12 : 24;
+        $minPg   = 12;
+
+        $mdgBandOk = ($karyawan->mdg_band_bulan ?? 0) >= $minBand;
+        $mdgJgOk   = ($karyawan->mdg_jg_bulan   ?? 0) >= $minJg;
+        $mdgPgOk   = ($karyawan->mdg_pg_bulan   ?? 0) >= $minPg;
 
         // KPI Tahunan saja, 4 tahun terakhir (tidak include tahun berjalan)
         $kpiSnapshot = PenilaianKaryawan::where('karyawan_id', $karyawan->id)
@@ -163,9 +175,7 @@ class UsulanPromosiController extends Controller
             ->get(['tahun', 'nilai', 'keterangan'])
             ->toArray();
 
-        $talentPool = TalentPool::where('karyawan_id', $karyawan->id)
-            ->where('periode', $tahunIni - 1)
-            ->first();
+        // $talentPool sudah di-query di atas, tidak perlu query ulang
 
         $assessment      = null;
         $hasilAssessment = null;
