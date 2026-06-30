@@ -40,6 +40,10 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            // Jangan pernah mengandalkan default kolom DB: registrasi mandiri
+            // selalu menghasilkan role 'user' yang paling rendah. Pembuatan akun
+            // admin/super_admin hanya lewat AkunController (khusus super admin).
+            'role' => 'user',
         ]);
 
         event(new Registered($user));

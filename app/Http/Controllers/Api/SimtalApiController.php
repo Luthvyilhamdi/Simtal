@@ -95,6 +95,13 @@ class SimtalApiController extends Controller
     // ─────────────────────────────────────────────
     public function employees(Request $request)
     {
+        // Direktori karyawan hanya untuk admin/super_admin — samakan dengan
+        // batasan di web app. Token milik role 'user' tidak boleh enumerasi
+        // seluruh data karyawan.
+        if ($request->user()->isUser()) {
+            return response()->json(['message' => 'Tidak diizinkan mengakses direktori karyawan.'], 403);
+        }
+
         $query = Karyawan::with(['jobGrade', 'personGrade', 'jabatan', 'departemen'])
             ->where('status', 'aktif');
 

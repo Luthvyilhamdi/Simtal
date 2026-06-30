@@ -204,7 +204,8 @@ Route::middleware('auth')->group(function () {
         });
 
         // Penilaian Karyawan
-        Route::prefix('karyawan/{karyawan}/penilaian')->name('penilaian_karyawan.')->group(function () {
+        // scopeBindings(): {penilaian} wajib milik {karyawan} di URL, kalau tidak -> 404.
+        Route::prefix('karyawan/{karyawan}/penilaian')->name('penilaian_karyawan.')->scopeBindings()->group(function () {
             Route::get('/',               [PenilaianKaryawanController::class, 'index'])->name('index');
             Route::get('/create',         [PenilaianKaryawanController::class, 'create'])->name('create');
             Route::post('/',              [PenilaianKaryawanController::class, 'store'])->name('store');
@@ -212,7 +213,8 @@ Route::middleware('auth')->group(function () {
         });
 
         // Kalibrasi Karyawan
-        Route::prefix('karyawan/{karyawan}/kalibrasi')->name('kalibrasi_karyawan.')->group(function () {
+        // scopeBindings(): {kalibrasi} wajib milik {karyawan} di URL, kalau tidak -> 404.
+        Route::prefix('karyawan/{karyawan}/kalibrasi')->name('kalibrasi_karyawan.')->scopeBindings()->group(function () {
             Route::get('/',               [KalibrasiKaryawanController::class, 'index'])->name('index');
             Route::get('/create',         [KalibrasiKaryawanController::class, 'create'])->name('create');
             Route::post('/',              [KalibrasiKaryawanController::class, 'store'])->name('store');

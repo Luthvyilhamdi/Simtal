@@ -7,6 +7,7 @@ use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SuratPentingController extends Controller
 {
@@ -73,9 +74,13 @@ class SuratPentingController extends Controller
             'keterangan'    => 'nullable|string',
         ]);
 
-        $file     = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('surat-penting', $fileName, 'public');
+        $file = $request->file('file');
+        // Nama file server-side acak (hindari path traversal / nama dari klien).
+        // Ekstensi sudah dibatasi oleh aturan validasi mimes di atas.
+        $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        // Disk privat ('local'): dokumen HR hanya bisa diakses lewat controller
+        // yang sudah ter-auth, bukan via URL /storage publik.
+        $filePath = $file->storeAs('surat-penting', $fileName, 'local');
         $fileSize = $this->formatFileSize($file->getSize());
 
         SuratPenting::create([
@@ -101,14 +106,14 @@ class SuratPentingController extends Controller
     public function show(SuratPenting $suratPenting)
     {
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         return response()->file($disk->path((string) $suratPenting->file_path));
     }
 
     public function download(SuratPenting $suratPenting)
     {
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         return $disk->download(
             (string) $suratPenting->file_path,
             (string) $suratPenting->file_name
@@ -118,7 +123,7 @@ class SuratPentingController extends Controller
     public function destroy(SuratPenting $suratPenting)
     {
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         $disk->delete((string) $suratPenting->file_path);
         $suratPenting->delete();
 
