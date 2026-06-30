@@ -40,6 +40,7 @@ class Karyawan extends Model
     public function suratPenting()     { return $this->hasMany(SuratPenting::class); }
     public function penilaians()       { return $this->hasMany(PenilaianKaryawan::class); }
     public function kalibrasis()       { return $this->hasMany(KalibrasiKaryawan::class); }
+    public function talentPools()      { return $this->hasMany(TalentPool::class); }
     public function pejabatAktif()
     {
         return $this->hasOne(\App\Models\HistoryPejabat::class)

@@ -31,6 +31,7 @@ use App\Http\Controllers\KalibrasiKaryawanController;
 use App\Http\Controllers\UsulanPromosiController;
 use App\Http\Controllers\UsulanMutasiController;
 use App\Http\Controllers\StrukturOrganisasiController;
+use App\Http\Controllers\ExportBuilderController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -253,6 +254,13 @@ Route::middleware('auth')->group(function () {
 
         // Laporan
         Route::get('/laporan/bulanan', [LaporanController::class, 'bulanan'])->name('laporan.bulanan');
+
+        // Export Builder (export Excel/PDF custom kolom)
+        Route::prefix('export-builder')->name('export_builder.')->group(function () {
+            Route::get('/',         [ExportBuilderController::class, 'index'])->name('index');
+            Route::post('/preview', [ExportBuilderController::class, 'preview'])->name('preview');
+            Route::post('/',        [ExportBuilderController::class, 'export'])->name('export');
+        });
 
         // ===== SUPER ADMIN ONLY =====
         Route::middleware('super_admin')->group(function () {
