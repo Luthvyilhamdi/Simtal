@@ -41,6 +41,11 @@ class HistoryJabatan extends Model
     {
         // Saat history jabatan baru dibuat
         static::created(function (HistoryJabatan $history) {
+            // Perbarui tanggal masuk band karyawan secara otomatis.
+            // Selalu dijalankan (di awal) agar tetap berlaku walau jabatan ini
+            // bukan jabatan pejabat (yang akan memicu return lebih awal di bawah).
+            self::syncTanggalMulaiBand($history->karyawan_id);
+
             // Tutup jabatan pejabat yang masih aktif untuk karyawan ini (kalau ada)
             HistoryPejabat::where('karyawan_id', $history->karyawan_id)
                 ->whereNull('tanggal_selesai')
@@ -79,6 +84,49 @@ class HistoryJabatan extends Model
         // Saat history jabatan dihapus → bersihkan record pejabat yang terhubung
         static::deleted(function (HistoryJabatan $history) {
             HistoryPejabat::where('history_jabatan_id', $history->id)->delete();
+
+            // Riwayat berubah → hitung ulang tanggal masuk band karyawan.
+            self::syncTanggalMulaiBand($history->karyawan_id);
         });
+    }
+
+    /**
+     * Hitung ulang & simpan tanggal_mulai_band karyawan dari Riwayat Jabatan.
+     * Dipanggil otomatis tiap riwayat jabatan dibuat/dihapus (termasuk lewat
+     * Terbit SK Promosi/Mutasi). saveQuietly() dipakai agar tidak memicu
+     * observer/event Karyawan lain.
+     */
+    /** Cache pengecekan keberadaan kolom (sekali per proses). */
+    protected static ?bool $bandColumnExists = null;
+
+    protected static function syncTanggalMulaiBand(?int $karyawanId): void
+    {
+        if (!$karyawanId) {
+            return;
+        }
+
+        // Aman jika migration belum dijalankan: lewati bila kolom belum ada.
+        if (self::$bandColumnExists === null) {
+            self::$bandColumnExists = \Illuminate\Support\Facades\Schema::hasColumn('karyawans', 'tanggal_mulai_band');
+        }
+        if (! self::$bandColumnExists) {
+            return;
+        }
+
+        $karyawan = Karyawan::find($karyawanId);
+        if (!$karyawan) {
+            return;
+        }
+
+        $baru = $karyawan->hitungTanggalMulaiBand();
+
+        // Hindari penyimpanan sia-sia: bandingkan sebagai tanggal Y-m-d.
+        $lama = optional($karyawan->tanggal_mulai_band)->format('Y-m-d');
+        $baruStr = optional($baru)->format('Y-m-d');
+
+        if ($lama !== $baruStr) {
+            $karyawan->tanggal_mulai_band = $baru;
+            $karyawan->saveQuietly();
+        }
     }
 }

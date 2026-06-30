@@ -19,10 +19,11 @@ class Karyawan extends Model
     ];
 
     protected $casts = [
-        'tanggal_lahir'    => 'date',
-        'tanggal_masuk'    => 'date',
-        'tanggal_mulai_pg' => 'date',
-        'tanggal_mulai_jg' => 'date',
+        'tanggal_lahir'     => 'date',
+        'tanggal_masuk'     => 'date',
+        'tanggal_mulai_pg'  => 'date',
+        'tanggal_mulai_jg'  => 'date',
+        'tanggal_mulai_band'=> 'date',
     ];
 
     // ===== RELASI =====
@@ -116,13 +117,65 @@ class Karyawan extends Model
 
     public function getMdgBandBulanAttribute(): int
     {
-        if (!$this->tanggal_mulai_jg) return 0;
-        return (int) $this->tanggal_mulai_jg->diffInMonths(now());
+        // MDG-Band = lama di BAND saat ini, dihitung dari tanggal_mulai_band
+        // (diisi otomatis dari Riwayat Jabatan). Berbeda dari MDG-JG: kenaikan
+        // JG di dalam band yang sama TIDAK mereset MDG-Band.
+        // Fallback ke tanggal_mulai_jg bila tanggal_mulai_band belum terisi.
+        $mulai = $this->tanggal_mulai_band ?? $this->tanggal_mulai_jg;
+        if (!$mulai) return 0;
+        return (int) $mulai->diffInMonths(now());
     }
 
     public function getMdgBandAttribute(): int
     {
         return (int) floor($this->mdg_band_bulan / 12);
+    }
+
+    /**
+     * Hitung tanggal masuk Band saat ini secara OTOMATIS dari Riwayat Jabatan.
+     *
+     * Band ditentukan dari Job Grade; satu band berisi beberapa JG, sehingga
+     * kenaikan JG di dalam band yang sama TIDAK mengganti tanggal ini. Yang
+     * dikembalikan adalah tanggal mulai dari rentetan (streak) band terakhir.
+     * Bila riwayat tak memadai, jatuh ke tanggal_mulai_jg.
+     */
+    public function hitungTanggalMulaiBand(): ?Carbon
+    {
+        $items = $this->historyJabatan()
+            ->with('jobGrade')
+            ->whereNotNull('tanggal_mulai')
+            ->orderBy('tanggal_mulai')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($h) {
+                $grade = (int) ($h->jobGrade->job_grade ?? 0);
+                return [
+                    'band'    => $grade ? self::getBandFromGrade($grade) : '-',
+                    'tanggal' => $h->tanggal_mulai,
+                ];
+            })
+            ->filter(fn ($x) => $x['band'] !== '-')
+            ->values();
+
+        if ($items->isEmpty()) {
+            return $this->tanggal_mulai_jg; // fallback: belum ada riwayat
+        }
+
+        // Band saat ini = band dari riwayat paling baru.
+        $bandSekarang = $items->last()['band'];
+
+        // Cari awal dari streak band saat ini yang TERAKHIR (kalau pernah keluar
+        // lalu masuk lagi ke band yang sama, ambil saat masuk terbarunya).
+        $tanggalMasuk = null;
+        foreach ($items as $it) {
+            if ($it['band'] === $bandSekarang) {
+                $tanggalMasuk ??= $it['tanggal'];
+            } else {
+                $tanggalMasuk = null; // streak putus
+            }
+        }
+
+        return $tanggalMasuk ?? $this->tanggal_mulai_jg;
     }
 
     // ===== STATUS KENAIKAN =====
