@@ -84,9 +84,12 @@ class ExportBuilderController extends Controller
             'kalibrasi_ket' => ['Kalibrasi', 'Keterangan Kalibrasi'.$suffixTahun, 'kalibrasis',
                 fn ($k) => optional(self::byTahun($k->kalibrasis, 'tahun', $tahun))->keterangan ?? '-'],
 
-            // ── Penilaian / KPI (per tahun; "semua tahun" = terbaru) ──
-            'kpi'           => ['Penilaian', 'Nilai KPI'.$suffixTahun, 'penilaians',
-                fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', 'KPI'), 'tahun', $tahun))->nilai ?? '-'],
+            // ── Penilaian / KPI per periode (per tahun; "semua tahun" = terbaru) ──
+            'kpi_tw1'       => ['Penilaian', 'KPI TW1'.$suffixTahun, 'penilaians', fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', 'KPI')->where('periode', 'triwulan_1'), 'tahun', $tahun))->nilai ?? '-'],
+            'kpi_tw2'       => ['Penilaian', 'KPI TW2'.$suffixTahun, 'penilaians', fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', 'KPI')->where('periode', 'triwulan_2'), 'tahun', $tahun))->nilai ?? '-'],
+            'kpi_tw3'       => ['Penilaian', 'KPI TW3'.$suffixTahun, 'penilaians', fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', 'KPI')->where('periode', 'triwulan_3'), 'tahun', $tahun))->nilai ?? '-'],
+            'kpi_tw4'       => ['Penilaian', 'KPI TW4'.$suffixTahun, 'penilaians', fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', 'KPI')->where('periode', 'triwulan_4'), 'tahun', $tahun))->nilai ?? '-'],
+            'kpi_tahunan'   => ['Penilaian', 'KPI Tahunan'.$suffixTahun, 'penilaians', fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', 'KPI')->where('periode', 'tahunan'), 'tahun', $tahun))->nilai ?? '-'],
             'penilaian_360' => ['Penilaian', 'Nilai 360'.$suffixTahun, 'penilaians',
                 fn ($k) => optional(self::byTahun($k->penilaians->where('tipe', '360'), 'tahun', $tahun))->nilai ?? '-'],
 
@@ -342,7 +345,8 @@ class ExportBuilderController extends Controller
     private static function yearDependentKeys(): array
     {
         return [
-            'kalibrasi', 'kalibrasi_ket', 'kpi', 'penilaian_360',
+            'kalibrasi', 'kalibrasi_ket',
+            'kpi_tw1', 'kpi_tw2', 'kpi_tw3', 'kpi_tw4', 'kpi_tahunan', 'penilaian_360',
             'assessment', 'assessment_inti', 'assessment_primer', 'assessment_skunder',
             'assessment_job_stream', 'assessment_lembaga', 'assessment_tgl', 'assessment_exp_idp',
             'kompetensi_kesimpulan', 'kompetensi_lembaga', 'kompetensi_tgl',
@@ -369,8 +373,8 @@ class ExportBuilderController extends Controller
     {
         return match (true) {
             in_array($key, ['kalibrasi', 'kalibrasi_ket'], true) => $k->kalibrasis->pluck('tahun'),
-            $key === 'kpi'           => $k->penilaians->where('tipe', 'KPI')->pluck('tahun'),
-            $key === 'penilaian_360' => $k->penilaians->where('tipe', '360')->pluck('tahun'),
+            Str::startsWith($key, 'kpi_')  => $k->penilaians->where('tipe', 'KPI')->pluck('tahun'),
+            $key === 'penilaian_360'       => $k->penilaians->where('tipe', '360')->pluck('tahun'),
             in_array($key, ['talent_klasifikasi', 'talent_catatan'], true) => $k->talentPools->pluck('periode'),
             Str::startsWith($key, 'assessment') => self::tahunDariTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $bulan),
             Str::startsWith($key, 'kompetensi') => self::tahunDariTanggal($k->historyAssessmentKompetensi, 'tanggal_assessment', $bulan),
