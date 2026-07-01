@@ -212,13 +212,14 @@ class KaryawanController extends Controller
             $import = new KaryawanImport();
             Excel::import($import, $request->file('file'));
 
-            $imported = $import->getRowCount();
-            $skipped  = $import->getSkippedCount();
+            $created = $import->getCreatedCount();
+            $updated = $import->getUpdatedCount();
+            $skipped = $import->getSkippedCount();
 
-            $msg = "Berhasil mengimport {$imported} karyawan.";
-            if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK duplikat).";
+            $msg = "Import selesai: {$created} karyawan baru, {$updated} diperbarui.";
+            if ($skipped > 0) $msg .= " {$skipped} baris dilewati (NIK kosong atau data baru tanpa nama).";
 
-            $this->log('import', 'Karyawan', 'Import Excel', "Berhasil import {$imported} karyawan");
+            $this->log('import', 'Karyawan', 'Import Excel', "Import: {$created} baru, {$updated} diperbarui");
 
             return redirect()->route('karyawan.index')->with('success', $msg);
 

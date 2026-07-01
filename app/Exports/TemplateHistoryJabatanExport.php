@@ -42,11 +42,11 @@ class TemplateHistoryJabatanExport implements FromArray, WithHeadings, WithStyle
     {
         return [
             // Contoh 1 karyawan 5 jabatan
-            ['10001','Staff','Staff Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','JG-3','PG-1','A.1.1','onboarding','01/01/2010','31/12/2012','SK/001/2010','01/01/2010','Jabatan awal masuk'],
-            ['10001','Senior Staff','Senior Staff Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','JG-4','PG-2','A.1.1','promosi','01/01/2013','31/12/2015','SK/002/2013','01/01/2013','Promosi pertama'],
-            ['10001','Supervisor','Supervisor Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','JG-5','PG-2','A.1.1','promosi','01/01/2016','31/12/2018','SK/003/2016','01/01/2016','Naik ke supervisor'],
-            ['10001','Manager','Manager Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','JG-7','PG-3','A.1.1','promosi','01/01/2019','31/12/2021','SK/004/2019','01/01/2019','Promosi manager'],
-            ['10001','Senior Manager','Senior Manager Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','JG-8','PG-3','A.1.1','promosi','01/01/2022','','SK/005/2022','01/01/2022','Jabatan saat ini - kosongkan tanggal_selesai'],
+            ['10001','Staff','Staff Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','3','1','A.1.1','onboarding','01/01/2010','31/12/2012','SK/001/2010','01/01/2010','Jabatan awal masuk'],
+            ['10001','Senior Staff','Senior Staff Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','4','2','A.1.1','promosi','01/01/2013','31/12/2015','SK/002/2013','01/01/2013','Promosi pertama'],
+            ['10001','Supervisor','Supervisor Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','5','2','A.1.1','promosi','01/01/2016','31/12/2018','SK/003/2016','01/01/2016','Naik ke supervisor'],
+            ['10001','Manager','Manager Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','7','3','A.1.1','promosi','01/01/2019','31/12/2021','SK/004/2019','01/01/2019','Promosi manager'],
+            ['10001','Senior Manager','Senior Manager Keuangan','Direktorat Keuangan','Kompartemen Akuntansi','Departemen Anggaran','8','3','A.1.1','promosi','01/01/2022','','SK/005/2022','01/01/2022','Jabatan saat ini - kosongkan tanggal_selesai'],
         ];
     }
 

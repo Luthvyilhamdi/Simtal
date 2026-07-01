@@ -28,6 +28,7 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
             'tanggal_masuk',
             'jabatan',
             'jabatan_saat_ini',
+            'struktural_fungsional',
             'direktorat',
             'kompartemen',
             'departemen',
@@ -51,11 +52,12 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
                 '01/03/2015',
                 'Senior Manager',
                 'Senior Manager Keuangan',
+                'Struktural',
                 'Direktorat Keuangan',
                 'Kompartemen Akuntansi',
                 'Departemen Anggaran',
-                'JG-8',
-                'PG-3',
+                '8',
+                '3',
                 'A.1.1',
                 'aktif',
             ],
@@ -68,11 +70,12 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
                 '15/06/2018',
                 'Staff',
                 'Staff HR',
+                'Fungsional',
                 'Direktorat SDM',
                 'Kompartemen Rekrutmen',
                 'Departemen HR',
-                'JG-5',
-                'PG-2',
+                '5',
+                '2',
                 'B.2.1',
                 'aktif',
             ],
@@ -82,14 +85,14 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
     public function styles(Worksheet $sheet): array
     {
         // Style header
-        $sheet->getStyle('A1:O1')->applyFromArray([
+        $sheet->getStyle('A1:P1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '15803D']],
             'alignment' => ['horizontal' => 'center'],
         ]);
 
         // Style contoh data (italic abu)
-        $sheet->getStyle('A2:O3')->applyFromArray([
+        $sheet->getStyle('A2:P3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '9ca3af']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'f9fafb']],
         ]);
