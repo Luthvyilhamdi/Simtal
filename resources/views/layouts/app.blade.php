@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
     <title>SIMTAL - @yield('title')</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     {{-- Baca cookie & pasang class collapsed SEBELUM halaman render (cegah kedip) --}}
@@ -185,6 +187,50 @@
         .sp:nth-child(10) { transform:translateX(-50%) rotate(270deg); animation:spin-fade 1.2s 0.9s  infinite; }
         .sp:nth-child(11) { transform:translateX(-50%) rotate(300deg); animation:spin-fade 1.2s 1.0s  infinite; }
         .sp:nth-child(12) { transform:translateX(-50%) rotate(330deg); animation:spin-fade 1.2s 1.1s  infinite; }
+    </style>
+    {{-- Date picker: paksa tampilan dd/mm/yyyy (submit tetap Y-m-d) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* ===== Theme date-picker (flatpickr) — soft corporate ===== */
+        .flatpickr-calendar {
+            border-radius:16px; border:1px solid #eef0f2;
+            box-shadow:0 16px 44px rgba(16,24,40,0.16); padding:10px 12px 12px;
+            font-family:'Plus Jakarta Sans',sans-serif; width:328px;
+        }
+        .flatpickr-calendar.arrowTop:after { border-bottom-color:#fff; }
+        .flatpickr-calendar.arrowBottom:before,.flatpickr-calendar.arrowBottom:after { border-top-color:#fff; }
+        .flatpickr-months { padding:4px 2px 10px; }
+        .flatpickr-months .flatpickr-month { color:#111827; }
+        .flatpickr-current-month { font-size:15px; font-weight:700; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months { font-weight:700; color:#15803d; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months:hover { background:#f0fdf4; }
+        .flatpickr-current-month input.cur-year { font-weight:700; color:#111827; }
+        .flatpickr-months .flatpickr-prev-month,.flatpickr-months .flatpickr-next-month {
+            width:32px; height:32px; border-radius:9px; padding:7px; top:4px;
+            display:flex; align-items:center; justify-content:center; transition:background .12s;
+        }
+        .flatpickr-months .flatpickr-prev-month:hover,.flatpickr-months .flatpickr-next-month:hover { background:#f0fdf4; }
+        .flatpickr-months .flatpickr-prev-month svg,.flatpickr-months .flatpickr-next-month svg { width:13px; height:13px; fill:#15803d; }
+        .flatpickr-months .flatpickr-prev-month:hover svg,.flatpickr-months .flatpickr-next-month:hover svg { fill:#166534; }
+        span.flatpickr-weekday { color:#98a2b3; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
+        .dayContainer { padding:2px 0; }
+        .flatpickr-day {
+            border-radius:10px; max-width:40px; height:38px; line-height:38px; margin-top:2px;
+            color:#374151; font-weight:500; border:none;
+        }
+        .flatpickr-day:hover,.flatpickr-day:focus { background:#f0fdf4; color:#15803d; }
+        .flatpickr-day.today { border:1.5px solid #86efac; color:#15803d; font-weight:700; }
+        .flatpickr-day.today:hover { background:#f0fdf4; }
+        .flatpickr-day.selected,.flatpickr-day.selected:hover,
+        .flatpickr-day.startRange,.flatpickr-day.endRange {
+            background:#15803d; border-color:#15803d; color:#fff; font-weight:700;
+            box-shadow:0 4px 10px rgba(21,128,61,0.30);
+        }
+        .flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay { color:#d1d5db; }
+        .flatpickr-day.flatpickr-disabled,.flatpickr-day.flatpickr-disabled:hover { color:#e5e7eb; background:transparent; }
+        .numInputWrapper:hover { background:#f0fdf4; border-radius:6px; }
+        .flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color:#15803d; }
+        .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color:#15803d; }
     </style>
     @stack('styles')
 </head>
@@ -578,6 +624,26 @@
         loader.style.display = 'flex';
     });
     window.addEventListener('pageshow', function(e) { loader.style.display = 'none'; });
+</script>
+
+{{-- Date picker global: semua input tanggal tampil dd/mm/yyyy, nilai dikirim tetap Y-m-d --}}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!window.flatpickr) return;
+        try { flatpickr.localize(flatpickr.l10ns.id); } catch (e) {}
+        document.querySelectorAll('input[type="date"]').forEach(function (el) {
+            var fp = flatpickr(el, {
+                altInput: true,        // input tampil (dd/mm/yyyy)
+                altFormat: 'd/m/Y',
+                dateFormat: 'Y-m-d',   // nilai asli yang dikirim ke server
+                allowInput: true,
+                locale: 'id',
+            });
+            if (fp && fp.altInput) fp.altInput.setAttribute('placeholder', 'dd/mm/yyyy');
+        });
+    });
 </script>
 
 @stack('scripts')

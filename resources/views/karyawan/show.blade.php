@@ -9,48 +9,53 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .profile-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:24px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap; }
+    .profile-card { background:white;border-radius:16px;border:1px solid #eef0f2;padding:24px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
     .profile-left { display:flex;align-items:center;gap:18px;flex:1;min-width:0; }
-    .profile-avatar { width:72px;height:72px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0;overflow:hidden;border:3px solid #bbf7d0; }
+    .profile-avatar { width:74px;height:74px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0;overflow:hidden;border:3px solid #bbf7d0; }
     .profile-avatar img { width:100%;height:100%;object-fit:cover; }
     .profile-name { font-size:20px;font-weight:700;color:#111827;margin-bottom:3px; }
     .profile-jabatan { font-size:13px;color:#6b7280;margin-bottom:10px; }
     .profile-tags { display:flex;flex-wrap:wrap;gap:6px; }
-    .profile-tag { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#f3f4f6;color:#374151; }
+    .profile-tag { display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;background:#f3f4f6;color:#374151; }
     .profile-tag.green { background:#dcfce7;color:#15803d; }
 
-    .profile-stats { display:flex;gap:28px;flex-shrink:0; }
-    .stat-item { text-align:center; }
-    .stat-num { font-size:24px;font-weight:700;color:#111827;line-height:1; }
+    .profile-stats { display:flex;gap:10px;flex-shrink:0; }
+    .stat-item { text-align:center;background:#f9fafb;border:1px solid #f1f2ee;border-radius:12px;padding:12px 16px;min-width:82px; }
+    .stat-num { font-size:23px;font-weight:800;color:#111827;line-height:1; }
     .stat-num.green { color:#15803d; }
     .stat-num.red { color:#e50909; }
-    .stat-label { font-size:11px;color:#9ca3af;margin-top:4px; }
+    .stat-label { font-size:10.5px;color:#9ca3af;margin-top:5px;font-weight:600; }
 
     .action-row { display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap; }
-    .btn-edit { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s; }
+    .btn-edit { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s; }
     .btn-edit:hover { background:#166534; }
     .btn-edit svg { width:14px;height:14px;stroke:white;fill:none;stroke-width:2; }
-    .btn-outline { display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;transition:all 0.15s; }
-    .btn-outline:hover { background:#f9fafb; }
+    .btn-outline { display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e4e7ec;transition:all 0.15s; }
+    .btn-outline:hover { background:#f9fafb;border-color:#bbf7d0;color:#15803d; }
     .btn-outline svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2; }
 
     .detail-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
-    .detail-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:20px; }
+    .detail-card { background:white;border-radius:14px;border:1px solid #eef0f2;padding:22px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
     .detail-card.full { grid-column:1/-1; }
-    .detail-card-title { font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:7px; }
-    .detail-card-title svg { width:14px;height:14px;stroke:#9ca3af;fill:none;stroke-width:1.8; }
-    .detail-row { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f9fafb; }
+    .detail-card-title { font-size:11px;font-weight:700;color:#98a2b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px; }
+    .dct-ico { width:26px;height:26px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .dct-ico svg { width:14px;height:14px;stroke:#16a34a;fill:none;stroke-width:1.8; }
+    .dct-ico.blue { background:#eff6ff; } .dct-ico.blue svg { stroke:#2563eb; }
+    .dct-ico.purple { background:#f5f3ff; } .dct-ico.purple svg { stroke:#7c3aed; }
+    .detail-row { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f7f8f9; }
     .detail-row:last-child { border-bottom:none;padding-bottom:0; }
-    .detail-label { font-size:12px;color:#9ca3af;font-weight:500;flex-shrink:0; }
+    .detail-label { font-size:12px;color:#98a2b3;font-weight:500;flex-shrink:0; }
     .detail-value { font-size:13px;color:#111827;font-weight:600;text-align:right;word-break:break-word; }
+    .detail-value a { color:#15803d;text-decoration:none; }
+    .muted { color:#d1d5db; }
 
-    .foto-section { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px 0; }
+    .foto-section { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px 0; }
     .foto-large { width:120px;height:120px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:700;overflow:hidden;border:4px solid #bbf7d0; }
     .foto-large img { width:100%;height:100%;object-fit:cover; }
     .foto-name { font-size:15px;font-weight:700;color:#111827; }
     .foto-nik { font-size:12px;color:#9ca3af; }
 
-    .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600; }
+    .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:600; }
     .badge-green  { background:#dcfce7;color:#15803d; }
     .badge-red    { background:#fee2e2;color:#dc2626; }
     .badge-gray   { background:#f3f4f6;color:#374151; }
@@ -58,15 +63,13 @@
     .badge-purple { background:#f5f3ff;color:#7c3aed; }
     .badge-amber  { background:#fffbeb;color:#d97706; }
 
-    /* Band & MDG */
-    .band-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:20px;margin-bottom:16px; }
+    .band-card { background:white;border-radius:14px;border:1px solid #eef0f2;padding:22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
     .mdg-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px; }
-    .mdg-item { text-align:center;background:#f9fafb;border-radius:10px;padding:14px 10px; }
+    .mdg-item { text-align:center;background:#f9fafb;border-radius:11px;padding:14px 10px; }
     .mdg-num { font-size:22px;font-weight:800;color:#111827; }
     .mdg-label { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px; }
     .mdg-since { font-size:10px;color:#d1d5db;margin-top:3px; }
 
-    /* MDG warna via class — menggantikan style Blade inline */
     .mdg-ok   { color:#15803d; }
     .mdg-warn { color:#d97706; }
     .mdg-border-ok   { border:1.5px solid #bbf7d0; }
@@ -74,8 +77,7 @@
     .mdg-since-shortlist { color:#15803d;font-weight:700; }
     .mdg-since-normal   { color:#6b7280; }
 
-    .status-naik { border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:16px; }
-    /* Status naik warna via class */
+    .status-naik { border-radius:11px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:16px; }
     .status-naik-ok   { background:#f0fdf4;border:1px solid #bbf7d0; }
     .status-naik-warn { background:#fffbeb;border:1px solid #fde68a; }
     .status-label-ok   { font-size:13px;font-weight:700;color:#15803d; }
@@ -88,8 +90,8 @@
     .syarat-label-ok   { font-weight:600;color:#15803d; }
     .syarat-label-fail { font-weight:600;color:#dc2626; }
 
-    .progress-wrap { display:flex;flex-direction:column;gap:10px; }
-    .progress-label { display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px; }
+    .progress-wrap { display:flex;flex-direction:column;gap:11px; }
+    .progress-label { display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:5px; }
     .progress-bar { height:6px;background:#f3f4f6;border-radius:20px;overflow:hidden; }
     .progress-fill { height:100%;border-radius:20px;transition:width 0.5s; }
 
@@ -97,11 +99,12 @@
         .detail-grid { grid-template-columns:1fr; }
         .detail-card.full { grid-column:1; }
         .profile-card { flex-direction:column; }
-        .profile-stats { width:100%;justify-content:space-around;border-top:1px solid #f3f4f6;padding-top:16px; }
-        .mdg-grid { grid-template-columns:1fr 1fr; }
+        .profile-stats { width:100%;justify-content:space-between;gap:8px; }
+        .stat-item { flex:1;min-width:0; }
+        .mdg-grid { grid-template-columns:1fr; }
     }
     @media (max-width:480px) {
-        .profile-avatar { width:56px;height:56px;font-size:18px; }
+        .profile-avatar { width:60px;height:60px;font-size:20px; }
         .profile-name { font-size:17px; }
         .stat-num { font-size:20px; }
         .action-row { flex-direction:column; }
@@ -191,123 +194,66 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Kalibrasi
     </a>
-    <a href="{{ route('karyawan.index') }}" class="btn-outline">
-        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        Semua Karyawan
-    </a>
 </div>
 
 {{-- DETAIL GRID --}}
 <div class="detail-grid">
 
-    {{-- Foto & Identitas --}}
-    <div class="detail-card">
-        <div class="detail-card-title">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg>
-            Foto & Identitas
-        </div>
-        <div class="foto-section">
-            <div class="foto-large">
-                @if($karyawan->foto)
-                    <img src="{{ Storage::url($karyawan->foto) }}" alt="{{ $karyawan->nama }}">
-                @else
-                    {{ initials($karyawan->nama) }}
-                @endif
-            </div>
-            <div class="foto-name">{{ $karyawan->nama }}</div>
-            <div class="foto-nik">NIK {{ $karyawan->nik }}</div>
-            <div>
-                @if($karyawan->status === 'aktif')
-                    <span class="badge badge-green">● Aktif</span>
-                @else
-                    <span class="badge badge-red">● Tidak Aktif</span>
-                @endif
-            </div>
-        </div>
-    </div>
-
     {{-- Data Pribadi --}}
     <div class="detail-card">
         <div class="detail-card-title">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="dct-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
             Data Pribadi
         </div>
-        <div class="detail-row">
-            <span class="detail-label">NIK</span>
-            <span class="detail-value">{{ $karyawan->nik }}</span>
+        <div class="detail-row"><span class="detail-label">NIK</span><span class="detail-value">{{ $karyawan->nik }}</span></div>
+        <div class="detail-row"><span class="detail-label">Nama Lengkap</span><span class="detail-value">{{ $karyawan->nama }}</span></div>
+        <div class="detail-row"><span class="detail-label">Jenis Kelamin</span><span class="detail-value">{{ $karyawan->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Tempat Lahir</span><span class="detail-value">{{ $karyawan->tempat_lahir ?: '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Tanggal Lahir</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->translatedFormat('d F Y') }}</span></div>
+        <div class="detail-row"><span class="detail-label">Usia</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} tahun</span></div>
+        <div class="detail-row"><span class="detail-label">Tanggal Masuk</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->translatedFormat('d F Y') }}</span></div>
+        <div class="detail-row"><span class="detail-label">Lama Bekerja</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->diffForHumans(null, true) }}</span></div>
+    </div>
+
+    {{-- Kontak & Pendidikan --}}
+    <div class="detail-card">
+        <div class="detail-card-title">
+            <span class="dct-ico blue"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.74a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg></span>
+            Kontak & Pendidikan
         </div>
         <div class="detail-row">
-            <span class="detail-label">Nama Lengkap</span>
-            <span class="detail-value">{{ $karyawan->nama }}</span>
+            <span class="detail-label">No. HP</span>
+            <span class="detail-value">@if($karyawan->no_hp)<a href="tel:{{ $karyawan->no_hp }}">{{ $karyawan->no_hp }}</a>@else<span class="muted">-</span>@endif</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Jenis Kelamin</span>
-            <span class="detail-value">{{ $karyawan->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+            <span class="detail-label">Email</span>
+            <span class="detail-value">@if($karyawan->email)<a href="mailto:{{ $karyawan->email }}">{{ $karyawan->email }}</a>@else<span class="muted">-</span>@endif</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Tempat Lahir</span>
-            <span class="detail-value">{{ $karyawan->tempat_lahir }}</span>
+            <span class="detail-label">Jenjang Pendidikan</span>
+            <span class="detail-value">@if($karyawan->jenjang_pendidikan)<span class="badge badge-blue">{{ $karyawan->jenjang_pendidikan }}</span>@else<span class="muted">-</span>@endif</span>
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Tanggal Lahir</span>
-            <span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->translatedFormat('d F Y') }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Usia</span>
-            <span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} tahun</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Tanggal Masuk</span>
-            <span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->translatedFormat('d F Y') }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Lama Bekerja</span>
-            <span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->diffForHumans(null, true) }}</span>
-        </div>
+        <div class="detail-row"><span class="detail-label">Jurusan</span><span class="detail-value">{{ $karyawan->jurusan ?: '-' }}</span></div>
     </div>
 
     {{-- Jabatan & Struktur --}}
     <div class="detail-card">
         <div class="detail-card-title">
-            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span class="dct-ico"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
             Jabatan & Struktur
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Jabatan</span>
-            <span class="detail-value">{{ $karyawan->jabatan->nama_jabatan ?? '-' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Jabatan Saat Ini</span>
-            <span class="detail-value">{{ $karyawan->jabatan_saat_ini ?? '-' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Direktorat</span>
-            <span class="detail-value">{{ $karyawan->direktorat->nama_direktorat ?? '-' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Kompartemen</span>
-            <span class="detail-value">{{ $karyawan->kompartemen->nama_kompartemen ?? '-' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Departemen</span>
-            <span class="detail-value">{{ $karyawan->departemen->nama_departemen ?? '-' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Kode Struktur</span>
-            <span class="detail-value">
-                <span class="badge badge-purple">{{ $karyawan->kodeStruktur->kode_struktur ?? '-' }}</span>
-            </span>
-        </div>
+        <div class="detail-row"><span class="detail-label">Jabatan</span><span class="detail-value">{{ $karyawan->jabatan->nama_jabatan ?? '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Jabatan Saat Ini</span><span class="detail-value">{{ $karyawan->jabatan_saat_ini ?: '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Direktorat</span><span class="detail-value">{{ $karyawan->direktorat->nama_direktorat ?? '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Kompartemen</span><span class="detail-value">{{ $karyawan->kompartemen->nama_kompartemen ?? '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Departemen</span><span class="detail-value">{{ $karyawan->departemen->nama_departemen ?? '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Kode Struktur</span><span class="detail-value"><span class="badge badge-purple">{{ $karyawan->kodeStruktur->kode_struktur ?? '-' }}</span></span></div>
         <div class="detail-row">
             <span class="detail-label">Struktural/Fungsional</span>
             <span class="detail-value">
                 @if($karyawan->struktural_fungsional)
-                    <span class="badge {{ $karyawan->struktural_fungsional === 'Struktural' ? 'badge-blue' : 'badge-amber' }}">
-                        {{ $karyawan->struktural_fungsional }}
-                    </span>
-                @else
-                    <span style="color:#d1d5db">-</span>
-                @endif
+                    <span class="badge {{ $karyawan->struktural_fungsional === 'Struktural' ? 'badge-blue' : 'badge-amber' }}">{{ $karyawan->struktural_fungsional }}</span>
+                @else <span class="muted">-</span> @endif
             </span>
         </div>
     </div>
@@ -315,35 +261,14 @@
     {{-- Grade & Band --}}
     <div class="detail-card">
         <div class="detail-card-title">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span class="dct-ico purple"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
             Grade & Band
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Band</span>
-            <span class="detail-value">
-                <span class="badge badge-green">{{ $karyawan->band }}</span>
-            </span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Job Grade</span>
-            <span class="detail-value">
-                <span class="badge badge-gray">JG {{ $karyawan->jobGrade->job_grade ?? '-' }}</span>
-            </span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Person Grade</span>
-            <span class="detail-value">
-                <span class="badge badge-blue">PG {{ $karyawan->personGrade->person_grade ?? '-' }}</span>
-            </span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">TMT Job Grade</span>
-            <span class="detail-value">{{ $karyawan->tanggal_mulai_jg ? $karyawan->tanggal_mulai_jg->format('d M Y') : '-' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">TMT Person Grade</span>
-            <span class="detail-value">{{ $karyawan->tanggal_mulai_pg ? $karyawan->tanggal_mulai_pg->format('d M Y') : '-' }}</span>
-        </div>
+        <div class="detail-row"><span class="detail-label">Band</span><span class="detail-value"><span class="badge badge-green">{{ $karyawan->band }}</span></span></div>
+        <div class="detail-row"><span class="detail-label">Job Grade</span><span class="detail-value"><span class="badge badge-gray">JG {{ $karyawan->jobGrade->job_grade ?? '-' }}</span></span></div>
+        <div class="detail-row"><span class="detail-label">Person Grade</span><span class="detail-value"><span class="badge badge-blue">PG {{ $karyawan->personGrade->person_grade ?? '-' }}</span></span></div>
+        <div class="detail-row"><span class="detail-label">TMT Job Grade</span><span class="detail-value">{{ $karyawan->tanggal_mulai_jg ? $karyawan->tanggal_mulai_jg->format('d M Y') : '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">TMT Person Grade</span><span class="detail-value">{{ $karyawan->tanggal_mulai_pg ? $karyawan->tanggal_mulai_pg->format('d M Y') : '-' }}</span></div>
     </div>
 
 </div>
@@ -369,8 +294,8 @@
 @endphp
 
 <div class="band-card">
-    <div class="detail-card-title" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:8px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <div class="detail-card-title" style="flex-wrap:wrap;gap:8px">
+        <span class="dct-ico"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
         Band & Masa Dinas Grade (MDG)
         @if($isShortlist)
         <span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:none;letter-spacing:0;border:1px solid #bbf7d0">
@@ -379,7 +304,6 @@
         @endif
     </div>
 
-    {{-- FIX Ln 358: Blade di style status-naik diganti class statis --}}
     <div class="status-naik {{ $sk['eligible'] ? 'status-naik-ok' : 'status-naik-warn' }}">
         <div style="font-size:28px;flex-shrink:0;">{{ $sk['eligible'] ? '✅' : '⏳' }}</div>
         <div style="flex:1;min-width:0;">
@@ -394,7 +318,6 @@
             @if(!empty($sk['syarat']))
             <div class="syarat-wrap">
                 @foreach($sk['syarat'] as $syarat)
-                {{-- FIX Ln 373-376: Blade di style syarat-item diganti class statis --}}
                 <div class="syarat-item {{ $syarat['terpenuhi'] ? 'syarat-ok' : 'syarat-fail' }}">
                     <span>{{ $syarat['terpenuhi'] ? '✅' : '❌' }}</span>
                     <span class="{{ $syarat['terpenuhi'] ? 'syarat-label-ok' : 'syarat-label-fail' }}">{{ $syarat['label'] }}</span>
@@ -409,44 +332,24 @@
         </div>
     </div>
 
-    {{-- FIX Ln 396-422: Blade di style mdg-item, mdg-num, mdg-since diganti class statis --}}
     <div class="mdg-grid">
-        {{-- Job Grade --}}
         <div class="mdg-item {{ $jgOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Job Grade</div>
-            <div class="mdg-num {{ $jgOk ? 'mdg-ok' : 'mdg-warn' }}">
-                {{ $karyawan->mdg_jg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span>
-            </div>
-            @if($karyawan->tanggal_mulai_jg)
-                <div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>
-            @endif
-            <div class="mdg-since {{ $isShortlist ? 'mdg-since-shortlist' : 'mdg-since-normal' }}">
-                min {{ $minJgTh }} tahun{{ $isShortlist ? ' ✦' : '' }}
-            </div>
+            <div class="mdg-num {{ $jgOk ? 'mdg-ok' : 'mdg-warn' }}">{{ $karyawan->mdg_jg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span></div>
+            @if($karyawan->tanggal_mulai_jg)<div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>@endif
+            <div class="mdg-since {{ $isShortlist ? 'mdg-since-shortlist' : 'mdg-since-normal' }}">min {{ $minJgTh }} tahun{{ $isShortlist ? ' ✦' : '' }}</div>
         </div>
-        {{-- Person Grade --}}
         <div class="mdg-item {{ $pgOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Person Grade</div>
-            <div class="mdg-num {{ $pgOk ? 'mdg-ok' : 'mdg-warn' }}">
-                {{ $karyawan->mdg_pg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span>
-            </div>
-            @if($karyawan->tanggal_mulai_pg)
-                <div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_pg->format('d M Y') }}</div>
-            @endif
+            <div class="mdg-num {{ $pgOk ? 'mdg-ok' : 'mdg-warn' }}">{{ $karyawan->mdg_pg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span></div>
+            @if($karyawan->tanggal_mulai_pg)<div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_pg->format('d M Y') }}</div>@endif
             <div class="mdg-since mdg-since-normal">min {{ $minPgTh }} tahun</div>
         </div>
-        {{-- Band --}}
         <div class="mdg-item {{ $bandOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Band</div>
-            <div class="mdg-num {{ $bandOk ? 'mdg-ok' : 'mdg-warn' }}">
-                {{ $karyawan->mdg_band }}<span style="font-size:12px;font-weight:500;"> thn</span>
-            </div>
-            @if($karyawan->tanggal_mulai_jg)
-                <div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>
-            @endif
-            <div class="mdg-since {{ $isShortlist ? 'mdg-since-shortlist' : 'mdg-since-normal' }}">
-                min {{ $minBandTh }} tahun{{ $isShortlist ? ' ✦' : '' }}
-            </div>
+            <div class="mdg-num {{ $bandOk ? 'mdg-ok' : 'mdg-warn' }}">{{ $karyawan->mdg_band }}<span style="font-size:12px;font-weight:500;"> thn</span></div>
+            @if($karyawan->tanggal_mulai_jg)<div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>@endif
+            <div class="mdg-since {{ $isShortlist ? 'mdg-since-shortlist' : 'mdg-since-normal' }}">min {{ $minBandTh }} tahun{{ $isShortlist ? ' ✦' : '' }}</div>
         </div>
     </div>
 
@@ -454,34 +357,18 @@
     <div style="font-size:11px;color:#15803d;margin-bottom:12px">✦ Ketentuan MDG khusus Shortlist Talent Pool {{ $shortlistPeriode }}</div>
     @endif
 
-    {{-- FIX Ln 420-422: Progress bar Blade di style diganti data-* lalu apply via JS --}}
     <div class="progress-wrap">
         <div class="progress-item">
-            <div class="progress-label">
-                <span>MDG Person Grade</span>
-                <span>{{ $karyawan->mdg_pg_bulan ?? 0 }} / {{ $minPg }} bulan</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" data-pct="{{ $pgPct }}" data-color="{{ $pgPct >= 100 ? '#15803d' : '#f59e0b' }}"></div>
-            </div>
+            <div class="progress-label"><span>MDG Person Grade</span><span>{{ $karyawan->mdg_pg_bulan ?? 0 }} / {{ $minPg }} bulan</span></div>
+            <div class="progress-bar"><div class="progress-fill" data-pct="{{ $pgPct }}" data-color="{{ $pgPct >= 100 ? '#15803d' : '#f59e0b' }}"></div></div>
         </div>
         <div class="progress-item">
-            <div class="progress-label">
-                <span>MDG Job Grade</span>
-                <span>{{ $karyawan->mdg_jg_bulan ?? 0 }} / {{ $minJg }} bulan</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" data-pct="{{ $jgPct }}" data-color="{{ $jgPct >= 100 ? '#15803d' : '#3b82f6' }}"></div>
-            </div>
+            <div class="progress-label"><span>MDG Job Grade</span><span>{{ $karyawan->mdg_jg_bulan ?? 0 }} / {{ $minJg }} bulan</span></div>
+            <div class="progress-bar"><div class="progress-fill" data-pct="{{ $jgPct }}" data-color="{{ $jgPct >= 100 ? '#15803d' : '#3b82f6' }}"></div></div>
         </div>
         <div class="progress-item">
-            <div class="progress-label">
-                <span>MDG Band (dari TMT JG)</span>
-                <span>{{ $karyawan->mdg_band_bulan ?? 0 }} / {{ $minBand }} bulan</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" data-pct="{{ $bandPct }}" data-color="{{ $bandPct >= 100 ? '#15803d' : '#7c3aed' }}"></div>
-            </div>
+            <div class="progress-label"><span>MDG Band (dari TMT JG)</span><span>{{ $karyawan->mdg_band_bulan ?? 0 }} / {{ $minBand }} bulan</span></div>
+            <div class="progress-bar"><div class="progress-fill" data-pct="{{ $bandPct }}" data-color="{{ $bandPct >= 100 ? '#15803d' : '#7c3aed' }}"></div></div>
         </div>
     </div>
 </div>
@@ -490,7 +377,6 @@
 
 @push('scripts')
 <script>
-// Apply progress bar width dan warna dari data-* (menghindari Blade di style)
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.progress-fill[data-pct]').forEach(function(el) {
         el.style.width = el.dataset.pct + '%';

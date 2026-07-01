@@ -55,6 +55,10 @@ class ExportBuilderController extends Controller
             'tanggal_lahir' => ['Data Diri', 'Tanggal Lahir', null, fn ($k) => $k->tanggal_lahir?->format('d/m/Y') ?? '-'],
             'usia'          => ['Data Diri', 'Usia', null, fn ($k) => $k->tanggal_lahir ? $k->tanggal_lahir->age : '-'],
             'status'        => ['Data Diri', 'Status', null, fn ($k) => ucfirst($k->status ?? '-')],
+            'no_hp'         => ['Data Diri', 'No. HP', null, fn ($k) => $k->no_hp ?: '-'],
+            'email'         => ['Data Diri', 'Email', null, fn ($k) => $k->email ?: '-'],
+            'jenjang_pendidikan' => ['Data Diri', 'Jenjang Pendidikan', null, fn ($k) => $k->jenjang_pendidikan ?: '-'],
+            'jurusan'       => ['Data Diri', 'Jurusan', null, fn ($k) => $k->jurusan ?: '-'],
 
             // ── Jabatan & Unit ──
             'jabatan'               => ['Jabatan & Unit', 'Jabatan', 'jabatan', fn ($k) => $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-')],

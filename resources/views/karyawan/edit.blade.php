@@ -13,49 +13,51 @@
     .page-title { font-size:20px;font-weight:700;color:#111827; }
     .page-sub { font-size:13px;color:#6b7280;margin-top:4px; }
 
-    .form-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:28px;margin-bottom:16px; }
+    .form-card { background:white;border-radius:16px;border:1px solid #eef0f2;padding:26px 28px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
 
-    .section-header { display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #f3f4f6; }
-    .section-icon { width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-    .section-icon svg { width:16px;height:16px;stroke:#16a34a;fill:none;stroke-width:1.8; }
+    .section-header { display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid #f3f4f6; }
+    .section-icon { width:36px;height:36px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .section-icon svg { width:17px;height:17px;stroke:#16a34a;fill:none;stroke-width:1.8; }
     .section-icon.blue { background:#eff6ff; }
-    .section-icon.blue svg { stroke:#1d4ed8; }
+    .section-icon.blue svg { stroke:#2563eb; }
     .section-icon.purple { background:#f5f3ff; }
     .section-icon.purple svg { stroke:#7c3aed; }
-    .section-title { font-size:14px;font-weight:700;color:#111827; }
+    .section-icon.amber { background:#fffbeb; }
+    .section-icon.amber svg { stroke:#d97706; }
+    .section-title { font-size:14.5px;font-weight:700;color:#111827; }
     .section-sub { font-size:12px;color:#9ca3af;margin-top:1px; }
 
-    .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
-    .form-group { display:flex;flex-direction:column;gap:6px; }
+    .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:18px; }
+    .form-group { display:flex;flex-direction:column;gap:7px; }
     .form-group.full { grid-column:1/-1; }
 
-    .form-label { font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:4px; }
+    .form-label { font-size:12px;font-weight:600;color:#475467;display:flex;align-items:center;gap:4px; }
     .req { color:#ef4444; }
 
-    .form-input { padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:13px;font-family:inherit;color:#111827;background:#fafafa;outline:none;transition:all 0.15s;width:100%; }
-    .form-input:focus { border-color:#16a34a;background:white;box-shadow:0 0 0 3px rgba(22,163,74,0.08); }
+    .form-input { padding:11px 14px;border:1px solid #e4e7ec;border-radius:10px;font-size:13.5px;font-family:inherit;color:#111827;background:#fcfcfd;outline:none;transition:all 0.15s;width:100%; }
+    .form-input:focus { border-color:#16a34a;background:white;box-shadow:0 0 0 3px rgba(22,163,74,0.10); }
     .form-input[readonly] { background:#f3f4f6;color:#15803d;font-weight:700;cursor:not-allowed; }
     .form-input.error-input { border-color:#ef4444; }
-    .error-msg { font-size:11px;color:#ef4444; }
-    .form-hint { font-size:11px;color:#9ca3af;margin-top:2px; }
+    .error-msg { font-size:11.5px;color:#ef4444; }
+    .form-hint { font-size:11.5px;color:#9ca3af; }
 
     .select-wrap { position:relative; }
-    .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
+    .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #98a2b3;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
 
     .radio-group { display:flex;gap:10px; }
-    .radio-card { flex:1;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:9px;cursor:pointer;transition:all 0.15s;background:#fafafa; }
+    .radio-card { flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid #e4e7ec;border-radius:10px;cursor:pointer;transition:all 0.15s;background:#fcfcfd; }
     .radio-card input[type=radio] { display:none; }
-    .radio-card:hover { border-color:#16a34a;background:#f0fdf4; }
+    .radio-card:hover { border-color:#86efac;background:#f0fdf4; }
     .radio-card.selected { border-color:#16a34a;background:#f0fdf4; }
     .radio-dot { width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s; }
     .radio-card.selected .radio-dot { border-color:#16a34a;background:#16a34a; }
     .radio-card.selected .radio-dot::after { content:'';width:6px;height:6px;border-radius:50%;background:white; }
-    .radio-label { font-size:13px;font-weight:600;color:#374151; }
+    .radio-label { font-size:13px;font-weight:600;color:#475467; }
     .radio-card.selected .radio-label { color:#15803d; }
 
     .status-group { display:flex;gap:10px; }
-    .status-card { flex:1;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:9px;cursor:pointer;transition:all 0.15s;background:#fafafa; }
+    .status-card { flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid #e4e7ec;border-radius:10px;cursor:pointer;transition:all 0.15s;background:#fcfcfd; }
     .status-card input[type=radio] { display:none; }
     .status-dot { width:10px;height:10px;border-radius:50%;background:#d1d5db;flex-shrink:0;transition:background 0.15s; }
     .status-card.aktif-card:hover,.status-card.aktif-card.selected { border-color:#16a34a;background:#f0fdf4; }
@@ -69,7 +71,7 @@
     .foto-upload-wrap { display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
     .foto-preview-box { width:80px;height:80px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0;overflow:hidden;border:3px solid #bbf7d0; }
     .foto-preview-box img { width:100%;height:100%;object-fit:cover; }
-    .foto-upload-area { flex:1;min-width:180px;border:2px dashed #d1d5db;border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafafa;position:relative; }
+    .foto-upload-area { flex:1;min-width:180px;border:1.5px dashed #d0d5dd;border-radius:11px;padding:14px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fcfcfd;position:relative; }
     .foto-upload-area:hover { border-color:#16a34a;background:#f0fdf4; }
     .foto-upload-area input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
     .foto-upload-icon { font-size:20px;margin-bottom:4px; }
@@ -77,21 +79,22 @@
     .foto-upload-text strong { color:#15803d; }
     .foto-upload-hint { font-size:10px;color:#9ca3af;margin-top:2px; }
 
-    .band-info-box { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px; }
-    .band-info-badge { display:inline-flex;padding:4px 14px;border-radius:20px;font-size:14px;font-weight:800;background:#15803d;color:white; }
-    .mdg-hint-box { background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:12px;color:#92400e;margin-top:8px; }
+    .band-info-box { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px; }
+    .band-info-badge { display:inline-flex;padding:5px 15px;border-radius:20px;font-size:14px;font-weight:800;background:#15803d;color:white; }
+    .mdg-hint-box { background:#fffbeb;border:1px solid #fde68a;border-radius:11px;padding:13px 16px;font-size:12px;color:#92400e;margin-top:10px; }
     .mdg-hint-box ul { margin:6px 0 0 16px;display:flex;flex-direction:column;gap:3px; }
 
-    .form-actions-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
+    .form-actions-card { background:white;border-radius:16px;border:1px solid #eef0f2;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
     .form-actions-right { display:flex;gap:10px; }
-    .btn-cancel { display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:600;border:1.5px solid #e5e7eb;text-decoration:none;transition:all 0.15s; }
+    .btn-cancel { display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid #e4e7ec;text-decoration:none;transition:all 0.15s; }
     .btn-cancel:hover { background:#f9fafb; }
-    .btn-save { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:10px 24px;border-radius:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s; }
-    .btn-save:hover { background:#166534;transform:translateY(-1px);box-shadow:0 4px 12px rgba(21,128,61,0.3); }
+    .btn-save { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:11px 26px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s; }
+    .btn-save:hover { background:#166534;box-shadow:0 4px 12px rgba(21,128,61,0.25); }
     .btn-save svg,.btn-cancel svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2; }
     .btn-save svg { stroke:white; }
 
     @media (max-width:640px) {
+        .form-card { padding:20px; }
         .form-grid { grid-template-columns:1fr; }
         .form-group.full { grid-column:1; }
         .radio-group,.status-group { flex-direction:column; }
@@ -110,7 +113,7 @@
 </a>
 
 <div class="page-header">
-    <div class="page-title">✏️ Edit Data Karyawan</div>
+    <div class="page-title">Edit Data Karyawan</div>
     <div class="page-sub">Perbarui informasi karyawan <strong>{{ $karyawan->nama }}</strong></div>
 </div>
 
@@ -220,10 +223,60 @@
                         <input type="file" name="foto" accept="image/*" onchange="previewFoto(this)" />
                         <div class="foto-upload-icon">📷</div>
                         <div class="foto-upload-text"><strong>Klik untuk upload</strong> atau drag & drop</div>
-                        <div class="foto-upload-hint">PNG, JPG, JPEG (maks. 2MB)</div>
+                        <div class="foto-upload-hint">Kosongkan bila tidak ingin mengubah · PNG, JPG (maks. 2MB)</div>
                     </div>
                 </div>
                 @error('foto')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== KONTAK & PENDIDIKAN ===== --}}
+    <div class="form-card">
+        <div class="section-header">
+            <div class="section-icon blue">
+                <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.74a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+                <div class="section-title">Kontak & Pendidikan</div>
+                <div class="section-sub">Nomor telepon, email, dan riwayat pendidikan</div>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">No. HP</label>
+                <input type="text" name="no_hp" value="{{ old('no_hp', $karyawan->no_hp) }}"
+                       class="form-input" placeholder="cth: 081234567890" inputmode="tel" />
+                @error('no_hp')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" value="{{ old('email', $karyawan->email) }}"
+                       class="form-input {{ $errors->has('email') ? 'error-input' : '' }}"
+                       placeholder="cth: nama@pupuk-indonesia.com" />
+                @error('email')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Jenjang Pendidikan</label>
+                <div class="select-wrap">
+                    <select name="jenjang_pendidikan" class="form-input">
+                        <option value="">-- Pilih --</option>
+                        @foreach(['SD','SMP','SMA/SMK','D1','D2','D3','D4','S1','S2','S3'] as $jp)
+                            <option value="{{ $jp }}" {{ old('jenjang_pendidikan', $karyawan->jenjang_pendidikan)==$jp ? 'selected' : '' }}>{{ $jp }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @error('jenjang_pendidikan')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Jurusan</label>
+                <input type="text" name="jurusan" value="{{ old('jurusan', $karyawan->jurusan) }}"
+                       class="form-input" placeholder="cth: Teknik Industri" />
+                @error('jurusan')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
         </div>
     </div>
@@ -255,7 +308,7 @@
                 </div>
                 @error('jabatan_id')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Struktural / Fungsional</label>
                 <div class="select-wrap">
@@ -267,8 +320,8 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Jabatan Saat Ini</label>
+            <div class="form-group full">
+                <label class="form-label">Jabatan Saat Ini <span class="req">*</span></label>
                 <input type="text" name="jabatan_saat_ini"
                        value="{{ old('jabatan_saat_ini', $karyawan->jabatan_saat_ini) }}"
                        class="form-input" placeholder="cth: Associate Officer Talenta Manajemen" />
@@ -404,7 +457,7 @@
     {{-- ===== TMT GRADE ===== --}}
     <div class="form-card">
         <div class="section-header">
-            <div class="section-icon blue">
+            <div class="section-icon amber">
                 <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
             <div>
@@ -439,10 +492,9 @@
             </div>
         </div>
 
-        {{-- Info MDG Band --}}
-        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-top:12px;font-size:12px;color:#374151;">
+        <div style="background:#f9fafb;border:1px solid #eef0f2;border-radius:11px;padding:13px 16px;margin-top:12px;font-size:12px;color:#374151;">
             📊 <strong>MDG Band</strong> (dari TMT JG saat masuk band):
-            <strong class="{{ $karyawan->mdg_band_bulan >= 36 ? 'text-ok' : 'text-warn' }}">
+            <strong style="color:{{ $karyawan->mdg_band_bulan >= 36 ? '#15803d' : '#d97706' }}">
                 {{ $karyawan->mdg_band_bulan }} bulan
             </strong>
             dari min 36 bulan untuk naik Band

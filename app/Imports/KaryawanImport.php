@@ -57,6 +57,10 @@ class KaryawanImport implements OnEachRow, WithHeadingRow
             if ($this->filled($row, 'tanggal_lahir'))    $data['tanggal_lahir'] = $this->parseDate($row['tanggal_lahir']);
             if ($this->filled($row, 'tanggal_masuk'))    $data['tanggal_masuk'] = $this->parseDate($row['tanggal_masuk']);
             if ($this->filled($row, 'status'))           $data['status'] = strtolower(trim($row['status'])) === 'aktif' ? 'aktif' : 'tidak aktif';
+            if ($this->filled($row, 'no_hp'))            $data['no_hp'] = trim((string) $row['no_hp']);
+            if ($this->filled($row, 'email'))            $data['email'] = trim((string) $row['email']);
+            if ($this->filled($row, 'jenjang_pendidikan')) $data['jenjang_pendidikan'] = trim((string) $row['jenjang_pendidikan']);
+            if ($this->filled($row, 'jurusan'))          $data['jurusan'] = trim((string) $row['jurusan']);
             if ($this->filled($row, 'struktural_fungsional')) {
                 $data['struktural_fungsional'] = ucfirst(strtolower(trim($row['struktural_fungsional'])));
             }
