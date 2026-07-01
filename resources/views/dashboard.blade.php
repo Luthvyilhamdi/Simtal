@@ -289,9 +289,21 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
         <div class="kpi-left">
             <div class="kpi-label">Assessment Rekomendasi</div>
             <div class="kpi-num">{{ $totalAssessment }}</div>
-            <div class="kpi-sub">{{ $assessmentReady }} ready · {{ $assessmentNR }} not ready</div>
-            @php $pctReady = $totalAssessment > 0 ? round(($assessmentReady/$totalAssessment)*100) : 0; @endphp
-            <span class="kpi-badge" style="background:#f5f3ff;color:#7c3aed;">{{ $pctReady }}% ready rate</span>
+            <div class="kpi-sub">Total assessment rekomendasi</div>
+            <div class="komp-stat-row">
+                <div class="komp-stat-item" style="background:#dcfce7;">
+                    <div class="komp-stat-num" style="color:#15803d;">{{ $assessmentReady }}</div>
+                    <div class="komp-stat-label" style="color:#15803d;">Ready</div>
+                </div>
+                <div class="komp-stat-item" style="background:#fef3c7;">
+                    <div class="komp-stat-num" style="color:#d97706;">{{ $assessmentRWD }}</div>
+                    <div class="komp-stat-label" style="color:#d97706;">R. Dev</div>
+                </div>
+                <div class="komp-stat-item" style="background:#fee2e2;">
+                    <div class="komp-stat-num" style="color:#dc2626;">{{ $assessmentNR }}</div>
+                    <div class="komp-stat-label" style="color:#dc2626;">Not Ready</div>
+                </div>
+            </div>
         </div>
         <div class="kpi-icon purple">{!! $icoClipDash !!}</div>
     </div>

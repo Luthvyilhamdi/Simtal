@@ -10,53 +10,83 @@ use App\Models\HistoryPejabat;
 use App\Models\PgsPjs;
 use App\Models\Direktorat;
 use App\Models\StrukturOrganisasi;
-use App\Models\Departemen;
 use App\Models\TalentPool;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // === STATS UTAMA ===
-        $totalKaryawan      = Karyawan::count();
-        $karyawanAktif      = Karyawan::where('status', 'aktif')->count();
-        $karyawanTidakAktif = Karyawan::where('status', 'tidak aktif')->count();
+        // === STATS UTAMA === (3 count → 1 query grouped)
+        $kStat = Karyawan::selectRaw("
+            COUNT(*) as total,
+            SUM(status = 'aktif') as aktif,
+            SUM(status = 'tidak aktif') as tidak_aktif
+        ")->first();
+        $totalKaryawan      = (int) $kStat->total;
+        $karyawanAktif      = (int) $kStat->aktif;
+        $karyawanTidakAktif = (int) $kStat->tidak_aktif;
         $karyawanBaru       = Karyawan::whereMonth('tanggal_masuk', now()->month)
                                 ->whereYear('tanggal_masuk', now()->year)->count();
 
-        // === HISTORY JABATAN ===
+        // === HISTORY JABATAN === (3 count tahun ini → 1 query grouped)
         $totalHistoryJabatan = HistoryJabatan::count();
-        $promosiThisYear     = HistoryJabatan::where('tipe', 'promosi')->whereYear('tanggal_mulai', now()->year)->count();
-        $mutasiThisYear      = HistoryJabatan::where('tipe', 'mutasi')->whereYear('tanggal_mulai', now()->year)->count();
-        $demosiThisYear      = HistoryJabatan::where('tipe', 'demosi')->whereYear('tanggal_mulai', now()->year)->count();
+        $hjYear = HistoryJabatan::whereYear('tanggal_mulai', now()->year)->selectRaw("
+            SUM(tipe = 'promosi') as promosi,
+            SUM(tipe = 'mutasi') as mutasi,
+            SUM(tipe = 'demosi') as demosi
+        ")->first();
+        $promosiThisYear = (int) $hjYear->promosi;
+        $mutasiThisYear  = (int) $hjYear->mutasi;
+        $demosiThisYear  = (int) $hjYear->demosi;
 
-        // === ASSESSMENT REKOMENDASI ===
-        $totalAssessment = HistoryAssessment::count();
-        $assessmentReady = HistoryAssessment::where('rekomendasi_final', 'ready')->count();
-        $assessmentRWD   = HistoryAssessment::where('rekomendasi_final', 'ready_with_development')->count();
-        $assessmentNR    = HistoryAssessment::where('rekomendasi_final', 'not_ready')->count();
+        // === ASSESSMENT REKOMENDASI === (4 count → 1 query grouped)
+        $aStat = HistoryAssessment::selectRaw("
+            COUNT(*) as total,
+            SUM(rekomendasi_final = 'ready') as ready,
+            SUM(rekomendasi_final = 'ready_with_development') as rwd,
+            SUM(rekomendasi_final = 'not_ready') as nr
+        ")->first();
+        $totalAssessment = (int) $aStat->total;
+        $assessmentReady = (int) $aStat->ready;
+        $assessmentRWD   = (int) $aStat->rwd;
+        $assessmentNR    = (int) $aStat->nr;
 
-        // === ASSESSMENT KOMPETENSI ===
-        $totalKompetensi   = HistoryAssessmentKompetensi::count();
-        $totalQualified    = HistoryAssessmentKompetensi::where('kesimpulan', 'QUALIFIED')->count();
-        $totalNotQualified = HistoryAssessmentKompetensi::where('kesimpulan', 'NOT QUALIFIED')->count();
+        // === ASSESSMENT KOMPETENSI === (3 count → 1 query grouped)
+        $kmpStat = HistoryAssessmentKompetensi::selectRaw("
+            COUNT(*) as total,
+            SUM(kesimpulan = 'QUALIFIED') as qualified,
+            SUM(kesimpulan = 'NOT QUALIFIED') as not_qualified
+        ")->first();
+        $totalKompetensi   = (int) $kmpStat->total;
+        $totalQualified    = (int) $kmpStat->qualified;
+        $totalNotQualified = (int) $kmpStat->not_qualified;
 
-        // === PEJABAT ===
-        $pejabatAktif = HistoryPejabat::whereNull('tanggal_selesai')->count();
-        $pejabatSVP   = HistoryPejabat::where('jabatan', 'SVP')->whereNull('tanggal_selesai')->count();
-        $pejabatVP    = HistoryPejabat::where('jabatan', 'VP')->whereNull('tanggal_selesai')->count();
-        $pejabatSPM   = HistoryPejabat::where('jabatan', 'SPM')->whereNull('tanggal_selesai')->count();
-        $pejabatPM    = HistoryPejabat::where('jabatan', 'PM')->whereNull('tanggal_selesai')->count();
+        // === PEJABAT === (5 count → 1 query grouped)
+        $pjStat = HistoryPejabat::whereNull('tanggal_selesai')->selectRaw("
+            COUNT(*) as total,
+            SUM(jabatan = 'SVP') as svp,
+            SUM(jabatan = 'VP') as vp,
+            SUM(jabatan = 'SPM') as spm,
+            SUM(jabatan = 'PM') as pm
+        ")->first();
+        $pejabatAktif = (int) $pjStat->total;
+        $pejabatSVP   = (int) $pjStat->svp;
+        $pejabatVP    = (int) $pjStat->vp;
+        $pejabatSPM   = (int) $pjStat->spm;
+        $pejabatPM    = (int) $pjStat->pm;
 
-        // === PGS & PJS ===
+        // === PGS & PJS === (2 count → 1 query grouped)
         PgsPjs::where('is_active', true)
             ->where('tanggal_berakhir', '<', now())
             ->whereNotNull('tanggal_berakhir')
             ->update(['is_active' => false]);
-        $pgsAktif = PgsPjs::where('is_active', true)->where('tipe', 'pgs')->count();
-        $pjsAktif = PgsPjs::where('is_active', true)->where('tipe', 'pjs')->count();
+        $pgsStat = PgsPjs::where('is_active', true)->selectRaw("
+            SUM(tipe = 'pgs') as pgs,
+            SUM(tipe = 'pjs') as pjs
+        ")->first();
+        $pgsAktif = (int) $pgsStat->pgs;
+        $pjsAktif = (int) $pgsStat->pjs;
 
         // === TALENT POOL ===
         $tpTahunIni  = now()->year;
@@ -85,8 +115,12 @@ class DashboardController extends Controller
         ];
 
         // === STRUKTUR ORGANISASI ===
-        $soBulan = now()->month;
-        $soTahun = now()->year;
+        // Pakai periode SO TERBARU yang ada datanya (bukan bulan berjalan yang
+        // mungkin belum diisi), agar seluruh ringkasan SO tidak kosong.
+        $soPeriode = StrukturOrganisasi::orderByDesc('tahun')->orderByDesc('bulan')
+            ->first(['bulan', 'tahun']);
+        $soBulan = $soPeriode->bulan ?? now()->month;
+        $soTahun = $soPeriode->tahun ?? now()->year;
         $soStats = StrukturOrganisasi::where('bulan', $soBulan)
             ->where('tahun', $soTahun)
             ->where('posisi', '!=', '-')
@@ -134,26 +168,43 @@ class DashboardController extends Controller
         $soPerKompartemen = $soStatusQuery('kompartemen')->get();
         $soPerDepartemen  = $soStatusQuery('dept')->get();
 
-        // === CHART: Tren Jabatan ===
+        // === CHART: Tren Jabatan === (12 bln x 3 = 36 query → 1 query grouped)
+        $awalTren = now()->subMonths(11)->startOfMonth();
+        $trenIdx  = HistoryJabatan::whereBetween('tanggal_mulai', [$awalTren, now()->endOfMonth()])
+            ->selectRaw("DATE_FORMAT(tanggal_mulai, '%Y-%m') as ym, tipe, COUNT(*) as c")
+            ->groupBy('ym', 'tipe')
+            ->get()
+            ->groupBy('ym');
+
         $trenBulan = [];
         for ($i = 11; $i >= 0; $i--) {
             $bulan = now()->subMonths($i);
+            $ym    = $bulan->format('Y-m');
+            $rows  = $trenIdx[$ym] ?? collect();
             $trenBulan[] = [
                 'bulan'   => $bulan->translatedFormat('M Y'),
-                'promosi' => HistoryJabatan::where('tipe', 'promosi')->whereYear('tanggal_mulai', $bulan->year)->whereMonth('tanggal_mulai', $bulan->month)->count(),
-                'mutasi'  => HistoryJabatan::where('tipe', 'mutasi')->whereYear('tanggal_mulai', $bulan->year)->whereMonth('tanggal_mulai', $bulan->month)->count(),
-                'demosi'  => HistoryJabatan::where('tipe', 'demosi')->whereYear('tanggal_mulai', $bulan->year)->whereMonth('tanggal_mulai', $bulan->month)->count(),
+                'promosi' => (int) ($rows->firstWhere('tipe', 'promosi')?->c ?? 0),
+                'mutasi'  => (int) ($rows->firstWhere('tipe', 'mutasi')?->c ?? 0),
+                'demosi'  => (int) ($rows->firstWhere('tipe', 'demosi')?->c ?? 0),
             ];
         }
 
-        // === CHART: Tren Kompetensi ===
+        // === CHART: Tren Kompetensi === (12 bln x 2 = 24 query → 1 query grouped)
+        $kompIdx = HistoryAssessmentKompetensi::whereBetween('tanggal_assessment', [$awalTren, now()->endOfMonth()])
+            ->selectRaw("DATE_FORMAT(tanggal_assessment, '%Y-%m') as ym, kesimpulan, COUNT(*) as c")
+            ->groupBy('ym', 'kesimpulan')
+            ->get()
+            ->groupBy('ym');
+
         $trenKompetensi = [];
         for ($i = 11; $i >= 0; $i--) {
             $bulan = now()->subMonths($i);
+            $ym    = $bulan->format('Y-m');
+            $rows  = $kompIdx[$ym] ?? collect();
             $trenKompetensi[] = [
                 'bulan'         => $bulan->translatedFormat('M Y'),
-                'qualified'     => HistoryAssessmentKompetensi::where('kesimpulan', 'QUALIFIED')->whereYear('tanggal_assessment', $bulan->year)->whereMonth('tanggal_assessment', $bulan->month)->count(),
-                'not_qualified' => HistoryAssessmentKompetensi::where('kesimpulan', 'NOT QUALIFIED')->whereYear('tanggal_assessment', $bulan->year)->whereMonth('tanggal_assessment', $bulan->month)->count(),
+                'qualified'     => (int) ($rows->firstWhere('kesimpulan', 'QUALIFIED')?->c ?? 0),
+                'not_qualified' => (int) ($rows->firstWhere('kesimpulan', 'NOT QUALIFIED')?->c ?? 0),
             ];
         }
 
@@ -177,22 +228,49 @@ class DashboardController extends Controller
             ->get()->map(fn($k) => ['nama' => 'JG ' . ($k->jobGrade->job_grade ?? '-'), 'total' => $k->total]);
 
         // === TABEL: Ringkasan Direktorat ===
+        // Sebelumnya N+1 (1 + N×6 query). Kini pra-hitung agregat per direktorat
+        // dengan JOIN + GROUP BY (5 query), lalu di-lookup per direktorat.
+        $tahunIni = now()->year;
+
+        $promosiDir = HistoryJabatan::join('karyawans', 'karyawans.id', '=', 'history_jabatans.karyawan_id')
+            ->where('history_jabatans.tipe', 'promosi')
+            ->whereYear('history_jabatans.tanggal_mulai', $tahunIni)
+            ->groupBy('karyawans.direktorat_id')
+            ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
+
+        $mutasiDir = HistoryJabatan::join('karyawans', 'karyawans.id', '=', 'history_jabatans.karyawan_id')
+            ->where('history_jabatans.tipe', 'mutasi')
+            ->whereYear('history_jabatans.tanggal_mulai', $tahunIni)
+            ->groupBy('karyawans.direktorat_id')
+            ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
+
+        $assessmentDir = HistoryAssessment::join('karyawans', 'karyawans.id', '=', 'history_assessments.karyawan_id')
+            ->groupBy('karyawans.direktorat_id')
+            ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
+
+        $readyDir = HistoryAssessment::join('karyawans', 'karyawans.id', '=', 'history_assessments.karyawan_id')
+            ->where('history_assessments.rekomendasi_final', 'ready')
+            ->groupBy('karyawans.direktorat_id')
+            ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
+
+        $qualifiedDir = HistoryAssessmentKompetensi::join('karyawans', 'karyawans.id', '=', 'history_assessment_kompetensi.karyawan_id')
+            ->where('history_assessment_kompetensi.kesimpulan', 'QUALIFIED')
+            ->groupBy('karyawans.direktorat_id')
+            ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
+
         $ringkasanDirektorat = Direktorat::withCount([
             'karyawans as total_karyawan',
             'karyawans as karyawan_aktif' => fn($q) => $q->where('status', 'aktif'),
-        ])->orderBy('total_karyawan', 'desc')->get()->map(function ($d) {
-            $ids = $d->karyawans()->pluck('id');
-            return [
-                'nama'       => $d->nama_direktorat,
-                'total'      => $d->total_karyawan,
-                'aktif'      => $d->karyawan_aktif,
-                'promosi'    => HistoryJabatan::whereIn('karyawan_id', $ids)->where('tipe', 'promosi')->whereYear('tanggal_mulai', now()->year)->count(),
-                'mutasi'     => HistoryJabatan::whereIn('karyawan_id', $ids)->where('tipe', 'mutasi')->whereYear('tanggal_mulai', now()->year)->count(),
-                'assessment' => HistoryAssessment::whereIn('karyawan_id', $ids)->count(),
-                'ready'      => HistoryAssessment::whereIn('karyawan_id', $ids)->where('rekomendasi_final', 'ready')->count(),
-                'qualified'  => HistoryAssessmentKompetensi::whereIn('karyawan_id', $ids)->where('kesimpulan', 'QUALIFIED')->count(),
-            ];
-        });
+        ])->orderBy('total_karyawan', 'desc')->get()->map(fn($d) => [
+            'nama'       => $d->nama_direktorat,
+            'total'      => $d->total_karyawan,
+            'aktif'      => $d->karyawan_aktif,
+            'promosi'    => (int) ($promosiDir[$d->id]    ?? 0),
+            'mutasi'     => (int) ($mutasiDir[$d->id]     ?? 0),
+            'assessment' => (int) ($assessmentDir[$d->id] ?? 0),
+            'ready'      => (int) ($readyDir[$d->id]      ?? 0),
+            'qualified'  => (int) ($qualifiedDir[$d->id]  ?? 0),
+        ]);
 
         // === AKAN PENSIUN ===
         $akanPensiun = Karyawan::where('status', 'aktif')
@@ -208,16 +286,22 @@ class DashboardController extends Controller
 
         $karyawanTerbaru = Karyawan::with(['jabatan', 'departemen'])->latest('tanggal_masuk')->take(5)->get();
 
-        $genderChart = [
-            'L' => Karyawan::where('status', 'aktif')->where('jenis_kelamin', 'L')->count(),
-            'P' => Karyawan::where('status', 'aktif')->where('jenis_kelamin', 'P')->count(),
-        ];
+        // === DEMOGRAFI === (gender 2 + usia 4 = 6 query → 1 query grouped)
+        $demo = Karyawan::where('status', 'aktif')->selectRaw("
+            SUM(jenis_kelamin = 'L') as l,
+            SUM(jenis_kelamin = 'P') as p,
+            SUM(TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) < 30) as u1,
+            SUM(TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 30 AND 39) as u2,
+            SUM(TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 40 AND 49) as u3,
+            SUM(TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) >= 50) as u4
+        ")->first();
 
+        $genderChart = ['L' => (int) $demo->l, 'P' => (int) $demo->p];
         $usiaChart = [
-            '< 30'  => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) < 30')->count(),
-            '30-39' => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 30 AND 39')->count(),
-            '40-49' => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) BETWEEN 40 AND 49')->count(),
-            '50+'   => Karyawan::where('status', 'aktif')->whereRaw('TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) >= 50')->count(),
+            '< 30'  => (int) $demo->u1,
+            '30-39' => (int) $demo->u2,
+            '40-49' => (int) $demo->u3,
+            '50+'   => (int) $demo->u4,
         ];
 
         return view('dashboard', compact(
