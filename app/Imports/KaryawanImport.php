@@ -111,11 +111,13 @@ class KaryawanImport implements
         }
 
         // Coba berbagai format tanggal
-        $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'd M Y', 'm/d/Y'];
+        // Semua format dd/mm/yyyy (tanpa mm/dd). hasFormat memvalidasi ketat
+        // agar tanggal tak valid tidak "overflow" menjadi tanggal keliru.
+        $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'd M Y'];
         foreach ($formats as $format) {
-            try {
-                return Carbon::createFromFormat($format, $value)->format('Y-m-d');
-            } catch (\Exception $e) {}
+            if (Carbon::hasFormat((string) $value, $format)) {
+                return Carbon::createFromFormat($format, (string) $value)->format('Y-m-d');
+            }
         }
 
         return null;

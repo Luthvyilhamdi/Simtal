@@ -159,6 +159,8 @@
         .kpi-num { font-size:22px; }
         .kpi-icon { width:36px;height:36px; }
         .kpi-icon svg { width:16px;height:16px; }
+        .komp-stat-num { font-size:18px; }
+        .komp-stat-row { gap:6px; }
         .so-grid { gap:8px; }
         .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr;gap:10px; }
         .so-status-grid { grid-template-columns:1fr;gap:10px; }
@@ -210,6 +212,10 @@
         .pejabat-num { font-size:18px; }
         .sec-title { font-size:11px; }
         .bar-label { min-width:50px; }
+        .komp-stat-num { font-size:15px; }
+        .komp-stat-label { font-size:8px; letter-spacing:0; }
+        .komp-stat-item { padding:6px 3px; }
+        .komp-stat-row { gap:5px; }
     }
 </style>
 @endpush
