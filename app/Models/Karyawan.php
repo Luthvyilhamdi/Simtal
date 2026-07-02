@@ -182,6 +182,20 @@ class Karyawan extends Model
     // ===== STATUS KENAIKAN =====
     public function getStatusKenaikanAttribute(): array
     {
+        // Default = normal track (PG 12 bln, JG 24 bln, Band 36 bln).
+        return $this->statusKenaikan();
+    }
+
+    /**
+     * Status kenaikan dengan ambang MDG yang bisa disesuaikan.
+     * Dipakai Reminder Promosi agar SELARAS dengan keringanan shortlist Talent Pool
+     * (shortlist: Band 24 bln, JG 12 bln). Bila argumen dikosongkan → normal track,
+     * sehingga perilaku atribut status_kenaikan & unit test tetap sama.
+     */
+    public function statusKenaikan(int $minPg = 12, int $minJg = 24, int $minBand = 36): array
+    {
+        $thn = fn (int $m) => (int) round($m / 12); // bulan → tahun untuk label
+
         $pg    = (int) ($this->personGrade->person_grade ?? 0);
         $jg    = (int) ($this->jobGrade->job_grade ?? 0);
         $band  = $this->band;
@@ -191,22 +205,22 @@ class Karyawan extends Model
         $mdgJgBulan   = $this->mdg_jg_bulan;
         $mdgBandBulan = $this->mdg_band_bulan;
 
-        $pgMemenuhi   = $mdgPgBulan >= 12;
-        $jgMemenuhi   = $mdgJgBulan >= 24;
-        $bandMemenuhi = $mdgBandBulan >= 36;
+        $pgMemenuhi   = $mdgPgBulan >= $minPg;
+        $jgMemenuhi   = $mdgJgBulan >= $minJg;
+        $bandMemenuhi = $mdgBandBulan >= $minBand;
 
         if ($pg < $jg) {
             return [
                 'status'      => 'naik_pg',
                 'eligible'    => $pgMemenuhi,
                 'label'       => "Naik Person Grade → PG " . ($pg + 1),
-                'sisa_bulan'  => max(0, 12 - $mdgPgBulan),
+                'sisa_bulan'  => max(0, $minPg - $mdgPgBulan),
                 'syarat'      => [
                     'pg' => [
                         'terpenuhi' => $pgMemenuhi,
                         'mdg'       => $mdgPgBulan,
-                        'min'       => 12,
-                        'label'     => 'MDG PG min 1 tahun',
+                        'min'       => $minPg,
+                        'label'     => 'MDG PG min ' . $thn($minPg) . ' tahun',
                     ],
                 ],
                 'blokir_info' => 'Selesaikan kenaikan PG terlebih dahulu.',
@@ -219,8 +233,8 @@ class Karyawan extends Model
         if ($jg < $maxJg) {
             $eligible  = $jgMemenuhi && $pgMemenuhi;
             $sisaBulan = 0;
-            if (!$jgMemenuhi) $sisaBulan = max($sisaBulan, 24 - $mdgJgBulan);
-            if (!$pgMemenuhi) $sisaBulan = max($sisaBulan, 12 - $mdgPgBulan);
+            if (!$jgMemenuhi) $sisaBulan = max($sisaBulan, $minJg - $mdgJgBulan);
+            if (!$pgMemenuhi) $sisaBulan = max($sisaBulan, $minPg - $mdgPgBulan);
 
             return [
                 'status'      => 'naik_jg',
@@ -231,14 +245,14 @@ class Karyawan extends Model
                     'jg' => [
                         'terpenuhi' => $jgMemenuhi,
                         'mdg'       => $mdgJgBulan,
-                        'min'       => 24,
-                        'label'     => 'MDG JG min 2 tahun',
+                        'min'       => $minJg,
+                        'label'     => 'MDG JG min ' . $thn($minJg) . ' tahun',
                     ],
                     'pg' => [
                         'terpenuhi' => $pgMemenuhi,
                         'mdg'       => $mdgPgBulan,
-                        'min'       => 12,
-                        'label'     => 'MDG PG min 1 tahun',
+                        'min'       => $minPg,
+                        'label'     => 'MDG PG min ' . $thn($minPg) . ' tahun',
                     ],
                 ],
                 'blokir_info' => !$eligible ? 'Semua syarat harus terpenuhi untuk naik JG.' : null,
@@ -251,9 +265,9 @@ class Karyawan extends Model
         if ($band !== 'Band 1') {
             $eligible  = $jgMemenuhi && $pgMemenuhi && $bandMemenuhi;
             $sisaBulan = 0;
-            if (!$jgMemenuhi)   $sisaBulan = max($sisaBulan, 24 - $mdgJgBulan);
-            if (!$pgMemenuhi)   $sisaBulan = max($sisaBulan, 12 - $mdgPgBulan);
-            if (!$bandMemenuhi) $sisaBulan = max($sisaBulan, 36 - $mdgBandBulan);
+            if (!$jgMemenuhi)   $sisaBulan = max($sisaBulan, $minJg - $mdgJgBulan);
+            if (!$pgMemenuhi)   $sisaBulan = max($sisaBulan, $minPg - $mdgPgBulan);
+            if (!$bandMemenuhi) $sisaBulan = max($sisaBulan, $minBand - $mdgBandBulan);
 
             $nextBandMinGrade = self::getMinGradeNextBand($band);
             $nextBand         = self::getBandFromGrade($nextBandMinGrade ?? 0);
@@ -267,20 +281,20 @@ class Karyawan extends Model
                     'jg'   => [
                         'terpenuhi' => $jgMemenuhi,
                         'mdg'       => $mdgJgBulan,
-                        'min'       => 24,
-                        'label'     => 'MDG JG min 2 tahun',
+                        'min'       => $minJg,
+                        'label'     => 'MDG JG min ' . $thn($minJg) . ' tahun',
                     ],
                     'pg'   => [
                         'terpenuhi' => $pgMemenuhi,
                         'mdg'       => $mdgPgBulan,
-                        'min'       => 12,
-                        'label'     => 'MDG PG min 1 tahun',
+                        'min'       => $minPg,
+                        'label'     => 'MDG PG min ' . $thn($minPg) . ' tahun',
                     ],
                     'band' => [
                         'terpenuhi' => $bandMemenuhi,
                         'mdg'       => $mdgBandBulan,
-                        'min'       => 36,
-                        'label'     => 'MDG Band min 3 tahun',
+                        'min'       => $minBand,
+                        'label'     => 'MDG Band min ' . $thn($minBand) . ' tahun',
                     ],
                 ],
                 'blokir_info' => !$eligible ? 'Semua syarat harus terpenuhi untuk naik Band.' : null,

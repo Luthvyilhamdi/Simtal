@@ -310,12 +310,12 @@
             </div>
 
             {{-- Manajemen Talenta (accordion) --}}
-            <div class="nav-link master-toggle {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*') ? 'active open' : '' }}" data-tooltip="Manajemen Talenta" onclick="toggleMaster(this)">
+            <div class="nav-link master-toggle {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*') ? 'active open' : '' }}" data-tooltip="Manajemen Talenta" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
                 <span class="nav-text">Manajemen Talenta</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="master-sub {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*') ? 'open' : '' }}">
+            <div class="master-sub {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*') ? 'open' : '' }}">
                 <a href="{{ route('talent_pool.index') }}" data-tooltip="Data Talent" class="nav-link {{ request()->routeIs('talent_pool.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     <span class="nav-text">Data Talent</span>
@@ -323,6 +323,10 @@
                 <a href="{{ route('usulan_promosi.index') }}" data-tooltip="Usulan Promosi" class="nav-link {{ request()->routeIs('usulan_promosi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="18 15 12 9 6 15"/><path d="M12 9v12"/><path d="M4 6h16"/></svg>
                     <span class="nav-text">Usulan Promosi</span>
+                </a>
+                <a href="{{ route('reminder_promosi.index') }}" data-tooltip="Reminder Promosi" class="nav-link {{ request()->routeIs('reminder_promosi.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="nav-text">Reminder Promosi</span>
                 </a>
                 <a href="{{ route('usulan_mutasi.index') }}" data-tooltip="Rotasi & Mutasi" class="nav-link {{ request()->routeIs('usulan_mutasi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg>

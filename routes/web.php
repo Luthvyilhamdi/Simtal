@@ -29,6 +29,7 @@ use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\PenilaianKaryawanController;
 use App\Http\Controllers\KalibrasiKaryawanController;
 use App\Http\Controllers\UsulanPromosiController;
+use App\Http\Controllers\ReminderPromosiController;
 use App\Http\Controllers\UsulanMutasiController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Http\Controllers\ExportBuilderController;
@@ -234,6 +235,9 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{usulanPromosi}/terbitkan-sk',  [UsulanPromosiController::class, 'terbitkanSk'])->name('terbitkan_sk');
             Route::delete('/{usulanPromosi}',      [UsulanPromosiController::class, 'destroy'])->name('destroy');
         });
+        // Reminder Promosi (read-only) — daftar karyawan yang akan/segera eligible naik grade
+        Route::get('reminder-promosi', [ReminderPromosiController::class, 'index'])->name('reminder_promosi.index');
+
         Route::get('api/usulan-promosi/karyawan',  [UsulanPromosiController::class, 'getKaryawanData'])->name('usulan_promosi.karyawan_data');
         Route::get('api/usulan-promosi/assessments',[UsulanPromosiController::class, 'getAssessments'])->name('usulan_promosi.assessments');
         Route::get('api/karyawan/{karyawan_id}/talent-kpi-preview',[UsulanPromosiController::class, 'getTalentKpiPreview'])->name('usulan_promosi.talent_kpi_preview');
