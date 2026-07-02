@@ -57,6 +57,7 @@
     table.rm tbody tr:hover { background:#fcfdfc; }
     .emp-name { font-weight:700;color:#111827; }
     .emp-nik { font-size:11.5px;color:#9ca3af;margin-top:1px; }
+    .sl-badge-wrap { margin-top:6px; }
     .emp-jab { color:#374151; }
     .emp-unit { font-size:11.5px;color:#9ca3af;margin-top:1px; }
 
@@ -183,11 +184,11 @@
                 @php $k = $i['karyawan']; $sk = $i['sk']; @endphp
                 <tr class="rm-row" data-search="{{ strtolower($k->nama.' '.$k->nik) }}">
                     <td>
-                        <div class="emp-name">
-                            {{ $k->nama }}
-                            @if($i['is_shortlist'])<span class="badge badge-green" style="margin-left:4px" title="Shortlist Talent Pool">★ Shortlist</span>@endif
-                        </div>
+                        <div class="emp-name">{{ $k->nama }}</div>
                         <div class="emp-nik">NIK {{ $k->nik }}</div>
+                        @if($i['is_shortlist'])
+                            <div class="sl-badge-wrap"><span class="badge badge-green" title="Shortlist Talent Pool">★ Shortlist</span></div>
+                        @endif
                     </td>
                     <td>
                         <div class="emp-jab">{{ $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-') }}</div>
