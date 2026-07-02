@@ -50,12 +50,16 @@
     .toolbar .tb-reset:hover { color:#15803d; }
 
     .card-table { background:white;border-radius:14px;border:1px solid #eef0f2;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
-    table.rm { width:100%;border-collapse:collapse;font-size:13px; }
+    table.rm { width:100%;border-collapse:collapse;font-size:13px;min-width:1040px; }
+    /* Kolom pendek: jaga satu baris biar rapi (tabel scroll horizontal bila sempit) */
+    table.rm td.col-nowrap { white-space:nowrap; }
+    /* Kolom jabatan (panjang): boleh turun baris, diberi lebar wajar */
+    table.rm td.col-jab { white-space:normal;min-width:260px;max-width:440px; }
     table.rm thead th { background:#f9fafb;text-align:left;font-size:11px;font-weight:700;color:#98a2b3;text-transform:uppercase;letter-spacing:.4px;padding:11px 16px;white-space:nowrap;border-bottom:1px solid #eef0f2; }
     table.rm tbody td { padding:12px 16px;border-bottom:1px solid #f5f6f7;vertical-align:middle; }
     table.rm tbody tr:last-child td { border-bottom:none; }
     table.rm tbody tr:hover { background:#fcfdfc; }
-    .emp-name { font-weight:700;color:#111827; }
+    .emp-name { font-weight:700;color:#111827;white-space:nowrap; }
     .emp-nik { font-size:11.5px;color:#9ca3af;margin-top:1px; }
     .sl-badge-wrap { margin-top:6px; }
     .emp-jab { color:#374151; }
@@ -70,7 +74,7 @@
 
     .status-now  { color:#15803d;font-weight:700; }
     .status-soon { color:#b45309;font-weight:700; }
-    .status-sub  { font-size:11px;color:#9ca3af;margin-top:2px; }
+    .status-sub  { font-size:11px;color:#9ca3af;margin-top:2px;white-space:nowrap; }
 
     .btn-usul { display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .15s; }
     .btn-usul:hover { background:#166534; }
@@ -190,19 +194,19 @@
                             <div class="sl-badge-wrap"><span class="badge badge-green" title="Shortlist Talent Pool">★ Shortlist</span></div>
                         @endif
                     </td>
-                    <td>
+                    <td class="col-jab">
                         <div class="emp-jab">{{ $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-') }}</div>
                         <div class="emp-unit">{{ $k->direktorat->nama_direktorat ?? '-' }}</div>
                     </td>
-                    <td>
+                    <td class="col-nowrap">
                         <span class="badge badge-green">{{ $k->band }}</span>
                         <span class="badge badge-gray" style="margin-left:3px">JG {{ $k->jobGrade->job_grade ?? '-' }}</span>
                     </td>
-                    <td>
+                    <td class="col-nowrap">
                         <span class="badge {{ $jenisBadge[$sk['status']] ?? 'badge-gray' }}">{{ $jenisLabel[$sk['status']] ?? $sk['status'] }}</span>
                         <div class="status-sub">{{ $sk['label'] }}</div>
                     </td>
-                    <td>
+                    <td class="col-nowrap">
                         @if($i['eligible_now'])
                             <div class="status-now">✅ Eligible sekarang</div>
                             <div class="status-sub">syarat MDG terpenuhi</div>
