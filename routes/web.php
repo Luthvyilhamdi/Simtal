@@ -65,6 +65,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/export', [StrukturOrganisasiController::class, 'export'])->name('export');
 
         Route::middleware('not_user_role')->group(function () {
+            Route::get('/template-jobs',    [StrukturOrganisasiController::class, 'templateJobs'])->name('template-jobs');
+            Route::post('/import-jobs',      [StrukturOrganisasiController::class, 'importJobs'])->name('import-jobs');
             Route::post('/',               [StrukturOrganisasiController::class, 'store'])->name('store');
             Route::post('/salin-periode',   [StrukturOrganisasiController::class, 'salinPeriode'])->name('salin-periode');
             Route::delete('/hapus-periode',  [StrukturOrganisasiController::class, 'hapusPeriode'])->name('hapus-periode');

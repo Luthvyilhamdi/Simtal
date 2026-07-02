@@ -25,11 +25,29 @@
 
     .field { margin-bottom:14px; }
     .field label { display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px; }
-    .field select { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;background:#fff; }
-    .field select:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
+    .field select, .field textarea { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;font-family:inherit; }
+    .field textarea { resize:vertical;line-height:1.5; }
+    .field select:focus, .field textarea:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
 
     .hint { font-size:11px;color:#9ca3af;margin-top:4px; }
     .err { font-size:12px;color:#dc2626;margin-top:6px; }
+
+    /* Pemilih karyawan (cari → tambah → chip) */
+    .picker { display:flex;gap:8px;align-items:stretch; }
+    .picker .pk-wrap { position:relative;flex:1; }
+    .picker input { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit; }
+    .picker input:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
+    .pk-add { border:none;background:#15803d;color:#fff;border-radius:8px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap; }
+    .pk-add:hover { background:#166534; }
+    .suggest { position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.12);max-height:230px;overflow-y:auto; }
+    .suggest-item { padding:8px 10px;font-size:12.5px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #f3f4f6; }
+    .suggest-item:last-child { border-bottom:none; }
+    .suggest-item:hover, .suggest-item.active { background:#f0fdf4; }
+    .chips { display:flex;flex-wrap:wrap;gap:6px;margin-top:8px; }
+    .chip { display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:999px;padding:3px 6px 3px 10px;font-size:12px;font-weight:500; }
+    .chip .cx { border:none;background:#d1fae5;color:#15803d;border-radius:50%;width:16px;height:16px;line-height:14px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center; }
+    .chip .cx:hover { background:#15803d;color:#fff; }
+    .chips-meta { font-size:11px;color:#6b7280;margin-top:6px;display:none; }
 
     .btn-row { display:flex;gap:10px;margin-top:6px; }
     .btn { flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:.15s; }
@@ -172,6 +190,21 @@
                     </select>
                     <div class="hint">Menyaring karyawan berdasarkan tier pejabat aktif (SVP/VP/SPM/PM).</div>
                 </div>
+
+                <div class="field">
+                    <label>Pilih Karyawan (opsional)</label>
+                    <div class="picker">
+                        <div class="pk-wrap">
+                            <input type="text" id="empSearch" autocomplete="off" placeholder="Cari NIK atau nama…">
+                            <div id="empSuggest" class="suggest" style="display:none;"></div>
+                        </div>
+                        <button type="button" class="pk-add" id="empAddBtn">+ Tambah</button>
+                    </div>
+                    <div id="empChips" class="chips"></div>
+                    <div id="empChipsMeta" class="chips-meta"></div>
+                    <input type="hidden" name="nik_nama" id="empNik" value="{{ old('nik_nama') }}">
+                    <div class="hint">Kosongkan untuk semua karyawan. Bisa juga tempel banyak NIK sekaligus (dipisah koma/baris) lalu klik Tambah.</div>
+                </div>
             </div>
 
             <div class="card">
@@ -220,6 +253,97 @@
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
+
+    // ===== Pemilih karyawan (cari → tambah → chip) =====
+    const EMP = {!! json_encode($karyawanPilih->map(fn($k) => ['nik' => (string) $k->nik, 'nama' => $k->nama])->values()) !!};
+    const empByNik = new Map(EMP.map(e => [e.nik, e.nama]));
+    const selectedEmp = new Map();            // nik -> nama
+    const searchEl  = document.getElementById('empSearch');
+    const suggestEl = document.getElementById('empSuggest');
+    const chipsEl   = document.getElementById('empChips');
+    const metaEl    = document.getElementById('empChipsMeta');
+    const hiddenEl  = document.getElementById('empNik');
+
+    function syncEmp() {
+        hiddenEl.value = Array.from(selectedEmp.keys()).join(',');
+        const n = selectedEmp.size;
+        metaEl.style.display = n ? 'block' : 'none';
+        metaEl.textContent = n ? `${n} karyawan dipilih` : '';
+    }
+    function renderChips() {
+        chipsEl.innerHTML = '';
+        selectedEmp.forEach((nama, nik) => {
+            const chip = document.createElement('span');
+            chip.className = 'chip';
+            chip.innerHTML = `<span>${escapeHtml(nama)} · ${escapeHtml(nik)}</span>`;
+            const x = document.createElement('button');
+            x.type = 'button'; x.className = 'cx'; x.textContent = '×';
+            x.addEventListener('click', () => { selectedEmp.delete(nik); renderChips(); syncEmp(); });
+            chip.appendChild(x);
+            chipsEl.appendChild(chip);
+        });
+    }
+    function addEmp(nik, nama) {
+        nik = String(nik).trim();
+        if (!nik || selectedEmp.has(nik)) return;
+        selectedEmp.set(nik, nama || empByNik.get(nik) || nik);
+    }
+    function renderSuggest() {
+        const q = searchEl.value.trim().toLowerCase();
+        if (!q) { suggestEl.style.display = 'none'; return; }
+        const matches = EMP
+            .filter(e => !selectedEmp.has(e.nik) && (e.nik + ' ' + e.nama).toLowerCase().includes(q))
+            .slice(0, 8);
+        if (!matches.length) { suggestEl.style.display = 'none'; return; }
+        suggestEl.innerHTML = '';
+        matches.forEach(e => {
+            const it = document.createElement('div');
+            it.className = 'suggest-item';
+            it.innerHTML = `<strong>${escapeHtml(e.nama)}</strong><span style="color:#9ca3af">${escapeHtml(e.nik)}</span>`;
+            it.addEventListener('click', () => {
+                addEmp(e.nik, e.nama); renderChips(); syncEmp();
+                searchEl.value = ''; suggestEl.style.display = 'none'; searchEl.focus();
+            });
+            suggestEl.appendChild(it);
+        });
+        suggestEl.style.display = 'block';
+    }
+    function commitEmp() {
+        const raw = searchEl.value;
+        const tokens = raw.split(/[\n,;]+/).map(t => t.trim()).filter(Boolean);
+        if (tokens.length > 1) {
+            // Tempel banyak: cocokkan tiap token ke NIK persis / nama persis.
+            tokens.forEach(tok => {
+                if (empByNik.has(tok)) { addEmp(tok, empByNik.get(tok)); return; }
+                const byName = EMP.filter(e => e.nama.toLowerCase() === tok.toLowerCase());
+                if (byName.length === 1) { addEmp(byName[0].nik, byName[0].nama); return; }
+                if (/^\d+$/.test(tok)) addEmp(tok, null); // NIK mentah walau tak ada di daftar
+            });
+        } else if (tokens.length === 1) {
+            const tok = tokens[0];
+            if (empByNik.has(tok)) { addEmp(tok, empByNik.get(tok)); }
+            else {
+                const m = EMP.find(e => !selectedEmp.has(e.nik) && (e.nik + ' ' + e.nama).toLowerCase().includes(tok.toLowerCase()));
+                if (m) addEmp(m.nik, m.nama);
+                else if (/^\d+$/.test(tok)) addEmp(tok, null);
+            }
+        }
+        renderChips(); syncEmp();
+        searchEl.value = ''; suggestEl.style.display = 'none';
+    }
+    searchEl.addEventListener('input', renderSuggest);
+    searchEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); commitEmp(); }
+    });
+    document.getElementById('empAddBtn').addEventListener('click', commitEmp);
+    document.addEventListener('click', e => { if (!e.target.closest('.picker')) suggestEl.style.display = 'none'; });
+
+    // Pulihkan pilihan bila halaman reload (mis. gagal validasi).
+    (function initEmp() {
+        (hiddenEl.value || '').split(',').map(t => t.trim()).filter(Boolean)
+            .forEach(nik => addEmp(nik, empByNik.get(nik)));
+        renderChips(); syncEmp();
+    })();
 
     async function doPreview() {
         const btn = document.getElementById('previewBtn');

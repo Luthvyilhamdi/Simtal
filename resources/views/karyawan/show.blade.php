@@ -244,6 +244,8 @@
         </div>
         <div class="detail-row"><span class="detail-label">Jabatan</span><span class="detail-value">{{ $karyawan->jabatan->nama_jabatan ?? '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Jabatan Saat Ini</span><span class="detail-value">{{ $karyawan->jabatan_saat_ini ?: '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Jobs</span><span class="detail-value">{{ $karyawan->jobs ?: '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Job Stream</span><span class="detail-value">{{ $karyawan->job_stream ?: '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Direktorat</span><span class="detail-value">{{ $karyawan->direktorat->nama_direktorat ?? '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Kompartemen</span><span class="detail-value">{{ $karyawan->kompartemen->nama_kompartemen ?? '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Departemen</span><span class="detail-value">{{ $karyawan->departemen->nama_departemen ?? '-' }}</span></div>

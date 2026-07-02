@@ -10,7 +10,7 @@ class StrukturOrganisasi extends Model
 
     protected $fillable = [
         'bulan', 'tahun', 'direktorat', 'kompartemen', 'dept', 'bagian',
-        'fungsional', 'posisi', 'job_grade',
+        'fungsional', 'posisi', 'jobs', 'job_stream', 'job_grade',
         'mc_tko', 'pengisian', 'deviasi', 'core',
         'karyawan_id', 'nik_karyawan', 'nama_karyawan',
     ];

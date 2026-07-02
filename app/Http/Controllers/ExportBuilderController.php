@@ -62,6 +62,9 @@ class ExportBuilderController extends Controller
 
             // ── Jabatan & Unit ──
             'jabatan'               => ['Jabatan & Unit', 'Jabatan', 'jabatan', fn ($k) => $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-')],
+            'jobs'                  => ['Jabatan & Unit', 'Jobs', 'strukturAssignments', fn ($k) => $k->jobs ?: '-'],
+            'job_stream'            => ['Jabatan & Unit', 'Job Stream', 'strukturAssignments', fn ($k) => $k->job_stream ?: '-'],
+            'core'                  => ['Jabatan & Unit', 'Core / Non Core', 'strukturAssignments', fn ($k) => $k->core ?: '-'],
             'direktorat'            => ['Jabatan & Unit', 'Direktorat', 'direktorat', fn ($k) => $k->direktorat->nama_direktorat ?? '-'],
             'kompartemen'           => ['Jabatan & Unit', 'Kompartemen', 'kompartemen', fn ($k) => $k->kompartemen->nama_kompartemen ?? '-'],
             'departemen'            => ['Jabatan & Unit', 'Departemen', 'departemen', fn ($k) => $k->departemen->nama_departemen ?? '-'],
@@ -153,8 +156,12 @@ class ExportBuilderController extends Controller
 
         $bulanList = self::BULAN;
 
+        // Untuk pemilih karyawan (cari NIK/nama → tambah sebagai chip) di sisi klien.
+        $karyawanPilih = Karyawan::orderBy('nama')->get(['nik', 'nama']);
+
         return view('export_builder.index', compact(
-            'grouped', 'direktorats', 'kompartemens', 'departemens', 'tierList', 'tahunList', 'bulanList'
+            'grouped', 'direktorats', 'kompartemens', 'departemens', 'tierList', 'tahunList', 'bulanList',
+            'karyawanPilih'
         ));
     }
 
@@ -216,7 +223,17 @@ class ExportBuilderController extends Controller
             'kompartemen_id' => 'nullable|exists:kompartemen,id',
             'departemen_id'  => 'nullable|exists:departemen,id',
             'tier'           => 'nullable|in:'.implode(',', HistoryPejabat::JABATAN_DIPANTAU),
+            'nik_nama'       => 'nullable|string|max:20000',
         ];
+    }
+
+    /** Pecah teks NIK/nama yang di-paste (baris/koma/titik-koma) menjadi token bersih. */
+    private static function parseNikNama(?string $raw): array
+    {
+        if (! $raw) return [];
+        $tokens = preg_split('/[\r\n,;]+/', $raw) ?: [];
+        $tokens = array_map('trim', $tokens);
+        return array_values(array_unique(array_filter($tokens, fn ($t) => $t !== '')));
     }
 
     /**
@@ -256,6 +273,18 @@ class ExportBuilderController extends Controller
         if (! empty($validated['tier'])) {
             // Karyawan yang pejabat aktifnya bertier tertentu (SVP/VP/SPM/PM).
             $query->whereHas('pejabatAktif', fn ($q) => $q->where('jabatan', $validated['tier']));
+        }
+
+        // Pilih karyawan spesifik dengan paste NIK / nama (baris/koma/titik-koma).
+        // Cocok bila NIK sama persis ATAU nama mengandung token.
+        $tokens = self::parseNikNama($validated['nik_nama'] ?? null);
+        if (! empty($tokens)) {
+            $query->where(function ($q) use ($tokens) {
+                foreach ($tokens as $t) {
+                    $q->orWhere('nik', $t)
+                      ->orWhere('nama', 'like', '%'.$t.'%');
+                }
+            });
         }
 
         // Mode "semua tahun" + ada kolom tahunan → satu baris per (karyawan, tahun).

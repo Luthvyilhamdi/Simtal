@@ -43,6 +43,7 @@ class Karyawan extends Model
     public function penilaians()       { return $this->hasMany(PenilaianKaryawan::class); }
     public function kalibrasis()       { return $this->hasMany(KalibrasiKaryawan::class); }
     public function talentPools()      { return $this->hasMany(TalentPool::class); }
+    public function strukturAssignments() { return $this->hasMany(StrukturOrganisasi::class, 'karyawan_id'); }
     public function pejabatAktif()
     {
         return $this->hasOne(\App\Models\HistoryPejabat::class)
@@ -315,6 +316,35 @@ class Karyawan extends Model
             'mdg_jg'      => $this->mdg_jg ?? 0,
             'mdg_band'    => $this->mdg_band,
         ];
+    }
+
+    // ===== JOBS & JOB STREAM (mengikuti posisi di Struktur Organisasi) =====
+    // Diambil dari baris Struktur Organisasi tempat karyawan ini di-assign,
+    // pada periode (tahun/bulan) TERBARU. Jadi jobs & job stream otomatis
+    // mengikuti "job title eksisting" yang sedang diduduki.
+    public function getStrukturAktifAttribute(): ?StrukturOrganisasi
+    {
+        return $this->strukturAssignments
+            ->where('posisi', '!=', '-')
+            ->sortByDesc(fn ($s) => ((int) $s->tahun) * 100 + (int) $s->bulan)
+            ->first();
+    }
+
+    public function getJobsAttribute(): ?string
+    {
+        return $this->struktur_aktif?->jobs;
+    }
+
+    public function getJobStreamAttribute(): ?string
+    {
+        return $this->struktur_aktif?->job_stream;
+    }
+
+    public function getCoreAttribute(): ?string
+    {
+        // 'Core' / 'Non Core' dari posisi Struktur Organisasi (bisa '' bila belum diisi).
+        $c = $this->struktur_aktif?->core;
+        return $c !== '' ? $c : null;
     }
 
     public function getRouteKeyName(): string

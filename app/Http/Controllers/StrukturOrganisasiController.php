@@ -6,8 +6,11 @@ use App\Models\StrukturOrganisasi;
 use App\Models\Karyawan;
 use App\Models\User;
 use App\Exports\StrukturOrganisasiExport;
+use App\Exports\TemplateJobsJobStreamExport;
+use App\Imports\JobsJobStreamImport;
 use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -113,6 +116,8 @@ class StrukturOrganisasiController extends Controller
             'fungsional'      => 'nullable|string',
             'fungsional_staff'=> 'nullable|string',
             'posisi'          => 'nullable|string',
+            'jobs'            => 'nullable|string|max:255',
+            'job_stream'      => 'nullable|string|max:255',
             'job_grade'       => 'nullable|integer',
             'mc_tko'          => 'nullable|integer|min:0',
             'core'            => 'nullable|in:Core,Non Core',
@@ -134,6 +139,8 @@ class StrukturOrganisasiController extends Controller
             'bagian'      => $request->bagian ?: null,
             'fungsional'  => $fungsional ?: null,
             'posisi'      => $request->posisi ?? '-',
+            'jobs'        => $request->jobs ?: null,
+            'job_stream'  => $request->job_stream ?: null,
             'job_grade'   => $request->job_grade,
             // Baris placeholder (posisi='-') tidak boleh punya mc_tko
             'mc_tko'      => ($request->posisi === '-') ? 0 : ($request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0),
@@ -188,6 +195,8 @@ class StrukturOrganisasiController extends Controller
                 'bagian'        => $row->bagian,
                 'fungsional'    => $row->fungsional,
                 'posisi'        => $row->posisi,
+                'jobs'          => $row->jobs,
+                'job_stream'    => $row->job_stream,
                 'job_grade'     => $row->job_grade,
                 'mc_tko'        => $row->mc_tko,
                 'core'          => $row->core,
@@ -280,11 +289,13 @@ class StrukturOrganisasiController extends Controller
     public function editPosisi(Request $request, StrukturOrganisasi $so)
     {
         $request->validate([
-            'posisi'    => 'required|string|max:255',
-            'job_grade' => 'nullable|integer|min:1|max:30',
-            'mc_tko'    => 'nullable|integer|min:0',
-            'core'      => 'nullable|in:Core,Non Core',
-            'pengisian' => 'nullable|integer|min:0',
+            'posisi'     => 'required|string|max:255',
+            'jobs'       => 'nullable|string|max:255',
+            'job_stream' => 'nullable|string|max:255',
+            'job_grade'  => 'nullable|integer|min:1|max:30',
+            'mc_tko'     => 'nullable|integer|min:0',
+            'core'       => 'nullable|in:Core,Non Core',
+            'pengisian'  => 'nullable|integer|min:0',
         ]);
 
         $mcTko    = $request->mc_tko !== null && $request->mc_tko !== '' ? (int)$request->mc_tko : 0;
@@ -293,12 +304,14 @@ class StrukturOrganisasiController extends Controller
         $pengisian = $request->pengisian !== null ? (int)$request->pengisian : $so->pengisian;
 
         $so->update([
-            'posisi'    => $request->posisi,
-            'job_grade' => $request->job_grade ?: null,
-            'mc_tko'    => $mcTko,
-            'core'      => $request->core ?? $so->core,
-            'pengisian' => $pengisian,
-            'deviasi'   => $pengisian - $mcTko,
+            'posisi'     => $request->posisi,
+            'jobs'       => $request->jobs ?: null,
+            'job_stream' => $request->job_stream ?: null,
+            'job_grade'  => $request->job_grade ?: null,
+            'mc_tko'     => $mcTko,
+            'core'       => $request->core ?? $so->core,
+            'pengisian'  => $pengisian,
+            'deviasi'    => $pengisian - $mcTko,
         ]);
 
         $so->refresh();
@@ -307,14 +320,16 @@ class StrukturOrganisasiController extends Controller
             "Dari: {$oldPosisi} · JG: {$so->job_grade} · MC: {$so->mc_tko} · {$so->core}");
 
         return response()->json([
-            'success'   => true,
-            'posisi'    => $so->posisi,
-            'job_grade' => $so->job_grade,
-            'mc_tko'    => $so->mc_tko,
-            'core'      => $so->core,
-            'pengisian' => $so->pengisian,
-            'deviasi'   => $so->deviasi,
-            'warna'     => $so->warnaDeviasi,
+            'success'    => true,
+            'posisi'     => $so->posisi,
+            'jobs'       => $so->jobs,
+            'job_stream' => $so->job_stream,
+            'job_grade'  => $so->job_grade,
+            'mc_tko'     => $so->mc_tko,
+            'core'       => $so->core,
+            'pengisian'  => $so->pengisian,
+            'deviasi'    => $so->deviasi,
+            'warna'      => $so->warnaDeviasi,
         ]);
     }
 
@@ -521,6 +536,152 @@ class StrukturOrganisasiController extends Controller
         );
     }
 
+
+    public function templateJobs(Request $request)
+    {
+        // Ikuti periode yang sedang dibuka. Bila periode itu kosong (mis. bulan
+        // berjalan belum diisi), jatuh ke periode TERBARU yang punya data,
+        // agar template selalu = daftar job title eksisting yang nyata.
+        $bulan = (int) $request->bulan;
+        $tahun = (int) $request->tahun;
+
+        $adaData = $bulan && $tahun && StrukturOrganisasi::where('bulan', $bulan)
+            ->where('tahun', $tahun)->where('posisi', '!=', '-')->exists();
+
+        if (!$adaData) {
+            $latest = StrukturOrganisasi::where('posisi', '!=', '-')
+                ->orderByDesc('tahun')->orderByDesc('bulan')
+                ->first(['bulan', 'tahun']);
+            $bulan = $latest->bulan ?? (int) now()->month;
+            $tahun = $latest->tahun ?? (int) now()->year;
+        }
+
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F-Y');
+
+        // Urutan template = PERSIS urutan tampilan Job Title Eksisting: pakai buildTree()
+        // yang sama seperti halaman, lalu ratakan dengan traversal yang identik.
+        $allRows = StrukturOrganisasi::where('bulan', $bulan)
+            ->where('tahun', $tahun)
+            ->orderBy('id')
+            ->get();
+
+        $ordered = $this->flattenTreeForTemplate($this->buildTree($allRows));
+
+        return Excel::download(
+            new TemplateJobsJobStreamExport($ordered),
+            "template-jobs-job-stream-{$namaBulan}.xlsx"
+        );
+    }
+
+    /**
+     * Ratakan hasil buildTree() menjadi daftar baris posisi TERURUT sama persis
+     * dengan cara blade struktur_organisasi merender-nya (grup dulu: langsung
+     * direktorat → tanpa dept → dept → tanpa bagian → bagian → fungsional).
+     * Baris placeholder (posisi '-') dilewati.
+     */
+    private function flattenTreeForTemplate(array $tree): array
+    {
+        $out = [];
+        $emit = function ($func) use (&$out) {
+            foreach ($func['jabatan'] as $row) {
+                if ($row->posisi === '-') continue;
+                $out[] = $row;
+            }
+        };
+
+        foreach ($tree as $dir) {
+            foreach ($dir['children'] as $kompKey => $komp) {
+                // Posisi langsung di bawah direktorat (tanpa kompartemen).
+                if ($kompKey === '__no_komp__') {
+                    foreach ($komp['children'] as $dept) {
+                        foreach ($dept['children'] as $bag) {
+                            foreach ($bag['children'] as $func) {
+                                $emit($func);
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                // (a) Posisi langsung di bawah kompartemen (tanpa departemen).
+                if (isset($komp['children']['__no_dept__'])) {
+                    foreach ($komp['children']['__no_dept__']['children'] as $bag2) {
+                        foreach ($bag2['children'] as $func2) {
+                            $emit($func2);
+                        }
+                    }
+                }
+
+                // (b) Tiap departemen nyata.
+                foreach ($komp['children'] as $deptKey => $dept) {
+                    if ($deptKey === '__no_dept__') continue;
+
+                    // (b1) Posisi langsung di bawah departemen (tanpa bagian).
+                    if (isset($dept['children']['__no_bag__'])) {
+                        foreach ($dept['children']['__no_bag__']['children'] as $func3) {
+                            $emit($func3);
+                        }
+                    }
+
+                    // (b2) Tiap bagian nyata.
+                    foreach ($dept['children'] as $bagKey => $bag) {
+                        if ($bagKey === '__no_bag__') continue;
+                        foreach ($bag['children'] as $func) {
+                            $emit($func);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $out;
+    }
+
+    public function importJobs(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], [
+            'file.required' => 'File wajib dipilih.',
+            'file.mimes'    => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            'file.max'      => 'Ukuran file maksimal 10MB.',
+        ]);
+
+        try {
+            $import = new JobsJobStreamImport();
+            Excel::import($import, $request->file('file'));
+
+            $titles    = $import->getUpdatedTitles();
+            $rows      = $import->getUpdatedRows();
+            $skipped   = $import->getSkippedCount();
+            $unmatched = $import->getUnmatched();
+
+            $msg = "Import selesai: {$titles} job title diperbarui ({$rows} baris posisi, semua periode).";
+            if ($skipped > 0) {
+                $msg .= " {$skipped} baris dilewati (posisi kosong / tanpa nilai).";
+            }
+            if (!empty($unmatched)) {
+                $contoh = implode(', ', array_slice($unmatched, 0, 5));
+                $msg .= " " . count($unmatched) . " posisi tidak ditemukan di Struktur Organisasi: {$contoh}" . (count($unmatched) > 5 ? ', …' : '') . '.';
+            }
+
+            $this->log('import', 'Struktur Organisasi', 'Import Jobs & Job Stream',
+                "{$titles} job title · {$rows} baris diperbarui");
+
+            return redirect()->route('struktur-organisasi.index', $request->only('bulan', 'tahun'))
+                             ->with('success', $msg);
+
+        } catch (ExcelValidationException $e) {
+            $failures = $e->failures();
+            $errMsg   = 'Import gagal karena kesalahan validasi: ';
+            foreach (array_slice($failures, 0, 3) as $failure) {
+                $errMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . '. ';
+            }
+            return back()->with('error', $errMsg);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
 
     public function hapusPeriode(Request $request)
     {
