@@ -9,7 +9,7 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .detail-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:20px;margin-bottom:16px; }
+    .detail-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:20px;margin-bottom:16px; }
     .detail-card-title { font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px; }
     .detail-row { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f9fafb; }
     .detail-row:last-child { border-bottom:none;padding-bottom:0; }
@@ -111,7 +111,7 @@
 @endphp
 
 {{-- HEADER --}}
-<div style="background:white;border-radius:16px;border:1px solid #e5e7eb;padding:24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+<div style="background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
     <div style="display:flex;align-items:center;gap:14px">
         <div style="width:48px;height:48px;border-radius:50%;background:#15803d;color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">
             {{ initials($u->karyawan->nama) }}

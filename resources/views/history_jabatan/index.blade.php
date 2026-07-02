@@ -15,7 +15,7 @@
 
     /* Profile Card */
     .profile-card {
-        background: white; border-radius: 16px; border: 1px solid #e5e7eb;
+        background: white; border-radius: var(--radius); border: 1px solid var(--card-border); box-shadow: var(--card-shadow);
         padding: 20px 24px; margin-bottom: 20px;
         display: flex; align-items: center; justify-content: space-between;
         flex-wrap: wrap; gap: 16px;
@@ -81,8 +81,8 @@
         width: 14px; height: 14px; left: -27px;
     }
     .timeline-card {
-        background: white; border-radius: 14px;
-        border: 1px solid #e5e7eb; padding: 18px 20px;
+        background: white; border-radius: var(--radius);
+        border: 1px solid var(--card-border); box-shadow: var(--card-shadow); padding: 18px 20px;
         transition: box-shadow 0.15s;
     }
     .timeline-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
@@ -373,7 +373,7 @@
     @endforeach
 </div>
 @else
-<div style="background:white;border-radius:14px;border:1px solid #e5e7eb;">
+<div style="background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);">
     <div class="empty-state">
         <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         <p>Belum ada history jabatan</p>

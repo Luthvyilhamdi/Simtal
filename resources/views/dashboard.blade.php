@@ -23,8 +23,11 @@
     .welcome-date { font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:20px; }
 
     .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px; }
-    .kpi-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
-    .kpi-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.07); }
+    .kpi-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
+    .kpi-card { transition:box-shadow .15s, transform .15s; }
+    .kpi-card:hover,.chart-card:hover,.demo-card:hover,.list-card:hover,.tabel-card:hover { box-shadow:var(--card-shadow-hover); }
+    .kpi-card:hover { transform:translateY(-1px); }
+    .chart-card,.demo-card,.list-card,.tabel-card { transition:box-shadow .15s; }
     .kpi-card::before { content:'';position:absolute;bottom:0;left:0;right:0;height:3px; }
     .kpi-card.green::before  { background:#16a34a; }
     .kpi-card.blue::before   { background:#2563eb; }
@@ -43,13 +46,23 @@
     .kpi-icon.amber  { background:#fffbeb; }
     .kpi-icon.teal   { background:#ecfeff; }
 
-    .sec-title { font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px; }
-    .sec-title::after { content:'';flex:1;height:1px;background:#f3f4f6; }
+    /* Tab dashboard (hierarki) */
+    .dash-tabs { display:flex;gap:2px;margin:2px 0 18px;border-bottom:1px solid var(--divider);flex-wrap:wrap; }
+    .dash-tab-btn { border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--text-muted);padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;white-space:nowrap; }
+    .dash-tab-btn:hover { color:var(--text); }
+    .dash-tab-btn.active { color:var(--brand);border-bottom-color:var(--brand); }
+    .dash-panel { display:none; }
+    .dash-panel.active { display:block;animation:panelFade .25s ease; }
+    @keyframes panelFade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+    .sec-title { font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:0.6px;margin:4px 0 13px;display:flex;align-items:center;gap:9px; }
+    .sec-title::before { content:'';width:3px;height:14px;background:var(--brand);border-radius:2px;flex-shrink:0; }
+    .sec-title::after { content:'';flex:1;height:1px;background:var(--divider); }
 
     .chart-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
     .chart-grid-3 { display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px; }
     .so-status-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
-    .chart-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px; }
+    .chart-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px; }
     .chart-card-title { font-size:13px;font-weight:700;color:#111827;margin-bottom:3px; }
     .chart-card-sub { font-size:11px;color:#9ca3af;margin-bottom:14px; }
 
@@ -63,6 +76,7 @@
     /* FIX: bar-fill warna via class statis */
     .bar-fill-blue   { background:#2563eb; }
     .bar-fill-purple { background:#7c3aed; }
+    .bar-fill-brand  { background:var(--chart-brand); }  /* magnitude: 1 hue */
     /* FIX: bar-val deviasi warna via class statis */
     .bar-val-neg  { color:#ef4444; }
     .bar-val-pos  { color:#16a34a; }
@@ -79,19 +93,20 @@
     .pie-item-pct { font-size:10px;color:#9ca3af;margin-left:3px; }
 
     .demo-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
-    .demo-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px; }
+    .demo-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px; }
 
     .so-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px; }
     .tp-grid { display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px; }
     @media (min-width:880px) { .tp-grid { grid-template-columns:1fr 1fr; } }
 
     .pejabat-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px; }
-    .pejabat-mini { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:14px;text-align:center; }
+    .pejabat-mini { background:white;border-radius:var(--radius-sm);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px;text-align:center;transition:box-shadow .15s,transform .15s; }
+    .pejabat-mini:hover { box-shadow:var(--card-shadow-hover);transform:translateY(-1px); }
     .pejabat-num { font-size:26px;font-weight:800; }
     .pejabat-label { font-size:11px;font-weight:700;margin-top:3px;letter-spacing:0.5px; }
     .pejabat-sub { font-size:10px;color:#9ca3af;margin-top:2px; }
 
-    .tabel-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:18px; }
+    .tabel-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:18px; }
     .tabel-header { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f3f4f6; }
     .tabel-title { font-size:13px;font-weight:700;color:#111827; }
     table { width:100%;border-collapse:collapse;font-size:12px; }
@@ -105,7 +120,7 @@
     .progress-mini-fill { height:100%;border-radius:20px; }
 
     .bottom-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
-    .list-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden; }
+    .list-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .list-card-header { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f3f4f6; }
     .list-card-title { font-size:12px;font-weight:700;color:#111827; }
     .list-card-body { padding:0 16px; }
@@ -333,6 +348,16 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
     </div>
 </div>
 
+{{-- ===== TAB HIERARKI ===== --}}
+<div class="dash-tabs" role="tablist">
+    <button class="dash-tab-btn active" data-tab="ringkasan" type="button">Ringkasan</button>
+    <button class="dash-tab-btn" data-tab="analitik" type="button">Analitik &amp; Grafik</button>
+    <button class="dash-tab-btn" data-tab="pejabat" type="button">Pejabat &amp; Direktorat</button>
+    <button class="dash-tab-btn" data-tab="pemantauan" type="button">Pemantauan</button>
+</div>
+<div class="dash-panels">
+<section class="dash-panel active" data-tab="ringkasan">
+
 {{-- SO CORE & NON CORE --}}
 @php
 $namaBulanDash = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -421,7 +446,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
         <div class="chart-card-title">{{ $grp['label'] }}</div>
         <div class="chart-card-sub">{{ $grp['sub'] }}</div>
         @php $maxKosongGrp = $grp['data']->max('belum_terisi') ?: 1; @endphp
-        <div class="bar-chart" style="margin-top:6px">
+        <div class="bar-chart" style="margin-top:6px;max-height:290px;overflow-y:auto;padding-right:4px">
             @forelse($grp['data'] as $d)
             @php
                 $kosong    = (int) $d->belum_terisi;
@@ -446,87 +471,85 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
     @endforeach
 </div>
 
-{{-- TALENT POOL --}}
+{{-- TALENT POOL — otomatis mengikuti 2 periode terbaru yang ada datanya --}}
 <div class="sec-title">Talent Pool</div>
-<div class="tp-grid">
+@if($talentPool['utama'])
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:18px">
 
-    {{-- Tahun Ini --}}
-    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px">
+    @foreach(array_filter([$talentPool['utama'], $talentPool['kedua']]) as $idx => $tp)
+    @php $utama = $idx === 0; @endphp
+    <div style="background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div>
-                <div style="font-size:13px;font-weight:700;color:#111827">Talent Pool {{ $talentPool['tahun_ini'] }}</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Tahun berjalan</div>
+                <div style="font-size:13px;font-weight:700;color:#111827">Talent Pool {{ $tp['periode'] }}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">{{ $utama ? 'Periode terbaru' : 'Periode sebelumnya' }}</div>
             </div>
-            <a href="{{ route('talent_pool.index', ['periode' => $talentPool['tahun_ini']]) }}"
-               style="font-size:11px;color:#15803d;font-weight:600;text-decoration:none">Lihat →</a>
+            <a href="{{ route('talent_pool.index', ['periode' => $tp['periode']]) }}"
+               style="font-size:11px;color:{{ $utama ? '#15803d' : '#6b7280' }};font-weight:600;text-decoration:none">Lihat →</a>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-            <div style="text-align:center;background:#f0fdf4;border-radius:10px;padding:14px 8px">
-                <div style="font-size:26px;font-weight:800;color:#15803d">{{ $talentPool['ini']['total'] }}</div>
-                <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Total</div>
+            <div style="text-align:center;background:{{ $utama ? '#f0fdf4' : '#f9fafb' }};border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:{{ $utama ? '#15803d' : '#374151' }}">{{ $tp['total'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:{{ $utama ? '#15803d' : '#6b7280' }};text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Total</div>
             </div>
-            <div style="text-align:center;background:#eff6ff;border-radius:10px;padding:14px 8px">
-                <div style="font-size:26px;font-weight:800;color:#1d4ed8">{{ $talentPool['ini']['longlist'] }}</div>
-                <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Longlist</div>
+            <div style="text-align:center;background:{{ $utama ? '#eff6ff' : '#f9fafb' }};border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:{{ $utama ? '#1d4ed8' : '#374151' }}">{{ $tp['longlist'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:{{ $utama ? '#1d4ed8' : '#6b7280' }};text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Longlist</div>
             </div>
-            <div style="text-align:center;background:#dcfce7;border-radius:10px;padding:14px 8px">
-                <div style="font-size:26px;font-weight:800;color:#15803d">{{ $talentPool['ini']['shortlist'] }}</div>
-                <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Shortlist</div>
+            <div style="text-align:center;background:{{ $utama ? '#dcfce7' : '#f9fafb' }};border-radius:10px;padding:14px 8px">
+                <div style="font-size:26px;font-weight:800;color:{{ $utama ? '#15803d' : '#374151' }}">{{ $tp['shortlist'] }}</div>
+                <div style="font-size:10px;font-weight:700;color:{{ $utama ? '#15803d' : '#6b7280' }};text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Shortlist</div>
             </div>
         </div>
-        @if($talentPool['ini']['total'] > 0)
-        @php $pctShortlist = round(($talentPool['ini']['shortlist']/$talentPool['ini']['total'])*100); @endphp
+        @if($tp['total'] > 0)
+        @php $pct = round(($tp['shortlist'] / $tp['total']) * 100); @endphp
         <div style="margin-top:14px">
             <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px">
                 <span>Shortlist rate</span>
-                <span style="font-weight:700;color:#15803d">{{ $pctShortlist }}%</span>
+                <span style="font-weight:700;color:{{ $utama ? '#15803d' : '#6b7280' }}">{{ $pct }}%</span>
             </div>
             <div style="height:5px;background:#f3f4f6;border-radius:20px;overflow:hidden">
-                <div class="progress-mini-fill" data-pct="{{ $pctShortlist }}" style="background:#15803d;height:100%;border-radius:20px;"></div>
+                <div class="progress-mini-fill" data-pct="{{ $pct }}" style="background:{{ $utama ? '#15803d' : '#9ca3af' }};height:100%;border-radius:20px;"></div>
             </div>
         </div>
         @endif
     </div>
-
-    {{-- Tahun Lalu --}}
-    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-            <div>
-                <div style="font-size:13px;font-weight:700;color:#111827">Talent Pool {{ $talentPool['tahun_lalu'] }}</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Tahun sebelumnya</div>
-            </div>
-            <a href="{{ route('talent_pool.index', ['periode' => $talentPool['tahun_lalu']]) }}"
-               style="font-size:11px;color:#6b7280;font-weight:600;text-decoration:none">Lihat →</a>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-            <div style="text-align:center;background:#f9fafb;border-radius:10px;padding:14px 8px">
-                <div style="font-size:26px;font-weight:800;color:#374151">{{ $talentPool['lalu']['total'] }}</div>
-                <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Total</div>
-            </div>
-            <div style="text-align:center;background:#f9fafb;border-radius:10px;padding:14px 8px">
-                <div style="font-size:26px;font-weight:800;color:#374151">{{ $talentPool['lalu']['longlist'] }}</div>
-                <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Longlist</div>
-            </div>
-            <div style="text-align:center;background:#f9fafb;border-radius:10px;padding:14px 8px">
-                <div style="font-size:26px;font-weight:800;color:#374151">{{ $talentPool['lalu']['shortlist'] }}</div>
-                <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:3px">Shortlist</div>
-            </div>
-        </div>
-        @if($talentPool['lalu']['total'] > 0)
-        @php $pctShortlistLalu = round(($talentPool['lalu']['shortlist']/$talentPool['lalu']['total'])*100); @endphp
-        <div style="margin-top:14px">
-            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px">
-                <span>Shortlist rate</span>
-                <span style="font-weight:700;color:#6b7280">{{ $pctShortlistLalu }}%</span>
-            </div>
-            <div style="height:5px;background:#f3f4f6;border-radius:20px;overflow:hidden">
-                <div class="progress-mini-fill" data-pct="{{ $pctShortlistLalu }}" style="background:#9ca3af;height:100%;border-radius:20px;"></div>
-            </div>
-        </div>
-        @endif
-    </div>
+    @endforeach
 
 </div>
+@else
+<div style="background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:28px;text-align:center;color:#9ca3af;font-size:13px;margin-bottom:18px">
+    Belum ada data Talent Pool. Ringkasan akan muncul otomatis setelah periode talent diinput.
+</div>
+@endif
+
+{{-- REMINDER PROMOSI --}}
+@if(!auth()->user()->isUser())
+<div class="sec-title">Reminder Promosi</div>
+<div style="background:linear-gradient(120deg,#14532d,#166534);border-radius:14px;padding:20px 22px;margin-bottom:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;color:#fff;box-shadow:0 8px 24px rgba(20,83,45,0.18)">
+    <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div>
+            <div style="font-size:28px;font-weight:800;line-height:1">{{ $reminderEligibleNow }}</div>
+            <div style="font-size:12px;color:#bbf7d0;margin-top:3px">karyawan siap diusulkan promosi (MDG terpenuhi)</div>
+        </div>
+    </div>
+    <div style="height:40px;width:1px;background:rgba(255,255,255,0.2)"></div>
+    <div>
+        <div style="font-size:22px;font-weight:800;line-height:1">{{ $reminderSoon }}</div>
+        <div style="font-size:12px;color:#bbf7d0;margin-top:3px">akan memenuhi ≤ 3 bulan</div>
+    </div>
+    <a href="{{ route('reminder_promosi.index') }}" style="margin-left:auto;background:#fff;color:#15803d;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap">
+        Lihat Reminder Promosi
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+</div>
+@endif
+
+</section>
+<section class="dash-panel" data-tab="analitik">
 
 {{-- GRAFIK --}}
 <div class="sec-title">Analitik & Grafik</div>
@@ -600,7 +623,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 <div class="bar-label" title="{{ $d['nama'] }}">{{ Str::limit($d['nama'], 18) }}</div>
                 <div class="bar-track">
                     {{-- FIX: width Blade diganti data-pct --}}
-                    <div class="bar-fill bar-fill-blue" data-pct="{{ $pctDir }}">{{ $d['total'] }}</div>
+                    <div class="bar-fill bar-fill-brand" data-pct="{{ $pctDir }}">{{ $d['total'] }}</div>
                 </div>
                 <div class="bar-val">{{ $d['total'] }}</div>
             </div>
@@ -617,11 +640,47 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
             <div class="bar-row">
                 <div class="bar-label">{{ $j['nama'] }}</div>
                 <div class="bar-track">
-                    <div class="bar-fill bar-fill-purple" data-pct="{{ $pctJG }}">{{ $j['total'] }}</div>
+                    <div class="bar-fill bar-fill-brand" data-pct="{{ $pctJG }}">{{ $j['total'] }}</div>
                 </div>
                 <div class="bar-val">{{ $j['total'] }}</div>
             </div>
             @endforeach
+        </div>
+    </div>
+</div>
+
+{{-- DISTRIBUSI BAND & PENDIDIKAN --}}
+<div class="chart-grid-2">
+    <div class="chart-card">
+        <div class="chart-card-title">Distribusi per Band</div>
+        <div class="chart-card-sub">Jumlah karyawan aktif per Band</div>
+        @php $maxBand = collect($distribusiBand)->max('total') ?: 1; @endphp
+        <div class="bar-chart">
+            @foreach($distribusiBand as $b)
+            @php $pctB = round(($b['total'] / $maxBand) * 100); @endphp
+            <div class="bar-row">
+                <div class="bar-label" title="{{ $b['nama'] }}">{{ $b['nama'] }}</div>
+                <div class="bar-track"><div class="bar-fill bar-fill-brand" data-pct="{{ $pctB }}">{{ $b['total'] }}</div></div>
+                <div class="bar-val">{{ $b['total'] }}</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title">Distribusi Pendidikan</div>
+        <div class="chart-card-sub">Jenjang pendidikan karyawan aktif</div>
+        @php $maxPend = collect($distribusiPendidikan)->max('total') ?: 1; @endphp
+        <div class="bar-chart">
+            @forelse($distribusiPendidikan as $p)
+            @php $pctP = round(($p['total'] / $maxPend) * 100); @endphp
+            <div class="bar-row">
+                <div class="bar-label" title="{{ $p['nama'] }}">{{ $p['nama'] }}</div>
+                <div class="bar-track"><div class="bar-fill bar-fill-brand" data-pct="{{ $pctP }}">{{ $p['total'] }}</div></div>
+                <div class="bar-val">{{ $p['total'] }}</div>
+            </div>
+            @empty
+            <div style="text-align:center;padding:14px;color:#9ca3af;font-size:12px;">Belum ada data pendidikan</div>
+            @endforelse
         </div>
     </div>
 </div>
@@ -657,8 +716,8 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
         <div class="bar-chart" style="margin-top:6px;">
             @foreach($usiaChart as $label => $val)
             @php
-                $colors=['< 30'=>'#06b6d4','30-39'=>'#2563eb','40-49'=>'#7c3aed','50+'=>'#d97706'];
-                $usiaColor = $colors[$label] ?? '#6b7280';
+                // Magnitude → satu hue hijau (disiplin warna, teks putih tetap terbaca)
+                $usiaColor = '#16a34a';
                 $pctUsia   = round(($val/$maxUsia)*100);
             @endphp
             <div class="bar-row">
@@ -673,6 +732,9 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
         </div>
     </div>
 </div>
+
+</section>
+<section class="dash-panel" data-tab="pejabat">
 
 {{-- PEJABAT --}}
 <div class="sec-title">Statistik Pejabat</div>
@@ -755,6 +817,9 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
         </table>
     </div>
 </div>
+
+</section>
+<section class="dash-panel" data-tab="pemantauan">
 
 {{-- PEMANTAUAN --}}
 <div class="sec-title">Pemantauan & Aktivitas</div>
@@ -871,12 +936,48 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
             @endforelse
         </div>
     </div>
+
+    <div class="list-card">
+        <div class="list-card-header">
+            <div class="list-card-title">Ulang Tahun Bulan Ini</div>
+            <span style="font-size:10px;color:#9ca3af;">{{ now()->translatedFormat('F') }}</span>
+        </div>
+        <div class="list-card-body">
+            @forelse($ulangTahunBulanIni as $k)
+            <div class="list-item">
+                <div style="font-size:12px;font-weight:800;color:#db2777;min-width:38px;text-align:center;">{{ \Carbon\Carbon::parse($k->tanggal_lahir)->format('d M') }}</div>
+                <div>
+                    <div class="list-name">{{ $k->nama }}</div>
+                    <div class="list-sub">{{ $k->jabatan_saat_ini ?? '-' }} · {{ \Carbon\Carbon::parse($k->tanggal_lahir)->age }} thn</div>
+                </div>
+                <div class="list-right">
+                    <a href="{{ route('karyawan.show', $k) }}" style="font-size:11px;color:#16a34a;text-decoration:none;font-weight:600;">Detail →</a>
+                </div>
+            </div>
+            @empty
+            <div style="text-align:center;padding:18px;color:#9ca3af;font-size:12px;">Tidak ada yang berulang tahun bulan ini</div>
+            @endforelse
+        </div>
+    </div>
 </div>
+</section>{{-- /dash-panel pemantauan --}}
+</div>{{-- /dash-panels --}}
 
 @endsection
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// Tab dashboard: ganti panel + picu resize supaya chart yang tadinya tersembunyi ikut terukur
+document.querySelectorAll('.dash-tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var t = this.dataset.tab;
+        document.querySelectorAll('.dash-tab-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === t); });
+        document.querySelectorAll('.dash-panel').forEach(function (p) { p.classList.toggle('active', p.dataset.tab === t); });
+        window.dispatchEvent(new Event('resize')); // Chart.js re-measure
+    });
+});
+</script>
 <script>
 Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
 Chart.defaults.color = '#6b7280';

@@ -11,6 +11,7 @@ use App\Models\PgsPjs;
 use App\Models\Direktorat;
 use App\Models\StrukturOrganisasi;
 use App\Models\TalentPool;
+use App\Services\ReminderPromosiService;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -88,30 +89,27 @@ class DashboardController extends Controller
         $pgsAktif = (int) $pgsStat->pgs;
         $pjsAktif = (int) $pgsStat->pjs;
 
-        // === TALENT POOL ===
-        $tpTahunIni  = now()->year;
-        $tpTahunLalu = now()->year - 1;
+        // === TALENT POOL === tampilkan 2 periode TERBARU yang ADA datanya (otomatis
+        // ikut tahun; periode kosong tidak ditampilkan).
+        $tpPeriodes = TalentPool::select('periode')->distinct()
+            ->orderByDesc('periode')->pluck('periode')->take(2)->values();
 
-        $tpIni  = TalentPool::where('periode', $tpTahunIni)
-            ->selectRaw('COUNT(*) as total, SUM(klasifikasi="longlist") as longlist, SUM(klasifikasi="shortlist") as shortlist')
-            ->first();
-        $tpLalu = TalentPool::where('periode', $tpTahunLalu)
-            ->selectRaw('COUNT(*) as total, SUM(klasifikasi="longlist") as longlist, SUM(klasifikasi="shortlist") as shortlist')
-            ->first();
+        $tpAgg = function ($periode) {
+            if ($periode === null) return null;
+            $r = TalentPool::where('periode', $periode)
+                ->selectRaw('COUNT(*) as total, SUM(klasifikasi="longlist") as longlist, SUM(klasifikasi="shortlist") as shortlist')
+                ->first();
+            return [
+                'periode'   => (int) $periode,
+                'total'     => (int) ($r->total     ?? 0),
+                'longlist'  => (int) ($r->longlist  ?? 0),
+                'shortlist' => (int) ($r->shortlist ?? 0),
+            ];
+        };
 
         $talentPool = [
-            'tahun_ini'  => $tpTahunIni,
-            'tahun_lalu' => $tpTahunLalu,
-            'ini'  => [
-                'total'     => $tpIni->total     ?? 0,
-                'longlist'  => $tpIni->longlist  ?? 0,
-                'shortlist' => $tpIni->shortlist ?? 0,
-            ],
-            'lalu' => [
-                'total'     => $tpLalu->total     ?? 0,
-                'longlist'  => $tpLalu->longlist  ?? 0,
-                'shortlist' => $tpLalu->shortlist ?? 0,
-            ],
+            'utama' => $tpAgg($tpPeriodes[0] ?? null), // periode terbaru
+            'kedua' => $tpAgg($tpPeriodes[1] ?? null), // periode sebelumnya (bisa null)
         ];
 
         // === STRUKTUR ORGANISASI ===
@@ -304,6 +302,55 @@ class DashboardController extends Controller
             '50+'   => (int) $demo->u4,
         ];
 
+        // === REMINDER PROMOSI (ringkasan) === selaras dengan halaman Reminder Promosi
+        $reminder = app(ReminderPromosiService::class)->build();
+        $reminderEligibleNow = count(array_filter($reminder['items'], fn ($i) => $i['eligible_now']));
+        $reminderSoon        = count($reminder['items']) - $reminderEligibleNow;
+
+        // === ULANG TAHUN BULAN INI ===
+        $ulangTahunBulanIni = Karyawan::where('status', 'aktif')
+            ->whereMonth('tanggal_lahir', now()->month)
+            ->orderByRaw('DAY(tanggal_lahir) ASC')
+            ->take(8)
+            ->get(['id', 'nik', 'nama', 'tanggal_lahir', 'jabatan_saat_ini']);
+
+        // === DISTRIBUSI BAND === (dari Job Grade → Band)
+        $jgCounts = Karyawan::where('status', 'aktif')
+            ->join('job_grade', 'job_grade.id', '=', 'karyawans.job_grade_id')
+            ->groupBy('job_grade.job_grade')
+            ->selectRaw('job_grade.job_grade as jg, COUNT(*) as total')
+            ->pluck('total', 'jg');
+        $bandTmp = [];
+        foreach ($jgCounts as $jg => $total) {
+            $band = Karyawan::getBandFromGrade((int) $jg);
+            $bandTmp[$band] = ($bandTmp[$band] ?? 0) + (int) $total;
+        }
+        $distribusiBand = [];
+        foreach (array_keys(Karyawan::bandConfig()) as $band) {
+            $distribusiBand[] = ['nama' => $band, 'total' => $bandTmp[$band] ?? 0];
+        }
+        if (!empty($bandTmp['-'])) {
+            $distribusiBand[] = ['nama' => 'Tanpa Band', 'total' => $bandTmp['-']];
+        }
+
+        // === DISTRIBUSI PENDIDIKAN ===
+        $pendCounts = Karyawan::where('status', 'aktif')
+            ->selectRaw("COALESCE(NULLIF(TRIM(jenjang_pendidikan), ''), 'Belum diisi') as jp, COUNT(*) as total")
+            ->groupBy('jp')
+            ->pluck('total', 'jp');
+        $urutPend = ['SD', 'SMP', 'SMA/SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3'];
+        $distribusiPendidikan = [];
+        foreach ($urutPend as $u) {
+            if (isset($pendCounts[$u])) {
+                $distribusiPendidikan[] = ['nama' => $u, 'total' => (int) $pendCounts[$u]];
+            }
+        }
+        foreach ($pendCounts as $jp => $total) {
+            if (!in_array($jp, $urutPend, true)) {
+                $distribusiPendidikan[] = ['nama' => $jp, 'total' => (int) $total];
+            }
+        }
+
         return view('dashboard', compact(
             'totalKaryawan', 'karyawanAktif', 'karyawanTidakAktif', 'karyawanBaru',
             'totalHistoryJabatan', 'promosiThisYear', 'mutasiThisYear', 'demosiThisYear',
@@ -316,7 +363,9 @@ class DashboardController extends Controller
             'karyawanTerbaru', 'genderChart', 'usiaChart',
             'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
             'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc',
-            'soPerDirektorat', 'soPerKompartemen', 'soPerDepartemen'
+            'soPerDirektorat', 'soPerKompartemen', 'soPerDepartemen',
+            'reminderEligibleNow', 'reminderSoon',
+            'ulangTahunBulanIni', 'distribusiBand', 'distribusiPendidikan'
         ));
     }
 }

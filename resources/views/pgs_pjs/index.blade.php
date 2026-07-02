@@ -18,8 +18,8 @@
 
     /* Aktif Cards */
     .aktif-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:32px; }
-    .aktif-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:18px 20px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
-    .aktif-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+    .aktif-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px 20px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
+    .aktif-card:hover { box-shadow:var(--card-shadow-hover); }
     .aktif-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
     .aktif-card.pgs::before { background:#3b82f6; }
     .aktif-card.pjs::before { background:#7c3aed; }
@@ -62,7 +62,7 @@
     .empty-aktif svg { width:40px;height:40px;margin:0 auto 10px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
 
     /* History Table */
-    .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto; }
     table { width:100%;border-collapse:collapse;font-size:13px;min-width:600px; }
     thead th { padding:11px 16px;text-align:left;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f3f4f6;background:#f9fafb;white-space:nowrap; }

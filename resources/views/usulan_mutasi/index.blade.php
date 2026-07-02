@@ -65,13 +65,13 @@
 /* ===== STATS ===== */
 .stats-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; padding-bottom: 4px; }
 .stats-inner { display: flex; gap: 10px; width: max-content; }
-.stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 18px; min-width: 120px; }
+.stat-card { background: white; border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 14px 18px; min-width: 120px; }
 .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
 .stat-lbl { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
 .stat-num { font-size: 26px; font-weight: 800; line-height: 1; }
 
 /* ===== WORKFLOW BAR (pill status + search) ===== */
-.flow-card { background: white; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px 18px; margin-bottom: 20px; }
+.flow-card { background: white; border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 16px 18px; margin-bottom: 20px; }
 .flow-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .flow-tag { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .6px; width: 84px; flex-shrink: 0; }
 
@@ -94,7 +94,7 @@
 .step-connector.is-done { background: #15803d; }
 
 /* ===== TABLE CARD ===== */
-.table-card { background: white; border-radius: 14px; border: 1px solid #e5e7eb; overflow: hidden; }
+.table-card { background: white; border-radius: var(--radius); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); overflow: hidden; }
 .table-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-outer::-webkit-scrollbar { height: 8px; }
 .table-outer::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }

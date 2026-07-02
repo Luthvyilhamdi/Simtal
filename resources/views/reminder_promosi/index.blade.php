@@ -26,7 +26,7 @@
     .note-info svg { width:16px;height:16px;stroke:#2563eb;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px; }
 
     .summary-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px; }
-    .sum-card { background:white;border-radius:14px;border:1px solid #eef0f2;padding:18px 20px;box-shadow:0 1px 3px rgba(16,24,40,0.04);display:flex;align-items:center;gap:14px; }
+    .sum-card { background:white;border-radius:14px;border:1px solid var(--card-border);padding:18px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:14px; }
     .sum-ico { width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
     .sum-ico svg { width:22px;height:22px;fill:none;stroke-width:1.9; }
     .sum-ico.green { background:#dcfce7; } .sum-ico.green svg { stroke:#15803d; }
@@ -35,7 +35,7 @@
     .sum-num { font-size:26px;font-weight:800;color:#111827;line-height:1; }
     .sum-label { font-size:12px;color:#6b7280;margin-top:3px;font-weight:500; }
 
-    .toolbar { background:white;border-radius:12px;border:1px solid #eef0f2;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .toolbar { background:white;border-radius:12px;border:1px solid var(--card-border);padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--card-shadow); }
     .toolbar select { border:1px solid #e4e7ec;border-radius:9px;padding:8px 12px;font-size:13px;outline:none;background:#fcfcfd;color:#374151;cursor:pointer; }
     .toolbar select:focus { border-color:#16a34a; }
     /* Search kecil — samakan dengan karyawan/index */
@@ -49,7 +49,7 @@
     .toolbar .tb-reset { font-size:12.5px;color:#6b7280;text-decoration:none;padding:8px 10px; }
     .toolbar .tb-reset:hover { color:#15803d; }
 
-    .card-table { background:white;border-radius:14px;border:1px solid #eef0f2;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .card-table { background:white;border-radius:14px;border:1px solid var(--card-border);overflow:hidden;box-shadow:var(--card-shadow); }
     table.rm { width:100%;border-collapse:collapse;font-size:13px;min-width:1040px; }
     /* Kolom pendek: jaga satu baris biar rapi (tabel scroll horizontal bila sempit) */
     table.rm td.col-nowrap { white-space:nowrap; }
@@ -104,7 +104,8 @@
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
     <div>
         Daftar ini <strong>hanya pengingat</strong> berdasarkan MDG &mdash; tidak mengubah data. Ambang <strong>selaras dengan Data Talent</strong>:
-        yang <strong>shortlist</strong> (ditandai ★) pakai ambang longgar (Band 2 thn, JG 1 thn), lainnya normal (Band 3 thn, JG 2 thn, PG 1 thn).
+        yang <strong>shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }}</strong> (ditandai ★) pakai ambang longgar (Band 2 thn, JG 1 thn), lainnya normal (Band 3 thn, JG 2 thn, PG 1 thn).
+        @if($shortlistPeriode)<br>Shortlist diambil dari <strong>periode terbaru yang tersedia ({{ $shortlistPeriode }})</strong>.@endif
         Hanya karyawan yang <strong>TMT grade-nya terisi</strong> yang bisa dihitung. Keputusan promosi tetap melalui Usulan Promosi.
     </div>
 </div>
@@ -191,7 +192,7 @@
                         <div class="emp-name">{{ $k->nama }}</div>
                         <div class="emp-nik">NIK {{ $k->nik }}</div>
                         @if($i['is_shortlist'])
-                            <div class="sl-badge-wrap"><span class="badge badge-green" title="Shortlist Talent Pool">★ Shortlist</span></div>
+                            <div class="sl-badge-wrap"><span class="badge badge-green" title="Shortlist Talent Pool {{ $shortlistPeriode }}">★ Shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }}</span></div>
                         @endif
                     </td>
                     <td class="col-jab">

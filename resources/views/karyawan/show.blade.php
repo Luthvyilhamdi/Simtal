@@ -9,7 +9,7 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .profile-card { background:white;border-radius:16px;border:1px solid #eef0f2;padding:24px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .profile-card { background:white;border-radius:16px;border:1px solid var(--card-border);padding:24px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:var(--card-shadow); }
     .profile-left { display:flex;align-items:center;gap:18px;flex:1;min-width:0; }
     .profile-avatar { width:74px;height:74px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0;overflow:hidden;border:3px solid #bbf7d0; }
     .profile-avatar img { width:100%;height:100%;object-fit:cover; }
@@ -35,7 +35,7 @@
     .btn-outline svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2; }
 
     .detail-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
-    .detail-card { background:white;border-radius:14px;border:1px solid #eef0f2;padding:22px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .detail-card { background:white;border-radius:14px;border:1px solid var(--card-border);padding:22px;box-shadow:var(--card-shadow); }
     .detail-card.full { grid-column:1/-1; }
     .detail-card-title { font-size:11px;font-weight:700;color:#98a2b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px; }
     .dct-ico { width:26px;height:26px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
@@ -63,7 +63,7 @@
     .badge-purple { background:#f5f3ff;color:#7c3aed; }
     .badge-amber  { background:#fffbeb;color:#d97706; }
 
-    .band-card { background:white;border-radius:14px;border:1px solid #eef0f2;padding:22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .band-card { background:white;border-radius:14px;border:1px solid var(--card-border);padding:22px;margin-bottom:16px;box-shadow:var(--card-shadow); }
     .mdg-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px; }
     .mdg-item { text-align:center;background:#f9fafb;border-radius:11px;padding:14px 10px; }
     .mdg-num { font-size:22px;font-weight:800;color:#111827; }

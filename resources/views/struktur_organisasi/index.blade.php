@@ -52,7 +52,7 @@ $isUser = auth()->user()->isUser();
 <div>
 
 {{-- PERIODE SELECTOR --}}
-<div style="background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<div style="background:#fff;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
   <div style="display:flex;align-items:center;gap:8px">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span style="font-size:13px;font-weight:700;color:#111827">Periode:</span>
@@ -114,7 +114,7 @@ $isUser = auth()->user()->isUser();
     ['label'=>'Terisi','value'=>$stats['total_peng'],'color'=>'#15803d','bg'=>'#dcfce7'],
     ['label'=>'Deviasi','value'=>$stats['total_dev'],'color'=>'#a32d2d','bg'=>'#fee2e2'],
   ] as $s)
-  <div style="background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:14px 18px;display:flex;align-items:center;gap:14px">
+  <div style="background:#fff;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px 18px;display:flex;align-items:center;gap:14px">
     {{-- FIX: Blade di dalam style stroke dan background diganti data-* --}}
     <div class="stat-icon" data-bg="{{ $s['bg'] }}">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" data-stroke="{{ $s['color'] }}" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
@@ -130,7 +130,7 @@ $isUser = auth()->user()->isUser();
 </div>
 
 {{-- FILTER --}}
-<div style="background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:14px 18px;margin-bottom:14px">
+<div style="background:#fff;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px 18px;margin-bottom:14px">
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:#f6f4f4;border:1px solid #e8e8e3;border-radius:8px;padding:7px 12px">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -174,7 +174,7 @@ $isUser = auth()->user()->isUser();
 </div>
 
 @if($allJabatan->count() === 0)
-<div style="background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:60px 20px;text-align:center">
+<div style="background:#fff;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:60px 20px;text-align:center">
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin:0 auto 16px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
   <div style="font-size:15px;font-weight:600;color:#374151;margin-bottom:6px">Belum ada data untuk periode {{ $periodeSaatIni }}</div>
   <div style="font-size:13px;color:#9ca3af;margin-bottom:16px">Salin dari periode sebelumnya atau tambah posisi baru</div>
@@ -187,7 +187,7 @@ $isUser = auth()->user()->isUser();
 @else
 
 {{-- TABEL --}}
-<div style="background:#fff;border-radius:12px;border:1px solid #e8e8e3;overflow:hidden">
+<div style="background:#fff;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden">
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
     <table style="width:max-content;min-width:100%;border-collapse:collapse;font-size:13px" id="mainTable">
       <thead>

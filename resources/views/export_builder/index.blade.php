@@ -11,7 +11,7 @@
     .eb-grid { display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start; }
     @media (max-width:900px){ .eb-grid{ grid-template-columns:1fr; } }
 
-    .card { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px; }
+    .card { background:#fff;border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:18px 20px; }
     .card + .card { margin-top:16px; }
     .card-title { font-size:13px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px; }
 

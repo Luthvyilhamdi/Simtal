@@ -1,7 +1,7 @@
 @push('styles')
 <style>
     .master-wrap { display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start; }
-    .form-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:24px;position:sticky;top:24px; }
+    .form-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:24px;position:sticky;top:24px; }
     .form-card-title { font-size:15px;font-weight:700;color:#111827;margin-bottom:4px; }
     .form-card-sub { font-size:12px;color:#9ca3af;margin-bottom:20px; }
     .form-group { display:flex;flex-direction:column;gap:6px;margin-bottom:14px; }
@@ -12,7 +12,7 @@
     .btn-save { width:100%;padding:11px;background:#15803d;color:white;border:none;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s; }
     .btn-save:hover { background:#166534; }
 
-    .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f3f4f6; }
     .table-title { font-size:14px;font-weight:700;color:#111827; }
     .table-count { font-size:12px;color:#9ca3af; }

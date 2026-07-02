@@ -81,7 +81,7 @@
     @keyframes spin { to{transform:rotate(360deg)} }
 
     /* === TABLE === */
-    .table-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch; }
     table { width:100%;border-collapse:collapse;font-size:13px;min-width:600px; }
     thead th { padding:11px 16px;text-align:left;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f3f4f6;background:#f9fafb;white-space:nowrap; }

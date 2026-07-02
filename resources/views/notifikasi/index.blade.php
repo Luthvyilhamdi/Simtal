@@ -9,8 +9,8 @@
     .page-sub { font-size:13px;color:#6b7280;margin-top:4px; }
 
     .notif-list { display:flex;flex-direction:column;gap:10px; }
-    .notif-item { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 18px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow 0.15s; }
-    .notif-item:hover { box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+    .notif-item { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:16px 18px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow 0.15s; }
+    .notif-item:hover { box-shadow:var(--card-shadow-hover); }
     .notif-item.unread { border-left:3px solid #16a34a; }
     .notif-item.unread.warning { border-left-color:#f59e0b; }
     .notif-item.unread.danger { border-left-color:#ef4444; }
@@ -44,7 +44,7 @@
     .page-btn.disabled { opacity:0.4;pointer-events:none; }
     .page-btn svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:14px;border:1px solid #e5e7eb;color:#9ca3af; }
+    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:#9ca3af; }
     .empty-state svg { width:48px;height:48px;margin:0 auto 12px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
 </style>
 @endpush

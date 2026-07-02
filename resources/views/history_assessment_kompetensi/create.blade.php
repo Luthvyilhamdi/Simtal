@@ -9,7 +9,7 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .form-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:28px;margin-bottom:16px; }
+    .form-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:28px;margin-bottom:16px; }
     .section-label { font-size:13px;font-weight:700;color:#374151;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px; }
 
     .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px; }

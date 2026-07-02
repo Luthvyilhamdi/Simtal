@@ -20,8 +20,8 @@
     .btn-hapus-log:hover { background:#fee2e2; }
 
     .log-list { display:flex;flex-direction:column;gap:8px; }
-    .log-item { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow 0.15s; }
-    .log-item:hover { box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+    .log-item { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px 18px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow 0.15s; }
+    .log-item:hover { box-shadow:var(--card-shadow-hover); }
     .log-icon { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
     .log-body { flex:1;min-width:0; }
     .log-top { display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px; }
@@ -42,7 +42,7 @@
     .page-btn.disabled { opacity:0.4;pointer-events:none; }
     .page-btn svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:14px;border:1px solid #e5e7eb;color:#9ca3af; }
+    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:#9ca3af; }
     .empty-state svg { width:48px;height:48px;margin:0 auto 12px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
 
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }

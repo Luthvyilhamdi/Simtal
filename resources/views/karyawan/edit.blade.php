@@ -13,7 +13,7 @@
     .page-title { font-size:20px;font-weight:700;color:#111827; }
     .page-sub { font-size:13px;color:#6b7280;margin-top:4px; }
 
-    .form-card { background:white;border-radius:16px;border:1px solid #eef0f2;padding:26px 28px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .form-card { background:white;border-radius:16px;border:1px solid var(--card-border);padding:26px 28px;margin-bottom:16px;box-shadow:var(--card-shadow); }
 
     .section-header { display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid #f3f4f6; }
     .section-icon { width:36px;height:36px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
@@ -84,7 +84,7 @@
     .mdg-hint-box { background:#fffbeb;border:1px solid #fde68a;border-radius:11px;padding:13px 16px;font-size:12px;color:#92400e;margin-top:10px; }
     .mdg-hint-box ul { margin:6px 0 0 16px;display:flex;flex-direction:column;gap:3px; }
 
-    .form-actions-card { background:white;border-radius:16px;border:1px solid #eef0f2;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 1px 3px rgba(16,24,40,0.04); }
+    .form-actions-card { background:white;border-radius:16px;border:1px solid var(--card-border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:var(--card-shadow); }
     .form-actions-right { display:flex;gap:10px; }
     .btn-cancel { display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid #e4e7ec;text-decoration:none;transition:all 0.15s; }
     .btn-cancel:hover { background:#f9fafb; }
@@ -492,7 +492,7 @@
             </div>
         </div>
 
-        <div style="background:#f9fafb;border:1px solid #eef0f2;border-radius:11px;padding:13px 16px;margin-top:12px;font-size:12px;color:#374151;">
+        <div style="background:#f9fafb;border:1px solid var(--card-border);border-radius:11px;padding:13px 16px;margin-top:12px;font-size:12px;color:#374151;">
             📊 <strong>MDG Band</strong> (dari TMT JG saat masuk band):
             <strong style="color:{{ $karyawan->mdg_band_bulan >= 36 ? '#15803d' : '#d97706' }}">
                 {{ $karyawan->mdg_band_bulan }} bulan

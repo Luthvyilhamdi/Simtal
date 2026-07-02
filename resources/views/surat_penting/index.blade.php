@@ -11,7 +11,7 @@
     .btn-primary:hover { background:#166534; }
     .btn-primary svg { width:13px;height:13px;stroke:white;fill:none;stroke-width:2.5; }
     .stats-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px; }
-    .stat-card { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:14px;text-align:center; }
+    .stat-card { background:white;border-radius:var(--radius-sm);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px;text-align:center; }
     .stat-num { font-size:24px;font-weight:800;color:#111827; }
     .stat-label { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px; }
     .stat-card.expire .stat-num { color:#ef4444; }
@@ -33,8 +33,8 @@
     .btn-reset:hover { background:#f5f5f0; }
     #suratGridWrap { transition:opacity 0.2s; }
     .surat-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px; }
-    .surat-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:18px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
-    .surat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+    .surat-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
+    .surat-card:hover { box-shadow:var(--card-shadow-hover); }
     .surat-card.expired { border-color:#fecaca; }
     .surat-card.soon-expire { border-color:#fde68a; }
     .scard-top { display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px; }
@@ -72,7 +72,7 @@
     .page-btn.active { background:#15803d;color:white;border-color:#15803d; }
     .page-btn.disabled { opacity:0.4;pointer-events:none; }
     .page-btn svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
-    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:14px;border:1px solid #e5e7eb;color:#9ca3af; }
+    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:#9ca3af; }
     .empty-state svg { width:44px;height:44px;margin:0 auto 10px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
     .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:260px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s forwards; }

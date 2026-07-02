@@ -13,7 +13,7 @@
     .page-title { font-size:20px;font-weight:700;color:#111827;margin-bottom:4px; }
     .page-sub { font-size:13px;color:#6b7280;margin-bottom:24px; }
 
-    .step-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:24px;margin-bottom:16px; }
+    .step-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:24px;margin-bottom:16px; }
     .step-header { display:flex;align-items:center;gap:12px;margin-bottom:16px; }
     .step-num { width:32px;height:32px;border-radius:50%;background:#15803d;color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0; }
     .step-title { font-size:15px;font-weight:700;color:#111827; }

@@ -9,7 +9,7 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .profile-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px; }
+    .profile-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px; }
     .profile-left { display:flex;align-items:center;gap:14px; }
     .profile-avatar { width:52px;height:52px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;overflow:hidden;border:2px solid #bbf7d0; }
     .profile-avatar img { width:100%;height:100%;object-fit:cover; }
@@ -41,7 +41,7 @@
     .tab-btn.active { background:white;color:#15803d;box-shadow:0 1px 4px rgba(0,0,0,0.08); }
 
     .assessment-list { display:flex;flex-direction:column;gap:14px; }
-    .acard { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:20px;transition:box-shadow 0.15s; }
+    .acard { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:20px;transition:box-shadow 0.15s; }
     .acard:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
     .acard-top { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap; }
     .acard-left { flex:1;min-width:0; }
@@ -98,7 +98,7 @@
     .btn-del:hover { background:#fef2f2;border-color:#fecaca; }
     .btn-del svg { width:13px;height:13px;stroke:#ef4444;fill:none;stroke-width:2; }
 
-    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:14px;border:1px solid #e5e7eb; }
+    .empty-state { text-align:center;padding:60px 20px;background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow); }
     .empty-state svg { width:48px;height:48px;margin:0 auto 12px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
     .empty-state p { font-size:14px;font-weight:600;color:#6b7280;margin-bottom:4px; }
 

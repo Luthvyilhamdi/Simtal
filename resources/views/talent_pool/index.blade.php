@@ -23,19 +23,19 @@
     @keyframes spin { to{transform:rotate(360deg)} }
 
     .stats-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px; }
-    .stat-card { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;display:flex;align-items:center;gap:14px; }
+    .stat-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:16px 20px;display:flex;align-items:center;gap:14px; }
     .stat-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
     .stat-icon svg { width:20px;height:20px;fill:none;stroke-width:1.8; }
     .stat-num { font-size:24px;font-weight:800;color:#111827; }
     .stat-label { font-size:12px;color:#6b7280;margin-top:1px; }
 
-    .filter-bar { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+    .filter-bar { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
     .filter-select { border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 14px;font-size:13px;font-family:inherit;color:#111827;background:white;outline:none;cursor:pointer;appearance:none;padding-right:28px; }
     .filter-select:focus { border-color:#15803d; }
     .select-wrap { position:relative; }
     .select-wrap::after { content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
 
-    .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto; }
     table { width:100%;border-collapse:collapse; }
     thead th { background:#f9fafb;padding:11px 16px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;text-align:left;border-bottom:1px solid #e5e7eb;white-space:nowrap; }

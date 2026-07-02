@@ -16,19 +16,19 @@
     .btn-primary svg { width:14px;height:14px;stroke:white;fill:none;stroke-width:2.5; }
 
     /* Profile mini */
-    .profile-mini { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px; }
+    .profile-mini { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px; }
     .profile-mini-avatar { width:44px;height:44px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden;border:2px solid #bbf7d0; }
     .profile-mini-avatar img { width:100%;height:100%;object-fit:cover; }
 
     /* Filter */
-    .filter-bar { background:white;border-radius:12px;border:1px solid #e5e7eb;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+    .filter-bar { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
     .filter-select { border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 28px 7px 12px;font-size:13px;font-family:inherit;color:#111827;background:white;outline:none;cursor:pointer;appearance:none; }
     .filter-select:focus { border-color:#15803d; }
     .select-wrap { position:relative; }
     .select-wrap::after { content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
 
     /* Table */
-    .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto; }
     table { width:100%;border-collapse:collapse; }
     thead th { background:#f9fafb;padding:11px 16px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;border-bottom:1px solid #e5e7eb;white-space:nowrap; }

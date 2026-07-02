@@ -9,7 +9,7 @@
     .page-sub { font-size:12px;color:#6b7280;margin-top:3px; }
 
     .stats-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px; }
-    .stat-card { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:14px;text-align:center; }
+    .stat-card { background:white;border-radius:var(--radius-sm);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:14px;text-align:center; }
     .stat-num { font-size:22px;font-weight:800;color:#111827; }
     .stat-label { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px; }
     .stat-card.svp .stat-num { color:#d97706; }
@@ -41,7 +41,7 @@
     .badge-aktif { background:#dcfce7;color:#15803d; }
     .badge-selesai { background:#f3f4f6;color:#6b7280; }
 
-    .table-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch; }
     table { width:100%;border-collapse:collapse;font-size:13px;min-width:900px; }
     thead th { padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f3f4f6;background:#f9fafb;white-space:nowrap; }

@@ -7,6 +7,41 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
     <title>SIMTAL - @yield('title')</title>
+    {{-- ===== Design tokens (sistem desain global) ===== --}}
+    <style>
+        :root {
+            --radius: 14px;
+            --radius-sm: 10px;
+            --card-border: #e7eaee;
+            --card-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.03);
+            --card-shadow-hover: 0 8px 24px rgba(16,24,40,0.08);
+            --divider: #eef1f4;
+            --brand: #15803d;
+            --brand-600: #16a34a;
+            --text-strong: #101828;
+            --text: #344054;
+            --text-muted: #667085;
+            --text-faint: #98a2b3;
+
+            /* Skala tipografi */
+            --fs-hero: 28px; --fs-h1: 20px; --fs-h2: 15px;
+            --fs-title: 13px; --fs-body: 13px; --fs-sm: 12px; --fs-xs: 11px;
+
+            /* Palet chart — disiplin (magnitude=1 hue hijau, status=tetap, kategorikal=urutan) */
+            --chart-brand: #16a34a;                 /* bar magnitude (1 hue) */
+            --chart-good: #0ca30c; --chart-warning: #f59e0b;
+            --chart-serious: #ec835a; --chart-critical: #dc2626;
+            --chart-cat-1: #2a78d6; --chart-cat-2: #e87ba4;   /* kategorikal (mis. gender) */
+            --seq-1: #dcfce7; --seq-2: #86efac; --seq-3: #22c55e; --seq-4: #15803d; /* ramp hijau ordinal */
+        }
+        /* Tombol standar (opsional, untuk dipakai lintas halaman) */
+        .btn { display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:var(--fs-body);font-weight:600;font-family:inherit;cursor:pointer;border:1px solid transparent;text-decoration:none;transition:all .15s;line-height:1; }
+        .btn svg { width:15px;height:15px;fill:none;stroke-width:2; }
+        .btn-primary { background:var(--brand);color:#fff; }
+        .btn-primary:hover { background:#166534;box-shadow:0 4px 12px rgba(21,128,61,.25); }
+        .btn-outline { background:#fff;color:var(--text);border-color:var(--card-border); }
+        .btn-outline:hover { background:#f9fafb;border-color:#bbf7d0;color:var(--brand); }
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     {{-- Baca cookie & pasang class collapsed SEBELUM halaman render (cegah kedip) --}}
     <script>

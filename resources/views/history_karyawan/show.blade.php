@@ -9,7 +9,7 @@
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .profile-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px; }
+    .profile-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px; }
     .profile-left { display:flex;align-items:center;gap:14px; }
     .profile-avatar { width:52px;height:52px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;overflow:hidden;border:2px solid #bbf7d0; }
     .profile-avatar img { width:100%;height:100%;object-fit:cover; }
@@ -35,8 +35,8 @@
     .timeline-dot { position:absolute;left:-26px;top:20px;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 0 2px #e5e7eb;background:#9ca3af;z-index:1; }
     .timeline-dot.current { background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,0.2);width:14px;height:14px;left:-27px; }
 
-    .timeline-card { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:18px 20px;transition:box-shadow 0.15s; }
-    .timeline-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+    .timeline-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px 20px;transition:box-shadow 0.15s; }
+    .timeline-card:hover { box-shadow:var(--card-shadow-hover); }
     .timeline-card.current-card { border-color:#bbf7d0;background:#fafffe; }
 
     .card-header { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap; }
@@ -207,7 +207,7 @@
     @endforeach
 </div>
 @else
-<div style="background:white;border-radius:14px;border:1px solid #e5e7eb;">
+<div style="background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);">
     <div class="empty-state">
         <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         <p style="font-size:14px;font-weight:600;color:#6b7280;">Belum ada history jabatan</p>

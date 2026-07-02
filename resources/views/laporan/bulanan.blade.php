@@ -19,7 +19,7 @@
 
 /* ===== STATS ===== */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; min-width: 0; }
+.stat-card { background: white; border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 16px; display: flex; align-items: center; gap: 12px; min-width: 0; }
 .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .stat-icon svg { width: 19px; height: 19px; fill: none; stroke-width: 1.8; }
 .stat-num { font-size: 22px; font-weight: 800; line-height: 1; }
@@ -29,7 +29,7 @@
 .report-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 880px) { .report-grid { grid-template-columns: 1fr 1fr; } }
 
-.report-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; min-width: 0; }
+.report-card { background: white; border-radius: var(--radius); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); overflow: hidden; min-width: 0; }
 .report-card-header { padding: 14px 18px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 10px; }
 .report-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .report-icon svg { width: 14px; height: 14px; fill: none; stroke-width: 2; }

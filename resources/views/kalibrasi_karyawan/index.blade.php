@@ -15,11 +15,11 @@
     .btn-primary:hover { background:#166534; }
     .btn-primary svg { width:14px;height:14px;stroke:white;fill:none;stroke-width:2.5; }
 
-    .profile-mini { background:white;border-radius:14px;border:1px solid #e5e7eb;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px; }
+    .profile-mini { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px; }
     .profile-mini-avatar { width:44px;height:44px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden;border:2px solid #bbf7d0; }
     .profile-mini-avatar img { width:100%;height:100%;object-fit:cover; }
 
-    .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
+    .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto; }
     table { width:100%;border-collapse:collapse; }
     thead th { background:#f9fafb;padding:11px 16px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;border-bottom:1px solid #e5e7eb;white-space:nowrap; }

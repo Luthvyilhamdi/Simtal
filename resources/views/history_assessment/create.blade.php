@@ -20,7 +20,7 @@
     .info-detail { font-size:12px;color:#6b7280;margin-top:2px; }
     .info-note { margin-left:auto;font-size:11px;color:#15803d;background:#dcfce7;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap; }
 
-    .form-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:28px;margin-bottom:16px; }
+    .form-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:28px;margin-bottom:16px; }
     .section-header { display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #f3f4f6; }
     .section-icon { width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
     .section-icon svg { width:16px;height:16px;stroke:#16a34a;fill:none;stroke-width:1.8; }
@@ -65,7 +65,7 @@
     .persen-wrap input { padding-right:36px; }
     .persen-suffix { position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;color:#9ca3af;pointer-events:none; }
 
-    .form-actions-card { background:white;border-radius:16px;border:1px solid #e5e7eb;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
+    .form-actions-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
     .form-actions-right { display:flex;gap:10px; }
     .btn-cancel { display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:600;border:1.5px solid #e5e7eb;text-decoration:none;transition:all 0.15s; }
     .btn-cancel:hover { background:#f9fafb; }
