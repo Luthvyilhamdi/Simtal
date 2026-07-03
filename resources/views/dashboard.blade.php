@@ -793,7 +793,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 <div class="chart-grid-3">
     <div class="chart-card">
         <div class="chart-card-title">Tren Pergerakan Jabatan</div>
-        <div class="chart-card-sub">12 bulan terakhir — promosi, mutasi, rotasi & demosi</div>
+        <div class="chart-card-sub">12 bulan terakhir — promosi, mutasi, rotasi &amp; demosi · <span style="color:#15803d;font-weight:600">klik batang untuk lihat siapa</span></div>
         <canvas id="trenChart" height="200"></canvas>
     </div>
     <div class="chart-card">
@@ -814,6 +814,21 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 @endforeach
             </div>
         </div>
+    </div>
+</div>
+
+{{-- Popup detail pergerakan jabatan (diisi JS saat batang chart diklik) --}}
+<div class="dash-modal" id="trenModal">
+    <div class="dash-modal-backdrop" onclick="closeDashModal(this)"></div>
+    <div class="dash-modal-card">
+        <div class="dash-modal-head">
+            <div>
+                <div class="dash-modal-title" id="trenModalTitle">—</div>
+                <div class="dash-modal-sub" id="trenModalSub">—</div>
+            </div>
+            <button type="button" class="dash-modal-close" onclick="closeDashModal(this)">&times;</button>
+        </div>
+        <div class="dash-modal-body" id="trenModalBody"></div>
     </div>
 </div>
 
@@ -1260,6 +1275,35 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// ── Popup detail pergerakan jabatan ──
+var TREN_TIPE = ['promosi','mutasi','rotasi','demosi'];
+var TREN_META = {
+    promosi: { label:'Promosi', color:'#16a34a', icon:'↑' },
+    mutasi:  { label:'Mutasi',  color:'#2563eb', icon:'↔' },
+    rotasi:  { label:'Rotasi',  color:'#0891b2', icon:'↻' },
+    demosi:  { label:'Demosi',  color:'#ef4444', icon:'↓' },
+};
+function trenEsc(s){ return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); }
+function openTrenModal(monthIdx, tipe) {
+    var d = trenData[monthIdx];
+    if (!d) return;
+    var meta = TREN_META[tipe];
+    var list = (d.detail && d.detail[tipe]) ? d.detail[tipe] : [];
+    document.getElementById('trenModalTitle').innerHTML =
+        '<span style="color:'+meta.color+'">'+meta.icon+' '+meta.label+'</span> — ' + trenEsc(d.bulan);
+    document.getElementById('trenModalSub').textContent = list.length + ' orang';
+    var body = document.getElementById('trenModalBody');
+    if (!list.length) {
+        body.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:20px;font-size:13px">Tidak ada '+meta.label.toLowerCase()+' pada bulan ini</div>';
+    } else {
+        body.innerHTML = '<table class="dash-tbl"><thead><tr><th>Nama</th><th>Jabatan</th><th class="num">Tanggal</th></tr></thead><tbody>' +
+            list.map(function(p){ return '<tr><td>'+trenEsc(p.nama)+'</td><td>'+trenEsc(p.jabatan)+'</td><td class="num">'+trenEsc(p.tgl)+'</td></tr>'; }).join('') +
+            '</tbody></table>';
+    }
+    document.getElementById('trenModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
 new Chart(document.getElementById('trenChart'), {
     type: 'bar',
     data: {
@@ -1273,6 +1317,14 @@ new Chart(document.getElementById('trenChart'), {
     },
     options: {
         responsive:true,
+        onClick: function(evt, elements){
+            if (!elements.length) return;
+            var el = elements[0];
+            openTrenModal(el.index, TREN_TIPE[el.datasetIndex]);
+        },
+        onHover: function(evt, elements){
+            evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+        },
         plugins: {
             legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, font:{size:11} } },
             tooltip:{ mode:'index', intersect:false },
