@@ -62,8 +62,33 @@
     .prev-table th { background:#15803d;color:#fff;position:sticky;top:0;font-weight:600; }
     .prev-table tr:nth-child(even) td { background:#f9fafb; }
 
-    .toolbar { display:flex;gap:12px;margin-bottom:12px; }
+    .toolbar { display:flex;gap:12px;margin-bottom:14px; }
     .link-btn { font-size:12px;color:#15803d;background:none;border:none;cursor:pointer;font-weight:600;text-decoration:underline; }
+
+    /* Header kolom: pencarian + penghitung */
+    .col-topbar { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap; }
+    .col-search { position:relative;flex:1;min-width:180px; }
+    .col-search input { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px 8px 32px;font-size:13px;font-family:inherit; }
+    .col-search input:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
+    .col-search svg { position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#9ca3af;stroke-width:2;fill:none;stroke:currentColor; }
+    .col-count-total { font-size:12px;color:#15803d;font-weight:700;white-space:nowrap; }
+
+    /* Grup kolom: accordion + pilih semua per grup */
+    .col-group-head { display:flex;align-items:center;gap:8px;margin-bottom:8px; }
+    .col-group-toggle { display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;padding:2px 0;flex:1;text-align:left; }
+    .cg-caret { width:11px;height:11px;color:#9ca3af;transition:transform .15s;flex-shrink:0;stroke-width:2.5;fill:none;stroke:currentColor; }
+    .col-group.collapsed .cg-caret { transform:rotate(-90deg); }
+    .col-group.collapsed .col-items { display:none; }
+    .col-group-label { margin-bottom:0; }
+    .col-group-count { font-size:11px;color:#9ca3af;font-weight:600; }
+    .col-group-all { display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280;cursor:pointer;white-space:nowrap;user-select:none; }
+    .col-group-all input { width:13px;height:13px;accent-color:#15803d;cursor:pointer; }
+    .col-group.hidden-search, .col-check.hidden-search { display:none; }
+    .no-col-result { font-size:12px;color:#9ca3af;text-align:center;padding:16px 0;display:none; }
+
+    /* Sidebar kanan sticky agar tombol unduh selalu terlihat */
+    .eb-side { position:sticky;top:16px;align-self:start; }
+    @media (max-width:900px){ .eb-side { position:static; } }
 </style>
 @endpush
 
@@ -90,6 +115,13 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" style="width:16px;height:16px;"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4M9 3v18M9 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9"/></svg>
                 Pilih Kolom
             </div>
+            <div class="col-topbar">
+                <div class="col-search">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="colSearch" placeholder="Cari kolom…" oninput="filterColumns(this.value)" autocomplete="off">
+                </div>
+                <span id="colCountTotal" class="col-count-total">0 kolom dipilih</span>
+            </div>
             <div class="toolbar">
                 <button type="button" class="link-btn" onclick="toggleAll(true)">Pilih semua</button>
                 <button type="button" class="link-btn" onclick="toggleAll(false)">Kosongkan</button>
@@ -97,7 +129,16 @@
 
             @foreach($grouped as $grup => $kolom)
                 <div class="col-group">
-                    <div class="col-group-label">{{ $grup }}</div>
+                    <div class="col-group-head">
+                        <button type="button" class="col-group-toggle" onclick="toggleGroup(this)">
+                            <svg class="cg-caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                            <span class="col-group-label">{{ $grup }}</span>
+                            <span class="col-group-count" data-group-count>0/{{ count($kolom) }}</span>
+                        </button>
+                        <label class="col-group-all" title="Pilih semua kolom di grup ini">
+                            <input type="checkbox" data-group-all onchange="toggleGroupAll(this)"> semua
+                        </label>
+                    </div>
                     <div class="col-items">
                         @foreach($kolom as $key => $label)
                             <label class="col-check">
@@ -109,10 +150,11 @@
                     </div>
                 </div>
             @endforeach
+            <div class="no-col-result" id="noColResult">Tidak ada kolom yang cocok.</div>
         </div>
 
         {{-- Filter & Aksi --}}
-        <div>
+        <div class="eb-side">
             <div class="card">
                 <div class="card-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" style="width:16px;height:16px;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -246,8 +288,59 @@
     const previewRoute = "{{ route('export_builder.preview') }}";
     const previewBtnDefault = document.getElementById('previewBtn').innerHTML;
 
+    // ===== Pemilih kolom (cari, accordion, pilih-semua, penghitung) =====
+    function colBoxes(scope) {
+        return Array.from((scope || document).querySelectorAll('input[name="columns[]"]'));
+    }
+
+    function refreshColCounts() {
+        let total = 0;
+        document.querySelectorAll('.col-group').forEach(g => {
+            const boxes   = colBoxes(g);
+            const checked = boxes.filter(b => b.checked).length;
+            total += checked;
+            const cnt = g.querySelector('[data-group-count]');
+            if (cnt) cnt.textContent = checked + '/' + boxes.length;
+            const all = g.querySelector('[data-group-all]');
+            if (all) {
+                all.checked = boxes.length > 0 && checked === boxes.length;
+                all.indeterminate = checked > 0 && checked < boxes.length;
+            }
+        });
+        const t = document.getElementById('colCountTotal');
+        if (t) t.textContent = total + ' kolom dipilih';
+    }
+
     function toggleAll(state) {
-        document.querySelectorAll('input[name="columns[]"]').forEach(cb => cb.checked = state);
+        colBoxes().forEach(cb => cb.checked = state);
+        refreshColCounts();
+    }
+
+    function toggleGroup(btn) {
+        btn.closest('.col-group').classList.toggle('collapsed');
+    }
+
+    function toggleGroupAll(cb) {
+        colBoxes(cb.closest('.col-group')).forEach(x => x.checked = cb.checked);
+        refreshColCounts();
+    }
+
+    function filterColumns(q) {
+        q = q.trim().toLowerCase();
+        let anyGroup = false;
+        document.querySelectorAll('.col-group').forEach(g => {
+            let visible = 0;
+            g.querySelectorAll('.col-check').forEach(lbl => {
+                const match = !q || lbl.textContent.toLowerCase().includes(q);
+                lbl.classList.toggle('hidden-search', !match);
+                if (match) visible++;
+            });
+            g.classList.toggle('hidden-search', visible === 0);
+            if (q) g.classList.remove('collapsed'); // buka grup saat mencari
+            if (visible > 0) anyGroup = true;
+        });
+        const none = document.getElementById('noColResult');
+        if (none) none.style.display = anyGroup ? 'none' : 'block';
     }
 
     function escapeHtml(s) {
@@ -344,6 +437,12 @@
             .forEach(nik => addEmp(nik, empByNik.get(nik)));
         renderChips(); syncEmp();
     })();
+
+    // Update penghitung tiap kali kolom dicentang manual, dan saat halaman siap.
+    exportForm.addEventListener('change', e => {
+        if (e.target.matches('input[name="columns[]"]')) refreshColCounts();
+    });
+    refreshColCounts();
 
     async function doPreview() {
         const btn = document.getElementById('previewBtn');

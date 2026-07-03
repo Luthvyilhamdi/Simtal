@@ -42,6 +42,7 @@ class LaporanController extends Controller
 
         $promosi = $pergerakan->where('tipe', 'promosi');
         $mutasi  = $pergerakan->where('tipe', 'mutasi');
+        $rotasi  = $pergerakan->where('tipe', 'rotasi');
         $demosi  = $pergerakan->where('tipe', 'demosi');
 
         // === ASSESSMENT REKOMENDASI ===
@@ -66,9 +67,10 @@ class LaporanController extends Controller
         $stats = [
             'karyawan_masuk'   => $karyawanMasuk->count(),
             'karyawan_keluar'  => $karyawanKeluar->count(),
-            'total_pergerakan' => $promosi->count() + $mutasi->count() + $demosi->count(),
+            'total_pergerakan' => $promosi->count() + $mutasi->count() + $rotasi->count() + $demosi->count(),
             'promosi'          => $promosi->count(),
             'mutasi'           => $mutasi->count(),
+            'rotasi'           => $rotasi->count(),
             'demosi'           => $demosi->count(),
             'assessment'       => $assessments->count(),
             'kompetensi'       => $kompetensi->count(),
@@ -85,7 +87,7 @@ class LaporanController extends Controller
         return view('laporan.bulanan', compact(
             'bulan', 'tahun', 'namaBulan', 'stats',
             'karyawanMasuk', 'karyawanKeluar',
-            'promosi', 'mutasi', 'demosi',
+            'promosi', 'mutasi', 'rotasi', 'demosi',
             'assessments', 'kompetensi',
             'akanPensiun', 'periodeList'
         ));

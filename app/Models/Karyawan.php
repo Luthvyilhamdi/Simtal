@@ -27,6 +27,9 @@ class Karyawan extends Model
         'tanggal_mulai_band'=> 'date',
     ];
 
+    /** Usia pensiun (tahun). */
+    public const USIA_PENSIUN = 56;
+
     // ===== RELASI =====
     public function jabatan()          { return $this->belongsTo(Jabatan::class); }
     public function direktorat()       { return $this->belongsTo(Direktorat::class); }
@@ -131,6 +134,50 @@ class Karyawan extends Model
     public function getMdgBandAttribute(): int
     {
         return (int) floor($this->mdg_band_bulan / 12);
+    }
+
+    // ===== PENSIUN =====
+    /** Perkiraan tanggal pensiun = tanggal lahir + USIA_PENSIUN tahun. */
+    public function getTanggalPensiunAttribute(): ?Carbon
+    {
+        return $this->tanggal_lahir ? $this->tanggal_lahir->copy()->addYears(self::USIA_PENSIUN) : null;
+    }
+
+    /**
+     * Sisa waktu menuju pensiun secara spesifik.
+     * @return array{tahun:int,bulan:int,total_bulan:int,lewat:bool}|null (null bila tgl lahir kosong)
+     */
+    public function getSisaPensiunAttribute(): ?array
+    {
+        if (!$this->tanggal_lahir) return null;
+
+        $now     = now()->startOfDay();
+        $pensiun = $this->tanggal_pensiun;
+
+        if ($pensiun->lessThanOrEqualTo($now)) {
+            return ['tahun' => 0, 'bulan' => 0, 'total_bulan' => 0, 'lewat' => true];
+        }
+
+        $diff = $now->diff($pensiun);
+        return [
+            'tahun'       => $diff->y,
+            'bulan'       => $diff->m,
+            'total_bulan' => $diff->y * 12 + $diff->m,
+            'lewat'       => false,
+        ];
+    }
+
+    /** Label ringkas sisa masa kerja, mis. "2 th 5 bln" / "< 1 bln" / "Sudah pensiun". */
+    public function getSisaPensiunLabelAttribute(): string
+    {
+        $s = $this->sisa_pensiun;
+        if (!$s) return '-';
+        if ($s['lewat']) return 'Sudah pensiun';
+
+        $parts = [];
+        if ($s['tahun'] > 0) $parts[] = $s['tahun'] . ' th';
+        if ($s['bulan'] > 0) $parts[] = $s['bulan'] . ' bln';
+        return $parts ? implode(' ', $parts) : '< 1 bln';
     }
 
     /**

@@ -117,6 +117,7 @@ $icoCalendar  = '<svg viewBox="0 0 24 24" stroke="#d97706"><rect x="3" y="4" wid
         ['label'=>'Total Pergerakan', 'val'=>$stats['total_pergerakan'],'color'=>'#185fa5','bg'=>'#dbeafe','icon'=>$icoTrend],
         ['label'=>'Promosi',          'val'=>$stats['promosi'],         'color'=>'#15803d','bg'=>'#dcfce7','icon'=>$icoArrowUp],
         ['label'=>'Mutasi',           'val'=>$stats['mutasi'],          'color'=>'#185fa5','bg'=>'#dbeafe','icon'=>$icoShuffle],
+        ['label'=>'Rotasi',           'val'=>$stats['rotasi'],          'color'=>'#0891b2','bg'=>'#ecfeff','icon'=>$icoShuffle],
         ['label'=>'Demosi',           'val'=>$stats['demosi'],          'color'=>'#dc2626','bg'=>'#fee2e2','icon'=>$icoArrowDown],
         ['label'=>'Assessment Rek.',  'val'=>$stats['assessment'],      'color'=>'#7c3aed','bg'=>'#f5f3ff','icon'=>$icoClipboard],
         ['label'=>'Assessment Komp.', 'val'=>$stats['kompetensi'],      'color'=>'#0891b2','bg'=>'#ecfeff','icon'=>$icoStar],
@@ -197,6 +198,7 @@ $icoCalendar  = '<svg viewBox="0 0 24 24" stroke="#d97706"><rect x="3" y="4" wid
             @foreach([
                 ['promosi', $promosi, '#dcfce7', '#15803d', $icoArrowUp,   'Promosi'],
                 ['mutasi',  $mutasi,  '#dbeafe', '#185fa5', $icoShuffle,   'Mutasi'],
+                ['rotasi',  $rotasi,  '#ecfeff', '#0891b2', $icoShuffle,   'Rotasi'],
                 ['demosi',  $demosi,  '#fee2e2', '#dc2626', $icoArrowDown, 'Demosi'],
             ] as [$tipe, $list, $bg, $color, $ico, $label])
             @if($list->count() > 0)

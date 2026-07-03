@@ -43,6 +43,7 @@
     .card-tipe { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px; }
     .tipe-promosi { background:#dcfce7;color:#15803d; }
     .tipe-mutasi { background:#dbeafe;color:#1d4ed8; }
+    .tipe-rotasi { background:#ecfeff;color:#0891b2; }
     .tipe-demosi { background:#fee2e2;color:#dc2626; }
     .tipe-onboarding { background:#fef3c7;color:#d97706; }
     .card-jabatan { font-size:15px;font-weight:700;color:#111827; }
@@ -141,7 +142,7 @@
                 <div>
                     <div>
                         <span class="card-tipe tipe-{{ $h->tipe }}">
-                            @if($h->tipe==='promosi') ↑ @elseif($h->tipe==='demosi') ↓ @elseif($h->tipe==='mutasi') ↔ @else ★ @endif
+                            @if($h->tipe==='promosi') ↑ @elseif($h->tipe==='demosi') ↓ @elseif($h->tipe==='mutasi') ↔ @elseif($h->tipe==='rotasi') ↻ @else ★ @endif
                             {{ ucfirst($h->tipe) }}
                         </span>
                         @if($h->is_current)

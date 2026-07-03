@@ -32,7 +32,7 @@
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
 
     /* Tipe Jabatan Cards */
-    .tipe-group { display:grid;grid-template-columns:repeat(4,1fr);gap:8px; }
+    .tipe-group { display:grid;grid-template-columns:repeat(5,1fr);gap:8px; }
     .tipe-card {
         display:flex;flex-direction:column;align-items:center;gap:6px;
         padding:12px 8px;border:1.5px solid #e5e7eb;border-radius:10px;
@@ -42,6 +42,7 @@
     .tipe-card:hover { border-color:#d1d5db;background:#f5f5f0; }
     .tipe-card.selected-promosi   { border-color:#16a34a;background:#f0fdf4; }
     .tipe-card.selected-mutasi    { border-color:#3b82f6;background:#eff6ff; }
+    .tipe-card.selected-rotasi    { border-color:#0891b2;background:#ecfeff; }
     .tipe-card.selected-demosi    { border-color:#ef4444;background:#fef2f2; }
     .tipe-card.selected-onboarding{ border-color:#f59e0b;background:#fffbeb; }
     .tipe-emoji { font-size:22px; }
@@ -106,8 +107,14 @@
                 <label class="tipe-card {{ $tipe=='mutasi' ? 'selected-mutasi' : '' }}" id="tipe-mutasi" onclick="selectTipe('mutasi')">
                     <input type="radio" name="tipe" value="mutasi" {{ $tipe=='mutasi' ? 'checked' : '' }}>
                     <span class="tipe-emoji">↔</span>
-                    <span class="tipe-name">Rotasi/Mutasi</span>
-                    <span class="tipe-desc">Pindah posisi</span>
+                    <span class="tipe-name">Mutasi</span>
+                    <span class="tipe-desc">Pindah unit</span>
+                </label>
+                <label class="tipe-card {{ $tipe=='rotasi' ? 'selected-rotasi' : '' }}" id="tipe-rotasi" onclick="selectTipe('rotasi')">
+                    <input type="radio" name="tipe" value="rotasi" {{ $tipe=='rotasi' ? 'checked' : '' }}>
+                    <span class="tipe-emoji">↻</span>
+                    <span class="tipe-name">Rotasi</span>
+                    <span class="tipe-desc">Rotasi jabatan</span>
                 </label>
                 <label class="tipe-card {{ $tipe=='demosi' ? 'selected-demosi' : '' }}" id="tipe-demosi" onclick="selectTipe('demosi')">
                     <input type="radio" name="tipe" value="demosi" {{ $tipe=='demosi' ? 'checked' : '' }}>
@@ -290,7 +297,7 @@
 
 @push('scripts')
 <script>
-    const tipes = ['promosi', 'mutasi', 'demosi', 'onboarding'];
+    const tipes = ['promosi', 'mutasi', 'rotasi', 'demosi', 'onboarding'];
     function selectTipe(val) {
         tipes.forEach(t => {
             const el = document.getElementById('tipe-' + t);

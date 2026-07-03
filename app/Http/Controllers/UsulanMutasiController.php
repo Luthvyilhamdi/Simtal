@@ -152,7 +152,7 @@ class UsulanMutasiController extends Controller
                 'kode_struktur_id' => $usulanMutasi->kode_struktur_tujuan_id,
                 'tanggal_mulai'    => $tmt,
                 'tanggal_selesai'  => null,
-                'tipe'             => 'mutasi',
+                'tipe'             => $usulanMutasi->jenis, // rotasi / mutasi mengikuti jenis usulan
                 'keterangan'       => $request->keterangan
                     ?: (ucfirst($usulanMutasi->jenis) . '. No. SK: ' . $request->no_sk),
                 'no_sk'            => $request->no_sk,

@@ -57,7 +57,7 @@ class HistoryJabatanController extends Controller
             'kode_struktur_id' => 'required',
             'tanggal_mulai'    => 'required|date',
             'tanggal_selesai'  => 'nullable|date|after:tanggal_mulai',
-            'tipe'             => 'required|in:mutasi,promosi,demosi,onboarding',
+            'tipe'             => 'required|in:mutasi,rotasi,promosi,demosi,onboarding',
             'keterangan'       => 'nullable|string',
             'no_sk'            => 'nullable|string',
             'tanggal_sk'       => 'nullable|date',

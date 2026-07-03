@@ -166,7 +166,7 @@
                 </div>
                 <div class="kolom-item">
                     <div class="kolom-name">tipe <span class="kolom-req">*wajib</span></div>
-                    <div class="kolom-desc">onboarding / promosi / mutasi / demosi</div>
+                    <div class="kolom-desc">onboarding / promosi / mutasi / rotasi / demosi</div>
                 </div>
                 <div class="kolom-item">
                     <div class="kolom-name">tanggal_mulai <span class="kolom-req">*wajib</span></div>

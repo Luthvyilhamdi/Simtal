@@ -166,7 +166,7 @@
             <div class="stat-label">Person Grade</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num red">{{ max(0, 56 - \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age) }}</div>
+            <div class="stat-num red" style="font-size:19px">{{ $karyawan->sisa_pensiun_label }}</div>
             <div class="stat-label">Sisa Masa Kerja</div>
         </div>
     </div>

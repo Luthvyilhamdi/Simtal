@@ -35,10 +35,12 @@ class DashboardController extends Controller
         $hjYear = HistoryJabatan::whereYear('tanggal_mulai', now()->year)->selectRaw("
             SUM(tipe = 'promosi') as promosi,
             SUM(tipe = 'mutasi') as mutasi,
+            SUM(tipe = 'rotasi') as rotasi,
             SUM(tipe = 'demosi') as demosi
         ")->first();
         $promosiThisYear = (int) $hjYear->promosi;
         $mutasiThisYear  = (int) $hjYear->mutasi;
+        $rotasiThisYear  = (int) $hjYear->rotasi;
         $demosiThisYear  = (int) $hjYear->demosi;
 
         // === ASSESSMENT REKOMENDASI === (4 count → 1 query grouped)
@@ -261,6 +263,7 @@ class DashboardController extends Controller
                 'bulan'   => $bulan->translatedFormat('M Y'),
                 'promosi' => (int) ($rows->firstWhere('tipe', 'promosi')?->c ?? 0),
                 'mutasi'  => (int) ($rows->firstWhere('tipe', 'mutasi')?->c ?? 0),
+                'rotasi'  => (int) ($rows->firstWhere('tipe', 'rotasi')?->c ?? 0),
                 'demosi'  => (int) ($rows->firstWhere('tipe', 'demosi')?->c ?? 0),
             ];
         }
@@ -326,6 +329,12 @@ class DashboardController extends Controller
             ->groupBy('karyawans.direktorat_id')
             ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
 
+        $rotasiDir = HistoryJabatan::join('karyawans', 'karyawans.id', '=', 'history_jabatans.karyawan_id')
+            ->where('history_jabatans.tipe', 'rotasi')
+            ->whereYear('history_jabatans.tanggal_mulai', $tahunIni)
+            ->groupBy('karyawans.direktorat_id')
+            ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
+
         $assessmentDir = HistoryAssessment::join('karyawans', 'karyawans.id', '=', 'history_assessments.karyawan_id')
             ->groupBy('karyawans.direktorat_id')
             ->selectRaw('karyawans.direktorat_id as did, COUNT(*) as c')->pluck('c', 'did');
@@ -349,6 +358,7 @@ class DashboardController extends Controller
             'aktif'      => $d->karyawan_aktif,
             'promosi'    => (int) ($promosiDir[$d->id]    ?? 0),
             'mutasi'     => (int) ($mutasiDir[$d->id]     ?? 0),
+            'rotasi'     => (int) ($rotasiDir[$d->id]     ?? 0),
             'assessment' => (int) ($assessmentDir[$d->id] ?? 0),
             'ready'      => (int) ($readyDir[$d->id]      ?? 0),
             'qualified'  => (int) ($qualifiedDir[$d->id]  ?? 0),
@@ -437,7 +447,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'totalKaryawan', 'karyawanAktif', 'karyawanTidakAktif', 'karyawanBaru',
-            'totalHistoryJabatan', 'promosiThisYear', 'mutasiThisYear', 'demosiThisYear',
+            'totalHistoryJabatan', 'promosiThisYear', 'mutasiThisYear', 'rotasiThisYear', 'demosiThisYear',
             'totalAssessment', 'assessmentReady', 'assessmentRWD', 'assessmentNR',
             'totalKompetensi', 'totalQualified', 'totalNotQualified', 'trenKompetensi',
             'pejabatAktif', 'pejabatSVP', 'pejabatVP', 'pejabatSPM', 'pejabatPM',

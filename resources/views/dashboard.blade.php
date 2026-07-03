@@ -165,6 +165,7 @@
     .tipe-badge { font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px; }
     .tipe-promosi    { background:#dcfce7;color:#15803d; }
     .tipe-mutasi     { background:#dbeafe;color:#1d4ed8; }
+    .tipe-rotasi     { background:#ecfeff;color:#0891b2; }
     .tipe-demosi     { background:#fee2e2;color:#dc2626; }
     .tipe-onboarding { background:#fef3c7;color:#d97706; }
     .view-all { font-size:11px;color:#16a34a;text-decoration:none;font-weight:600; }
@@ -331,9 +332,9 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
     <div class="kpi-card blue">
         <div class="kpi-left">
             <div class="kpi-label">Pergerakan Jabatan</div>
-            <div class="kpi-num">{{ $promosiThisYear + $mutasiThisYear + $demosiThisYear }}</div>
+            <div class="kpi-num">{{ $promosiThisYear + $mutasiThisYear + $rotasiThisYear + $demosiThisYear }}</div>
             <div class="kpi-sub">Tahun {{ now()->year }}</div>
-            <span class="kpi-badge" style="background:#dbeafe;color:#1d4ed8;">{{ $promosiThisYear }} promosi · {{ $mutasiThisYear }} mutasi</span>
+            <span class="kpi-badge" style="background:#dbeafe;color:#1d4ed8;">{{ $promosiThisYear }} promosi · {{ $mutasiThisYear }} mutasi · {{ $rotasiThisYear }} rotasi</span>
         </div>
         <div class="kpi-icon blue">{!! $icoTrendDash !!}</div>
     </div>
@@ -792,7 +793,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 <div class="chart-grid-3">
     <div class="chart-card">
         <div class="chart-card-title">Tren Pergerakan Jabatan</div>
-        <div class="chart-card-sub">12 bulan terakhir — promosi, mutasi & demosi</div>
+        <div class="chart-card-sub">12 bulan terakhir — promosi, mutasi, rotasi & demosi</div>
         <canvas id="trenChart" height="200"></canvas>
     </div>
     <div class="chart-card">
@@ -1002,6 +1003,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                     <th class="center">Proporsi</th>
                     <th class="center">Promosi {{ now()->year }}</th>
                     <th class="center">Mutasi {{ now()->year }}</th>
+                    <th class="center">Rotasi {{ now()->year }}</th>
                     <th class="center">Assessment</th>
                     <th class="center">Ready</th>
                     <th class="center">Ready Rate</th>
@@ -1028,6 +1030,10 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                     </td>
                     <td class="center" data-label="Mutasi {{ now()->year }}">
                         @if($r['mutasi'] > 0)<span style="background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['mutasi'] }}</span>
+                        @else<span style="color:#d1d5db;">—</span>@endif
+                    </td>
+                    <td class="center" data-label="Rotasi {{ now()->year }}">
+                        @if($r['rotasi'] > 0)<span style="background:#ecfeff;color:#0891b2;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;">{{ $r['rotasi'] }}</span>
                         @else<span style="color:#d1d5db;">—</span>@endif
                     </td>
                     <td class="center" data-label="Assessment">{{ $r['assessment'] ?: '—' }}</td>
@@ -1096,20 +1102,24 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
         <div class="list-card-body">
             @forelse($akanPensiun as $k)
             @php
-                $usia       = \Carbon\Carbon::parse($k->tanggal_lahir)->age;
-                $sisaTahun  = 56 - $usia;
-                $pensiunClass = $sisaTahun <= 1 ? 'pensiun-kritis' : ($sisaTahun <= 2 ? 'pensiun-warn' : 'pensiun-normal');
+                $usia   = \Carbon\Carbon::parse($k->tanggal_lahir)->age;
+                $sisa   = $k->sisa_pensiun ?? ['tahun' => 0, 'bulan' => 0, 'total_bulan' => 0];
+                $totBln = $sisa['total_bulan'];
+                $pensiunClass = $totBln <= 12 ? 'pensiun-kritis' : ($totBln <= 24 ? 'pensiun-warn' : 'pensiun-normal');
             @endphp
             <div class="list-item">
-                {{-- FIX: style color Blade diganti class statis --}}
-                <div style="font-size:16px;font-weight:800;min-width:32px;text-align:center;" class="{{ $pensiunClass }}">{{ $sisaTahun }}th</div>
+                {{-- Sisa masa kerja spesifik: tahun + bulan --}}
+                <div class="{{ $pensiunClass }}" style="min-width:46px;text-align:center;line-height:1.05">
+                    <div style="font-size:15px;font-weight:800">{{ $sisa['tahun'] }}<span style="font-size:9px;font-weight:700">th</span></div>
+                    <div style="font-size:11px;font-weight:700">{{ $sisa['bulan'] }}<span style="font-size:8px">bln</span></div>
+                </div>
                 <div class="list-avatar">
                     @if($k->foto)<img src="{{ Storage::url($k->foto) }}" alt="">
                     @else{{ initials($k->nama) }}@endif
                 </div>
                 <div>
                     <div class="list-name">{{ $k->nama }}</div>
-                    <div class="list-sub">{{ $k->jabatan_saat_ini ?? $k->jabatan->nama_jabatan ?? '-' }} · {{ $usia }} thn</div>
+                    <div class="list-sub">{{ $k->jabatan_saat_ini ?? $k->jabatan->nama_jabatan ?? '-' }} · {{ $usia }} thn · pensiun {{ $k->tanggal_pensiun?->translatedFormat('M Y') }}</div>
                 </div>
                 <div class="list-right">
                     <a href="{{ route('karyawan.show', $k) }}" style="font-size:11px;color:#16a34a;text-decoration:none;font-weight:600;">Detail →</a>
@@ -1257,6 +1267,7 @@ new Chart(document.getElementById('trenChart'), {
         datasets: [
             { label:'Promosi', data:trenData.map(function(d){return d.promosi;}), backgroundColor:'#16a34a', borderRadius:3 },
             { label:'Mutasi',  data:trenData.map(function(d){return d.mutasi;}),  backgroundColor:'#2563eb', borderRadius:3 },
+            { label:'Rotasi',  data:trenData.map(function(d){return d.rotasi;}),  backgroundColor:'#0891b2', borderRadius:3 },
             { label:'Demosi',  data:trenData.map(function(d){return d.demosi;}),  backgroundColor:'#ef4444', borderRadius:3 },
         ]
     },

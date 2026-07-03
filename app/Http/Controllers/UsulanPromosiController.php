@@ -390,7 +390,7 @@ class UsulanPromosiController extends Controller
             ->limit(10)
             ->get(['id', 'nik', 'nama', 'jabatan_saat_ini', 'job_grade_id', 'person_grade_id',
                    'direktorat_id', 'kompartemen_id', 'departemen_id',
-                   'struktural_fungsional', 'tanggal_mulai_jg', 'tanggal_mulai_pg']);
+                   'struktural_fungsional', 'tanggal_mulai_jg', 'tanggal_mulai_pg', 'tanggal_mulai_band']);
 
         return response()->json($karyawan->map(fn($k) => [
             'id'                    => $k->id,

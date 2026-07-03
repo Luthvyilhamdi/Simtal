@@ -54,6 +54,8 @@ class ExportBuilderController extends Controller
             'tempat_lahir'  => ['Data Diri', 'Tempat Lahir', null, fn ($k) => $k->tempat_lahir ?: '-'],
             'tanggal_lahir' => ['Data Diri', 'Tanggal Lahir', null, fn ($k) => $k->tanggal_lahir?->format('d/m/Y') ?? '-'],
             'usia'          => ['Data Diri', 'Usia', null, fn ($k) => $k->tanggal_lahir ? $k->tanggal_lahir->age : '-'],
+            'perkiraan_pensiun' => ['Data Diri', 'Perkiraan Pensiun', null, fn ($k) => $k->tanggal_pensiun?->format('d/m/Y') ?? '-'],
+            'sisa_masa_kerja'   => ['Data Diri', 'Sisa Masa Kerja', null, fn ($k) => $k->tanggal_lahir ? $k->sisa_pensiun_label : '-'],
             'status'        => ['Data Diri', 'Status', null, fn ($k) => ucfirst($k->status ?? '-')],
             'no_hp'         => ['Data Diri', 'No. HP', null, fn ($k) => $k->no_hp ?: '-'],
             'email'         => ['Data Diri', 'Email', null, fn ($k) => $k->email ?: '-'],
@@ -69,6 +71,7 @@ class ExportBuilderController extends Controller
             'kompartemen'           => ['Jabatan & Unit', 'Kompartemen', 'kompartemen', fn ($k) => $k->kompartemen->nama_kompartemen ?? '-'],
             'departemen'            => ['Jabatan & Unit', 'Departemen', 'departemen', fn ($k) => $k->departemen->nama_departemen ?? '-'],
             'struktural_fungsional' => ['Jabatan & Unit', 'Struktural/Fungsional', null, fn ($k) => $k->struktural_fungsional ?: '-'],
+            'tier_pejabat'          => ['Jabatan & Unit', 'Tier Pejabat (SVP/VP/SPM/PM)', 'pejabatAktif', fn ($k) => $k->pejabatAktif->jabatan ?? '-'],
 
             // ── Grade ──
             'job_grade'        => ['Grade', 'Job Grade', 'jobGrade', fn ($k) => $k->jobGrade->job_grade ?? '-'],
@@ -77,11 +80,16 @@ class ExportBuilderController extends Controller
             'kode_struktur'    => ['Grade', 'Kode Struktur', 'kodeStruktur', fn ($k) => $k->kodeStruktur->kode_struktur ?? '-'],
             'tanggal_masuk'    => ['Grade', 'Tanggal Masuk', null, fn ($k) => $k->tanggal_masuk?->format('d/m/Y') ?? '-'],
             'masa_kerja'       => ['Grade', 'Masa Kerja (thn)', null, fn ($k) => $k->tanggal_masuk ? (int) $k->tanggal_masuk->diffInYears(now()) : '-'],
-            'tanggal_mulai_pg' => ['Grade', 'Tgl Mulai PG', null, fn ($k) => $k->tanggal_mulai_pg?->format('d/m/Y') ?? '-'],
-            'tanggal_mulai_jg' => ['Grade', 'Tgl Mulai JG', null, fn ($k) => $k->tanggal_mulai_jg?->format('d/m/Y') ?? '-'],
+            // MDG thn/bln berpasangan (offset genap → sejajar 2 kolom di UI)
             'mdg_pg'           => ['Grade', 'MDG PG (thn)', null, fn ($k) => $k->mdg_pg ?? '-'],
+            'mdg_pg_bulan'     => ['Grade', 'MDG PG (bln)', null, fn ($k) => $k->mdg_pg_bulan],
             'mdg_jg'           => ['Grade', 'MDG JG (thn)', null, fn ($k) => $k->mdg_jg ?? '-'],
+            'mdg_jg_bulan'     => ['Grade', 'MDG JG (bln)', null, fn ($k) => $k->mdg_jg_bulan],
             'mdg_band'         => ['Grade', 'MDG Band (thn)', null, fn ($k) => $k->mdg_band],
+            'mdg_band_bulan'   => ['Grade', 'MDG Band (bln)', null, fn ($k) => $k->mdg_band_bulan],
+            'tanggal_mulai_pg'   => ['Grade', 'Tgl Mulai PG', null, fn ($k) => $k->tanggal_mulai_pg?->format('d/m/Y') ?? '-'],
+            'tanggal_mulai_jg'   => ['Grade', 'Tgl Mulai JG', null, fn ($k) => $k->tanggal_mulai_jg?->format('d/m/Y') ?? '-'],
+            'tanggal_mulai_band' => ['Grade', 'Tgl Mulai Band', null, fn ($k) => $k->tanggal_mulai_band?->format('d/m/Y') ?? '-'],
             'status_kenaikan'  => ['Grade', 'Status Kenaikan', 'jobGrade,personGrade', fn ($k) => $k->status_kenaikan['label'] ?? '-'],
             'eligible_naik'    => ['Grade', 'Eligible Naik', 'jobGrade,personGrade', fn ($k) => ($k->status_kenaikan['eligible'] ?? false) ? 'Ya' : 'Belum'],
 
@@ -125,7 +133,8 @@ class ExportBuilderController extends Controller
             'riwayat_tgl_terakhir'     => ['Riwayat Jabatan', 'Tgl Perubahan Terakhir', 'historyJabatan',
                 fn ($k) => optional($k->historyJabatan->sortByDesc('tanggal_mulai')->first())->tanggal_mulai?->format('d/m/Y') ?? '-'],
             'jumlah_promosi' => ['Riwayat Jabatan', 'Jumlah Promosi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'promosi')->count()],
-            'jumlah_mutasi'  => ['Riwayat Jabatan', 'Jumlah Mutasi', 'historyJabatan', fn ($k) => $k->historyJabatan->whereIn('tipe', ['mutasi', 'rotasi'])->count()],
+            'jumlah_mutasi'  => ['Riwayat Jabatan', 'Jumlah Mutasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'mutasi')->count()],
+            'jumlah_rotasi'  => ['Riwayat Jabatan', 'Jumlah Rotasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'rotasi')->count()],
 
             // ── PGS / PJS (penugasan aktif) ──
             'pgs_pjs_aktif'   => ['PGS / PJS', 'Status PGS/PJS', 'pgsPjs',

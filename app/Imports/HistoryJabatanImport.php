@@ -71,7 +71,7 @@ class HistoryJabatanImport implements
 
         // Parse tipe
         $tipe = strtolower(trim($row['tipe'] ?? 'onboarding'));
-        if (!in_array($tipe, ['promosi', 'mutasi', 'demosi', 'onboarding'])) {
+        if (!in_array($tipe, ['promosi', 'mutasi', 'rotasi', 'demosi', 'onboarding'])) {
             $tipe = 'onboarding';
         }
 
