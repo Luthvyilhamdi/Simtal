@@ -16,7 +16,7 @@ class Karyawan extends Model
         'direktorat_id', 'kompartemen_id', 'departemen_id',
         'job_grade_id', 'person_grade_id', 'kode_struktur_id',
         'status', 'foto',
-        'tanggal_mulai_pg', 'tanggal_mulai_jg',
+        'tanggal_mulai_pg', 'tanggal_mulai_jg', 'tanggal_mulai_band',
     ];
 
     protected $casts = [

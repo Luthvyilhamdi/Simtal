@@ -442,6 +442,13 @@
                 <span class="form-hint">Tanggal mulai di Person Grade saat ini</span>
                 @error('tanggal_mulai_pg')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
+
+            <div class="form-group">
+                <label class="form-label">TMT Band</label>
+                <input type="date" name="tanggal_mulai_band" value="{{ old('tanggal_mulai_band') }}" class="form-input" />
+                <span class="form-hint">Tanggal mulai di Band saat ini (untuk MDG Band). Bila kosong, memakai TMT Job Grade.</span>
+                @error('tanggal_mulai_band')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
         </div>
     </div>
 

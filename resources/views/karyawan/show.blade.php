@@ -271,6 +271,7 @@
         <div class="detail-row"><span class="detail-label">Person Grade</span><span class="detail-value"><span class="badge badge-blue">PG {{ $karyawan->personGrade->person_grade ?? '-' }}</span></span></div>
         <div class="detail-row"><span class="detail-label">TMT Job Grade</span><span class="detail-value">{{ $karyawan->tanggal_mulai_jg ? $karyawan->tanggal_mulai_jg->format('d M Y') : '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">TMT Person Grade</span><span class="detail-value">{{ $karyawan->tanggal_mulai_pg ? $karyawan->tanggal_mulai_pg->format('d M Y') : '-' }}</span></div>
+        <div class="detail-row"><span class="detail-label">TMT Band</span><span class="detail-value">{{ $karyawan->tanggal_mulai_band ? $karyawan->tanggal_mulai_band->format('d M Y') : '-' }}</span></div>
     </div>
 
 </div>

@@ -166,6 +166,84 @@ class DashboardController extends Controller
         $soPerKompartemen = $soStatusQuery('kompartemen')->get();
         $soPerDepartemen  = $soStatusQuery('dept')->get();
 
+        // Total pengisian (headcount) yang terisi per unit — SUM(pengisian) vs SUM(mc_tko).
+        // Beda dari status di atas (yang menghitung JUMLAH POSISI terisi/kosong).
+        $soTerisiQuery = fn ($kolom) => StrukturOrganisasi::where('bulan', $soBulan)
+            ->where('tahun', $soTahun)
+            ->where('posisi', '!=', '-')
+            ->whereNotNull($kolom)
+            ->where($kolom, '!=', '')
+            ->selectRaw("
+                {$kolom} as nama,
+                SUM(pengisian) as total_terisi,
+                SUM(mc_tko) as total_mc
+            ")
+            ->groupBy($kolom)
+            ->orderByDesc('total_terisi');
+
+        $soTerisiDirektorat  = $soTerisiQuery('direktorat')->get();
+        $soTerisiKompartemen = $soTerisiQuery('kompartemen')->get();
+        $soTerisiDepartemen  = $soTerisiQuery('dept')->get();
+
+        // Data drill-down untuk popup: tiap unit induk (parent) diuraikan ke unit anak
+        // yang ada namanya — Direktorat→Kompartemen, Kompartemen→Dept (Dept tidak diuraikan).
+        // Mengikuti hierarki halaman Struktur Organisasi (kolom direktorat/kompartemen/dept).
+        // mode 'status' = hitung posisi (terisi/tersedia/belum); 'terisi' = jumlah headcount.
+        $soHierarki = function (string $parentCol, string $childCol, string $mode) use ($soBulan, $soTahun) {
+            $q = StrukturOrganisasi::where('bulan', $soBulan)
+                ->where('tahun', $soTahun)
+                ->where('posisi', '!=', '-')
+                ->whereNotNull($parentCol)->where($parentCol, '!=', '');
+            if ($mode === 'status') {
+                $q->where('mc_tko', '>', 0);
+                $sel = 'SUM(CASE WHEN pengisian > 0 THEN 1 ELSE 0 END) as terisi,
+                        SUM(CASE WHEN pengisian = 0 THEN 1 ELSE 0 END) as belum,
+                        COUNT(*) as tersedia';
+            } else {
+                $sel = 'SUM(pengisian) as total_terisi, SUM(mc_tko) as total_mc';
+            }
+
+            $rows = $q->selectRaw("{$parentCol} as parent, {$childCol} as child, {$sel}")
+                ->groupBy($parentCol, $childCol)->get();
+
+            $keys = $mode === 'status' ? ['terisi', 'belum', 'tersedia'] : ['total_terisi', 'total_mc'];
+            $tree = [];
+            foreach ($rows as $r) {
+                $p = $r->parent;
+                if (! isset($tree[$p])) {
+                    $tree[$p] = ['nama' => $p, 'children' => []];
+                    foreach ($keys as $k) $tree[$p][$k] = 0;
+                }
+                // Total induk mencakup semua posisi (agar cocok dengan angka di kartu).
+                foreach ($keys as $k) $tree[$p][$k] += (int) $r->{$k};
+
+                // Hanya tampilkan anak yang punya nama unit (lewati posisi tanpa unit anak).
+                if ($r->child !== null && $r->child !== '') {
+                    $child = ['nama' => $r->child];
+                    foreach ($keys as $k) $child[$k] = (int) $r->{$k};
+                    $tree[$p]['children'][] = $child;
+                }
+            }
+
+            // Urutkan: mode status → belum terbanyak dulu; mode terisi → terisi terbanyak dulu.
+            $sortKey = $mode === 'status' ? 'belum' : 'total_terisi';
+            foreach ($tree as &$p) {
+                usort($p['children'], fn ($a, $b) => $b[$sortKey] <=> $a[$sortKey]);
+            }
+            unset($p);
+            usort($tree, fn ($a, $b) => $b[$sortKey] <=> $a[$sortKey]);
+
+            return $tree;
+        };
+
+        // Hanya Direktorat & Kompartemen yang punya drill-down; Departemen tampil flat.
+        $soDrill = [
+            'status-dir'  => $soHierarki('direktorat', 'kompartemen', 'status'),
+            'status-komp' => $soHierarki('kompartemen', 'dept', 'status'),
+            'terisi-dir'  => $soHierarki('direktorat', 'kompartemen', 'terisi'),
+            'terisi-komp' => $soHierarki('kompartemen', 'dept', 'terisi'),
+        ];
+
         // === CHART: Tren Jabatan === (12 bln x 3 = 36 query → 1 query grouped)
         $awalTren = now()->subMonths(11)->startOfMonth();
         $trenIdx  = HistoryJabatan::whereBetween('tanggal_mulai', [$awalTren, now()->endOfMonth()])
@@ -206,12 +284,6 @@ class DashboardController extends Controller
             ];
         }
 
-        // === CHART: Distribusi Direktorat ===
-        $distribusiDirektorat = Karyawan::where('status', 'aktif')
-            ->select('direktorat_id', DB::raw('count(*) as total'))
-            ->with('direktorat')->groupBy('direktorat_id')->orderBy('total', 'desc')
-            ->get()->map(fn($k) => ['nama' => $k->direktorat->nama_direktorat ?? 'Belum Ditentukan', 'total' => $k->total]);
-
         // === CHART: Assessment Pie ===
         $assessmentChart = [
             ['label' => 'Ready',                  'value' => $assessmentReady, 'color' => '#16a34a'],
@@ -219,11 +291,23 @@ class DashboardController extends Controller
             ['label' => 'Not Ready',               'value' => $assessmentNR,   'color' => '#ef4444'],
         ];
 
-        // === CHART: Job Grade ===
+        // === CHART: Job Grade === (urut grade tertinggi → terendah, tampil semua)
         $distribusiJobGrade = Karyawan::where('status', 'aktif')
             ->select('job_grade_id', DB::raw('count(*) as total'))
-            ->with('jobGrade')->groupBy('job_grade_id')->orderBy('total', 'desc')
-            ->get()->map(fn($k) => ['nama' => 'JG ' . ($k->jobGrade->job_grade ?? '-'), 'total' => $k->total]);
+            ->with('jobGrade')->groupBy('job_grade_id')->get()
+            ->map(function ($k) {
+                $g = (int) ($k->jobGrade->job_grade ?? 0);
+                return ['grade' => $g, 'nama' => $g > 0 ? 'JG ' . $k->jobGrade->job_grade : 'Tanpa JG', 'total' => $k->total];
+            })->sortByDesc('grade')->values();
+
+        // === CHART: Person Grade === (urut grade tertinggi → terendah, tampil semua)
+        $distribusiPersonGrade = Karyawan::where('status', 'aktif')
+            ->select('person_grade_id', DB::raw('count(*) as total'))
+            ->with('personGrade')->groupBy('person_grade_id')->get()
+            ->map(function ($k) {
+                $g = (int) ($k->personGrade->person_grade ?? 0);
+                return ['grade' => $g, 'nama' => $g > 0 ? 'PG ' . $k->personGrade->person_grade : 'Tanpa PG', 'total' => $k->total];
+            })->sortByDesc('grade')->values();
 
         // === TABEL: Ringkasan Direktorat ===
         // Sebelumnya N+1 (1 + N×6 query). Kini pra-hitung agregat per direktorat
@@ -358,12 +442,14 @@ class DashboardController extends Controller
             'totalKompetensi', 'totalQualified', 'totalNotQualified', 'trenKompetensi',
             'pejabatAktif', 'pejabatSVP', 'pejabatVP', 'pejabatSPM', 'pejabatPM',
             'pgsAktif', 'pjsAktif', 'talentPool',
-            'trenBulan', 'distribusiDirektorat', 'assessmentChart', 'distribusiJobGrade',
+            'trenBulan', 'assessmentChart', 'distribusiJobGrade', 'distribusiPersonGrade',
             'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
             'karyawanTerbaru', 'genderChart', 'usiaChart',
             'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
             'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc',
             'soPerDirektorat', 'soPerKompartemen', 'soPerDepartemen',
+            'soTerisiDirektorat', 'soTerisiKompartemen', 'soTerisiDepartemen',
+            'soDrill',
             'reminderEligibleNow', 'reminderSoon',
             'ulangTahunBulanIni', 'distribusiBand', 'distribusiPendidikan'
         ));

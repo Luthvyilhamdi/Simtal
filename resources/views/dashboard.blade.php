@@ -84,6 +84,37 @@
     .bar-fill-neg  { background:#ef4444; }
     .bar-fill-pos  { background:#16a34a; }
     .bar-fill-zero { background:#6b7280; }
+    .bar-val-wide  { min-width:76px;white-space:nowrap; }
+
+    /* Kartu bisa diklik → buka detail popup */
+    .chart-card.clickable { cursor:pointer;transition:box-shadow .15s,transform .15s; }
+    .chart-card.clickable:hover { box-shadow:0 8px 24px rgba(16,24,40,.10);transform:translateY(-1px); }
+    .cc-head { display:flex;justify-content:space-between;align-items:flex-start;gap:8px; }
+    .cc-expand { width:15px;height:15px;color:#cbd5e1;flex-shrink:0;stroke-width:2;fill:none;stroke:currentColor; }
+    .chart-card.clickable:hover .cc-expand { color:#15803d; }
+
+    /* Popup detail */
+    .dash-modal { position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px; }
+    .dash-modal.open { display:flex; }
+    .dash-modal-backdrop { position:absolute;inset:0;background:rgba(17,24,39,.5); }
+    .dash-modal-card { position:relative;background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.28);width:100%;max-width:640px;max-height:82vh;display:flex;flex-direction:column;overflow:hidden; }
+    .dash-modal-head { padding:16px 20px;border-bottom:1px solid #eef0f2;display:flex;align-items:flex-start;justify-content:space-between;gap:12px; }
+    .dash-modal-title { font-size:15px;font-weight:700;color:#111827; }
+    .dash-modal-sub { font-size:12px;color:#6b7280;margin-top:2px; }
+    .dash-modal-close { border:none;background:#f3f4f6;border-radius:8px;width:30px;height:30px;font-size:18px;line-height:1;cursor:pointer;color:#6b7280;flex-shrink:0; }
+    .dash-modal-close:hover { background:#e5e7eb;color:#111827; }
+    .dash-modal-body { overflow-y:auto;padding:6px 20px 18px; }
+    .dash-tbl { width:100%;border-collapse:collapse;font-size:12.5px; }
+    .dash-tbl th, .dash-tbl td { padding:8px 10px;text-align:left;border-bottom:1px solid #f1f3f5; }
+    .dash-tbl th { position:sticky;top:0;background:#fff;color:#6b7280;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em; }
+    .dash-tbl td.num, .dash-tbl th.num { text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap; }
+    .dash-tbl tbody tr:hover td { background:#f9fafb; }
+    .dash-pill { display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700; }
+    .dash-pill-pos { background:#dcfce7;color:#15803d; }
+    .dash-pill-neg { background:#fee2e2;color:#dc2626; }
+    .dash-tbl tr.row-parent td { font-weight:700;color:#111827;background:#f6f8fa;border-top:1px solid #e5e7eb; }
+    .dash-tbl td.child { padding-left:22px;color:#4b5563; }
+    .dash-tbl td.child::before { content:'└';color:#cbd5e1;margin-right:6px; }
 
     .pie-legend { display:flex;flex-direction:column;gap:8px;flex:1; }
     .pie-item { display:flex;align-items:center;gap:7px; }
@@ -438,13 +469,18 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 {{-- SO STATUS PENGISIAN: DIREKTORAT, KOMPARTEMEN, DEPARTEMEN --}}
 <div class="so-status-grid" style="margin-bottom:18px">
     @foreach([
-        ['label' => 'Status Pengisian per Direktorat',  'data' => $soPerDirektorat,  'sub' => 'Posisi MC/TKO tersedia: belum terisi vs total tersedia', 'strip' => true],
-        ['label' => 'Status Pengisian per Kompartemen', 'data' => $soPerKompartemen, 'sub' => 'Diurutkan dari yang belum terisi terbanyak', 'strip' => false],
-        ['label' => 'Status Pengisian per Departemen',  'data' => $soPerDepartemen,  'sub' => 'Diurutkan dari yang belum terisi terbanyak', 'strip' => false],
+        ['key' => 'status-dir',  'label' => 'Status Pengisian per Direktorat',  'data' => $soPerDirektorat,  'sub' => 'Posisi MC/TKO tersedia: belum terisi vs total tersedia', 'strip' => true],
+        ['key' => 'status-komp', 'label' => 'Status Pengisian per Kompartemen', 'data' => $soPerKompartemen, 'sub' => 'Diurutkan dari yang belum terisi terbanyak', 'strip' => false],
+        ['key' => 'status-dept', 'label' => 'Status Pengisian per Departemen',  'data' => $soPerDepartemen,  'sub' => 'Diurutkan dari yang belum terisi terbanyak', 'strip' => false],
     ] as $grp)
-    <div class="chart-card">
-        <div class="chart-card-title">{{ $grp['label'] }}</div>
-        <div class="chart-card-sub">{{ $grp['sub'] }}</div>
+    <div class="chart-card clickable" onclick="openDashModal('{{ $grp['key'] }}')">
+        <div class="cc-head">
+            <div>
+                <div class="chart-card-title">{{ $grp['label'] }}</div>
+                <div class="chart-card-sub">{{ $grp['sub'] }}</div>
+            </div>
+            <svg class="cc-expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </div>
         @php $maxKosongGrp = $grp['data']->max('belum_terisi') ?: 1; @endphp
         <div class="bar-chart" style="margin-top:6px;max-height:290px;overflow-y:auto;padding-right:4px">
             @forelse($grp['data'] as $d)
@@ -452,6 +488,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 $kosong    = (int) $d->belum_terisi;
                 $barW      = $kosong > 0 ? min(100, round($kosong / $maxKosongGrp * 100)) : 0;
                 $devClass  = $kosong > 0 ? 'neg' : 'pos';
+                $pctIsi    = $d->tersedia > 0 ? round($d->terisi / $d->tersedia * 100) : 0;
                 $shortName = $grp['strip']
                     ? Str::limit(str_replace(['Direktorat ', 'Directorat '], '', $d->nama), 18)
                     : Str::limit($d->nama, 18);
@@ -461,15 +498,214 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 <div class="bar-track">
                     <div class="bar-fill bar-fill-{{ $devClass }}" data-pct="{{ $barW }}">{{ $kosong }}</div>
                 </div>
-                <div class="bar-val" style="color:#9ca3af">{{ $d->terisi }}/{{ $d->tersedia }}</div>
+                <div class="bar-val bar-val-wide" style="color:#9ca3af">{{ $d->terisi }}/{{ $d->tersedia }} · {{ $pctIsi }}%</div>
             </div>
             @empty
             <div style="font-size:12px;color:#9ca3af;text-align:center;padding:12px 0">Tidak ada data</div>
             @endforelse
         </div>
     </div>
+
+    {{-- Popup detail status pengisian --}}
+    <div class="dash-modal" id="dashmodal-{{ $grp['key'] }}">
+        <div class="dash-modal-backdrop" onclick="closeDashModal(this)"></div>
+        <div class="dash-modal-card">
+            <div class="dash-modal-head">
+                <div>
+                    <div class="dash-modal-title">{{ $grp['label'] }}</div>
+                    <div class="dash-modal-sub">Periode {{ \App\Http\Controllers\ExportBuilderController::BULAN[$soBulan] ?? $soBulan }} {{ $soTahun }} · posisi dengan MC/TKO tersedia</div>
+                </div>
+                <button type="button" class="dash-modal-close" onclick="closeDashModal(this)">&times;</button>
+            </div>
+            <div class="dash-modal-body">
+                <table class="dash-tbl">
+                    <thead>
+                        <tr>
+                            <th>Unit</th>
+                            <th class="num">Terisi</th>
+                            <th class="num">Tersedia</th>
+                            <th class="num">Belum</th>
+                            <th class="num">% Terisi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(isset($soDrill[$grp['key']]))
+                            @forelse($soDrill[$grp['key']] as $p)
+                            @php $pPct = $p['tersedia'] > 0 ? round($p['terisi'] / $p['tersedia'] * 100) : 0; @endphp
+                            <tr class="row-parent">
+                                <td>{{ $p['nama'] }}</td>
+                                <td class="num">{{ $p['terisi'] }}</td>
+                                <td class="num">{{ $p['tersedia'] }}</td>
+                                <td class="num">{{ $p['belum'] }}</td>
+                                <td class="num"><span class="dash-pill {{ $p['belum'] > 0 ? 'dash-pill-neg' : 'dash-pill-pos' }}">{{ $pPct }}%</span></td>
+                            </tr>
+                            @foreach($p['children'] as $c)
+                            @php $cPct = $c['tersedia'] > 0 ? round($c['terisi'] / $c['tersedia'] * 100) : 0; @endphp
+                            <tr>
+                                <td class="child">{{ $c['nama'] }}</td>
+                                <td class="num">{{ $c['terisi'] }}</td>
+                                <td class="num">{{ $c['tersedia'] }}</td>
+                                <td class="num">{{ $c['belum'] }}</td>
+                                <td class="num"><span class="dash-pill {{ $c['belum'] > 0 ? 'dash-pill-neg' : 'dash-pill-pos' }}">{{ $cPct }}%</span></td>
+                            </tr>
+                            @endforeach
+                            @empty
+                            <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:14px">Tidak ada data</td></tr>
+                            @endforelse
+                        @else
+                            @forelse($grp['data'] as $d)
+                            @php $pctIsi = $d->tersedia > 0 ? round($d->terisi / $d->tersedia * 100) : 0; @endphp
+                            <tr>
+                                <td>{{ $d->nama }}</td>
+                                <td class="num">{{ $d->terisi }}</td>
+                                <td class="num">{{ $d->tersedia }}</td>
+                                <td class="num">{{ $d->belum_terisi }}</td>
+                                <td class="num"><span class="dash-pill {{ $d->belum_terisi > 0 ? 'dash-pill-neg' : 'dash-pill-pos' }}">{{ $pctIsi }}%</span></td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:14px">Tidak ada data</td></tr>
+                            @endforelse
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     @endforeach
 </div>
+
+{{-- SO TOTAL PENGISIAN (headcount) PER DIREKTORAT, KOMPARTEMEN, DEPARTEMEN --}}
+<div class="so-status-grid" style="margin-bottom:18px">
+    @foreach([
+        ['key' => 'terisi-dir',  'label' => 'Total Terisi per Direktorat',  'data' => $soTerisiDirektorat,  'strip' => true],
+        ['key' => 'terisi-komp', 'label' => 'Total Terisi per Kompartemen', 'data' => $soTerisiKompartemen, 'strip' => false],
+        ['key' => 'terisi-dept', 'label' => 'Total Terisi per Departemen',  'data' => $soTerisiDepartemen,  'strip' => false],
+    ] as $grp)
+    <div class="chart-card clickable" onclick="openDashModal('{{ $grp['key'] }}')">
+        <div class="cc-head">
+            <div>
+                <div class="chart-card-title">{{ $grp['label'] }}</div>
+                <div class="chart-card-sub">Jumlah pengisian (headcount) yang terisi vs target MC/TKO</div>
+            </div>
+            <svg class="cc-expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </div>
+        @php $maxTerisiGrp = $grp['data']->max('total_terisi') ?: 1; @endphp
+        <div class="bar-chart" style="margin-top:6px;max-height:290px;overflow-y:auto;padding-right:4px">
+            @forelse($grp['data'] as $d)
+            @php
+                $terisi    = (int) $d->total_terisi;
+                $mc        = (int) $d->total_mc;
+                $barW      = $terisi > 0 ? min(100, round($terisi / $maxTerisiGrp * 100)) : 0;
+                $pctMc     = $mc > 0 ? round($terisi / $mc * 100) : null;
+                $shortName = $grp['strip']
+                    ? Str::limit(str_replace(['Direktorat ', 'Directorat '], '', $d->nama), 18)
+                    : Str::limit($d->nama, 18);
+            @endphp
+            <div class="bar-row">
+                <div class="bar-label" title="{{ $d->nama }}">{{ $shortName }}</div>
+                <div class="bar-track">
+                    <div class="bar-fill bar-fill-brand" data-pct="{{ $barW }}">{{ $terisi }}</div>
+                </div>
+                <div class="bar-val bar-val-wide" style="color:#9ca3af">{{ $terisi }}/{{ $mc }} · {{ $pctMc !== null ? $pctMc.'%' : '–' }}</div>
+            </div>
+            @empty
+            <div style="font-size:12px;color:#9ca3af;text-align:center;padding:12px 0">Tidak ada data</div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Popup detail total terisi --}}
+    <div class="dash-modal" id="dashmodal-{{ $grp['key'] }}">
+        <div class="dash-modal-backdrop" onclick="closeDashModal(this)"></div>
+        <div class="dash-modal-card">
+            <div class="dash-modal-head">
+                <div>
+                    <div class="dash-modal-title">{{ $grp['label'] }}</div>
+                    <div class="dash-modal-sub">Periode {{ \App\Http\Controllers\ExportBuilderController::BULAN[$soBulan] ?? $soBulan }} {{ $soTahun }} · headcount terisi vs target MC/TKO</div>
+                </div>
+                <button type="button" class="dash-modal-close" onclick="closeDashModal(this)">&times;</button>
+            </div>
+            <div class="dash-modal-body">
+                <table class="dash-tbl">
+                    <thead>
+                        <tr>
+                            <th>Unit</th>
+                            <th class="num">Terisi</th>
+                            <th class="num">Target MC</th>
+                            <th class="num">% Target</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(isset($soDrill[$grp['key']]))
+                            @forelse($soDrill[$grp['key']] as $p)
+                            @php $pPct = $p['total_mc'] > 0 ? round($p['total_terisi'] / $p['total_mc'] * 100) : null; @endphp
+                            <tr class="row-parent">
+                                <td>{{ $p['nama'] }}</td>
+                                <td class="num">{{ $p['total_terisi'] }}</td>
+                                <td class="num">{{ $p['total_mc'] }}</td>
+                                <td class="num">
+                                    @if($pPct === null)<span style="color:#9ca3af">–</span>
+                                    @else<span class="dash-pill {{ $pPct >= 100 ? 'dash-pill-pos' : 'dash-pill-neg' }}">{{ $pPct }}%</span>@endif
+                                </td>
+                            </tr>
+                            @foreach($p['children'] as $c)
+                            @php $cPct = $c['total_mc'] > 0 ? round($c['total_terisi'] / $c['total_mc'] * 100) : null; @endphp
+                            <tr>
+                                <td class="child">{{ $c['nama'] }}</td>
+                                <td class="num">{{ $c['total_terisi'] }}</td>
+                                <td class="num">{{ $c['total_mc'] }}</td>
+                                <td class="num">
+                                    @if($cPct === null)<span style="color:#9ca3af">–</span>
+                                    @else<span class="dash-pill {{ $cPct >= 100 ? 'dash-pill-pos' : 'dash-pill-neg' }}">{{ $cPct }}%</span>@endif
+                                </td>
+                            </tr>
+                            @endforeach
+                            @empty
+                            <tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:14px">Tidak ada data</td></tr>
+                            @endforelse
+                        @else
+                            @forelse($grp['data'] as $d)
+                            @php
+                                $terisi = (int) $d->total_terisi; $mc = (int) $d->total_mc;
+                                $pctMc  = $mc > 0 ? round($terisi / $mc * 100) : null;
+                            @endphp
+                            <tr>
+                                <td>{{ $d->nama }}</td>
+                                <td class="num">{{ $terisi }}</td>
+                                <td class="num">{{ $mc }}</td>
+                                <td class="num">
+                                    @if($pctMc === null)<span style="color:#9ca3af">–</span>
+                                    @else<span class="dash-pill {{ $pctMc >= 100 ? 'dash-pill-pos' : 'dash-pill-neg' }}">{{ $pctMc }}%</span>@endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:14px">Tidak ada data</td></tr>
+                            @endforelse
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+<script>
+    function openDashModal(key) {
+        const m = document.getElementById('dashmodal-' + key);
+        if (m) { m.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+    function closeDashModal(el) {
+        const m = el.closest('.dash-modal');
+        if (m) { m.classList.remove('open'); document.body.style.overflow = ''; }
+    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.dash-modal.open').forEach(m => m.classList.remove('open'));
+            document.body.style.overflow = '';
+        }
+    });
+</script>
 
 {{-- TALENT POOL — otomatis mengikuti 2 periode terbaru yang ada datanya --}}
 <div class="sec-title">Talent Pool</div>
@@ -613,29 +849,11 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 
 <div class="chart-grid-2">
     <div class="chart-card">
-        <div class="chart-card-title">Distribusi per Direktorat</div>
-        <div class="chart-card-sub">Jumlah karyawan aktif</div>
-        @php $maxDir = $distribusiDirektorat->max('total') ?: 1; @endphp
-        <div class="bar-chart">
-            @foreach($distribusiDirektorat->take(8) as $d)
-            @php $pctDir = round(($d['total']/$maxDir)*100); @endphp
-            <div class="bar-row">
-                <div class="bar-label" title="{{ $d['nama'] }}">{{ Str::limit($d['nama'], 18) }}</div>
-                <div class="bar-track">
-                    {{-- FIX: width Blade diganti data-pct --}}
-                    <div class="bar-fill bar-fill-brand" data-pct="{{ $pctDir }}">{{ $d['total'] }}</div>
-                </div>
-                <div class="bar-val">{{ $d['total'] }}</div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    <div class="chart-card">
         <div class="chart-card-title">Distribusi per Job Grade</div>
-        <div class="chart-card-sub">Jumlah karyawan aktif</div>
+        <div class="chart-card-sub">Jumlah karyawan aktif (JG tertinggi → terendah)</div>
         @php $maxJG = $distribusiJobGrade->max('total') ?: 1; @endphp
         <div class="bar-chart">
-            @foreach($distribusiJobGrade->take(8) as $j)
+            @foreach($distribusiJobGrade as $j)
             @php $pctJG = round(($j['total']/$maxJG)*100); @endphp
             <div class="bar-row">
                 <div class="bar-label">{{ $j['nama'] }}</div>
@@ -645,6 +863,25 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 <div class="bar-val">{{ $j['total'] }}</div>
             </div>
             @endforeach
+        </div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-card-title">Distribusi per Person Grade</div>
+        <div class="chart-card-sub">Jumlah karyawan aktif (PG tertinggi → terendah)</div>
+        @php $maxPG = $distribusiPersonGrade->max('total') ?: 1; @endphp
+        <div class="bar-chart">
+            @forelse($distribusiPersonGrade as $pg)
+            @php $pctPG = round(($pg['total']/$maxPG)*100); @endphp
+            <div class="bar-row">
+                <div class="bar-label">{{ $pg['nama'] }}</div>
+                <div class="bar-track">
+                    <div class="bar-fill bar-fill-brand" data-pct="{{ $pctPG }}">{{ $pg['total'] }}</div>
+                </div>
+                <div class="bar-val">{{ $pg['total'] }}</div>
+            </div>
+            @empty
+            <div style="text-align:center;padding:14px;color:#9ca3af;font-size:12px;">Belum ada data person grade</div>
+            @endforelse
         </div>
     </div>
 </div>

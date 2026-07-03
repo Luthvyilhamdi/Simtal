@@ -490,10 +490,21 @@
                 </span>
                 @error('tanggal_mulai_pg')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
+
+            <div class="form-group">
+                <label class="form-label">TMT Band</label>
+                <input type="date" name="tanggal_mulai_band"
+                       value="{{ old('tanggal_mulai_band', $karyawan->tanggal_mulai_band?->format('Y-m-d')) }}"
+                       class="form-input" />
+                <span class="form-hint">
+                    Tanggal mulai di Band saat ini. Untuk sementara diisi manual; ke depan bisa otomatis dari Riwayat Jabatan. Bila kosong, MDG Band memakai TMT Job Grade.
+                </span>
+                @error('tanggal_mulai_band')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
         </div>
 
         <div style="background:#f9fafb;border:1px solid var(--card-border);border-radius:11px;padding:13px 16px;margin-top:12px;font-size:12px;color:#374151;">
-            📊 <strong>MDG Band</strong> (dari TMT JG saat masuk band):
+            📊 <strong>MDG Band</strong> (dari TMT Band; bila kosong pakai TMT JG):
             <strong style="color:{{ $karyawan->mdg_band_bulan >= 36 ? '#15803d' : '#d97706' }}">
                 {{ $karyawan->mdg_band_bulan }} bulan
             </strong>
