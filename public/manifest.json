@@ -1,0 +1,15 @@
+{
+    "name": "SIMTAL - Sistem Manajemen Talenta",
+    "short_name": "SIMTAL",
+    "description": "Sistem Manajemen Talenta Pupuk Iskandar Muda",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#f0f2f5",
+    "theme_color": "#14532d",
+    "icons": [
+        { "src": "/images/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/images/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    ]
+}
