@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Karyawan;
 use App\Models\TalentPool;
+use App\Models\UsulanPromosi;
 
 /**
  * Sumber tunggal perhitungan Reminder Promosi (MDG), dipakai oleh
@@ -18,8 +19,13 @@ class ReminderPromosiService
     /** Batas "akan datang" dalam bulan. */
     public const WINDOW_BULAN = 3;
 
+    /** Status usulan promosi yang dianggap "sedang berjalan / sudah lulus"
+     *  → karyawannya disembunyikan dari reminder (tidak perlu diusulkan lagi).
+     *  Status 'tidak_lulus' & 'ditolak' TIDAK termasuk (mungkin perlu diusulkan lagi). */
+    public const USULAN_AKTIF = ['draft', 'verif_berkas', 'sidang', 'lulus'];
+
     /**
-     * @return array{items: array<int,array>, shortlistPeriode: int|null, totalDinilai: int}
+     * @return array{items: array<int,array>, shortlistPeriode: int|null, totalDinilai: int, disembunyikan: int}
      */
     public function build(): array
     {
@@ -39,6 +45,13 @@ class ReminderPromosiService
               )
             : [];
 
+        // Karyawan yang sudah punya usulan promosi berjalan/lulus → disembunyikan.
+        $sudahDiusulkanSet = array_flip(
+            UsulanPromosi::whereIn('status', self::USULAN_AKTIF)
+                ->pluck('karyawan_id')
+                ->all()
+        );
+
         // Hanya karyawan aktif yang punya minimal satu TMT (kalau tidak, MDG = 0
         // dan sisa bulannya pasti > window → tidak masuk daftar).
         $karyawans = Karyawan::with(['jobGrade', 'personGrade', 'direktorat', 'jabatan'])
@@ -51,6 +64,7 @@ class ReminderPromosiService
             ->get();
 
         $items = [];
+        $disembunyikan = 0;
         foreach ($karyawans as $k) {
             $isShortlist = isset($shortlistSet[$k->id]);
 
@@ -71,6 +85,12 @@ class ReminderPromosiService
                 continue;
             }
 
+            // Sudah diusulkan (berjalan/lulus) → sembunyikan, tapi hitung untuk info.
+            if (isset($sudahDiusulkanSet[$k->id])) {
+                $disembunyikan++;
+                continue;
+            }
+
             $items[] = [
                 'karyawan'     => $k,
                 'sk'           => $sk,
@@ -84,6 +104,7 @@ class ReminderPromosiService
             'items'            => $items,
             'shortlistPeriode' => $latestPeriode,
             'totalDinilai'     => $karyawans->count(),
+            'disembunyikan'    => $disembunyikan,
         ];
     }
 }

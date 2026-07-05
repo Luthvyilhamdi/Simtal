@@ -55,6 +55,7 @@ class ReminderPromosiController extends Controller
             'jenisFilter'      => $jenisFilter,
             'shortlistPeriode' => $latestPeriode,
             'windowBulan'      => ReminderPromosiService::WINDOW_BULAN,
+            'disembunyikan'    => $data['disembunyikan'] ?? 0,
         ]);
     }
 }

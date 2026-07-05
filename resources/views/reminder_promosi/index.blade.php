@@ -107,8 +107,16 @@
         yang <strong>shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }}</strong> (ditandai ★) pakai ambang longgar (Band 2 thn, JG 1 thn), lainnya normal (Band 3 thn, JG 2 thn, PG 1 thn).
         @if($shortlistPeriode)<br>Shortlist diambil dari <strong>periode terbaru yang tersedia ({{ $shortlistPeriode }})</strong>.@endif
         Hanya karyawan yang <strong>TMT grade-nya terisi</strong> yang bisa dihitung. Keputusan promosi tetap melalui Usulan Promosi.
+        <br>Karyawan yang <strong>usulan promosinya sedang berjalan atau sudah lulus otomatis disembunyikan</strong> (yang ditolak/tidak lulus tetap tampil).
     </div>
 </div>
+
+@if(($disembunyikan ?? 0) > 0)
+<div class="note-info" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">
+    <svg viewBox="0 0 24 24" style="stroke:#16a34a"><path d="M20 6 9 17l-5-5"/></svg>
+    <div><strong>{{ $disembunyikan }}</strong> karyawan disembunyikan dari daftar karena sudah dibuatkan usulan promosi (sedang diproses / lulus).</div>
+</div>
+@endif
 
 {{-- SUMMARY --}}
 <div class="summary-grid">
