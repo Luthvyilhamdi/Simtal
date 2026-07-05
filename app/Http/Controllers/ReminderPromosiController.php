@@ -25,17 +25,20 @@ class ReminderPromosiController extends Controller
 
         $data          = $service->build();
         $items         = $data['items'];
+        $hiddenItems   = $data['hiddenItems'];
         $latestPeriode = $data['shortlistPeriode'];
 
         // Filter struktural (search nama dilakukan di sisi klien).
         if ($direktoratFilter) {
-            $items = array_filter($items, fn ($i) =>
-                ($i['karyawan']->direktorat->nama_direktorat ?? '') === $direktoratFilter);
+            $byDir = fn ($i) => ($i['karyawan']->direktorat->nama_direktorat ?? '') === $direktoratFilter;
+            $items       = array_filter($items, $byDir);
+            $hiddenItems = array_filter($hiddenItems, $byDir);
         }
         if ($jenisFilter) {
             $items = array_filter($items, fn ($i) => $i['sk']['status'] === $jenisFilter);
         }
-        $items = array_values($items);
+        $items       = array_values($items);
+        $hiddenItems = array_values($hiddenItems);
 
         // Urutkan: paling mendesak dulu (sisa terkecil), lalu nama.
         usort($items, function ($a, $b) {
@@ -55,7 +58,7 @@ class ReminderPromosiController extends Controller
             'jenisFilter'      => $jenisFilter,
             'shortlistPeriode' => $latestPeriode,
             'windowBulan'      => ReminderPromosiService::WINDOW_BULAN,
-            'disembunyikan'    => $data['disembunyikan'] ?? 0,
+            'hiddenItems'      => $hiddenItems,
         ]);
     }
 }

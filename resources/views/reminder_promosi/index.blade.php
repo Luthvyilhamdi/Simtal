@@ -14,6 +14,12 @@
         'naik_jg'   => 'badge-amber',
         'naik_band' => 'badge-purple',
     ];
+    $usulanLabel = [
+        'draft' => 'Draft', 'verif_berkas' => 'Verifikasi Berkas', 'sidang' => 'Sidang', 'lulus' => 'Lulus',
+    ];
+    $usulanBadge = [
+        'draft' => 'badge-gray', 'verif_berkas' => 'badge-amber', 'sidang' => 'badge-blue', 'lulus' => 'badge-green',
+    ];
 @endphp
 
 @push('styles')
@@ -22,8 +28,21 @@
     .page-title { font-size:20px;font-weight:700;color:#111827; }
     .page-sub { font-size:13px;color:#6b7280;margin-top:4px; }
 
-    .note-info { background:#eff6ff;border:1px solid #bfdbfe;border-radius:11px;padding:12px 16px;font-size:12.5px;color:#1e40af;margin-bottom:16px;display:flex;gap:9px;align-items:flex-start; }
-    .note-info svg { width:16px;height:16px;stroke:#2563eb;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px; }
+    /* Legenda ringkas (gaya corporate) */
+    .rm-legend { display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:#9ca3af;margin-bottom:18px; }
+    .rm-legend .lg-star { color:#15803d;font-weight:700; }
+    .rm-legend .lg-sep { width:1px;height:12px;background:#e5e7eb;display:inline-block; }
+
+    /* Panel karyawan yang disembunyikan (sudah diusulkan) */
+    .hidden-panel { margin-top:16px;background:white;border:1px solid var(--card-border);border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden; }
+    .hidden-toggle { width:100%;display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:14px 18px;font-size:13px;font-weight:600;color:#374151;text-align:left; }
+    .hidden-toggle:hover { background:#f9fafb; }
+    .hidden-toggle .ht-caret { width:13px;height:13px;stroke:#9ca3af;fill:none;stroke-width:2.5;transition:transform .15s;flex-shrink:0; }
+    .hidden-panel.open .ht-caret { transform:rotate(90deg); }
+    .hidden-toggle .ht-count { background:#f0fdf4;color:#15803d;border-radius:100px;padding:1px 9px;font-size:11px;font-weight:700; }
+    .hidden-toggle .ht-hint { margin-left:auto;font-size:11px;color:#9ca3af;font-weight:500; }
+    .hidden-body { display:none;border-top:1px solid #f3f4f6; }
+    .hidden-panel.open .hidden-body { display:block; }
 
     .summary-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px; }
     .sum-card { background:white;border-radius:14px;border:1px solid var(--card-border);padding:18px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:14px; }
@@ -100,23 +119,13 @@
     <div class="page-sub">Karyawan yang sudah / akan memenuhi Masa Dinas Grade dalam {{ $windowBulan }} bulan ke depan.</div>
 </div>
 
-<div class="note-info">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-    <div>
-        Daftar ini <strong>hanya pengingat</strong> berdasarkan MDG &mdash; tidak mengubah data. Ambang <strong>selaras dengan Data Talent</strong>:
-        yang <strong>shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }}</strong> (ditandai ★) pakai ambang longgar (Band 2 thn, JG 1 thn), lainnya normal (Band 3 thn, JG 2 thn, PG 1 thn).
-        @if($shortlistPeriode)<br>Shortlist diambil dari <strong>periode terbaru yang tersedia ({{ $shortlistPeriode }})</strong>.@endif
-        Hanya karyawan yang <strong>TMT grade-nya terisi</strong> yang bisa dihitung. Keputusan promosi tetap melalui Usulan Promosi.
-        <br>Karyawan yang <strong>usulan promosinya sedang berjalan atau sudah lulus otomatis disembunyikan</strong> (yang ditolak/tidak lulus tetap tampil).
-    </div>
+<div class="rm-legend">
+    <span><span class="lg-star">★</span> Shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }} — ambang longgar (Band 2 / JG 1 thn)</span>
+    <span class="lg-sep"></span>
+    <span>Normal — Band 3 / JG 2 / PG 1 thn</span>
+    <span class="lg-sep"></span>
+    <span>Hanya karyawan ber-TMT yang dihitung</span>
 </div>
-
-@if(($disembunyikan ?? 0) > 0)
-<div class="note-info" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">
-    <svg viewBox="0 0 24 24" style="stroke:#16a34a"><path d="M20 6 9 17l-5-5"/></svg>
-    <div><strong>{{ $disembunyikan }}</strong> karyawan disembunyikan dari daftar karena sudah dibuatkan usulan promosi (sedang diproses / lulus).</div>
-</div>
-@endif
 
 {{-- SUMMARY --}}
 <div class="summary-grid">
@@ -241,6 +250,68 @@
     @endif
 </div>
 
+{{-- PANEL: karyawan yang disembunyikan (sudah diusulkan) --}}
+@if(count($hiddenItems) > 0)
+<div class="hidden-panel" id="hiddenPanel">
+    <button type="button" class="hidden-toggle" onclick="toggleHidden()">
+        <svg class="ht-caret" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        Sudah diusulkan
+        <span class="ht-count">{{ count($hiddenItems) }}</span>
+        <span class="ht-hint">disembunyikan dari daftar — klik untuk lihat</span>
+    </button>
+    <div class="hidden-body">
+        <div class="table-scroll">
+            <table class="rm">
+                <thead>
+                    <tr>
+                        <th>Karyawan</th>
+                        <th>Jabatan &amp; Unit</th>
+                        <th>Band / Grade</th>
+                        <th>Rencana Kenaikan</th>
+                        <th>Status Usulan</th>
+                        <th style="text-align:right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($hiddenItems as $i)
+                    @php $k = $i['karyawan']; $sk = $i['sk']; $us = $i['usulan_status'] ?? '-'; @endphp
+                    <tr class="rm-row">
+                        <td>
+                            <div class="emp-name">{{ $k->nama }}</div>
+                            <div class="emp-nik">NIK {{ $k->nik }}</div>
+                            @if($i['is_shortlist'])
+                                <div class="sl-badge-wrap"><span class="badge badge-green" title="Shortlist Talent Pool {{ $shortlistPeriode }}">★ Shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }}</span></div>
+                            @endif
+                        </td>
+                        <td class="col-jab">
+                            <div class="emp-jab">{{ $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-') }}</div>
+                            <div class="emp-unit">{{ $k->direktorat->nama_direktorat ?? '-' }}</div>
+                        </td>
+                        <td class="col-nowrap">
+                            <span class="badge badge-green">{{ $k->band }}</span>
+                            <span class="badge badge-gray" style="margin-left:3px">JG {{ $k->jobGrade->job_grade ?? '-' }}</span>
+                        </td>
+                        <td class="col-nowrap">
+                            <span class="badge {{ $jenisBadge[$sk['status']] ?? 'badge-gray' }}">{{ $jenisLabel[$sk['status']] ?? $sk['status'] }}</span>
+                        </td>
+                        <td class="col-nowrap">
+                            <span class="badge {{ $usulanBadge[$us] ?? 'badge-gray' }}">{{ $usulanLabel[$us] ?? ucfirst($us) }}</span>
+                            <div class="status-sub">usulan sudah dibuat</div>
+                        </td>
+                        <td style="text-align:right">
+                            <a href="{{ route('usulan_promosi.index') }}" class="btn-usul" style="background:#f3f4f6;color:#374151" title="Lihat usulan promosi">
+                                Lihat Usulan
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection
 
 @push('scripts')
@@ -252,10 +323,17 @@
         window.location.href = u.toString();
     }
 
+    // Buka/tutup panel "Sudah diusulkan"
+    function toggleHidden() {
+        var p = document.getElementById('hiddenPanel');
+        if (p) p.classList.toggle('open');
+    }
+
     (function () {
         var input   = document.getElementById('searchInput');
         var clear   = document.getElementById('clearBtn');
-        var rows    = Array.prototype.slice.call(document.querySelectorAll('.rm-row'));
+        // Hanya baris tabel utama (panel tersembunyi tidak ikut disaring pencarian).
+        var rows    = Array.prototype.slice.call(document.querySelectorAll('.card-table .rm-row'));
         var noMatch = document.getElementById('noMatchRow');
         var countEl = document.getElementById('resultCount');
         if (!input) return;

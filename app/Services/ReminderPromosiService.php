@@ -25,7 +25,7 @@ class ReminderPromosiService
     public const USULAN_AKTIF = ['draft', 'verif_berkas', 'sidang', 'lulus'];
 
     /**
-     * @return array{items: array<int,array>, shortlistPeriode: int|null, totalDinilai: int, disembunyikan: int}
+     * @return array{items: array<int,array>, hiddenItems: array<int,array>, shortlistPeriode: int|null, totalDinilai: int, disembunyikan: int}
      */
     public function build(): array
     {
@@ -46,11 +46,11 @@ class ReminderPromosiService
             : [];
 
         // Karyawan yang sudah punya usulan promosi berjalan/lulus → disembunyikan.
-        $sudahDiusulkanSet = array_flip(
-            UsulanPromosi::whereIn('status', self::USULAN_AKTIF)
-                ->pluck('karyawan_id')
-                ->all()
-        );
+        // Map karyawan_id => status usulan terbaru (untuk ditampilkan di panel "disembunyikan").
+        $usulanStatusMap = [];
+        foreach (UsulanPromosi::whereIn('status', self::USULAN_AKTIF)->orderByDesc('id')->get(['karyawan_id', 'status']) as $u) {
+            $usulanStatusMap[$u->karyawan_id] ??= $u->status;
+        }
 
         // Hanya karyawan aktif yang punya minimal satu TMT (kalau tidak, MDG = 0
         // dan sisa bulannya pasti > window → tidak masuk daftar).
@@ -64,7 +64,7 @@ class ReminderPromosiService
             ->get();
 
         $items = [];
-        $disembunyikan = 0;
+        $hiddenItems = [];
         foreach ($karyawans as $k) {
             $isShortlist = isset($shortlistSet[$k->id]);
 
@@ -85,26 +85,30 @@ class ReminderPromosiService
                 continue;
             }
 
-            // Sudah diusulkan (berjalan/lulus) → sembunyikan, tapi hitung untuk info.
-            if (isset($sudahDiusulkanSet[$k->id])) {
-                $disembunyikan++;
-                continue;
-            }
-
-            $items[] = [
+            $row = [
                 'karyawan'     => $k,
                 'sk'           => $sk,
                 'eligible_now' => $eligibleNow,
                 'sisa'         => $eligibleNow ? 0 : $sisa,
                 'is_shortlist' => $isShortlist,
             ];
+
+            // Sudah diusulkan (berjalan/lulus) → masuk daftar tersembunyi, bukan daftar utama.
+            if (isset($usulanStatusMap[$k->id])) {
+                $row['usulan_status'] = $usulanStatusMap[$k->id];
+                $hiddenItems[] = $row;
+                continue;
+            }
+
+            $items[] = $row;
         }
 
         return [
             'items'            => $items,
+            'hiddenItems'      => $hiddenItems,
             'shortlistPeriode' => $latestPeriode,
             'totalDinilai'     => $karyawans->count(),
-            'disembunyikan'    => $disembunyikan,
+            'disembunyikan'    => count($hiddenItems),
         ];
     }
 }
