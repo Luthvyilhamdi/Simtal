@@ -376,7 +376,7 @@ class StrukturOrganisasiController extends Controller
     {
         $k = Karyawan::with([
             'direktorat', 'kompartemen', 'departemen',
-            'jobGrade', 'personGrade',
+            'jobGrade', 'personGrade', 'strukturAssignments',
         ])->findOrFail($id);
 
         $history = DB::table('history_jabatans as hj')
@@ -435,6 +435,15 @@ class StrukturOrganisasiController extends Controller
             'sisa_masa_kerja' => $sisaMasaKerja,
             'lama_bekerja'    => $lamaBekerja,
             'status'          => $k->status,
+            'struktural_fungsional' => $k->struktural_fungsional ?: '-',
+            'band'               => $k->band ?: '-',
+            'jobs'               => $k->jobs ?: '-',
+            'job_stream'         => $k->job_stream ?: '-',
+            'status_kepegawaian' => $k->status_kepegawaian ?: '-',
+            'no_hp'              => $k->no_hp ?: '-',
+            'email'              => $k->email ?: '-',
+            'jenjang_pendidikan' => $k->jenjang_pendidikan ?: '-',
+            'jurusan'            => $k->jurusan ?: '-',
             'history'         => $history,
             'so_assignments'  => $soAssignments,
             'assign_logs'     => $assignLogs,

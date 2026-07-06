@@ -81,16 +81,13 @@ class ExportBuilderController extends Controller
             'kode_struktur'    => ['Grade', 'Kode Struktur', 'kodeStruktur', fn ($k) => $k->kodeStruktur->kode_struktur ?? '-'],
             'tanggal_masuk'    => ['Grade', 'Tanggal Masuk', null, fn ($k) => $k->tanggal_masuk?->format('d/m/Y') ?? '-'],
             'masa_kerja'       => ['Grade', 'Masa Kerja (thn)', null, fn ($k) => $k->tanggal_masuk ? (int) $k->tanggal_masuk->diffInYears(now()) : '-'],
-            // MDG thn/bln berpasangan (offset genap → sejajar 2 kolom di UI)
-            'mdg_pg'           => ['Grade', 'MDG PG (thn)', null, fn ($k) => $k->mdg_pg ?? '-'],
-            'mdg_pg_bulan'     => ['Grade', 'MDG PG (bln)', null, fn ($k) => $k->mdg_pg_bulan],
-            'mdg_jg'           => ['Grade', 'MDG JG (thn)', null, fn ($k) => $k->mdg_jg ?? '-'],
-            'mdg_jg_bulan'     => ['Grade', 'MDG JG (bln)', null, fn ($k) => $k->mdg_jg_bulan],
-            'mdg_band'         => ['Grade', 'MDG Band (thn)', null, fn ($k) => $k->mdg_band],
-            'mdg_band_bulan'   => ['Grade', 'MDG Band (bln)', null, fn ($k) => $k->mdg_band_bulan],
-            'tanggal_mulai_pg'   => ['Grade', 'Tgl Mulai PG', null, fn ($k) => $k->tanggal_mulai_pg?->format('d/m/Y') ?? '-'],
-            'tanggal_mulai_jg'   => ['Grade', 'Tgl Mulai JG', null, fn ($k) => $k->tanggal_mulai_jg?->format('d/m/Y') ?? '-'],
+            // Tgl Mulai (TMT) didahulukan, lalu MDG — urutan Band, JG, PG.
             'tanggal_mulai_band' => ['Grade', 'Tgl Mulai Band', null, fn ($k) => $k->tanggal_mulai_band?->format('d/m/Y') ?? '-'],
+            'tanggal_mulai_jg'   => ['Grade', 'Tgl Mulai JG', null, fn ($k) => $k->tanggal_mulai_jg?->format('d/m/Y') ?? '-'],
+            'tanggal_mulai_pg'   => ['Grade', 'Tgl Mulai PG', null, fn ($k) => $k->tanggal_mulai_pg?->format('d/m/Y') ?? '-'],
+            'mdg_band' => ['Grade', 'MDG Band', null, fn ($k) => self::mdgLengkap($k->tanggal_mulai_band ?? $k->tanggal_mulai_jg)],
+            'mdg_jg'   => ['Grade', 'MDG JG', null, fn ($k) => self::mdgLengkap($k->tanggal_mulai_jg)],
+            'mdg_pg'   => ['Grade', 'MDG PG', null, fn ($k) => self::mdgLengkap($k->tanggal_mulai_pg)],
             'status_kenaikan'  => ['Grade', 'Status Kenaikan', 'jobGrade,personGrade', fn ($k) => $k->status_kenaikan['label'] ?? '-'],
             'eligible_naik'    => ['Grade', 'Eligible Naik', 'jobGrade,personGrade', fn ($k) => ($k->status_kenaikan['eligible'] ?? false) ? 'Ya' : 'Belum'],
 
@@ -266,7 +263,13 @@ class ExportBuilderController extends Controller
             ->flatMap(fn ($r) => explode(',', $r))
             ->unique()->values()->all();
 
-        $query = Karyawan::with($relations)->orderBy('nama');
+        // Urutkan dari grade TERTINGGI ke terendah (JG desc), nama sebagai pemecah seri.
+        // Karyawan tanpa job grade diletakkan paling bawah.
+        $query = Karyawan::with($relations)
+            ->leftJoin('job_grade as jg_sort', 'jg_sort.id', '=', 'karyawans.job_grade_id')
+            ->orderByRaw('CAST(jg_sort.job_grade AS UNSIGNED) DESC')
+            ->orderBy('karyawans.nama')
+            ->select('karyawans.*');
 
         if (! empty($validated['status'])) {
             $query->where('status', $validated['status']);
@@ -487,6 +490,24 @@ class ExportBuilderController extends Controller
         }
 
         return ' (terbaru)';
+    }
+
+    /** MDG dalam format "X tahun, Y bulan, Z hari" dari tanggal mulai grade sampai sekarang. */
+    private static function mdgLengkap($mulai): string
+    {
+        if (! $mulai) return '-';
+
+        $mulai = $mulai instanceof \Carbon\Carbon ? $mulai : \Carbon\Carbon::parse($mulai);
+        $now   = now();
+        if ($mulai->greaterThan($now)) return '-';
+
+        $d = $mulai->diff($now);
+        $parts = [];
+        if ($d->y > 0) $parts[] = $d->y.' tahun';
+        if ($d->m > 0) $parts[] = $d->m.' bulan';
+        $parts[] = $d->d.' hari';
+
+        return implode(', ', $parts);
     }
 
     /** Label periode lengkap untuk header PDF. */

@@ -1181,7 +1181,14 @@ function openPanel(karyawanId){
     const currentH = d.history ? d.history.find(h=>h.is_current) : null;
     const noSk = currentH?.no_sk || '-';
     const tglSk = currentH?.tanggal_mulai || '-';
-    const rows=[['Direktorat',d.direktorat],['Kompartemen',d.kompartemen],['Departemen',d.departemen],['No. SK',noSk],['Tanggal SK',tglSk],['Tgl Masuk',d.tanggal_masuk],['Tgl Lahir',d.tanggal_lahir],['Pensiun',d.pensiun],['Lama Bekerja',d.lama_bekerja]];
+    const rows=[
+      ['Direktorat',d.direktorat],['Kompartemen',d.kompartemen],['Departemen',d.departemen],
+      ['Struktural/Fungsional',d.struktural_fungsional],['Band',d.band],
+      ['Jobs',d.jobs],['Job Stream',d.job_stream],['Status Kepegawaian',d.status_kepegawaian],
+      ['No. SK',noSk],['Tanggal SK',tglSk],
+      ['Tgl Masuk',d.tanggal_masuk],['Tgl Lahir',d.tanggal_lahir],['Pensiun',d.pensiun],['Lama Bekerja',d.lama_bekerja],
+      ['No. HP',d.no_hp],['Email',d.email],['Jenjang Pendidikan',d.jenjang_pendidikan],['Jurusan',d.jurusan]
+    ];
     document.getElementById('pInfoRows').innerHTML=rows.map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 14px;border-bottom:1px solid #f9fafb;gap:10px"><span style="font-size:11px;color:#9ca3af;flex-shrink:0">${l}</span><span style="font-size:12px;font-weight:500;color:#111827;text-align:right">${v??'-'}</span></div>`).join('');
     const soEl=document.getElementById('pSoHistory');
     const namaBulan=['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
