@@ -50,16 +50,22 @@ class PenilaianImport implements ToCollection, WithHeadingRow, WithChunkReading
             $nilaiRaw = str_replace(',', '.', trim((string) ($row['nilai'] ?? '')));
             if ($nilaiRaw === '' || !is_numeric($nilaiRaw)) { $this->skippedCount++; continue; }
 
-            PenilaianKaryawan::create([
-                'karyawan_id' => $karyawan->id,
-                'tahun'       => $tahun,
-                'periode'     => $periode,
-                'tipe'        => $tipe,
-                'judul'       => $judul,
-                'nilai'       => (float) $nilaiRaw,
-                'keterangan'  => trim((string) ($row['keterangan'] ?? '')) ?: null,
-                'created_by'  => Auth::id(),
-            ]);
+            // Update pintar: 1 nilai per (karyawan, tahun, periode, tipe).
+            // NIK sudah ada di slot itu → DIPERBARUI; belum ada → dibuat baru.
+            PenilaianKaryawan::updateOrCreate(
+                [
+                    'karyawan_id' => $karyawan->id,
+                    'tahun'       => $tahun,
+                    'periode'     => $periode,
+                    'tipe'        => $tipe,
+                ],
+                [
+                    'judul'       => $judul,
+                    'nilai'       => (float) $nilaiRaw,
+                    'keterangan'  => trim((string) ($row['keterangan'] ?? '')) ?: null,
+                    'created_by'  => Auth::id(),
+                ]
+            );
             $this->rowCount++;
         }
     }

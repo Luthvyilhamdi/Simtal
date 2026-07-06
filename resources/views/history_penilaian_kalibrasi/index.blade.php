@@ -187,7 +187,7 @@
 <div class="modal-backdrop" id="modalImportPen">
     <div class="modal-box" style="max-width:440px;text-align:left">
         <div class="modal-title">📥 Import Penilaian</div>
-        <div class="imp-cols">Kolom: <code>NIK</code> <code>Nama</code> <code>Tahun</code> <code>Periode</code> <code>Tipe</code> <code>Judul</code> <code>Nilai</code> <code>Keterangan</code><br>Periode: Triwulan I–IV / Tahunan · Tipe: KPI / 360</div>
+        <div class="imp-cols">Kolom: <code>NIK</code> <code>Nama</code> <code>Tahun</code> <code>Periode</code> <code>Tipe</code> <code>Judul</code> <code>Nilai</code> <code>Keterangan</code><br>Periode: Triwulan I–IV / Tahunan · Tipe: KPI / 360 · Unik per (karyawan, tahun, periode, tipe) — yang sudah ada akan diperbarui</div>
         <a href="{{ route('history_penilaian_kalibrasi.template.penilaian') }}" class="tmpl-link">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#15803d" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download Template</a>
