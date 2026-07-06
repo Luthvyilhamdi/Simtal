@@ -15,8 +15,15 @@ class Karyawan extends Model
         'jabatan_id', 'jabatan_saat_ini', 'struktural_fungsional',
         'direktorat_id', 'kompartemen_id', 'departemen_id',
         'job_grade_id', 'person_grade_id', 'kode_struktur_id',
-        'status', 'foto',
+        'status', 'status_kepegawaian', 'foto',
         'tanggal_mulai_pg', 'tanggal_mulai_jg', 'tanggal_mulai_band',
+    ];
+
+    /** Pilihan status kepegawaian. */
+    public const STATUS_KEPEGAWAIAN = [
+        'Organik',
+        'PKWT',
+        'Penugasan',
     ];
 
     protected $casts = [

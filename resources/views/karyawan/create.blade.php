@@ -196,6 +196,17 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Status Kepegawaian</label>
+                <select name="status_kepegawaian" class="form-input">
+                    <option value="">— Pilih Status Kepegawaian —</option>
+                    @foreach(\App\Models\Karyawan::STATUS_KEPEGAWAIAN as $sk)
+                        <option value="{{ $sk }}" {{ old('status_kepegawaian')==$sk ? 'selected' : '' }}>{{ $sk }}</option>
+                    @endforeach
+                </select>
+                @error('status_kepegawaian')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Foto Karyawan</label>
                 <div class="foto-upload-wrap">
                     <div class="foto-preview-box">

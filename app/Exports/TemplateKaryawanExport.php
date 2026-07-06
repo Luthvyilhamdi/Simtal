@@ -40,6 +40,7 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
             'person_grade',
             'kode_struktur',
             'status',
+            'status_kepegawaian',
         ];
     }
 
@@ -68,6 +69,7 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
                 '3',
                 'A.1.1',
                 'aktif',
+                'Organik',
             ],
             [
                 '10002',
@@ -90,6 +92,7 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
                 '2',
                 'B.2.1',
                 'aktif',
+                'PKWT',
             ],
         ];
     }
@@ -97,14 +100,14 @@ class TemplateKaryawanExport implements FromArray, WithHeadings, WithStyles, Sho
     public function styles(Worksheet $sheet): array
     {
         // Style header
-        $sheet->getStyle('A1:T1')->applyFromArray([
+        $sheet->getStyle('A1:U1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '15803D']],
             'alignment' => ['horizontal' => 'center'],
         ]);
 
         // Style contoh data (italic abu)
-        $sheet->getStyle('A2:T3')->applyFromArray([
+        $sheet->getStyle('A2:U3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '9ca3af']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'f9fafb']],
         ]);

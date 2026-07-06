@@ -186,6 +186,10 @@
                     <div class="kolom-name">status</div>
                     <div class="kolom-desc">aktif / tidak aktif</div>
                 </div>
+                <div class="kolom-item">
+                    <div class="kolom-name">status_kepegawaian</div>
+                    <div class="kolom-desc">Organik / PKWT / Penugasan</div>
+                </div>
             </div>
         </div>
     </div>

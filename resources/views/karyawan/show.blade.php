@@ -213,6 +213,7 @@
         <div class="detail-row"><span class="detail-label">Usia</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} tahun</span></div>
         <div class="detail-row"><span class="detail-label">Tanggal Masuk</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->translatedFormat('d F Y') }}</span></div>
         <div class="detail-row"><span class="detail-label">Lama Bekerja</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->diffForHumans(null, true) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Status Kepegawaian</span><span class="detail-value">@if($karyawan->status_kepegawaian)<span class="badge badge-purple">{{ $karyawan->status_kepegawaian }}</span>@else<span class="muted">-</span>@endif</span></div>
     </div>
 
     {{-- Kontak & Pendidikan --}}

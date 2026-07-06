@@ -75,6 +75,7 @@ class KaryawanExport implements FromCollection, WithHeadings, WithMapping, WithS
             'Person Grade',
             'Kode Struktur',
             'Status',
+            'Status Kepegawaian',
         ];
     }
 
@@ -106,6 +107,7 @@ class KaryawanExport implements FromCollection, WithHeadings, WithMapping, WithS
             $row->personGrade->person_grade ?? '-',
             $row->kodeStruktur->kode_struktur ?? '-',
             ucfirst($row->status),
+            $row->status_kepegawaian ?: '-',
         ];
     }
 

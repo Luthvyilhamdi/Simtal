@@ -57,6 +57,7 @@ class ExportBuilderController extends Controller
             'perkiraan_pensiun' => ['Data Diri', 'Perkiraan Pensiun', null, fn ($k) => $k->tanggal_pensiun?->format('d/m/Y') ?? '-'],
             'sisa_masa_kerja'   => ['Data Diri', 'Sisa Masa Kerja', null, fn ($k) => $k->tanggal_lahir ? $k->sisa_pensiun_label : '-'],
             'status'        => ['Data Diri', 'Status', null, fn ($k) => ucfirst($k->status ?? '-')],
+            'status_kepegawaian' => ['Data Diri', 'Status Kepegawaian', null, fn ($k) => $k->status_kepegawaian ?: '-'],
             'no_hp'         => ['Data Diri', 'No. HP', null, fn ($k) => $k->no_hp ?: '-'],
             'email'         => ['Data Diri', 'Email', null, fn ($k) => $k->email ?: '-'],
             'jenjang_pendidikan' => ['Data Diri', 'Jenjang Pendidikan', null, fn ($k) => $k->jenjang_pendidikan ?: '-'],

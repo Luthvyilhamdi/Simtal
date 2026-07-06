@@ -57,6 +57,7 @@ class KaryawanImport implements OnEachRow, WithHeadingRow
             if ($this->filled($row, 'tanggal_lahir'))    $data['tanggal_lahir'] = $this->parseDate($row['tanggal_lahir']);
             if ($this->filled($row, 'tanggal_masuk'))    $data['tanggal_masuk'] = $this->parseDate($row['tanggal_masuk']);
             if ($this->filled($row, 'status'))           $data['status'] = strtolower(trim($row['status'])) === 'aktif' ? 'aktif' : 'tidak aktif';
+            if ($this->filled($row, 'status_kepegawaian')) $data['status_kepegawaian'] = $this->normStatusKepegawaian($row['status_kepegawaian']);
             if ($this->filled($row, 'no_hp'))            $data['no_hp'] = trim((string) $row['no_hp']);
             if ($this->filled($row, 'email'))            $data['email'] = trim((string) $row['email']);
             if ($this->filled($row, 'jenjang_pendidikan')) $data['jenjang_pendidikan'] = trim((string) $row['jenjang_pendidikan']);
@@ -115,6 +116,16 @@ class KaryawanImport implements OnEachRow, WithHeadingRow
     private function filled(array $row, string $key): bool
     {
         return isset($row[$key]) && trim((string) $row[$key]) !== '';
+    }
+
+    /** Cocokkan status kepegawaian ke opsi resmi (case-insensitive); bila tak cocok, pakai apa adanya. */
+    private function normStatusKepegawaian($value): string
+    {
+        $value = trim((string) $value);
+        foreach (Karyawan::STATUS_KEPEGAWAIAN as $opt) {
+            if (strcasecmp($opt, $value) === 0) return $opt;
+        }
+        return $value;
     }
 
     private function parseDate($value): ?string
