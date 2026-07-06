@@ -231,6 +231,7 @@ class ExportBuilderController extends Controller
             'departemen_id'  => 'nullable|exists:departemen,id',
             'tier'           => 'nullable|in:'.implode(',', HistoryPejabat::JABATAN_DIPANTAU),
             'nik_nama'       => 'nullable|string|max:20000',
+            'col_order'      => 'nullable|string|max:5000',
         ];
     }
 
@@ -254,6 +255,22 @@ class ExportBuilderController extends Controller
         $bulan    = $validated['bulan'] ?? null;
         $selected = $validated['columns'];
         $registry = self::columnRegistry($tahun, $bulan);
+
+        // Urutan kolom kustom dari user (col_order). Hanya kolom yang benar-benar
+        // terpilih yang dipakai; sisa yang tak ada di urutan ditempel di belakang.
+        if (! empty($validated['col_order'])) {
+            $order   = array_filter(array_map('trim', explode(',', $validated['col_order'])));
+            $ordered = [];
+            foreach ($order as $key) {
+                if (in_array($key, $selected, true) && ! in_array($key, $ordered, true)) {
+                    $ordered[] = $key;
+                }
+            }
+            foreach ($selected as $key) {
+                if (! in_array($key, $ordered, true)) $ordered[] = $key;
+            }
+            $selected = $ordered;
+        }
 
         // Eager-load hanya relasi yang dibutuhkan kolom terpilih.
         // Index [2] boleh berisi beberapa relasi dipisah koma (mis. 'jobGrade,personGrade').

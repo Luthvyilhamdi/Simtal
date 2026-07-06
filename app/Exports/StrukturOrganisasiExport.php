@@ -109,11 +109,9 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                         ->setWrapText(true);
                 }
 
-                // Header background A-X
-                foreach (self::ALL_COLS as $col) {
-                    $sheet->getCell($col.'1')->getStyle()->getFill()
-                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_HEADER);
-                }
+                // Header background A-AH (per-range agar cepat)
+                $sheet->getStyle('A1:AH1')->getFill()
+                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_HEADER);
                 $sheet->getRowDimension(1)->setRowHeight(30);
 
                 // ===== ROW 2: Total =====
@@ -122,26 +120,21 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                 $sheet->getCell('L2')->setValue($totalPeng);
                 $sheet->getCell('M2')->setValue($totalDev);
 
-                // Total background A-X
-                foreach (self::ALL_COLS as $col) {
-                    $sheet->getCell($col.'2')->getStyle()->getFill()
-                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_TOTAL);
-                    $sheet->getCell($col.'2')->getStyle()->getFont()
-                        ->setBold(true)->setName(self::FONT_NAME)->setSize(10)->getColor()->setRGB('FFFFFF');
-                }
+                // Total background A-AH (per-range agar cepat)
+                $totalStyle = $sheet->getStyle('A2:AH2');
+                $totalStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_TOTAL);
+                $totalStyle->getFont()->setBold(true)->setName(self::FONT_NAME)->setSize(10)->getColor()->setRGB('FFFFFF');
 $devStyle = $sheet->getCell('M2')->getStyle();
                 $devStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
                 $devStyle->getFont()->setBold(true)->setName(self::FONT_NAME)->setSize(10)->getColor()->setRGB('000000');
                 $devStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 $currentRow = 3;
-                // Helper apply background A-X
+                // Helper apply background A-AH (per-range → 1 operasi/baris, jauh lebih cepat)
                 $applyBg = function($row, $bg, $bold = false) use ($sheet) {
-                    foreach (self::ALL_COLS as $col) {
-                        $style = $sheet->getCell($col.$row)->getStyle();
-                        $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
-                        $style->getFont()->setName(self::FONT_NAME)->setSize(10)->setBold($bold);
-                    }
+                    $style = $sheet->getStyle('A'.$row.':AH'.$row);
+                    $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
+                    $style->getFont()->setName(self::FONT_NAME)->setSize(10)->setBold($bold);
                 };
 
                 // ===== Build tree =====

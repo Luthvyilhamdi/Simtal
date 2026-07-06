@@ -529,6 +529,9 @@ class StrukturOrganisasiController extends Controller
 
     public function export(Request $request)
     {
+        // Generate Excel yang besar bisa perlu waktu; beri kelonggaran (jaring pengaman).
+        @set_time_limit(300);
+
         ['bulan' => $bulan, 'tahun' => $tahun] = $this->getPeriode($request);
         $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F-Y');
         $filename  = "struktur-organisasi-{$namaBulan}.xlsx";

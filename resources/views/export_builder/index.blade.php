@@ -89,6 +89,35 @@
     /* Sidebar kanan sticky agar tombol unduh selalu terlihat */
     .eb-side { position:sticky;top:16px;align-self:start; }
     @media (max-width:900px){ .eb-side { position:static; } }
+
+    /* Kolom terpilih — atur urutan (drag / naik-turun) */
+    .order-list { display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-top:6px; }
+    .order-item { display:flex;align-items:center;gap:7px;background:#f9fafb;border:1px solid #eef0f2;border-radius:8px;padding:6px 8px;font-size:12.5px;color:#374151; }
+    .order-item.dragging { opacity:.4; }
+    .order-item.drag-over { border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.12); }
+    .order-item .oi-handle { color:#cbd5e1;flex-shrink:0;cursor:grab;display:inline-flex;width:14px;height:14px; }
+    .order-item .oi-idx { color:#9ca3af;font-size:11px;font-weight:700;min-width:16px;text-align:right; }
+    .order-item .oi-label { flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .order-item .oi-btn { border:none;background:none;color:#9ca3af;cursor:pointer;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;font-size:14px;line-height:1;flex-shrink:0; }
+    .order-item .oi-btn:hover { background:#eef0f2;color:#374151; }
+    .order-item .oi-btn:disabled { opacity:.25;cursor:default; }
+    .order-item .oi-btn svg { width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2; }
+    .order-empty { font-size:12px;color:#9ca3af;text-align:center;padding:16px 0; }
+    .order-badge { margin-left:auto;background:#dcfce7;color:#15803d;border-radius:100px;padding:1px 9px;font-size:11px;font-weight:700; }
+
+    /* Modal atur urutan kolom */
+    .eb-modal { position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px; }
+    .eb-modal.open { display:flex; }
+    .eb-modal-backdrop { position:absolute;inset:0;background:rgba(17,24,39,.5); }
+    .eb-modal-card { position:relative;background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.28);width:100%;max-width:520px;max-height:84vh;display:flex;flex-direction:column;overflow:hidden; }
+    .eb-modal-head { padding:16px 20px;border-bottom:1px solid #eef0f2;display:flex;align-items:flex-start;justify-content:space-between;gap:12px; }
+    .eb-modal-title { font-size:15px;font-weight:700;color:#111827; }
+    .eb-modal-sub { font-size:12px;color:#6b7280;margin-top:2px;line-height:1.4; }
+    .eb-modal-close { border:none;background:#f3f4f6;border-radius:8px;width:30px;height:30px;font-size:18px;line-height:1;cursor:pointer;color:#6b7280;flex-shrink:0; }
+    .eb-modal-close:hover { background:#e5e7eb;color:#111827; }
+    .eb-modal-body { overflow-y:auto;padding:14px 20px; }
+    .eb-modal-body .order-list { max-height:none;margin-top:0; }
+    .eb-modal-foot { padding:12px 20px;border-top:1px solid #eef0f2;display:flex;align-items:center;justify-content:space-between;gap:12px; }
 </style>
 @endpush
 
@@ -250,6 +279,15 @@
             </div>
 
             <div class="card">
+                <button type="button" class="btn btn-preview" style="width:100%;" onclick="openOrderModal()">
+                    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    <span>Atur Urutan Kolom</span>
+                    <span id="orderBtnCount" class="order-badge">0</span>
+                </button>
+                <input type="hidden" name="col_order" id="colOrder">
+            </div>
+
+            <div class="card">
                 <div class="card-title">Preview & Unduh</div>
                 <button type="button" id="previewBtn" class="btn btn-preview" onclick="doPreview()" style="width:100%;margin-bottom:10px;">
                     <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -270,6 +308,28 @@
         </div>
     </div>
 </form>
+
+{{-- Modal: atur urutan kolom --}}
+<div class="eb-modal" id="orderModal">
+    <div class="eb-modal-backdrop" onclick="closeOrderModal()"></div>
+    <div class="eb-modal-card">
+        <div class="eb-modal-head">
+            <div>
+                <div class="eb-modal-title">Atur Urutan Kolom</div>
+                <div class="eb-modal-sub">Seret <strong>⋮⋮</strong> atau pakai ▲▼ untuk mengatur urutan kolom di Preview, Excel &amp; PDF.</div>
+            </div>
+            <button type="button" class="eb-modal-close" onclick="closeOrderModal()">&times;</button>
+        </div>
+        <div class="eb-modal-body">
+            <div class="order-list" id="orderList"></div>
+            <div class="order-empty" id="orderEmpty">Belum ada kolom dipilih. Centang kolom dulu di panel kiri.</div>
+        </div>
+        <div class="eb-modal-foot">
+            <span id="orderCount" style="font-size:12px;color:#9ca3af;"></span>
+            <button type="button" class="btn btn-excel" style="flex:none;padding:9px 22px;" onclick="closeOrderModal()">Selesai</button>
+        </div>
+    </div>
+</div>
 
 {{-- Panel preview --}}
 <div class="card" id="previewPanel" style="display:none;margin-top:20px;">
@@ -309,6 +369,95 @@
         });
         const t = document.getElementById('colCountTotal');
         if (t) t.textContent = total + ' kolom dipilih';
+        syncOrderList();
+    }
+
+    // ===== Urutan kolom (drag / naik-turun) =====
+    let colOrderKeys = [];
+
+    function colLabel(key) {
+        const cb = exportForm.querySelector('input[name="columns[]"][value="' + key + '"]');
+        if (!cb) return key;
+        const span = cb.closest('.col-check').querySelector('span');
+        return span ? span.textContent.trim() : key;
+    }
+
+    function syncOrderList() {
+        const checked = colBoxes().filter(b => b.checked).map(b => b.value);
+        colOrderKeys = colOrderKeys.filter(k => checked.indexOf(k) !== -1);   // buang yg di-uncheck
+        checked.forEach(k => { if (colOrderKeys.indexOf(k) === -1) colOrderKeys.push(k); }); // tambah yg baru
+        renderOrderList();
+    }
+
+    function renderOrderList() {
+        const list  = document.getElementById('orderList');
+        const empty = document.getElementById('orderEmpty');
+        const cnt   = document.getElementById('orderCount');
+        const hidden= document.getElementById('colOrder');
+        const badge = document.getElementById('orderBtnCount');
+        hidden.value = colOrderKeys.join(',');
+        cnt.textContent = colOrderKeys.length ? colOrderKeys.length + ' kolom terpilih' : '';
+        if (badge) badge.textContent = colOrderKeys.length;
+        if (!colOrderKeys.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+        list.innerHTML = colOrderKeys.map((k, i) =>
+            '<div class="order-item" draggable="true" data-key="' + k + '">' +
+                '<span class="oi-handle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>' +
+                '<span class="oi-idx">' + (i + 1) + '</span>' +
+                '<span class="oi-label">' + escapeHtml(colLabel(k)) + '</span>' +
+                '<button type="button" class="oi-btn" title="Naik" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveOrder(\'' + k + '\',-1)"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>' +
+                '<button type="button" class="oi-btn" title="Turun" ' + (i === colOrderKeys.length - 1 ? 'disabled' : '') + ' onclick="moveOrder(\'' + k + '\',1)"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+                '<button type="button" class="oi-btn" title="Hapus" onclick="removeOrder(\'' + k + '\')">&times;</button>' +
+            '</div>'
+        ).join('');
+        bindOrderDrag();
+    }
+
+    function moveOrder(key, dir) {
+        const i = colOrderKeys.indexOf(key);
+        const j = i + dir;
+        if (i === -1 || j < 0 || j >= colOrderKeys.length) return;
+        [colOrderKeys[i], colOrderKeys[j]] = [colOrderKeys[j], colOrderKeys[i]];
+        renderOrderList();
+    }
+
+    function removeOrder(key) {
+        const cb = exportForm.querySelector('input[name="columns[]"][value="' + key + '"]');
+        if (cb) cb.checked = false;
+        refreshColCounts();   // → syncOrderList() ikut membuangnya
+    }
+
+    function openOrderModal() {
+        syncOrderList();
+        document.getElementById('orderModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeOrderModal();
+    });
+
+    let _dragKey = null;
+    function bindOrderDrag() {
+        document.querySelectorAll('#orderList .order-item').forEach(it => {
+            it.addEventListener('dragstart', () => { _dragKey = it.dataset.key; it.classList.add('dragging'); });
+            it.addEventListener('dragend',   () => { it.classList.remove('dragging'); document.querySelectorAll('.order-item').forEach(x => x.classList.remove('drag-over')); });
+            it.addEventListener('dragover',  e => { e.preventDefault(); it.classList.add('drag-over'); });
+            it.addEventListener('dragleave', () => it.classList.remove('drag-over'));
+            it.addEventListener('drop', e => {
+                e.preventDefault();
+                const target = it.dataset.key;
+                if (!_dragKey || _dragKey === target) return;
+                const from = colOrderKeys.indexOf(_dragKey), to = colOrderKeys.indexOf(target);
+                if (from === -1 || to === -1) return;
+                colOrderKeys.splice(from, 1);
+                colOrderKeys.splice(to, 0, _dragKey);
+                renderOrderList();
+            });
+        });
     }
 
     function toggleAll(state) {
