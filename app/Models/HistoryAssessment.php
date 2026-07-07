@@ -23,6 +23,7 @@ class HistoryAssessment extends Model
         'tanggal_exp_idp',
         'keterangan',
         'lembaga',
+        'link_file',
     ];
 
     protected $casts = [

@@ -212,6 +212,14 @@
                 <textarea name="keterangan" rows="3" class="form-input" style="resize:vertical;"
                           placeholder="Catatan tambahan assessment...">{{ old('keterangan') }}</textarea>
             </div>
+
+            <div class="form-group full">
+                <label class="form-label">Link File</label>
+                <input type="url" name="link_file" value="{{ old('link_file') }}" class="form-input"
+                       placeholder="https://drive.google.com/... atau https://1drv.ms/...">
+                <span class="form-hint">Link file assessment (Google Drive / OneDrive), diawali http:// atau https://. Opsional.</span>
+                @error('link_file')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
         </div>
     </div>
 

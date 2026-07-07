@@ -20,7 +20,7 @@ class HistoryAssessmentKompetensi extends Model
         'financial', 'commercial', 'people', 'operation', 'technology',
         // Hasil
         'total_competency_under', 'total_qualification_under',
-        'kesimpulan', 'keterangan', 'lembaga',
+        'kesimpulan', 'keterangan', 'lembaga', 'link_file',
     ];
 
     protected $casts = [

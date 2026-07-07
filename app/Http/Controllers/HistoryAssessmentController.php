@@ -46,6 +46,7 @@ class HistoryAssessmentController extends Controller
             'rekomendasi_final'   => 'nullable|in:ready,ready_with_development,not_ready',
             'keterangan'          => 'nullable|string',
             'lembaga'             => 'nullable|string|max:255',
+            'link_file'           => 'nullable|url|max:2048',
         ]);
 
         $karyawan->load(['jobGrade', 'personGrade']);
@@ -70,6 +71,7 @@ class HistoryAssessmentController extends Controller
             'tanggal_exp_idp'     => $tanggalExpIdp,
             'keterangan'          => $request->keterangan,
             'lembaga'             => $request->lembaga,
+            'link_file'           => $request->link_file,
         ]);
 
         $this->log('tambah', 'Assessment', $karyawan->nama, 'Tgl: ' . $request->tanggal_pelaksanaan);

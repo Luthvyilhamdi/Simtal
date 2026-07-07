@@ -231,10 +231,20 @@
             <span class="detail-value">@if($karyawan->email)<a href="mailto:{{ $karyawan->email }}">{{ $karyawan->email }}</a>@else<span class="muted">-</span>@endif</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Jenjang Pendidikan</span>
-            <span class="detail-value">@if($karyawan->jenjang_pendidikan)<span class="badge badge-blue">{{ $karyawan->jenjang_pendidikan }}</span>@else<span class="muted">-</span>@endif</span>
+            <span class="detail-label">Pendidikan Terakhir</span>
+            <span class="detail-value">@if($karyawan->jenjang_pendidikan)<span class="badge badge-blue">{{ $karyawan->jenjang_pendidikan }}</span>@if($karyawan->jurusan) <span style="color:#6b7280;">· {{ $karyawan->jurusan }}</span>@endif @else<span class="muted">-</span>@endif</span>
         </div>
-        <div class="detail-row"><span class="detail-label">Jurusan</span><span class="detail-value">{{ $karyawan->jurusan ?: '-' }}</span></div>
+        @if($karyawan->riwayatPendidikan->isNotEmpty())
+        <div style="padding:12px 0 2px;border-top:1px solid #f7f8f9;">
+            <div style="font-size:12px;color:#98a2b3;font-weight:500;margin-bottom:8px;">Riwayat Pendidikan</div>
+            @foreach($karyawan->riwayatPendidikan->sortBy(fn($r) => array_search($r->jenjang, \App\Models\Karyawan::JENJANG_PENDIDIKAN)) as $rp)
+            <div style="font-size:13px;color:#111827;margin-bottom:6px;display:flex;gap:8px;align-items:baseline;">
+                <span class="badge badge-blue" style="flex-shrink:0;">{{ $rp->jenjang }}</span>
+                <span>{{ $rp->jurusan ?: '-' }}@if($rp->institusi) <span style="color:#9ca3af;">· {{ $rp->institusi }}</span>@endif</span>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 
     {{-- Jabatan & Struktur --}}
@@ -339,20 +349,20 @@
     <div class="mdg-grid">
         <div class="mdg-item {{ $jgOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Job Grade</div>
-            <div class="mdg-num {{ $jgOk ? 'mdg-ok' : 'mdg-warn' }}">{{ $karyawan->mdg_jg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span></div>
+            <div class="mdg-num {{ $jgOk ? 'mdg-ok' : 'mdg-warn' }}" style="font-size:15px;line-height:1.3">{{ $karyawan->mdg_jg_lengkap }}</div>
             @if($karyawan->tanggal_mulai_jg)<div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>@endif
             <div class="mdg-since {{ $isShortlist ? 'mdg-since-shortlist' : 'mdg-since-normal' }}">min {{ $minJgTh }} tahun{{ $isShortlist ? ' ✦' : '' }}</div>
         </div>
         <div class="mdg-item {{ $pgOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Person Grade</div>
-            <div class="mdg-num {{ $pgOk ? 'mdg-ok' : 'mdg-warn' }}">{{ $karyawan->mdg_pg ?? 0 }}<span style="font-size:12px;font-weight:500;"> thn</span></div>
+            <div class="mdg-num {{ $pgOk ? 'mdg-ok' : 'mdg-warn' }}" style="font-size:15px;line-height:1.3">{{ $karyawan->mdg_pg_lengkap }}</div>
             @if($karyawan->tanggal_mulai_pg)<div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_pg->format('d M Y') }}</div>@endif
             <div class="mdg-since mdg-since-normal">min {{ $minPgTh }} tahun</div>
         </div>
         <div class="mdg-item {{ $bandOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Band</div>
-            <div class="mdg-num {{ $bandOk ? 'mdg-ok' : 'mdg-warn' }}">{{ $karyawan->mdg_band }}<span style="font-size:12px;font-weight:500;"> thn</span></div>
-            @if($karyawan->tanggal_mulai_jg)<div class="mdg-since">sejak {{ $karyawan->tanggal_mulai_jg->format('d M Y') }}</div>@endif
+            <div class="mdg-num {{ $bandOk ? 'mdg-ok' : 'mdg-warn' }}" style="font-size:15px;line-height:1.3">{{ $karyawan->mdg_band_lengkap }}</div>
+            @if($karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg)<div class="mdg-since">sejak {{ ($karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg)->format('d M Y') }}</div>@endif
             <div class="mdg-since {{ $isShortlist ? 'mdg-since-shortlist' : 'mdg-since-normal' }}">min {{ $minBandTh }} tahun{{ $isShortlist ? ' ✦' : '' }}</div>
         </div>
     </div>

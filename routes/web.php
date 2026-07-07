@@ -139,6 +139,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',                     [HistoryAssessmentAllController::class, 'export'])->name('export');
             Route::get('/export/kompetensi',          [HistoryAssessmentAllController::class, 'exportKompetensi'])->name('export.kompetensi');
             Route::delete('/{assessment}',            [HistoryAssessmentAllController::class, 'destroy'])->name('destroy');
+            Route::patch('/{assessment}/link-file',   [HistoryAssessmentAllController::class, 'updateLinkFile'])->name('link_file');
             Route::get('/import',                     [ImportAssessmentController::class, 'page'])->name('import');
             Route::post('/import',                    [ImportAssessmentController::class, 'import'])->name('import.store');
             Route::get('/import/template',            [ImportAssessmentController::class, 'downloadTemplate'])->name('import.template');
@@ -150,6 +151,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/history-assessment/kompetensi/{kompetensi}',
             [HistoryAssessmentAllController::class, 'destroyKompetensi'])
             ->name('assessment_kompetensi_all.destroy');
+        Route::patch('/history-assessment/kompetensi/{kompetensi}/link-file',
+            [HistoryAssessmentAllController::class, 'updateLinkFileKompetensi'])
+            ->name('assessment_kompetensi_all.link_file');
 
         // PGS & PJS
         Route::prefix('pgs-pjs')->name('pgs_pjs.')->group(function () {

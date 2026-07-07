@@ -27,6 +27,7 @@ class HistoryAssessmentKompetensiController extends Controller
             'periode'            => 'nullable|string',
             'keterangan'         => 'nullable|string',
             'lembaga'            => 'nullable|string|max:255',
+            'link_file'          => 'nullable|url|max:2048',
         ];
 
         foreach (array_keys(HistoryAssessmentKompetensi::competencies()) as $key) {
@@ -39,7 +40,7 @@ class HistoryAssessmentKompetensiController extends Controller
         $request->validate($rules);
 
         $data = $request->only(array_merge(
-            ['tanggal_assessment', 'periode', 'keterangan', 'lembaga'],
+            ['tanggal_assessment', 'periode', 'keterangan', 'lembaga', 'link_file'],
             array_keys(HistoryAssessmentKompetensi::competencies()),
             array_keys(HistoryAssessmentKompetensi::qualifications())
         ));

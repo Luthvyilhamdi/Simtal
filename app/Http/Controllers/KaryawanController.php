@@ -72,8 +72,10 @@ class KaryawanController extends Controller
             'tanggal_masuk'      => 'required|date',
             'no_hp'              => 'nullable|string|max:30',
             'email'              => 'nullable|email|max:255',
-            'jenjang_pendidikan' => 'nullable|string|max:20',
-            'jurusan'            => 'nullable|string|max:255',
+            'pend_jenjang'       => 'nullable|array',
+            'pend_jenjang.*'     => 'nullable|string|max:20',
+            'pend_jurusan.*'     => 'nullable|string|max:255',
+            'pend_institusi.*'   => 'nullable|string|max:255',
             'jabatan_id'         => 'required',
             'direktorat_id'      => 'required',
             'kompartemen_id'     => 'required',
@@ -97,7 +99,15 @@ class KaryawanController extends Controller
             $data['foto'] = $request->file('foto')->store('foto-karyawan', 'public');
         }
 
-        Karyawan::create($data);
+        $karyawan = Karyawan::create($data);
+
+        // Riwayat pendidikan + set Pendidikan Terakhir (jenjang tertinggi).
+        $karyawan->update($karyawan->syncRiwayatPendidikan(
+            (array) $request->input('pend_jenjang', []),
+            (array) $request->input('pend_jurusan', []),
+            (array) $request->input('pend_institusi', [])
+        ));
+
         $this->log('tambah', 'Karyawan', $request->nama, 'NIK: ' . $request->nik);
 
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil ditambahkan!');
@@ -105,7 +115,7 @@ class KaryawanController extends Controller
 
     public function show(Karyawan $karyawan)
     {
-        $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur','strukturAssignments']);
+        $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur','strukturAssignments','riwayatPendidikan']);
 
         // Cek shortlist — prioritas tahun ini, fallback tahun lalu
         $talentShortlist = TalentPool::where('karyawan_id', $karyawan->id)
@@ -145,8 +155,10 @@ class KaryawanController extends Controller
             'tanggal_masuk'      => 'required|date',
             'no_hp'              => 'nullable|string|max:30',
             'email'              => 'nullable|email|max:255',
-            'jenjang_pendidikan' => 'nullable|string|max:20',
-            'jurusan'            => 'nullable|string|max:255',
+            'pend_jenjang'       => 'nullable|array',
+            'pend_jenjang.*'     => 'nullable|string|max:20',
+            'pend_jurusan.*'     => 'nullable|string|max:255',
+            'pend_institusi.*'   => 'nullable|string|max:255',
             'jabatan_id'         => 'required',
             'direktorat_id'      => 'required',
             'kompartemen_id'     => 'required',
@@ -172,6 +184,14 @@ class KaryawanController extends Controller
         }
 
         $karyawan->update($data);
+
+        // Riwayat pendidikan + set Pendidikan Terakhir (jenjang tertinggi).
+        $karyawan->update($karyawan->syncRiwayatPendidikan(
+            (array) $request->input('pend_jenjang', []),
+            (array) $request->input('pend_jurusan', []),
+            (array) $request->input('pend_institusi', [])
+        ));
+
         $this->log('edit', 'Karyawan', $karyawan->nama, 'NIK: ' . $karyawan->nik);
 
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diupdate!');

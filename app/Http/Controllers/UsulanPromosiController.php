@@ -310,6 +310,10 @@ class UsulanPromosiController extends Controller
 
         DB::transaction(function () use ($request, $usulanPromosi, $karyawan, $jabatanId, $namaJabatan, $tmt) {
 
+            // Capture SEBELUM event syncTanggalMulaiBand jalan (dipicu oleh create history).
+            $jgLamaId        = (int) $karyawan->job_grade_id;
+            $bandDateSebelum = $karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg;
+
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->update([
@@ -351,8 +355,25 @@ class UsulanPromosiController extends Controller
             if ((int) $karyawan->person_grade_id !== (int) $request->person_grade_id) {
                 $update['person_grade_id']  = $request->person_grade_id;
                 $update['tanggal_mulai_pg'] = $tmt;
+
+                // Ketentuan MDG: saat Person Grade NAIK, TMT Job Grade ikut di-reset.
+                $pgLamaVal = (int) optional(PersonGrade::find($karyawan->person_grade_id))->person_grade;
+                $pgBaruVal = (int) optional(PersonGrade::find($request->person_grade_id))->person_grade;
+                if ($pgBaruVal > $pgLamaVal) {
+                    $update['tanggal_mulai_jg'] = $tmt;
+                }
             }
+
             $karyawan->update($update);
+
+            // TMT Band otoritatif: hanya di-reset saat NAIK BAND; band sama/turun →
+            // dipertahankan. Ditulis via query builder agar menang atas event sync
+            // (yang bisa keliru me-reset saat riwayat jabatan tidak lengkap).
+            Karyawan::where('id', $karyawan->id)->update([
+                'tanggal_mulai_band' => Karyawan::tmtBandSetelahPromosi(
+                    $jgLamaId, (int) $request->job_grade_id, $bandDateSebelum, $tmt
+                ),
+            ]);
 
             $usulanPromosi->update([
                 'no_sk'       => $request->no_sk,

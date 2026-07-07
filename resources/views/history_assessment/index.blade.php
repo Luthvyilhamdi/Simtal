@@ -125,6 +125,14 @@
     .modal-btn.cancel { background:#f9fafb;color:#374151;border:1px solid #e5e7eb; }
     .modal-btn.danger { background:#ef4444;color:white; }
     .modal-btn.danger:hover { background:#dc2626; }
+    .modal-btn.green { background:#15803d;color:white; }
+    .modal-btn.green:hover { background:#166534; }
+    .lf-btn { width:30px;height:30px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;flex-shrink:0;text-decoration:none; }
+    .lf-btn svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2; }
+    .lf-btn.open { color:#15803d;border-color:#bbf7d0;background:#f0fdf4; }
+    .lf-btn.open:hover { background:#dcfce7; }
+    .lf-btn.edit { color:#374151; }
+    .lf-btn.edit:hover { background:#f9fafb;border-color:#d1d5db; }
     @keyframes modalIn { from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);} }
 
     @media (max-width:640px) {
@@ -165,6 +173,24 @@
     </div>
 </div>
 <form id="formHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
+
+{{-- MODAL LINK FILE --}}
+<div class="modal-backdrop" id="modalLinkFile">
+    <div class="modal-box" style="max-width:460px;text-align:left;">
+        <div class="modal-title">🔗 Link File Assessment</div>
+        <div class="modal-desc" style="text-align:left;margin-bottom:14px;">Tempel link file assessment (Google Drive / OneDrive), diawali http:// atau https://. Kosongkan untuk menghapus link.</div>
+        <form id="formLinkFile" method="POST">
+            @csrf
+            @method('PATCH')
+            <input type="url" name="link_file" id="linkFileInput" placeholder="https://drive.google.com/..."
+                   style="width:100%;border:1px solid #d1d5db;border-radius:9px;padding:10px 12px;font-size:13px;font-family:inherit;">
+            <div class="modal-actions" style="margin-top:16px;">
+                <button type="button" class="modal-btn cancel" onclick="closeLinkFile()">Batal</button>
+                <button type="submit" class="modal-btn green">Simpan Link</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <a href="{{ route('karyawan.show', $karyawan) }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -276,6 +302,12 @@
                         {{ $a->rekomendasiFinalLabel }}
                     </span>
                     @endif
+                    @if($a->link_file)
+                        <a href="{{ $a->link_file }}" target="_blank" rel="noopener" class="lf-btn open" title="Buka file assessment"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+                    @endif
+                    <button type="button" class="lf-btn edit" title="{{ $a->link_file ? 'Ubah link file' : 'Tambah link file' }}"
+                        data-url="{{ route('history_assessment_all.link_file', $a) }}" data-link="{{ $a->link_file }}"
+                        onclick="openLinkFile(this.dataset.url, this.dataset.link)"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
                     <button type="button" class="btn-del"
                         data-url="{{ route('history_assessment.destroy', [$karyawan, $a]) }}"
                         data-tgl="{{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}"
@@ -373,6 +405,12 @@
                         <span class="badge-dot {{ $isQualified ? 'badge-dot-qualified' : 'badge-dot-notqualified' }}"></span>
                         {{ $ak->kesimpulan ?? '-' }}
                     </span>
+                    @if($ak->link_file)
+                        <a href="{{ $ak->link_file }}" target="_blank" rel="noopener" class="lf-btn open" title="Buka file assessment"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+                    @endif
+                    <button type="button" class="lf-btn edit" title="{{ $ak->link_file ? 'Ubah link file' : 'Tambah link file' }}"
+                        data-url="{{ route('assessment_kompetensi_all.link_file', $ak) }}" data-link="{{ $ak->link_file }}"
+                        onclick="openLinkFile(this.dataset.url, this.dataset.link)"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
                     <button type="button" class="btn-del"
                         data-url="{{ route('assessment_kompetensi.destroy', [$karyawan, $ak]) }}"
                         data-tgl="{{ $ak->tanggal_assessment->format('d M Y') }}"
@@ -473,6 +511,21 @@ function submitHapus() {
 document.getElementById('modalHapus').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ===== Modal Link File =====
+function openLinkFile(url, current) {
+    document.getElementById('formLinkFile').action = url;
+    document.getElementById('linkFileInput').value = current || '';
+    document.getElementById('modalLinkFile').classList.add('show');
+    setTimeout(() => document.getElementById('linkFileInput').focus(), 50);
+}
+function closeLinkFile() {
+    document.getElementById('modalLinkFile').classList.remove('show');
+}
+document.getElementById('modalLinkFile').addEventListener('click', function(e) {
+    if (e.target === this) closeLinkFile();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeLinkFile(); } });
 </script>
 @endpush

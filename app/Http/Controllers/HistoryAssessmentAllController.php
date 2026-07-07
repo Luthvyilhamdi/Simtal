@@ -109,4 +109,20 @@ class HistoryAssessmentAllController extends Controller
             ->route('history_assessment_all.index', ['tab' => 'komp'])
             ->with('success', 'Data assessment kompetensi berhasil dihapus!');
     }
+
+    // ===== UPDATE LINK FILE (assessment rekomendasi) =====
+    public function updateLinkFile(Request $request, HistoryAssessment $assessment)
+    {
+        $data = $request->validate(['link_file' => 'nullable|url|max:2048']);
+        $assessment->update(['link_file' => $data['link_file'] ?: null]);
+        return back()->with('success', 'Link file assessment berhasil disimpan.');
+    }
+
+    // ===== UPDATE LINK FILE (assessment kompetensi) =====
+    public function updateLinkFileKompetensi(Request $request, HistoryAssessmentKompetensi $kompetensi)
+    {
+        $data = $request->validate(['link_file' => 'nullable|url|max:2048']);
+        $kompetensi->update(['link_file' => $data['link_file'] ?: null]);
+        return back()->with('success', 'Link file assessment kompetensi berhasil disimpan.');
+    }
 }

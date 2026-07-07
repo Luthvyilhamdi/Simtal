@@ -26,6 +26,11 @@ class Karyawan extends Model
         'Penugasan',
     ];
 
+    /** Jenjang pendidikan, urut dari terendah → tertinggi (untuk menentukan pendidikan terakhir). */
+    public const JENJANG_PENDIDIKAN = [
+        'SD', 'SMP', 'SMA/SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3',
+    ];
+
     protected $casts = [
         'tanggal_lahir'     => 'date',
         'tanggal_masuk'     => 'date',
@@ -54,6 +59,40 @@ class Karyawan extends Model
     public function kalibrasis()       { return $this->hasMany(KalibrasiKaryawan::class); }
     public function talentPools()      { return $this->hasMany(TalentPool::class); }
     public function strukturAssignments() { return $this->hasMany(StrukturOrganisasi::class, 'karyawan_id'); }
+    public function riwayatPendidikan()   { return $this->hasMany(RiwayatPendidikan::class); }
+
+    /**
+     * Simpan ulang riwayat pendidikan dari array paralel (jenjang/jurusan/institusi),
+     * lalu tentukan Pendidikan Terakhir = entri dengan jenjang TERTINGGI.
+     * Mengembalikan ['jenjang_pendidikan' => ..., 'jurusan' => ...] untuk di-set ke karyawan.
+     */
+    public function syncRiwayatPendidikan(array $jenjang, array $jurusan = [], array $institusi = []): array
+    {
+        $entries = [];
+        foreach ($jenjang as $i => $j) {
+            $j = trim((string) $j);
+            if ($j === '') continue;
+            $entries[] = [
+                'jenjang'   => $j,
+                'jurusan'   => trim((string) ($jurusan[$i] ?? '')) ?: null,
+                'institusi' => trim((string) ($institusi[$i] ?? '')) ?: null,
+            ];
+        }
+
+        $this->riwayatPendidikan()->delete();
+        if ($entries) {
+            $this->riwayatPendidikan()->createMany($entries);
+        }
+
+        $terakhir = collect($entries)
+            ->sortByDesc(fn ($e) => array_search($e['jenjang'], self::JENJANG_PENDIDIKAN))
+            ->first();
+
+        return [
+            'jenjang_pendidikan' => $terakhir['jenjang'] ?? null,
+            'jurusan'            => $terakhir['jurusan'] ?? null,
+        ];
+    }
     public function pejabatAktif()
     {
         return $this->hasOne(\App\Models\HistoryPejabat::class)
@@ -142,6 +181,51 @@ class Karyawan extends Model
     {
         return (int) floor($this->mdg_band_bulan / 12);
     }
+
+    // MDG format lengkap "X tahun, Y bulan, Z hari" dari TMT grade sampai sekarang.
+    public static function formatMdgLengkap($mulai): string
+    {
+        if (! $mulai) return '-';
+        $mulai = $mulai instanceof Carbon ? $mulai : Carbon::parse($mulai);
+        $now = now();
+        if ($mulai->greaterThan($now)) return '-';
+
+        $d = $mulai->diff($now);
+        $parts = [];
+        if ($d->y > 0) $parts[] = $d->y . ' tahun';
+        if ($d->m > 0) $parts[] = $d->m . ' bulan';
+        $parts[] = $d->d . ' hari';
+        return implode(', ', $parts);
+    }
+
+    /** TRUE jika perubahan Job Grade merupakan kenaikan BAND (Band 1 teratas). */
+    public static function isNaikBand(?int $jgLamaId, ?int $jgBaruId): bool
+    {
+        $jgLamaVal = (int) optional(JobGrade::find($jgLamaId))->job_grade;
+        $jgBaruVal = (int) optional(JobGrade::find($jgBaruId))->job_grade;
+
+        $bandKeys = array_keys(self::bandConfig());
+        $idxLama  = array_search(self::getBandFromGrade($jgLamaVal), $bandKeys, true);
+        $idxBaru  = array_search(self::getBandFromGrade($jgBaruVal), $bandKeys, true);
+
+        // Index kecil = band lebih tinggi. Naik band = index mengecil.
+        return $idxLama !== false && $idxBaru !== false && $idxBaru < $idxLama;
+    }
+
+    /**
+     * TMT Band setelah perubahan grade (dipakai alur promosi):
+     * - NAIK band  → reset ke $tmt.
+     * - Band sama / turun band → dipertahankan ($bandDateSebelum = tanggal_mulai_band
+     *   lama, fallback tanggal_mulai_jg lama; DI-CAPTURE sebelum event sync jalan).
+     */
+    public static function tmtBandSetelahPromosi(?int $jgLamaId, ?int $jgBaruId, $bandDateSebelum, $tmt)
+    {
+        return self::isNaikBand($jgLamaId, $jgBaruId) ? $tmt : $bandDateSebelum;
+    }
+
+    public function getMdgPgLengkapAttribute(): string   { return self::formatMdgLengkap($this->tanggal_mulai_pg); }
+    public function getMdgJgLengkapAttribute(): string   { return self::formatMdgLengkap($this->tanggal_mulai_jg); }
+    public function getMdgBandLengkapAttribute(): string { return self::formatMdgLengkap($this->tanggal_mulai_band ?? $this->tanggal_mulai_jg); }
 
     // ===== PENSIUN =====
     /** Perkiraan tanggal pensiun = tanggal lahir + USIA_PENSIUN tahun. */
