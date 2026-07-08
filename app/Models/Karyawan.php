@@ -28,7 +28,7 @@ class Karyawan extends Model
 
     /** Jenjang pendidikan, urut dari terendah → tertinggi (untuk menentukan pendidikan terakhir). */
     public const JENJANG_PENDIDIKAN = [
-        'SD', 'SMP', 'SMA/SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3',
+        'SD', 'SMP', 'SMA/SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'Profesi', 'S2', 'S3',
     ];
 
     protected $casts = [
