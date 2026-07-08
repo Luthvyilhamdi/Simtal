@@ -204,10 +204,6 @@ Route::middleware('auth')->group(function () {
                 Route::get('/import/penilaian/template', [HistoryPenilaianKalibrasiController::class, 'templatePenilaian'])->name('template.penilaian');
                 Route::post('/import/kalibrasi',         [HistoryPenilaianKalibrasiController::class, 'importKalibrasi'])->name('import.kalibrasi');
                 Route::get('/import/kalibrasi/template', [HistoryPenilaianKalibrasiController::class, 'templateKalibrasi'])->name('template.kalibrasi');
-
-                // Hapus SEMUA data (konfirmasi ketik "Ya")
-                Route::delete('/hapus-semua/penilaian', [HistoryPenilaianKalibrasiController::class, 'destroyAllPenilaian'])->name('destroy_all.penilaian');
-                Route::delete('/hapus-semua/kalibrasi', [HistoryPenilaianKalibrasiController::class, 'destroyAllKalibrasi'])->name('destroy_all.kalibrasi');
             });
         });
 
