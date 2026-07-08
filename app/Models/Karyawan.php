@@ -62,37 +62,40 @@ class Karyawan extends Model
     public function riwayatPendidikan()   { return $this->hasMany(RiwayatPendidikan::class); }
 
     /**
-     * Simpan ulang riwayat pendidikan dari array paralel (jenjang/jurusan/institusi),
-     * lalu tentukan Pendidikan Terakhir = entri dengan jenjang TERTINGGI.
-     * Mengembalikan ['jenjang_pendidikan' => ..., 'jurusan' => ...] untuk di-set ke karyawan.
+     * Hitung ulang "Pendidikan Terakhir" (kolom jenjang_pendidikan/jurusan) dari
+     * riwayatPendidikan yang ADA saat ini = entri dengan jenjang TERTINGGI.
+     * Dipakai saat riwayat dikelola satu-per-satu di halaman tersendiri.
      */
-    public function syncRiwayatPendidikan(array $jenjang, array $jurusan = [], array $institusi = []): array
+    public function refreshPendidikanTerakhir(): void
     {
-        $entries = [];
-        foreach ($jenjang as $i => $j) {
-            $j = trim((string) $j);
-            if ($j === '') continue;
-            $entries[] = [
-                'jenjang'   => $j,
-                'jurusan'   => trim((string) ($jurusan[$i] ?? '')) ?: null,
-                'institusi' => trim((string) ($institusi[$i] ?? '')) ?: null,
-            ];
-        }
-
-        $this->riwayatPendidikan()->delete();
-        if ($entries) {
-            $this->riwayatPendidikan()->createMany($entries);
-        }
-
-        $terakhir = collect($entries)
-            ->sortByDesc(fn ($e) => array_search($e['jenjang'], self::JENJANG_PENDIDIKAN))
+        $terakhir = $this->riwayatPendidikan()->get()
+            ->sortByDesc(fn ($e) => array_search($e->jenjang, self::JENJANG_PENDIDIKAN))
             ->first();
 
-        return [
-            'jenjang_pendidikan' => $terakhir['jenjang'] ?? null,
-            'jurusan'            => $terakhir['jurusan'] ?? null,
-        ];
+        self::whereKey($this->getKey())->update([
+            'jenjang_pendidikan' => $terakhir->jenjang ?? null,
+            'jurusan'            => $terakhir->jurusan ?? null,
+        ]);
     }
+
+    /**
+     * Riwayat pendidikan → satu string untuk EXPORT (dan bisa dipakai IMPORT lagi).
+     * Format: entri dipisah "; ", field dipisah "|" → "Jenjang|Jurusan|Institusi".
+     * Contoh: "SMA/SMK|IPA|SMAN 1; S1|Teknik Mesin|UGM". Urut jenjang terendah→tertinggi.
+     */
+    public function getRiwayatPendidikanStringAttribute(): string
+    {
+        return $this->riwayatPendidikan
+            ->sortBy(fn ($e) => array_search($e->jenjang, self::JENJANG_PENDIDIKAN))
+            ->map(function ($e) {
+                $parts = [trim((string) $e->jenjang), trim((string) $e->jurusan), trim((string) $e->institusi)];
+                // Buang field kosong di ujung agar ringkas (mis. tanpa institusi).
+                while (count($parts) > 1 && end($parts) === '') array_pop($parts);
+                return implode('|', $parts);
+            })
+            ->implode('; ');
+    }
+
     public function pejabatAktif()
     {
         return $this->hasOne(\App\Models\HistoryPejabat::class)

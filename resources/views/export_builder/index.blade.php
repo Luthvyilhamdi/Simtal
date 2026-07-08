@@ -213,6 +213,15 @@
                 </div>
 
                 <div class="field">
+                    <label>Pendidikan</label>
+                    <select name="pendidikan">
+                        <option value="">Tidak disertakan</option>
+                        <option value="terakhir" {{ old('pendidikan')=='terakhir'?'selected':'' }}>Pendidikan Terakhir</option>
+                    </select>
+                    <div class="hint">Bila dipilih, menambah kolom <b>Pendidikan Terakhir · Jurusan · Institusi</b> (jenjang tertinggi). Untuk daftar lengkap semua jenjang, gunakan menu <b>History Pendidikan</b> → Export.</div>
+                </div>
+
+                <div class="field">
                     <label>Status</label>
                     <select name="status">
                         <option value="">Semua</option>

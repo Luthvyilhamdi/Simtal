@@ -151,7 +151,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">History Pejabat</div>
-        <div class="page-sub">Riwayat pejabat SVP, VP, SPM & PM — terintegrasi otomatis dari history jabatan</div>
+        <div class="page-sub">History pejabat SVP, VP, SPM & PM — terintegrasi otomatis dari history jabatan</div>
     </div>
     <a href="{{ route('history_pejabat.export', request()->query()) }}"
        style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">

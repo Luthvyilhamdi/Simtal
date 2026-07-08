@@ -234,17 +234,23 @@
             <span class="detail-label">Pendidikan Terakhir</span>
             <span class="detail-value">@if($karyawan->jenjang_pendidikan)<span class="badge badge-blue">{{ $karyawan->jenjang_pendidikan }}</span>@if($karyawan->jurusan) <span style="color:#6b7280;">· {{ $karyawan->jurusan }}</span>@endif @else<span class="muted">-</span>@endif</span>
         </div>
-        @if($karyawan->riwayatPendidikan->isNotEmpty())
         <div style="padding:12px 0 2px;border-top:1px solid #f7f8f9;">
-            <div style="font-size:12px;color:#98a2b3;font-weight:500;margin-bottom:8px;">Riwayat Pendidikan</div>
-            @foreach($karyawan->riwayatPendidikan->sortBy(fn($r) => array_search($r->jenjang, \App\Models\Karyawan::JENJANG_PENDIDIKAN)) as $rp)
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:12px;color:#98a2b3;font-weight:500;">History Pendidikan</span>
+                <a href="{{ route('riwayat_pendidikan.index', $karyawan) }}" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#15803d;text-decoration:none;">
+                    <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Kelola
+                </a>
+            </div>
+            @forelse($karyawan->riwayatPendidikan->sortBy(fn($r) => array_search($r->jenjang, \App\Models\Karyawan::JENJANG_PENDIDIKAN)) as $rp)
             <div style="font-size:13px;color:#111827;margin-bottom:6px;display:flex;gap:8px;align-items:baseline;">
                 <span class="badge badge-blue" style="flex-shrink:0;">{{ $rp->jenjang }}</span>
                 <span>{{ $rp->jurusan ?: '-' }}@if($rp->institusi) <span style="color:#9ca3af;">· {{ $rp->institusi }}</span>@endif</span>
             </div>
-            @endforeach
+            @empty
+            <div style="font-size:12.5px;color:#9ca3af;font-style:italic;">Belum ada history pendidikan. Klik "Kelola" untuk menambahkan.</div>
+            @endforelse
         </div>
-        @endif
     </div>
 
     {{-- Jabatan & Struktur --}}

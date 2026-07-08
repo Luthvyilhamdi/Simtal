@@ -204,4 +204,45 @@ class HistoryPenilaianKalibrasiController extends Controller
         return redirect()->route('history_penilaian_kalibrasi.index', ['tab' => 'kalibrasi'])
             ->with('success', 'Data kalibrasi berhasil dihapus.');
     }
+
+    // ===================== HAPUS SEMUA (Super Admin, konfirmasi ketik "Ya") =====================
+    public function destroyAllPenilaian(Request $request)
+    {
+        $this->checkSuperAdmin();
+
+        if (! $this->konfirmasiYa($request)) {
+            return redirect()->route('history_penilaian_kalibrasi.index', ['tab' => 'penilaian'])
+                ->with('error', 'Konfirmasi salah. Ketik "Ya" untuk menghapus semua data penilaian.');
+        }
+
+        $count = PenilaianKaryawan::count();
+        PenilaianKaryawan::query()->delete();
+        $this->log('hapus', 'Penilaian Karyawan', 'Hapus Semua', "Menghapus {$count} data penilaian");
+
+        return redirect()->route('history_penilaian_kalibrasi.index', ['tab' => 'penilaian'])
+            ->with('success', "Semua data penilaian berhasil dihapus ({$count} data).");
+    }
+
+    public function destroyAllKalibrasi(Request $request)
+    {
+        $this->checkSuperAdmin();
+
+        if (! $this->konfirmasiYa($request)) {
+            return redirect()->route('history_penilaian_kalibrasi.index', ['tab' => 'kalibrasi'])
+                ->with('error', 'Konfirmasi salah. Ketik "Ya" untuk menghapus semua data kalibrasi.');
+        }
+
+        $count = KalibrasiKaryawan::count();
+        KalibrasiKaryawan::query()->delete();
+        $this->log('hapus', 'Kalibrasi', 'Hapus Semua', "Menghapus {$count} data kalibrasi");
+
+        return redirect()->route('history_penilaian_kalibrasi.index', ['tab' => 'kalibrasi'])
+            ->with('success', "Semua data kalibrasi berhasil dihapus ({$count} data).");
+    }
+
+    /** Konfirmasi aman: user harus mengetik "Ya" (case-insensitive). */
+    private function konfirmasiYa(Request $request): bool
+    {
+        return strtolower(trim((string) $request->input('konfirmasi'))) === 'ya';
+    }
 }

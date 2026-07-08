@@ -44,6 +44,11 @@
     .btn-import svg { stroke:currentColor; }
     .btn-export { background:#15803d;color:white; }
     .btn-export svg { stroke:white; }
+    .btn-danger { background:#fef2f2;color:#dc2626;border:1px solid #fecaca; }
+    .btn-danger:hover { background:#fee2e2; }
+    .btn-danger svg { stroke:currentColor; }
+    .hs-input { width:100%;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;text-align:center;letter-spacing:1px;margin-top:6px; }
+    .hs-input:focus { outline:none;border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.12); }
 
     .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
     .table-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch; }
@@ -183,6 +188,25 @@
 <form id="formHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
 
 @if($isSA)
+{{-- MODAL HAPUS SEMUA (ketik "Ya") --}}
+<div class="modal-backdrop" id="modalHapusSemua">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-icon-wrap"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="modal-title" id="hsTitle">Hapus SEMUA Data?</div>
+        <div class="modal-desc" id="hsDesc">Tindakan ini tidak dapat dibatalkan.</div>
+        <form id="formHapusSemua" method="POST">
+            @csrf
+            @method('DELETE')
+            <div style="text-align:left;font-size:12px;font-weight:600;color:#374151;">Yakin ingin menghapus data ini semua? Ketik <b style="color:#dc2626;">Ya</b> untuk konfirmasi:</div>
+            <input type="text" id="hsInput" name="konfirmasi" class="hs-input" autocomplete="off" placeholder="Ketik: Ya">
+            <div class="modal-actions" style="margin-top:16px;">
+                <button type="button" class="modal-btn cancel" onclick="closeHapusSemua()">Batal</button>
+                <button type="submit" class="modal-btn danger" id="hsSubmit" disabled>Hapus Semua</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {{-- IMPORT MODAL: PENILAIAN --}}
 <div class="modal-backdrop" id="modalImportPen">
     <div class="modal-box" style="max-width:440px;text-align:left">
@@ -225,7 +249,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">History Penilaian &amp; Kalibrasi</div>
-        <div class="page-sub">Dikelompokkan per karyawan — klik Riwayat untuk lihat semua tahun. Import &amp; export massal.</div>
+        <div class="page-sub">Dikelompokkan per karyawan — klik History untuk lihat semua tahun. Import &amp; export massal.</div>
     </div>
 </div>
 
@@ -260,6 +284,7 @@
         <div class="spacer"></div>
         @if($isSA)<button class="btn-act btn-import" onclick="openImport('Pen')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>@endif
         <a href="{{ route('history_penilaian_kalibrasi.export.penilaian', request()->only('search','tahun')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Penilaian</a>
+        @if($isSA && $stats['total_penilaian'] > 0)<button type="button" class="btn-act btn-danger" data-url="{{ route('history_penilaian_kalibrasi.destroy_all.penilaian') }}" data-label="Penilaian" data-count="{{ $stats['total_penilaian'] }}" onclick="openHapusSemua(this.dataset.url, this.dataset.label, this.dataset.count)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Hapus Semua</button>@endif
     </div>
 
     <div class="table-card" id="cardPenilaian">
@@ -304,7 +329,7 @@
                         <td>
                             <button type="button" class="btn-detail" data-detail='@json($detailP)' onclick="openSide(this.dataset.detail)">
                                 <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                Riwayat
+                                History
                             </button>
                         </td>
                     </tr>
@@ -347,6 +372,7 @@
         <div class="spacer"></div>
         @if($isSA)<button class="btn-act btn-import" onclick="openImport('Kal')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>@endif
         <a href="{{ route('history_penilaian_kalibrasi.export.kalibrasi', request()->only('search_kalibrasi','tahun_kalibrasi')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Kalibrasi</a>
+        @if($isSA && $stats['total_kalibrasi'] > 0)<button type="button" class="btn-act btn-danger" data-url="{{ route('history_penilaian_kalibrasi.destroy_all.kalibrasi') }}" data-label="Kalibrasi" data-count="{{ $stats['total_kalibrasi'] }}" onclick="openHapusSemua(this.dataset.url, this.dataset.label, this.dataset.count)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Hapus Semua</button>@endif
     </div>
 
     <div class="table-card" id="cardKalibrasi">
@@ -391,7 +417,7 @@
                         <td>
                             <button type="button" class="btn-detail" data-detail='@json($detailK)' onclick="openSide(this.dataset.detail)">
                                 <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                Riwayat
+                                History
                             </button>
                         </td>
                     </tr>
@@ -516,6 +542,24 @@ function closeModal() { document.getElementById('modalHapus').classList.remove('
 function submitHapus() { var f=document.getElementById('formHapus'); f.action=deleteUrl; f.submit(); }
 document.getElementById('modalHapus').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
 
+// ===== HAPUS SEMUA MODAL (ketik "Ya") =====
+function openHapusSemua(url, label, count){
+    var f = document.getElementById('formHapusSemua');
+    f.action = url;
+    document.getElementById('hsTitle').textContent = 'Hapus SEMUA Data ' + label + '?';
+    document.getElementById('hsDesc').innerHTML = 'Anda akan menghapus <strong>seluruh data ' + label.toLowerCase() + ' (' + count + ' data)</strong> secara permanen. Tindakan ini <strong>tidak dapat dibatalkan</strong>.';
+    var inp = document.getElementById('hsInput'); inp.value=''; document.getElementById('hsSubmit').disabled = true;
+    document.getElementById('modalHapusSemua').classList.add('show'); document.body.style.overflow='hidden';
+    setTimeout(function(){ inp.focus(); }, 60);
+}
+function closeHapusSemua(){ document.getElementById('modalHapusSemua').classList.remove('show'); document.body.style.overflow=''; }
+(function(){
+    var inp = document.getElementById('hsInput');
+    if (!inp) return; // hanya ada untuk Super Admin
+    inp.addEventListener('input', function(){ document.getElementById('hsSubmit').disabled = this.value.trim().toLowerCase() !== 'ya'; });
+    document.getElementById('modalHapusSemua').addEventListener('click', function(e){ if(e.target===this) closeHapusSemua(); });
+})();
+
 // ===== IMPORT MODAL =====
 function openImport(w){ var m=document.getElementById('modalImport'+w); if(m){ m.classList.add('show'); document.body.style.overflow='hidden'; } }
 function closeImport(w){ var m=document.getElementById('modalImport'+w); if(m){ m.classList.remove('show'); document.body.style.overflow=''; } }
@@ -536,7 +580,7 @@ function openSide(json) {
 
     var rows = '';
     if (d.tipe_panel === 'penilaian') {
-        document.getElementById('sideTitle').textContent = '📊 Riwayat Penilaian';
+        document.getElementById('sideTitle').textContent = '📊 History Penilaian';
         rows = d.items.map(function(it){
             var tipeCls = it.tipe === 'KPI' ? 'background:#dcfce7;color:#15803d' : 'background:#dbeafe;color:#1d4ed8';
             return '<div class="sp-item">'
@@ -549,7 +593,7 @@ function openSide(json) {
                 + '</div>';
         }).join('');
     } else {
-        document.getElementById('sideTitle').textContent = '🎯 Riwayat Kalibrasi';
+        document.getElementById('sideTitle').textContent = '🎯 History Kalibrasi';
         rows = d.items.map(function(it){
             var bg = (it.color && it.color.bg) ? it.color.bg : '#f3f4f6';
             var tx = (it.color && it.color.text) ? it.color.text : '#374151';
@@ -563,7 +607,7 @@ function openSide(json) {
         }).join('');
     }
 
-    body.innerHTML = head + '<div class="sp-section-title">Riwayat Lengkap</div>' + rows;
+    body.innerHTML = head + '<div class="sp-section-title">History Lengkap</div>' + rows;
     document.getElementById('sideOverlay').classList.add('show');
     setTimeout(function(){ document.getElementById('sidePanel').classList.add('show'); }, 10);
     document.body.style.overflow = 'hidden';

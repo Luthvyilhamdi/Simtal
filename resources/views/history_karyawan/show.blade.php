@@ -126,7 +126,7 @@
 {{-- Section Header --}}
 <div class="section-header">
     <div>
-        <div class="section-title">Riwayat Jabatan</div>
+        <div class="section-title">History Jabatan</div>
         <div class="section-sub">{{ $histories->count() }} jabatan tercatat dalam sistem</div>
     </div>
 </div>

@@ -60,8 +60,8 @@ class ExportBuilderController extends Controller
             'status_kepegawaian' => ['Data Diri', 'Status Kepegawaian', null, fn ($k) => $k->status_kepegawaian ?: '-'],
             'no_hp'         => ['Data Diri', 'No. HP', null, fn ($k) => $k->no_hp ?: '-'],
             'email'         => ['Data Diri', 'Email', null, fn ($k) => $k->email ?: '-'],
-            'jenjang_pendidikan' => ['Data Diri', 'Jenjang Pendidikan', null, fn ($k) => $k->jenjang_pendidikan ?: '-'],
-            'jurusan'       => ['Data Diri', 'Jurusan', null, fn ($k) => $k->jurusan ?: '-'],
+            // Pendidikan TIDAK lagi kolom checkbox — dipilih lewat filter "Pendidikan"
+            // (Terakhir / Semua / jenjang tertentu) → kolom rapi Jurusan & Institusi.
 
             // ── Jabatan & Unit ──
             'jabatan'               => ['Jabatan & Unit', 'Jabatan', 'jabatan', fn ($k) => $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-')],
@@ -125,14 +125,14 @@ class ExportBuilderController extends Controller
             'talent_klasifikasi' => ['Talent Pool', 'Klasifikasi Talent'.$suffixTahun, 'talentPools', fn ($k) => optional(self::byTahun($k->talentPools, 'periode', $tahun))->klasifikasi_label ?? '-'],
             'talent_catatan'     => ['Talent Pool', 'Catatan Talent'.$suffixTahun, 'talentPools', fn ($k) => optional(self::byTahun($k->talentPools, 'periode', $tahun))->catatan ?? '-'],
 
-            // ── Riwayat Jabatan (ringkasan seluruh riwayat) ──
-            'riwayat_jabatan_terakhir' => ['Riwayat Jabatan', 'Jabatan Terakhir (Riwayat)', 'historyJabatan',
+            // ── History Jabatan (ringkasan seluruh riwayat) ──
+            'riwayat_jabatan_terakhir' => ['History Jabatan', 'Jabatan Terakhir (History)', 'historyJabatan',
                 fn ($k) => optional($k->historyJabatan->sortByDesc('tanggal_mulai')->first())->jabatan_saat_ini ?? '-'],
-            'riwayat_tgl_terakhir'     => ['Riwayat Jabatan', 'Tgl Perubahan Terakhir', 'historyJabatan',
+            'riwayat_tgl_terakhir'     => ['History Jabatan', 'Tgl Perubahan Terakhir', 'historyJabatan',
                 fn ($k) => optional($k->historyJabatan->sortByDesc('tanggal_mulai')->first())->tanggal_mulai?->format('d/m/Y') ?? '-'],
-            'jumlah_promosi' => ['Riwayat Jabatan', 'Jumlah Promosi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'promosi')->count()],
-            'jumlah_mutasi'  => ['Riwayat Jabatan', 'Jumlah Mutasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'mutasi')->count()],
-            'jumlah_rotasi'  => ['Riwayat Jabatan', 'Jumlah Rotasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'rotasi')->count()],
+            'jumlah_promosi' => ['History Jabatan', 'Jumlah Promosi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'promosi')->count()],
+            'jumlah_mutasi'  => ['History Jabatan', 'Jumlah Mutasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'mutasi')->count()],
+            'jumlah_rotasi'  => ['History Jabatan', 'Jumlah Rotasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'rotasi')->count()],
 
             // ── PGS / PJS (penugasan aktif) ──
             'pgs_pjs_aktif'   => ['PGS / PJS', 'Status PGS/PJS', 'pgsPjs',
@@ -225,6 +225,7 @@ class ExportBuilderController extends Controller
             'columns.*'     => 'in:'.implode(',', array_keys(self::columnRegistry())),
             'tahun'          => 'nullable|integer|min:2000|max:2100',
             'bulan'          => 'nullable|integer|min:1|max:12',
+            'pendidikan'     => 'nullable|in:terakhir',
             'status'         => 'nullable|in:aktif,tidak aktif',
             'direktorat_id'  => 'nullable|exists:direktorat,id',
             'kompartemen_id' => 'nullable|exists:kompartemen,id',
@@ -251,10 +252,11 @@ class ExportBuilderController extends Controller
      */
     private function buildRows(array $validated, ?int $limit = null): array
     {
-        $tahun    = $validated['tahun'] ?? null;
-        $bulan    = $validated['bulan'] ?? null;
-        $selected = $validated['columns'];
-        $registry = self::columnRegistry($tahun, $bulan);
+        $tahun      = $validated['tahun'] ?? null;
+        $bulan      = $validated['bulan'] ?? null;
+        $pendidikan = $validated['pendidikan'] ?? null;
+        $selected   = $validated['columns'];
+        $registry   = self::columnRegistry($tahun, $bulan);
 
         // Urutan kolom kustom dari user (col_order). Hanya kolom yang benar-benar
         // terpilih yang dipakai; sisa yang tak ada di urutan ditempel di belakang.
@@ -279,6 +281,10 @@ class ExportBuilderController extends Controller
             ->filter()
             ->flatMap(fn ($r) => explode(',', $r))
             ->unique()->values()->all();
+
+        if ($pendidikan) {
+            $relations[] = 'riwayatPendidikan';
+        }
 
         // Urutkan dari grade TERTINGGI ke terendah (JG desc), nama sebagai pemecah seri.
         // Karyawan tanpa job grade diletakkan paling bawah.
@@ -317,6 +323,10 @@ class ExportBuilderController extends Controller
             });
         }
 
+        // Kolom pendidikan dinamis (Terakhir / Semua / jenjang tertentu) — ditempel
+        // di belakang kolom terpilih. Dihitung dari query TERFILTER (sebelum limit).
+        $eduCols = self::pendidikanColumns($pendidikan);
+
         // Mode "semua tahun" + ada kolom tahunan → satu baris per (karyawan, tahun).
         $adaKolomTahunan = (bool) array_intersect($selected, self::yearDependentKeys());
         $expand = ($tahun === null) && $adaKolomTahunan;
@@ -331,6 +341,9 @@ class ExportBuilderController extends Controller
             foreach ($selected as $key) {
                 $headings[] = $registry[$key][1];
             }
+            foreach ($eduCols as $c) {
+                $headings[] = $c['label'];
+            }
 
             $rows = [];
             $no = 1;
@@ -338,6 +351,9 @@ class ExportBuilderController extends Controller
                 $row = [$no++];
                 foreach ($selected as $key) {
                     $row[] = (string) $registry[$key][3]($k);
+                }
+                foreach ($eduCols as $c) {
+                    $row[] = (string) ($c['resolver'])($k);
                 }
                 $rows[] = $row;
             }
@@ -378,6 +394,9 @@ class ExportBuilderController extends Controller
                 $plan[] = ['key' => $key, 'tahun' => $th];
             }
         }
+        foreach ($eduCols as $c) {
+            $headings[] = $c['label'];
+        }
 
         $registryCache = [];
         $rows = [];
@@ -393,6 +412,9 @@ class ExportBuilderController extends Controller
                     $row[] = (string) $reg[$col['key']][3]($k);
                 }
             }
+            foreach ($eduCols as $c) {
+                $row[] = (string) ($c['resolver'])($k);
+            }
             $rows[] = $row;
         }
 
@@ -402,6 +424,25 @@ class ExportBuilderController extends Controller
         }
 
         return [$headings, $rows, $total];
+    }
+
+    /**
+     * Kolom pendidikan untuk Export Builder: hanya "Pendidikan Terakhir"
+     * (jenjang tertinggi) → Pendidikan Terakhir + Jurusan + Institusi.
+     * Daftar lengkap semua jenjang diekspor lewat menu History Pendidikan.
+     * Return list of ['label' => string, 'resolver' => fn(Karyawan): string].
+     */
+    private static function pendidikanColumns(?string $pendidikan): array
+    {
+        if ($pendidikan !== 'terakhir') return [];
+
+        $entri = fn ($k) => optional($k->riwayatPendidikan->firstWhere('jenjang', $k->jenjang_pendidikan));
+
+        return [
+            ['label' => 'Pendidikan Terakhir', 'resolver' => fn ($k) => $k->jenjang_pendidikan ?: '-'],
+            ['label' => 'Jurusan',             'resolver' => fn ($k) => $k->jurusan ?: '-'],
+            ['label' => 'Institusi',           'resolver' => fn ($k) => $entri($k)->institusi ?: '-'],
+        ];
     }
 
     /** Daftar key kolom yang nilainya bergantung pada tahun/periode. */

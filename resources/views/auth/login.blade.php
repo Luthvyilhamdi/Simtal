@@ -223,7 +223,7 @@
         </div>
         <div class="left-desc">
             <h2>Sistem Manajemen Talenta Karyawan</h2>
-            <p>Kelola data karyawan, riwayat jabatan, dan assessment secara terpusat, aman, dan efisien.</p>
+            <p>Kelola data karyawan, history jabatan, dan assessment secara terpusat, aman, dan efisien.</p>
         </div>
         <div class="left-badges">
             <div class="badge-item">

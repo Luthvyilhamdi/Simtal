@@ -7,6 +7,8 @@ use App\Http\Controllers\HistoryKaryawanController;
 use App\Http\Controllers\HistoryAssessmentController;
 use App\Http\Controllers\HistoryAssessmentAllController;
 use App\Http\Controllers\HistoryAssessmentKompetensiController;
+use App\Http\Controllers\RiwayatPendidikanController;
+use App\Http\Controllers\RiwayatPendidikanAllController;
 use App\Http\Controllers\ImportAssessmentController;
 use App\Http\Controllers\ImportHistoryJabatanController;
 use App\Http\Controllers\PgsPjsController;
@@ -133,6 +135,23 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{kompetensi}', [HistoryAssessmentKompetensiController::class, 'destroy'])->name('destroy');
         });
 
+        // Riwayat Pendidikan per Karyawan
+        Route::prefix('karyawan/{karyawan}/riwayat-pendidikan')->name('riwayat_pendidikan.')->group(function () {
+            Route::get('/',                        [RiwayatPendidikanController::class, 'index'])->name('index');
+            Route::post('/',                       [RiwayatPendidikanController::class, 'store'])->name('store');
+            Route::put('/{riwayatPendidikan}',     [RiwayatPendidikanController::class, 'update'])->name('update');
+            Route::delete('/{riwayatPendidikan}',  [RiwayatPendidikanController::class, 'destroy'])->name('destroy');
+        });
+
+        // History Pendidikan GLOBAL (semua karyawan) — khusus Super Admin
+        Route::prefix('riwayat-pendidikan')->name('riwayat_pendidikan_all.')->group(function () {
+            Route::get('/',                       [RiwayatPendidikanAllController::class, 'index'])->name('index');
+            Route::get('/export',                 [RiwayatPendidikanAllController::class, 'export'])->name('export');
+            Route::post('/import',                [RiwayatPendidikanAllController::class, 'import'])->name('import.store');
+            Route::get('/import/template',        [RiwayatPendidikanAllController::class, 'downloadTemplate'])->name('import.template');
+            Route::delete('/{riwayatPendidikan}', [RiwayatPendidikanAllController::class, 'destroy'])->name('destroy');
+        });
+
         // History Assessment All
         Route::prefix('history-assessment')->name('history_assessment_all.')->group(function () {
             Route::get('/',                           [HistoryAssessmentAllController::class, 'index'])->name('index');
@@ -185,6 +204,10 @@ Route::middleware('auth')->group(function () {
                 Route::get('/import/penilaian/template', [HistoryPenilaianKalibrasiController::class, 'templatePenilaian'])->name('template.penilaian');
                 Route::post('/import/kalibrasi',         [HistoryPenilaianKalibrasiController::class, 'importKalibrasi'])->name('import.kalibrasi');
                 Route::get('/import/kalibrasi/template', [HistoryPenilaianKalibrasiController::class, 'templateKalibrasi'])->name('template.kalibrasi');
+
+                // Hapus SEMUA data (konfirmasi ketik "Ya")
+                Route::delete('/hapus-semua/penilaian', [HistoryPenilaianKalibrasiController::class, 'destroyAllPenilaian'])->name('destroy_all.penilaian');
+                Route::delete('/hapus-semua/kalibrasi', [HistoryPenilaianKalibrasiController::class, 'destroyAllKalibrasi'])->name('destroy_all.kalibrasi');
             });
         });
 

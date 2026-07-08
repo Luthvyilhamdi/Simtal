@@ -278,7 +278,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">History Jabatan</div>
-        <div class="page-sub">Riwayat Jabatan {{ $karyawan->nama }}</div>
+        <div class="page-sub">History Jabatan {{ $karyawan->nama }}</div>
     </div>
     <a href="{{ route('history_jabatan.create', $karyawan) }}" class="btn-primary">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -378,7 +378,7 @@
     <div class="empty-state">
         <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         <p>Belum ada history jabatan</p>
-        <span style="font-size:12px;">Klik "Tambah Jabatan" untuk menambahkan riwayat jabatan</span>
+        <span style="font-size:12px;">Klik "Tambah Jabatan" untuk menambahkan history jabatan</span>
     </div>
 </div>
 @endif

@@ -169,7 +169,7 @@
                     value="{{ old('jabatan_tujuan') }}"
                     class="form-input {{ $errors->has('jabatan_tujuan')?'error-input':'' }}"
                     placeholder="Ketik jabatan tujuan (judul yang akan tampil)…" autocomplete="off">
-                <div class="form-hint">Label jabatan yang akan tampil di riwayat & profil karyawan.</div>
+                <div class="form-hint">Label jabatan yang akan tampil di history & profil karyawan.</div>
                 @error('jabatan_tujuan')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
 

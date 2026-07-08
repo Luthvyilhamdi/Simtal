@@ -98,13 +98,6 @@
         .form-actions-right { flex-direction:column; }
         .btn-cancel,.btn-save { width:100%;justify-content:center; }
     }
-    /* Riwayat pendidikan berulang */
-    .pend-row { display:grid;grid-template-columns:140px 1fr 1fr 34px;gap:8px;margin-bottom:8px;align-items:center; }
-    .pend-del { width:34px;height:38px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:8px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0; }
-    .pend-del:hover { background:#fee2e2; }
-    .pend-add { margin-top:2px;border:1px dashed #86efac;background:#f0fdf4;color:#15803d;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
-    .pend-add:hover { background:#dcfce7; }
-    @media (max-width:640px){ .pend-row { grid-template-columns:1fr 1fr 34px; } }
 </style>
 @endpush
 
@@ -240,7 +233,7 @@
             </div>
             <div>
                 <div class="section-title">Kontak & Pendidikan</div>
-                <div class="section-sub">Nomor telepon, email, dan riwayat pendidikan</div>
+                <div class="section-sub">Nomor telepon, email, dan history pendidikan</div>
             </div>
         </div>
 
@@ -258,45 +251,10 @@
             </div>
 
             <div class="form-group" style="grid-column:1/-1;">
-                <label class="form-label">Riwayat Pendidikan</label>
-                <div class="form-hint" style="margin-bottom:8px;">Isi dari terendah ke tertinggi (mis. SMA/SMK → S1 → S2). "Pendidikan Terakhir" otomatis diambil dari jenjang tertinggi.</div>
-                <div id="pendRows">
-                    @php $oldJen = (array) old('pend_jenjang', ['']); $oldJur = (array) old('pend_jurusan', []); $oldIns = (array) old('pend_institusi', []); @endphp
-                    @foreach($oldJen as $i => $jv)
-                    <div class="pend-row">
-                        <div class="select-wrap">
-                            <select name="pend_jenjang[]" class="form-input">
-                                <option value="">-- Jenjang --</option>
-                                @foreach(\App\Models\Karyawan::JENJANG_PENDIDIKAN as $jp)
-                                    <option value="{{ $jp }}" {{ $jv==$jp ? 'selected' : '' }}>{{ $jp }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <input type="text" name="pend_jurusan[]" value="{{ $oldJur[$i] ?? '' }}" class="form-input" placeholder="Jurusan">
-                        <input type="text" name="pend_institusi[]" value="{{ $oldIns[$i] ?? '' }}" class="form-input" placeholder="Institusi / Sekolah">
-                        <button type="button" class="pend-del" onclick="removePendRow(this)" title="Hapus baris">&times;</button>
-                    </div>
-                    @endforeach
-                </div>
-                <button type="button" class="pend-add" onclick="addPendRow()">+ Tambah Pendidikan</button>
-                @error('pend_jenjang.*')<div class="error-msg">{{ $message }}</div>@enderror
+                <div class="form-hint">History Pendidikan (SD → S3) dikelola di halaman tersendiri setelah karyawan disimpan — buka profil karyawan lalu klik <strong>"Kelola"</strong> pada bagian Pendidikan.</div>
             </div>
         </div>
     </div>
-
-    <template id="pendRowTpl">
-        <div class="pend-row">
-            <div class="select-wrap">
-                <select name="pend_jenjang[]" class="form-input">
-                    <option value="">-- Jenjang --</option>
-                    @foreach(\App\Models\Karyawan::JENJANG_PENDIDIKAN as $jp)<option value="{{ $jp }}">{{ $jp }}</option>@endforeach
-                </select>
-            </div>
-            <input type="text" name="pend_jurusan[]" class="form-input" placeholder="Jurusan">
-            <input type="text" name="pend_institusi[]" class="form-input" placeholder="Institusi / Sekolah">
-            <button type="button" class="pend-del" onclick="removePendRow(this)" title="Hapus baris">&times;</button>
-        </div>
-    </template>
 
     {{-- ===== JABATAN & STRUKTUR ===== --}}
     <div class="form-card">
@@ -511,22 +469,6 @@
 
 @push('scripts')
 <script>
-    // Riwayat pendidikan: tambah/hapus baris
-    function addPendRow() {
-        const tpl = document.getElementById('pendRowTpl');
-        document.getElementById('pendRows').appendChild(tpl.content.cloneNode(true));
-    }
-    function removePendRow(btn) {
-        const rows = document.querySelectorAll('#pendRows .pend-row');
-        const row  = btn.closest('.pend-row');
-        if (rows.length <= 1) {
-            row.querySelectorAll('input').forEach(i => i.value = '');
-            row.querySelector('select').value = '';
-        } else {
-            row.remove();
-        }
-    }
-
     const bandMap = {
         22:'Band 1', 21:'Band 1', 20:'Band 1',
         19:'Band 2', 18:'Band 2', 17:'Band 2',

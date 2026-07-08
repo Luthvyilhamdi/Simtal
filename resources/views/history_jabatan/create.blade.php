@@ -78,7 +78,7 @@
 
     <div class="page-header">
         <div class="page-title">➕ Tambah History Jabatan</div>
-        <div class="page-sub">Tambah riwayat jabatan baru untuk <strong>{{ $karyawan->nama }}</strong> — profil akan otomatis diperbarui</div>
+        <div class="page-sub">Tambah history jabatan baru untuk <strong>{{ $karyawan->nama }}</strong> — profil akan otomatis diperbarui</div>
     </div>
 
     <form method="POST" action="{{ route('history_jabatan.store', $karyawan) }}">

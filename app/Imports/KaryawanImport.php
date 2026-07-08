@@ -60,8 +60,8 @@ class KaryawanImport implements OnEachRow, WithHeadingRow
             if ($this->filled($row, 'status_kepegawaian')) $data['status_kepegawaian'] = $this->normStatusKepegawaian($row['status_kepegawaian']);
             if ($this->filled($row, 'no_hp'))            $data['no_hp'] = trim((string) $row['no_hp']);
             if ($this->filled($row, 'email'))            $data['email'] = trim((string) $row['email']);
-            if ($this->filled($row, 'jenjang_pendidikan')) $data['jenjang_pendidikan'] = trim((string) $row['jenjang_pendidikan']);
-            if ($this->filled($row, 'jurusan'))          $data['jurusan'] = trim((string) $row['jurusan']);
+            // Pendidikan (jenjang_pendidikan/jurusan) TIDAK diimport di sini —
+            // dikelola khusus lewat History Pendidikan (riwayat_pendidikan_all.*).
             if ($this->filled($row, 'struktural_fungsional')) {
                 $data['struktural_fungsional'] = ucfirst(strtolower(trim($row['struktural_fungsional'])));
             }

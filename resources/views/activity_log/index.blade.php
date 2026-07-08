@@ -110,7 +110,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">Log Aktivitas</div>
-        <div class="page-sub">Riwayat semua aktivitas di sistem SIMTAL</div>
+        <div class="page-sub">History semua aktivitas di sistem SIMTAL</div>
     </div>
     <button type="button" class="btn-hapus-log" onclick="openModal()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>

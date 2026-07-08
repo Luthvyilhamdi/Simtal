@@ -232,7 +232,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">History Assessment</div>
-        <div class="page-sub">Riwayat assessment seluruh karyawan</div>
+        <div class="page-sub">History assessment seluruh karyawan</div>
     </div>
 </div>
 

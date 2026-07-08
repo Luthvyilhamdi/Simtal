@@ -324,20 +324,26 @@
             <div class="nav-section-label">Menu Utama</div>
 
             {{-- Data Karyawan (accordion) --}}
-            <div class="nav-link master-toggle {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
+            <div class="nav-link master-toggle {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <span class="nav-text">Data Karyawan</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="master-sub {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*') ? 'open' : '' }}">
+            <div class="master-sub {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'open' : '' }}">
                 <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-text">Profil Karyawan</span>
                 </a>
-                <a href="{{ route('history_karyawan.index') }}" data-tooltip="Riwayat Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
+                <a href="{{ route('history_karyawan.index') }}" data-tooltip="History Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span class="nav-text">Riwayat Jabatan</span>
+                    <span class="nav-text">History Jabatan</span>
                 </a>
+                @if(auth()->user()->isSuperAdmin())
+                <a href="{{ route('riwayat_pendidikan_all.index') }}" data-tooltip="History Pendidikan" class="nav-link {{ request()->routeIs('riwayat_pendidikan_all.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    <span class="nav-text">History Pendidikan</span>
+                </a>
+                @endif
                 <a href="{{ route('struktur-organisasi.index') }}" data-tooltip="Struktur Organisasi" class="nav-link {{ request()->routeIs('struktur-organisasi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
                     <span class="nav-text">Struktur Organisasi</span>

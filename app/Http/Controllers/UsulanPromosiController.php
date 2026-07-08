@@ -386,7 +386,7 @@ class UsulanPromosiController extends Controller
             'Terbit SK ' . $request->no_sk . ' -> ' . $namaJabatan . ' (TMT ' . $tmt . ')');
 
         return redirect()->route('usulan_promosi.index', ['tab' => 'lulus'])
-            ->with('success', 'SK berhasil diterbitkan. Riwayat jabatan & posisi karyawan diperbarui!');
+            ->with('success', 'SK berhasil diterbitkan. History jabatan & posisi karyawan diperbarui!');
     }
 
     public function destroy(UsulanPromosi $usulanPromosi)

@@ -271,7 +271,7 @@ mark { background: #fef08a; border-radius: 2px; padding: 0 1px; color: inherit; 
                 </div>
                 <div style="display:flex;gap:8px;font-size:11px;color:#6b7280;background:#fafafa;border:1px solid #f3f4f6;border-radius:8px;padding:9px 11px;line-height:1.5">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="#9ca3af" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <div>Posisi tujuan sudah dipilih saat usulan dibuat. Menyimpan akan membuat <strong>riwayat jabatan baru</strong> (tipe mengikuti jenis usulan: rotasi/mutasi) &amp; memperbarui posisi karyawan. <strong>Job Grade &amp; Person Grade tidak berubah.</strong></div>
+                    <div>Posisi tujuan sudah dipilih saat usulan dibuat. Menyimpan akan membuat <strong>history jabatan baru</strong> (tipe mengikuti jenis usulan: rotasi/mutasi) &amp; memperbarui posisi karyawan. <strong>Job Grade &amp; Person Grade tidak berubah.</strong></div>
                 </div>
             </div>
             <div class="modal-acts" style="margin-top:18px">

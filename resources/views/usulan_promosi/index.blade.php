@@ -355,7 +355,7 @@ mark { background: #fef08a; border-radius: 2px; padding: 0 1px; color: inherit; 
                 </div>
                 <div style="display:flex;gap:8px;font-size:11px;color:#6b7280;background:#fafafa;border:1px solid #f3f4f6;border-radius:8px;padding:9px 11px;line-height:1.5">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="#9ca3af" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <div>Jabatan tujuan diambil dari usulan. Menyimpan akan otomatis membuat <strong>riwayat jabatan baru</strong> (tipe: promosi) &amp; memperbarui <strong>posisi terkini karyawan</strong>. Jika jabatan tujuan termasuk tingkat pejabat (SVP/VP/SPM/PM), otomatis tercatat di Pejabat Definitif.</div>
+                    <div>Jabatan tujuan diambil dari usulan. Menyimpan akan otomatis membuat <strong>history jabatan baru</strong> (tipe: promosi) &amp; memperbarui <strong>posisi terkini karyawan</strong>. Jika jabatan tujuan termasuk tingkat pejabat (SVP/VP/SPM/PM), otomatis tercatat di Pejabat Definitif.</div>
                 </div>
             </div>
             <div class="modal-acts" style="margin-top:18px">

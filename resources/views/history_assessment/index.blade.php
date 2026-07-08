@@ -241,7 +241,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">History Assessment</div>
-        <div class="page-sub">Riwayat assessment {{ $karyawan->nama }}</div>
+        <div class="page-sub">History assessment {{ $karyawan->nama }}</div>
     </div>
     <div class="btn-group">
         <a href="{{ route('history_assessment.create', $karyawan) }}" class="btn-outline-green">

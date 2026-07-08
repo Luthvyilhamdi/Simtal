@@ -72,10 +72,6 @@ class KaryawanController extends Controller
             'tanggal_masuk'      => 'required|date',
             'no_hp'              => 'nullable|string|max:30',
             'email'              => 'nullable|email|max:255',
-            'pend_jenjang'       => 'nullable|array',
-            'pend_jenjang.*'     => 'nullable|string|max:20',
-            'pend_jurusan.*'     => 'nullable|string|max:255',
-            'pend_institusi.*'   => 'nullable|string|max:255',
             'jabatan_id'         => 'required',
             'direktorat_id'      => 'required',
             'kompartemen_id'     => 'required',
@@ -101,12 +97,7 @@ class KaryawanController extends Controller
 
         $karyawan = Karyawan::create($data);
 
-        // Riwayat pendidikan + set Pendidikan Terakhir (jenjang tertinggi).
-        $karyawan->update($karyawan->syncRiwayatPendidikan(
-            (array) $request->input('pend_jenjang', []),
-            (array) $request->input('pend_jurusan', []),
-            (array) $request->input('pend_institusi', [])
-        ));
+        // Riwayat pendidikan dikelola di halaman tersendiri (riwayat_pendidikan.*).
 
         $this->log('tambah', 'Karyawan', $request->nama, 'NIK: ' . $request->nik);
 
@@ -155,10 +146,6 @@ class KaryawanController extends Controller
             'tanggal_masuk'      => 'required|date',
             'no_hp'              => 'nullable|string|max:30',
             'email'              => 'nullable|email|max:255',
-            'pend_jenjang'       => 'nullable|array',
-            'pend_jenjang.*'     => 'nullable|string|max:20',
-            'pend_jurusan.*'     => 'nullable|string|max:255',
-            'pend_institusi.*'   => 'nullable|string|max:255',
             'jabatan_id'         => 'required',
             'direktorat_id'      => 'required',
             'kompartemen_id'     => 'required',
@@ -185,12 +172,7 @@ class KaryawanController extends Controller
 
         $karyawan->update($data);
 
-        // Riwayat pendidikan + set Pendidikan Terakhir (jenjang tertinggi).
-        $karyawan->update($karyawan->syncRiwayatPendidikan(
-            (array) $request->input('pend_jenjang', []),
-            (array) $request->input('pend_jurusan', []),
-            (array) $request->input('pend_institusi', [])
-        ));
+        // Riwayat pendidikan dikelola di halaman tersendiri (riwayat_pendidikan.*).
 
         $this->log('edit', 'Karyawan', $karyawan->nama, 'NIK: ' . $karyawan->nik);
 

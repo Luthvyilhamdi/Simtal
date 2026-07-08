@@ -692,7 +692,7 @@ $isUser = auth()->user()->isUser();
         <div id="pInfoRows"></div>
       </div>
       <div style="margin-top:0">
-        <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Riwayat Penugasan SO</div>
+        <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">History Penugasan SO</div>
         <div id="pSoHistory"></div>
       </div>
     </div>

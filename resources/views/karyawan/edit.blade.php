@@ -102,13 +102,6 @@
         .form-actions-right { flex-direction:column; }
         .btn-cancel,.btn-save { width:100%;justify-content:center; }
     }
-    /* Riwayat pendidikan berulang */
-    .pend-row { display:grid;grid-template-columns:140px 1fr 1fr 34px;gap:8px;margin-bottom:8px;align-items:center; }
-    .pend-del { width:34px;height:38px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:8px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0; }
-    .pend-del:hover { background:#fee2e2; }
-    .pend-add { margin-top:2px;border:1px dashed #86efac;background:#f0fdf4;color:#15803d;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
-    .pend-add:hover { background:#dcfce7; }
-    @media (max-width:640px){ .pend-row { grid-template-columns:1fr 1fr 34px; } }
 </style>
 @endpush
 
@@ -257,7 +250,7 @@
             </div>
             <div>
                 <div class="section-title">Kontak & Pendidikan</div>
-                <div class="section-sub">Nomor telepon, email, dan riwayat pendidikan</div>
+                <div class="section-sub">Nomor telepon, email, dan history pendidikan</div>
             </div>
         </div>
 
@@ -278,60 +271,21 @@
             </div>
 
             <div class="form-group" style="grid-column:1/-1;">
-                <label class="form-label">Riwayat Pendidikan</label>
-                <div class="form-hint" style="margin-bottom:8px;">Isi dari terendah ke tertinggi (mis. SMA/SMK → S1 → S2). "Pendidikan Terakhir" otomatis diambil dari jenjang tertinggi.</div>
-                <div id="pendRows">
-                    @php
-                        // Sumber baris: old() (validasi gagal) → riwayat tersimpan → seed dari field lama.
-                        if (old('pend_jenjang') !== null) {
-                            $rows = collect(old('pend_jenjang'))->map(fn($j,$i) => [
-                                'jenjang' => $j, 'jurusan' => old('pend_jurusan')[$i] ?? '', 'institusi' => old('pend_institusi')[$i] ?? '',
-                            ])->all();
-                        } elseif ($karyawan->riwayatPendidikan->isNotEmpty()) {
-                            $rows = $karyawan->riwayatPendidikan->map(fn($r) => [
-                                'jenjang' => $r->jenjang, 'jurusan' => $r->jurusan, 'institusi' => $r->institusi,
-                            ])->all();
-                        } elseif ($karyawan->jenjang_pendidikan) {
-                            $rows = [['jenjang' => $karyawan->jenjang_pendidikan, 'jurusan' => $karyawan->jurusan, 'institusi' => '']];
-                        } else {
-                            $rows = [['jenjang' => '', 'jurusan' => '', 'institusi' => '']];
-                        }
-                    @endphp
-                    @foreach($rows as $row)
-                    <div class="pend-row">
-                        <div class="select-wrap">
-                            <select name="pend_jenjang[]" class="form-input">
-                                <option value="">-- Jenjang --</option>
-                                @foreach(\App\Models\Karyawan::JENJANG_PENDIDIKAN as $jp)
-                                    <option value="{{ $jp }}" {{ $row['jenjang']==$jp ? 'selected' : '' }}>{{ $jp }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <input type="text" name="pend_jurusan[]" value="{{ $row['jurusan'] }}" class="form-input" placeholder="Jurusan">
-                        <input type="text" name="pend_institusi[]" value="{{ $row['institusi'] }}" class="form-input" placeholder="Institusi / Sekolah">
-                        <button type="button" class="pend-del" onclick="removePendRow(this)" title="Hapus baris">&times;</button>
+                <label class="form-label">History Pendidikan</label>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#f9fafb;border:1px solid #eef0f2;border-radius:10px;padding:12px 16px;">
+                    <div style="font-size:13px;color:#6b7280;">
+                        Pendidikan Terakhir:
+                        <strong style="color:#111827;">{{ $karyawan->jenjang_pendidikan ?: '-' }}</strong>@if($karyawan->jurusan) · {{ $karyawan->jurusan }}@endif
+                        <span style="color:#9ca3af;">({{ $karyawan->riwayatPendidikan->count() }} jenjang)</span>
                     </div>
-                    @endforeach
+                    <a href="{{ route('riwayat_pendidikan.index', $karyawan) }}" target="_blank"
+                       style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #15803d;color:#15803d;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;">
+                        Kelola History Pendidikan →
+                    </a>
                 </div>
-                <button type="button" class="pend-add" onclick="addPendRow()">+ Tambah Pendidikan</button>
-                @error('pend_jenjang.*')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
         </div>
     </div>
-
-    <template id="pendRowTpl">
-        <div class="pend-row">
-            <div class="select-wrap">
-                <select name="pend_jenjang[]" class="form-input">
-                    <option value="">-- Jenjang --</option>
-                    @foreach(\App\Models\Karyawan::JENJANG_PENDIDIKAN as $jp)<option value="{{ $jp }}">{{ $jp }}</option>@endforeach
-                </select>
-            </div>
-            <input type="text" name="pend_jurusan[]" class="form-input" placeholder="Jurusan">
-            <input type="text" name="pend_institusi[]" class="form-input" placeholder="Institusi / Sekolah">
-            <button type="button" class="pend-del" onclick="removePendRow(this)" title="Hapus baris">&times;</button>
-        </div>
-    </template>
 
     {{-- ===== JABATAN & STRUKTUR ===== --}}
     <div class="form-card">
@@ -549,7 +503,7 @@
                        value="{{ old('tanggal_mulai_band', $karyawan->tanggal_mulai_band?->format('Y-m-d')) }}"
                        class="form-input" />
                 <span class="form-hint">
-                    Tanggal mulai di Band saat ini. Untuk sementara diisi manual; ke depan bisa otomatis dari Riwayat Jabatan. Bila kosong, MDG Band memakai TMT Job Grade.
+                    Tanggal mulai di Band saat ini. Untuk sementara diisi manual; ke depan bisa otomatis dari History Jabatan. Bila kosong, MDG Band memakai TMT Job Grade.
                 </span>
                 @error('tanggal_mulai_band')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
@@ -585,22 +539,6 @@
 
 @push('scripts')
 <script>
-    // Riwayat pendidikan: tambah/hapus baris
-    function addPendRow() {
-        const tpl = document.getElementById('pendRowTpl');
-        document.getElementById('pendRows').appendChild(tpl.content.cloneNode(true));
-    }
-    function removePendRow(btn) {
-        const rows = document.querySelectorAll('#pendRows .pend-row');
-        const row  = btn.closest('.pend-row');
-        if (rows.length <= 1) {
-            row.querySelectorAll('input').forEach(i => i.value = '');
-            row.querySelector('select').value = '';
-        } else {
-            row.remove();
-        }
-    }
-
     const bandMap = {
         22:'Band 1', 21:'Band 1', 20:'Band 1',
         19:'Band 2', 18:'Band 2', 17:'Band 2',
