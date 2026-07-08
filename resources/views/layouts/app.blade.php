@@ -658,6 +658,8 @@
         if (!a) return;
         const href = a.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank') return;
+        // Protokol yang tidak memuat ulang halaman (buka app eksternal) — jangan tampilkan loader.
+        if (/^(tel:|mailto:|sms:|whatsapp:|https?:\/\/wa\.me\/|https?:\/\/(api|web)\.whatsapp\.com)/i.test(href)) return;
         if (href.includes('/export') || href.includes('/download') || href.includes('template') || a.getAttribute('download') !== null) return;
         loader.style.display = 'flex';
     });

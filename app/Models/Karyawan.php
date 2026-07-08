@@ -488,6 +488,24 @@ class Karyawan extends Model
         return $c !== '' ? $c : null;
     }
 
+    /**
+     * URL WhatsApp dari no_hp (dinormalkan ke format internasional 62…).
+     * "08123…" → "628123…", "+62…"/"62…" tetap, "8123…" → "628123…".
+     */
+    public function getWhatsappUrlAttribute(): ?string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $this->no_hp);
+        if ($digits === '' || $digits === null) return null;
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '62' . substr($digits, 1);
+        } elseif (! str_starts_with($digits, '62')) {
+            $digits = '62' . $digits;
+        }
+
+        return 'https://wa.me/' . $digits;
+    }
+
     public function getRouteKeyName(): string
     {
         return 'nik';

@@ -224,7 +224,7 @@
         </div>
         <div class="detail-row">
             <span class="detail-label">No. HP</span>
-            <span class="detail-value">@if($karyawan->no_hp)<a href="tel:{{ $karyawan->no_hp }}">{{ $karyawan->no_hp }}</a>@else<span class="muted">-</span>@endif</span>
+            <span class="detail-value">@if($karyawan->no_hp)<a href="{{ $karyawan->whatsapp_url }}" target="_blank" rel="noopener" title="Chat via WhatsApp">{{ $karyawan->no_hp }}</a>@else<span class="muted">-</span>@endif</span>
         </div>
         <div class="detail-row">
             <span class="detail-label">Email</span>
