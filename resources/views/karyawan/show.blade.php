@@ -148,6 +148,9 @@
                 @if($isShortlist)
                 <span class="profile-tag" style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0">🟢 Shortlist {{ $shortlistPeriode }}</span>
                 @endif
+                @if($pgsAktif = $karyawan->pgsPjs->firstWhere('is_active', true))
+                <span class="profile-tag" style="background:{{ $pgsAktif->tipe_warna['bg'] }};color:{{ $pgsAktif->tipe_warna['text'] }};border:1px solid {{ $pgsAktif->tipe_warna['border'] }};">{{ $pgsAktif->tipe_label }}: {{ $pgsAktif->jabatan_pgs_pjs }}</span>
+                @endif
             </div>
         </div>
     </div>
@@ -193,6 +196,10 @@
     <a href="{{ route('kalibrasi_karyawan.index', $karyawan) }}" class="btn-outline">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Kalibrasi
+    </a>
+    <a href="{{ route('toefl.index', $karyawan) }}" class="btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        TOEFL
     </a>
 </div>
 
@@ -275,6 +282,16 @@
                 @else <span class="muted">-</span> @endif
             </span>
         </div>
+        @if($pgsAktif ?? null)
+        <div class="detail-row">
+            <span class="detail-label">Status PGS/PJS</span>
+            <span class="detail-value">
+                <span class="badge" style="background:{{ $pgsAktif->tipe_warna['bg'] }};color:{{ $pgsAktif->tipe_warna['text'] }};">{{ $pgsAktif->tipe_label }}</span>
+                {{ $pgsAktif->jabatan_pgs_pjs }}
+                @if($pgsAktif->tanggal_berakhir)<span class="muted" style="font-size:11px;"> · s/d {{ $pgsAktif->tanggal_berakhir->format('d/m/Y') }}{{ $pgsAktif->is_expired ? ' (berakhir)' : '' }}</span>@endif
+            </span>
+        </div>
+        @endif
     </div>
 
     {{-- Grade & Band --}}

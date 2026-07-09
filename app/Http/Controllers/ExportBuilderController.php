@@ -121,6 +121,12 @@ class ExportBuilderController extends Controller
             'kompetensi_lembaga'    => ['Assessment Kompetensi', 'Lembaga Kompetensi'.$suffix, 'historyAssessmentKompetensi', fn ($k) => optional(self::byTanggal($k->historyAssessmentKompetensi, 'tanggal_assessment', $tahun, $bulan))->lembaga ?? '-'],
             'kompetensi_tgl'        => ['Assessment Kompetensi', 'Tgl Kompetensi'.$suffix, 'historyAssessmentKompetensi', fn ($k) => optional(self::byTanggal($k->historyAssessmentKompetensi, 'tanggal_assessment', $tahun, $bulan))->tanggal_assessment?->format('d/m/Y') ?? '-'],
 
+            // ── TOEFL (hasil tes TERBARU per karyawan) ──
+            'toefl_skor'    => ['TOEFL', 'Skor TOEFL (terbaru)', 'toefls', fn ($k) => $k->toefl_terbaru?->skor ?? '-'],
+            'toefl_jenis'   => ['TOEFL', 'Jenis TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->jenis ?: '-'],
+            'toefl_tanggal' => ['TOEFL', 'Tgl Tes TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->tanggal_tes?->format('d/m/Y') ?? '-'],
+            'toefl_lembaga' => ['TOEFL', 'Lembaga TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->lembaga ?: '-'],
+
             // ── Talent Pool (per periode/tahun; "semua tahun" = terbaru) ──
             'talent_klasifikasi' => ['Talent Pool', 'Klasifikasi Talent'.$suffixTahun, 'talentPools', fn ($k) => optional(self::byTahun($k->talentPools, 'periode', $tahun))->klasifikasi_label ?? '-'],
             'talent_catatan'     => ['Talent Pool', 'Catatan Talent'.$suffixTahun, 'talentPools', fn ($k) => optional(self::byTahun($k->talentPools, 'periode', $tahun))->catatan ?? '-'],

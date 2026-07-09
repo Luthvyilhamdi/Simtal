@@ -106,7 +106,7 @@ class KaryawanController extends Controller
 
     public function show(Karyawan $karyawan)
     {
-        $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur','strukturAssignments','riwayatPendidikan']);
+        $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur','strukturAssignments','riwayatPendidikan','pgsPjs']);
 
         // Cek shortlist — prioritas tahun ini, fallback tahun lalu
         $talentShortlist = TalentPool::where('karyawan_id', $karyawan->id)

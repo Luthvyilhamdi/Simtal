@@ -9,6 +9,8 @@ use App\Http\Controllers\HistoryAssessmentAllController;
 use App\Http\Controllers\HistoryAssessmentKompetensiController;
 use App\Http\Controllers\RiwayatPendidikanController;
 use App\Http\Controllers\RiwayatPendidikanAllController;
+use App\Http\Controllers\ToeflController;
+use App\Http\Controllers\ToeflAllController;
 use App\Http\Controllers\ImportAssessmentController;
 use App\Http\Controllers\ImportHistoryJabatanController;
 use App\Http\Controllers\PgsPjsController;
@@ -150,6 +152,20 @@ Route::middleware('auth')->group(function () {
             Route::post('/import',                [RiwayatPendidikanAllController::class, 'import'])->name('import.store');
             Route::get('/import/template',        [RiwayatPendidikanAllController::class, 'downloadTemplate'])->name('import.template');
             Route::delete('/{riwayatPendidikan}', [RiwayatPendidikanAllController::class, 'destroy'])->name('destroy');
+        });
+
+        // TOEFL per Karyawan
+        Route::prefix('karyawan/{karyawan}/toefl')->name('toefl.')->group(function () {
+            Route::get('/',              [ToeflController::class, 'index'])->name('index');
+            Route::post('/',             [ToeflController::class, 'store'])->name('store');
+            Route::put('/{toefl}',       [ToeflController::class, 'update'])->name('update');
+            Route::delete('/{toefl}',    [ToeflController::class, 'destroy'])->name('destroy');
+        });
+
+        // TOEFL GLOBAL (semua karyawan)
+        Route::prefix('toefl')->name('toefl_all.')->group(function () {
+            Route::get('/',       [ToeflAllController::class, 'index'])->name('index');
+            Route::get('/export', [ToeflAllController::class, 'export'])->name('export');
         });
 
         // History Assessment All

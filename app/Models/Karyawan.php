@@ -60,6 +60,7 @@ class Karyawan extends Model
     public function talentPools()      { return $this->hasMany(TalentPool::class); }
     public function strukturAssignments() { return $this->hasMany(StrukturOrganisasi::class, 'karyawan_id'); }
     public function riwayatPendidikan()   { return $this->hasMany(RiwayatPendidikan::class); }
+    public function toefls()              { return $this->hasMany(Toefl::class); }
 
     /**
      * Hitung ulang "Pendidikan Terakhir" (kolom jenjang_pendidikan/jurusan) dari
@@ -504,6 +505,12 @@ class Karyawan extends Model
         }
 
         return 'https://wa.me/' . $digits;
+    }
+
+    /** Hasil tes TOEFL TERBARU (berdasarkan tanggal_tes). Butuh relasi toefls dimuat. */
+    public function getToeflTerbaruAttribute(): ?Toefl
+    {
+        return $this->toefls->sortByDesc('tanggal_tes')->first();
     }
 
     public function getRouteKeyName(): string

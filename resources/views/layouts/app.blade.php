@@ -393,12 +393,12 @@
             </div>
 
             {{-- Assessment & Penilaian (accordion) --}}
-            <div class="nav-link master-toggle {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*') ? 'active open' : '' }}" data-tooltip="Assessment & Penilaian" onclick="toggleMaster(this)">
+            <div class="nav-link master-toggle {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*','toefl_all.*','toefl.*') ? 'active open' : '' }}" data-tooltip="Assessment & Penilaian" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 <span class="nav-text">Assessment & Penilaian</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="master-sub {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*') ? 'open' : '' }}">
+            <div class="master-sub {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*','toefl_all.*','toefl.*') ? 'open' : '' }}">
                 <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     <span class="nav-text">History Assessment</span>
@@ -406,6 +406,10 @@
                 <a href="{{ route('history_penilaian_kalibrasi.index') }}" data-tooltip="Penilaian & Kalibrasi" class="nav-link {{ request()->routeIs('history_penilaian_kalibrasi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
                     <span class="nav-text">Penilaian &amp; Kalibrasi</span>
+                </a>
+                <a href="{{ route('toefl_all.index') }}" data-tooltip="Nilai TOEFL" class="nav-link {{ request()->routeIs('toefl_all.*') || request()->routeIs('toefl.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span class="nav-text">Nilai TOEFL</span>
                 </a>
             </div>
         </div>
