@@ -196,7 +196,6 @@
                     <td>
                         @if($k->jenjang_pendidikan)
                             <span class="badge-jenjang">{{ $k->jenjang_pendidikan }}</span>
-                            @if($k->jurusan)<span style="color:#6b7280;margin-left:4px;">· {{ $k->jurusan }}</span>@endif
                         @else
                             <span class="muted">-</span>
                         @endif

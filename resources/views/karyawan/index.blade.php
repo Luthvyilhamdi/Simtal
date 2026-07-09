@@ -202,9 +202,9 @@
                 <tr>
                     <th>Karyawan</th>
                     <th>Jabatan</th>
-                    <th>Departemen</th>
+                    <th>Band</th>
                     <th>Job Grade</th>
-                    <th>Tgl Masuk</th>
+                    <th>Person Grade</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -227,10 +227,10 @@
                             </div>
                         </div>
                     </td>
-                    <td>{{ $k->jabatan->nama_jabatan ?? '-' }}</td>
-                    <td>{{ $k->departemen->nama_departemen ?? '-' }}</td>
+                    <td>{{ $k->jabatan_saat_ini ?: '-' }}</td>
+                    <td><span class="badge badge-gray">{{ $k->band ?? '-' }}</span></td>
                     <td><span class="badge badge-gray">{{ $k->jobGrade->job_grade ?? '-' }}</span></td>
-                    <td>{{ \Carbon\Carbon::parse($k->tanggal_masuk)->format('d M Y') }}</td>
+                    <td><span class="badge badge-gray">{{ $k->personGrade->person_grade ?? '-' }}</span></td>
                     <td>
                         @if($k->status === 'aktif')
                             <span class="badge badge-green">● Aktif</span>
