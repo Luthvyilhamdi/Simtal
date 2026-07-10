@@ -38,9 +38,11 @@
     .kpi-card.amber::before  { background:#d97706; }
     .kpi-card.teal::before   { background:#0891b2; }
     .kpi-label { font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px; }
+    /* Isi kartu jadi kolom setinggi kartu, agar baris statistik rata bawah di semua kartu. */
+    .kpi-left { display:flex;flex-direction:column;flex:1;align-self:stretch;min-width:0; }
     .kpi-num { font-size:28px;font-weight:800;color:#111827;line-height:1;margin-bottom:5px; }
     .kpi-sub { font-size:11px;color:#6b7280; }
-    .kpi-badge { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:5px;display:inline-block; }
+    .kpi-badge { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:5px;display:inline-block;align-self:flex-start; }
     .kpi-icon { width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
     .kpi-icon svg { width:20px;height:20px;fill:none;stroke-width:1.8; }
     .kpi-icon.green  { background:#f0fdf4; }
@@ -174,7 +176,7 @@
     .view-all { font-size:11px;color:#16a34a;text-decoration:none;font-weight:600; }
     .view-all:hover { text-decoration:underline; }
 
-    .komp-stat-row { display:flex;align-items:center;gap:8px;margin-top:8px; }
+    .komp-stat-row { display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:8px; }
     .komp-stat-item { flex:1;text-align:center;padding:8px 6px;border-radius:8px; }
     .komp-stat-num { font-size:20px;font-weight:800;line-height:1; }
     .komp-stat-label { font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px; }
@@ -353,7 +355,20 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
             <div class="kpi-label">Pergerakan Jabatan</div>
             <div class="kpi-num">{{ $promosiThisYear + $mutasiThisYear + $rotasiThisYear + $demosiThisYear }}</div>
             <div class="kpi-sub">Tahun {{ now()->year }}</div>
-            <span class="kpi-badge" style="background:#dbeafe;color:#1d4ed8;">{{ $promosiThisYear }} promosi · {{ $mutasiThisYear }} mutasi · {{ $rotasiThisYear }} rotasi</span>
+            <div class="komp-stat-row">
+                <div class="komp-stat-item" style="background:#dcfce7;">
+                    <div class="komp-stat-num" style="color:#15803d;">{{ $promosiThisYear }}</div>
+                    <div class="komp-stat-label" style="color:#15803d;">Promosi</div>
+                </div>
+                <div class="komp-stat-item" style="background:#dbeafe;">
+                    <div class="komp-stat-num" style="color:#1d4ed8;">{{ $mutasiThisYear }}</div>
+                    <div class="komp-stat-label" style="color:#1d4ed8;">Mutasi</div>
+                </div>
+                <div class="komp-stat-item" style="background:#f5f3ff;">
+                    <div class="komp-stat-num" style="color:#7c3aed;">{{ $rotasiThisYear }}</div>
+                    <div class="komp-stat-label" style="color:#7c3aed;">Rotasi</div>
+                </div>
+            </div>
         </div>
         <div class="kpi-icon blue">{!! $icoTrendDash !!}</div>
     </div>
