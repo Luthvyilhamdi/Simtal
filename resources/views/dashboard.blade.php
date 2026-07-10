@@ -20,6 +20,9 @@
     .pill-green { background:rgba(22,163,74,0.3);color:#4ade80; }
     .pill-blue  { background:rgba(59,130,246,0.3);color:#93c5fd; }
     .pill-amber { background:rgba(245,158,11,0.3);color:#fcd34d; }
+    /* Warna selaras dengan grid Statistik Pejabat: PJS pink, PGS cyan. */
+    .pill-pink  { background:rgba(236,72,153,0.3);color:#f9a8d4; }
+    .pill-cyan  { background:rgba(8,145,178,0.35);color:#67e8f9; }
     .welcome-date { font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:20px; }
 
     .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px; }
@@ -301,7 +304,8 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
         <div class="welcome-pills">
             <span class="welcome-pill pill-green">{{ $karyawanAktif }} Karyawan Aktif</span>
             <span class="welcome-pill pill-blue">{{ $pejabatAktif }} Pejabat Aktif</span>
-            <span class="welcome-pill pill-amber">{{ $pgsAktif + $pjsAktif }} PGS/PJS Aktif</span>
+            <span class="welcome-pill pill-pink">{{ $pjsAktif }} PJS Aktif</span>
+            <span class="welcome-pill pill-cyan">{{ $pgsAktif }} PGS Aktif</span>
         </div>
     </div>
     <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
@@ -326,6 +330,21 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
             @if($karyawanBaru > 0)
             <span class="kpi-badge" style="background:#dcfce7;color:#15803d;">+{{ $karyawanBaru }} bulan ini</span>
             @endif
+            {{-- Rincian status kepegawaian --}}
+            <div class="komp-stat-row">
+                <div class="komp-stat-item" style="background:#dcfce7;">
+                    <div class="komp-stat-num" style="color:#15803d;">{{ $kepegawaian['Organik'] }}</div>
+                    <div class="komp-stat-label" style="color:#15803d;">Organik</div>
+                </div>
+                <div class="komp-stat-item" style="background:#fef3c7;">
+                    <div class="komp-stat-num" style="color:#d97706;">{{ $kepegawaian['PKWT'] }}</div>
+                    <div class="komp-stat-label" style="color:#d97706;">PKWT</div>
+                </div>
+                <div class="komp-stat-item" style="background:#dbeafe;">
+                    <div class="komp-stat-num" style="color:#1d4ed8;">{{ $kepegawaian['Penugasan'] }}</div>
+                    <div class="komp-stat-label" style="color:#1d4ed8;">Penugasan</div>
+                </div>
+            </div>
         </div>
         <div class="kpi-icon green">{!! $icoUsers !!}</div>
     </div>
@@ -992,7 +1011,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 {{-- PEJABAT --}}
 <div class="sec-title">Statistik Pejabat</div>
 <div class="pejabat-grid">
-    @foreach([['SVP',$pejabatSVP,'svp'],['VP',$pejabatVP,'vp'],['SPM',$pejabatSPM,'spm'],['PM',$pejabatPM,'pm'],['PGS',$pgsAktif,'pgs'],['PJS',$pjsAktif,'pjs']] as [$label,$val,$cls])
+    @foreach([['SVP',$pejabatSVP,'svp'],['VP',$pejabatVP,'vp'],['SPM',$pejabatSPM,'spm'],['PM',$pejabatPM,'pm'],['PJS',$pjsAktif,'pjs'],['PGS',$pgsAktif,'pgs']] as [$label,$val,$cls])
     <div class="pejabat-mini">
         {{-- FIX: style Blade diganti class statis per jabatan --}}
         <div class="pejabat-num pejabat-{{ $cls }}">{{ $val }}</div>

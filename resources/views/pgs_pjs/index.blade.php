@@ -1,6 +1,13 @@
 @extends('layouts.app')
-@section('title', 'PGS & PJS')
-@section('breadcrumb', 'PGS & PJS')
+@php
+    // $tipe: 'pgs' | 'pjs' | null (keduanya)
+    $labelTipe = $tipe ? strtoupper($tipe) : 'PGS & PJS';
+    $subTipe   = $tipe
+        ? 'Daftar penugasan ' . strtoupper($tipe)
+        : 'Pejabat Sementara dan Pejabat Jabatan Sementara';
+@endphp
+@section('title', $labelTipe)
+@section('breadcrumb', $labelTipe)
 
 @push('styles')
 <style>
@@ -180,8 +187,8 @@
 {{-- Page Header --}}
 <div class="page-header">
     <div>
-        <div class="page-title">PGS & PJS</div>
-        <div class="page-sub">Pejabat Sementara dan Pejabat Jabatan Sementara</div>
+        <div class="page-title">{{ $labelTipe }}</div>
+        <div class="page-sub">{{ $subTipe }}</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
         {{-- Tombol Export --}}
@@ -195,10 +202,10 @@
             </svg>
             Export Excel
         </a>
-        {{-- Tombol Tambah --}}
-        <a href="{{ route('pgs_pjs.create') }}" class="btn-primary">
+        {{-- Tombol Tambah — jenis dibawa dari halaman yang sedang dibuka --}}
+        <a href="{{ route('pgs_pjs.create', $tipe ? ['tipe' => $tipe] : []) }}" class="btn-primary">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Tambah PGS / PJS
+            Tambah {{ $tipe ? $labelTipe : 'PGS / PJS' }}
         </a>
     </div>
 </div>
@@ -316,7 +323,7 @@
 
 {{-- HISTORY --}}
 <div class="section-label">
-    🕐 History PGS & PJS
+    🕐 History {{ $labelTipe }}
     <span class="count-badge">{{ $history->total() }} data</span>
 </div>
 

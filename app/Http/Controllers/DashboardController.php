@@ -18,15 +18,25 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // === STATS UTAMA === (3 count → 1 query grouped)
+        // === STATS UTAMA === (count status + status kepegawaian → 1 query grouped)
         $kStat = Karyawan::selectRaw("
             COUNT(*) as total,
             SUM(status = 'aktif') as aktif,
-            SUM(status = 'tidak aktif') as tidak_aktif
+            SUM(status = 'tidak aktif') as tidak_aktif,
+            SUM(status_kepegawaian = 'Organik')   as organik,
+            SUM(status_kepegawaian = 'PKWT')      as pkwt,
+            SUM(status_kepegawaian = 'Penugasan') as penugasan
         ")->first();
         $totalKaryawan      = (int) $kStat->total;
         $karyawanAktif      = (int) $kStat->aktif;
         $karyawanTidakAktif = (int) $kStat->tidak_aktif;
+
+        // Rincian status kepegawaian untuk kartu Total Karyawan.
+        $kepegawaian = [
+            'Organik'   => (int) $kStat->organik,
+            'PKWT'      => (int) $kStat->pkwt,
+            'Penugasan' => (int) $kStat->penugasan,
+        ];
         $karyawanBaru       = Karyawan::whereMonth('tanggal_masuk', now()->month)
                                 ->whereYear('tanggal_masuk', now()->year)->count();
 
@@ -466,7 +476,7 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', compact(
-            'totalKaryawan', 'karyawanAktif', 'karyawanTidakAktif', 'karyawanBaru',
+            'totalKaryawan', 'karyawanAktif', 'karyawanTidakAktif', 'karyawanBaru', 'kepegawaian',
             'totalHistoryJabatan', 'promosiThisYear', 'mutasiThisYear', 'rotasiThisYear', 'demosiThisYear',
             'totalAssessment', 'assessmentReady', 'assessmentRWD', 'assessmentNR',
             'totalKompetensi', 'totalQualified', 'totalNotQualified', 'trenKompetensi',

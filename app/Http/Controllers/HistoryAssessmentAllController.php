@@ -31,7 +31,8 @@ class HistoryAssessmentAllController extends Controller
             $query->whereYear('tanggal_pelaksanaan', $request->tahun);
         }
 
-        $assessments = $query->paginate(15)->withQueryString();
+        // Nama parameter halaman dibedakan agar paginasi kedua tab tidak saling menggeser.
+        $assessments = $query->paginate(15, ['*'], 'page_rekom')->withQueryString();
 
         // ===== QUERY KOMPETENSI =====
         $queryKomp = HistoryAssessmentKompetensi::with('karyawan')
@@ -44,7 +45,7 @@ class HistoryAssessmentAllController extends Controller
             });
         }
 
-        $assessmentKompetensi = $queryKomp->paginate(15)->withQueryString();
+        $assessmentKompetensi = $queryKomp->paginate(15, ['*'], 'page_komp')->withQueryString();
 
         // ===== STATS =====
         $stats = [

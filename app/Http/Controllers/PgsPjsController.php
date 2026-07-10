@@ -12,32 +12,41 @@ class PgsPjsController extends Controller
 {
     use LogsActivity;
 
-    public function index()
+    public function index(Request $request)
     {
         PgsPjs::where('is_active', true)
             ->where('tanggal_berakhir', '<', now())
             ->whereNotNull('tanggal_berakhir')
             ->update(['is_active' => false]);
 
+        // Filter jenis penugasan: 'pgs' / 'pjs'. Null = tampilkan keduanya.
+        $tipe = in_array($request->tipe, ['pgs', 'pjs'], true) ? $request->tipe : null;
+
         $aktif = PgsPjs::with('karyawan')
             ->where('is_active', true)
+            ->when($tipe, fn ($q) => $q->where('tipe', $tipe))
             ->orderBy('tanggal_berakhir', 'asc')
             ->get();
 
         $history = PgsPjs::with('karyawan')
             ->where('is_active', false)
+            ->when($tipe, fn ($q) => $q->where('tipe', $tipe))
             ->orderBy('tanggal_berakhir', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('pgs_pjs.index', compact('aktif', 'history'));
+        return view('pgs_pjs.index', compact('aktif', 'history', 'tipe'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        // Jenis dibawa dari menu (PJS / PGS) agar form langsung terpilih.
+        $tipe = in_array($request->tipe, ['pgs', 'pjs'], true) ? $request->tipe : null;
+
         $karyawans = Karyawan::where('status', 'aktif')
             ->orderBy('nama')
             ->get();
-        return view('pgs_pjs.create', compact('karyawans'));
+        return view('pgs_pjs.create', compact('karyawans', 'tipe'));
     }
 
     public function store(Request $request)
@@ -73,7 +82,7 @@ class PgsPjsController extends Controller
         $this->log('tambah', 'PGS/PJS', $karyawan->nama, strtoupper($request->tipe) . ': ' . $request->jabatan_pgs_pjs);
 
         return redirect()
-            ->route('pgs_pjs.index')
+            ->route('pgs_pjs.index', ['tipe' => $request->tipe])
             ->with('success', 'Data PGS/PJS berhasil ditambahkan!');
     }
 
@@ -91,19 +100,20 @@ class PgsPjsController extends Controller
         $this->log('akhiri', 'PGS/PJS', $pgsPjs->karyawan->nama, 'Diakhiri: ' . $request->tanggal_berakhir);
 
         return redirect()
-            ->route('pgs_pjs.index')
+            ->route('pgs_pjs.index', ['tipe' => $pgsPjs->tipe])
             ->with('success', 'PGS/PJS berhasil diakhiri!');
     }
 
     public function destroy(PgsPjs $pgsPjs)
     {
         $nama = $pgsPjs->karyawan->nama ?? '-';
+        $tipe = $pgsPjs->tipe;
         $pgsPjs->delete();
 
         $this->log('hapus', 'PGS/PJS', $nama, 'Hapus data PGS/PJS');
 
         return redirect()
-            ->route('pgs_pjs.index')
+            ->route('pgs_pjs.index', ['tipe' => $tipe])
             ->with('success', 'Data PGS/PJS berhasil dihapus!');
     }
 

@@ -470,8 +470,10 @@
             </table>
         </div>
 
+        {{-- Container SELALU ada agar AJAX search bisa menambah/menghapus pagination. --}}
+        <div id="footerRekom">
         @if($assessments->hasPages())
-        <div class="table-footer" id="footerRekom">
+        <div class="table-footer">
             <span>Menampilkan <strong>{{ $assessments->firstItem() }}</strong>–<strong>{{ $assessments->lastItem() }}</strong> dari <strong>{{ $assessments->total() }}</strong></span>
             <div class="pagination-wrap">
                 @if($assessments->onFirstPage())
@@ -499,6 +501,7 @@
             </div>
         </div>
         @endif
+        </div>
     </div>
 </div>
 
@@ -507,9 +510,9 @@
     <div class="filter-row">
         <div class="search-mini">
             <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchInputKomp" placeholder="Cari nama / NIK..." autocomplete="off">
+            <input type="text" id="searchInputKomp" placeholder="Cari nama / NIK..." value="{{ request('search_komp') }}" autocomplete="off">
             <div class="search-spinner" id="spinnerKomp"></div>
-            <button class="clear-btn" id="clearKomp" onclick="clearSearchKomp()">×</button>
+            <button class="clear-btn {{ request('search_komp') ? 'visible' : '' }}" id="clearKomp" onclick="clearSearchKomp()">×</button>
         </div>
     </div>
     <div class="table-card">
@@ -629,8 +632,10 @@
             </table>
         </div>
 
+        {{-- Container SELALU ada agar AJAX search bisa menambah/menghapus pagination. --}}
+        <div id="footerKomp">
         @if($assessmentKompetensi->hasPages())
-        <div class="table-footer" id="footerKomp">
+        <div class="table-footer">
             <span>Menampilkan <strong>{{ $assessmentKompetensi->firstItem() }}</strong>–<strong>{{ $assessmentKompetensi->lastItem() }}</strong> dari <strong>{{ $assessmentKompetensi->total() }}</strong></span>
             <div class="pagination-wrap">
                 @if($assessmentKompetensi->onFirstPage())
@@ -658,6 +663,7 @@
             </div>
         </div>
         @endif
+        </div>
     </div>
 </div>
 
@@ -755,7 +761,7 @@ function doSearchRekom(keyword){
     var url=new URL(window.location.href);
     if(keyword)url.searchParams.set('search',keyword);
     else url.searchParams.delete('search');
-    url.searchParams.delete('page');
+    url.searchParams.delete('page_rekom');
     url.searchParams.set('tab','rekom');
     window.history.pushState({},'',url.toString());
     spinner.classList.add('show');
@@ -810,6 +816,7 @@ function doSearchKomp(keyword){
     var url=new URL(window.location.href);
     if(keyword)url.searchParams.set('search_komp',keyword);
     else url.searchParams.delete('search_komp');
+    url.searchParams.delete('page_komp');
     url.searchParams.set('tab','komp');
     window.history.pushState({},'',url.toString());
     spinnerKomp.classList.add('show');
@@ -820,6 +827,9 @@ function doSearchKomp(keyword){
             var doc=new DOMParser().parseFromString(html,'text/html');
             var nb=doc.getElementById('tableBodyKomp');
             if(nb)tableBodyKomp.innerHTML=nb.innerHTML;
+            var nfk=doc.getElementById('footerKomp');
+            var cfk=document.getElementById('footerKomp');
+            if(nfk&&cfk)cfk.innerHTML=nfk.innerHTML;
             tableBodyKomp.style.opacity='1';spinnerKomp.classList.remove('show');
             if(keyword)highlightText(tableBodyKomp,keyword);
         })

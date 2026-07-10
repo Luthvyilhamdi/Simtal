@@ -477,6 +477,12 @@ $isUser = auth()->user()->isUser();
               @if(!$isUser)
               <div style="display:flex;gap:4px;margin-left:8px">
                 <button data-action="openTambah" data-tipe="staff" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="{{ $isDeptReal ? addslashes($dept['label']) : '' }}" data-bag="{{ addslashes($bag['label']) }}" style="padding:2px 7px;font-size:10px;font-weight:600;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:5px;cursor:pointer;white-space:nowrap">+ Staff</button>
+                @if(auth()->user()->role === 'super_admin')
+                <div style="width:1px;height:14px;background:#e5e7eb"></div>
+                <button data-action="confirmDeleteGroup" data-tipe="bagian" data-nama="{{ addslashes($bag['label']) }}" data-dir="{{ addslashes($dir['label']) }}" data-komp="{{ addslashes($komp['label']) }}" data-dept="{{ $isDeptReal ? addslashes($dept['label']) : '' }}" style="padding:2px 7px;font-size:10px;font-weight:600;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:3px">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>Hapus
+                </button>
+                @endif
               </div>
               @endif
             </div>
@@ -1080,7 +1086,7 @@ document.addEventListener('click', function(e) {
     } else if (action === 'openEditGroup') {
         openEditGroup(d.tipe, d.nama, d.dir || null, d.komp || null);
     } else if (action === 'confirmDeleteGroup') {
-        confirmDeleteGroup(d.tipe, d.nama, d.dir || null, d.komp || null);
+        confirmDeleteGroup(d.tipe, d.nama, d.dir || null, d.komp || null, d.dept || null);
     }
 });
 
@@ -1550,9 +1556,9 @@ function saveEditGroup() {
 document.getElementById('modalEditGroupBg').addEventListener('click', function(e){if(e.target===this)closeEditGroup();});
 document.getElementById('editGroupInput').addEventListener('keydown', function(e){if(e.key==='Enter')saveEditGroup();});
 
-function confirmDeleteGroup(tipe, nama, dir, komp) {
-  _groupState = {tipe, nama, dir, komp};
-  const labels = {direktorat:'Direktorat', kompartemen:'Kompartemen', departemen:'Departemen'};
+function confirmDeleteGroup(tipe, nama, dir, komp, dept) {
+  _groupState = {tipe, nama, dir, komp, dept};
+  const labels = {direktorat:'Direktorat', kompartemen:'Kompartemen', departemen:'Departemen', bagian:'Bagian'};
   document.getElementById('deleteGroupLabel').textContent = labels[tipe] + ' "' + nama + '"';
   document.getElementById('modalDeleteGroupBg').style.display = 'flex';
 }
@@ -1561,7 +1567,7 @@ function doDeleteGroup() {
   fetch('/struktur-organisasi/delete-group', {
     method: 'DELETE',
     headers: {'Content-Type':'application/json','X-CSRF-TOKEN':_pd.csrf},
-    body: JSON.stringify({tipe:_groupState.tipe, nama:_groupState.nama, direktorat:_groupState.dir, kompartemen:_groupState.komp, bulan:_pd.bulan, tahun:_pd.tahun})
+    body: JSON.stringify({tipe:_groupState.tipe, nama:_groupState.nama, direktorat:_groupState.dir, kompartemen:_groupState.komp, dept:_groupState.dept, bulan:_pd.bulan, tahun:_pd.tahun})
   }).then(r=>r.json()).then(d=>{
     if (d.success) { closeDeleteGroup(); location.reload(); }
     else alert('Gagal menghapus: ' + (d.message||''));

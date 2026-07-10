@@ -495,12 +495,13 @@ class StrukturOrganisasiController extends Controller
         }
 
         $request->validate([
-            'tipe'        => 'required|in:direktorat,kompartemen,departemen',
+            'tipe'        => 'required|in:direktorat,kompartemen,departemen,bagian',
             'nama'        => 'required|string',
             'bulan'       => 'required|integer',
             'tahun'       => 'required|integer',
             'direktorat'  => 'nullable|string',
             'kompartemen' => 'nullable|string',
+            'dept'        => 'nullable|string',
         ]);
 
         // Map tipe ke nama kolom sebenarnya ('departemen' → 'dept')
@@ -516,6 +517,16 @@ class StrukturOrganisasiController extends Controller
         if ($request->tipe === 'departemen') {
             if ($request->direktorat)  $query->where('direktorat', $request->direktorat);
             if ($request->kompartemen) $query->where('kompartemen', $request->kompartemen);
+        }
+        if ($request->tipe === 'bagian') {
+            if ($request->direktorat)  $query->where('direktorat', $request->direktorat);
+            if ($request->kompartemen) $query->where('kompartemen', $request->kompartemen);
+            // Bagian bisa berada langsung di bawah kompartemen (tanpa departemen).
+            if ($request->filled('dept')) {
+                $query->where('dept', $request->dept);
+            } else {
+                $query->where(fn ($q) => $q->whereNull('dept')->orWhere('dept', ''));
+            }
         }
 
         $count = $query->count();

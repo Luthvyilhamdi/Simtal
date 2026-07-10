@@ -1,7 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Tambah PGS/PJS')
-@section('breadcrumb-parent', 'PGS & PJS')
-@section('breadcrumb', 'Tambah PGS/PJS')
+@php
+    // $tipe: 'pgs' | 'pjs' | null — dibawa dari menu PJS / PGS.
+    $labelTipe = $tipe ? strtoupper($tipe) : 'PGS / PJS';
+@endphp
+@section('title', 'Tambah ' . $labelTipe)
+@section('breadcrumb-parent', $tipe ? $labelTipe : 'PGS & PJS')
+@section('breadcrumb', 'Tambah ' . $labelTipe)
 
 @push('styles')
 <style>
@@ -27,7 +31,7 @@
     .form-input.error-input { border-color:#ef4444; }
     .error-msg { font-size:11px;color:#ef4444; }
     .select-wrap { position:relative; }
-    .select-wrap::after { content:\'\';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
+    .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
     .tipe-group { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
     .tipe-card { display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border:1.5px solid #e5e7eb;border-radius:12px;cursor:pointer;transition:all 0.15s;background:#fafafa;text-align:center; }
@@ -88,20 +92,23 @@
 @endpush
 
 @section('content')
-<a href="{{ route('pgs_pjs.index') }}" class="back-link">
+<a href="{{ route('pgs_pjs.index', $tipe ? ['tipe' => $tipe] : []) }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    Kembali ke PGS & PJS
+    Kembali ke {{ $tipe ? $labelTipe : 'PGS & PJS' }}
 </a>
 
 <div class="page-header">
-    <div class="page-title">➕ Tambah PGS / PJS</div>
+    <div class="page-title">➕ Tambah {{ $labelTipe }}</div>
     <div class="page-sub">Tambahkan data pejabat sementara baru</div>
 </div>
 
 <form method="POST" action="{{ route('pgs_pjs.store') }}">
     @csrf
 
-    {{-- Tipe --}}
+    {{-- Tipe — hanya dipilih bila belum ditentukan dari menu (PJS/PGS) --}}
+    @if($tipe)
+        <input type="hidden" name="tipe" value="{{ $tipe }}">
+    @else
     <div class="form-card">
         <div class="section-header">
             <div class="section-icon">
@@ -129,6 +136,7 @@
         </div>
         @error('tipe')<div class="error-msg" style="margin-top:8px">{{ $message }}</div>@enderror
     </div>
+    @endif
 
     {{-- Data --}}
     <div class="form-card">
@@ -137,7 +145,7 @@
                 <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
             <div>
-                <div class="section-title">Data PGS / PJS</div>
+                <div class="section-title">Data {{ $labelTipe }}</div>
                 <div class="section-sub">Informasi penugasan sementara</div>
             </div>
         </div>
@@ -249,13 +257,13 @@
     <div class="form-actions-card">
         <div style="font-size:12px;color:#9ca3af;"><span style="color:#ef4444">*</span> Wajib diisi</div>
         <div class="form-actions-right">
-            <a href="{{ route('pgs_pjs.index') }}" class="btn-cancel">
+            <a href="{{ route('pgs_pjs.index', $tipe ? ['tipe' => $tipe] : []) }}" class="btn-cancel">
                 <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 Batal
             </a>
             <button type="submit" class="btn-save">
                 <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                Simpan PGS/PJS
+                Simpan {{ $tipe ? $labelTipe : 'PGS/PJS' }}
             </button>
         </div>
     </div>
