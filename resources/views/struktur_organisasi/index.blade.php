@@ -1197,18 +1197,19 @@ function openPanel(karyawanId){
     ];
     document.getElementById('pInfoRows').innerHTML=rows.map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 14px;border-bottom:1px solid #f9fafb;gap:10px"><span style="font-size:11px;color:#9ca3af;flex-shrink:0">${l}</span><span style="font-size:12px;font-weight:500;color:#111827;text-align:right">${v??'-'}</span></div>`).join('');
     const soEl=document.getElementById('pSoHistory');
-    const namaBulan=['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
     if(!d.so_assignments||d.so_assignments.length===0){
       soEl.innerHTML='<div style="text-align:center;padding:16px;color:#d1d5db;font-size:12px">Belum ada penugasan SO</div>';
     }else{
       soEl.innerHTML=d.so_assignments.map(s=>`
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding:10px;background:#f9fafb;border-radius:8px;border:1px solid #f3f4f6">
-          <div style="flex-shrink:0;margin-top:2px"><div style="width:8px;height:8px;border-radius:50%;background:#15803d"></div></div>
+          <div style="flex-shrink:0;margin-top:2px"><div style="width:8px;height:8px;border-radius:50%;background:${s.aktif?'#15803d':'#d1d5db'}"></div></div>
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:600;color:#111827">${s.posisi}</div>
             <div style="font-size:11px;color:#6b7280;margin-top:2px">${s.direktorat||''} ${s.kompartemen?'· '+s.kompartemen:''}</div>
-            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
-              <span style="font-size:10px;color:#9ca3af">📅 ${namaBulan[s.bulan]} ${s.tahun}</span>
+            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center">
+              <span style="font-size:10px;color:#9ca3af">📅 ${s.mulai===s.selesai?s.mulai:s.mulai+' – '+s.selesai}</span>
+              <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:#f3f4f6;color:#6b7280">⏱ ${s.durasi}</span>
+              ${s.aktif?`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:#dcfce7;color:#15803d">Berjalan</span>`:''}
               ${s.job_grade?`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:#dbeafe;color:#1d4ed8">JG ${s.job_grade}</span>`:''}
               ${s.core?`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:${s.core==='Core'?'#dcfce7':'#f3f4f6'};color:${s.core==='Core'?'#15803d':'#6b7280'}">${s.core}</span>`:''}
             </div>

@@ -372,6 +372,79 @@ class StrukturOrganisasiController extends Controller
         ]);
     }
 
+    /**
+     * Ubah snapshot SO bulanan menjadi daftar PERIODE penugasan.
+     * Bulan berurutan dengan penugasan yang sama (posisi + unit + JG + core) digabung
+     * jadi satu entri berentang. Jeda bulan memutus periode. Satu karyawan bisa
+     * menduduki >1 posisi di bulan yang sama, jadi dikelompokkan per penugasan dulu.
+     */
+    private static function ringkasPeriodeSo($rows): array
+    {
+        if ($rows->isEmpty()) return [];
+
+        $namaBulan = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        $ord = fn ($r) => ((int) $r->tahun) * 12 + (int) $r->bulan;
+        $ordTerbaru = (int) $rows->max(fn ($r) => $ord($r));
+
+        $grup = [];
+        foreach ($rows as $r) {
+            $kunci = implode('|', array_map(
+                fn ($v) => trim((string) $v),
+                [$r->posisi, $r->direktorat, $r->kompartemen, $r->job_grade, $r->core]
+            ));
+            $grup[$kunci][] = $r;
+        }
+
+        $periode = [];
+        foreach ($grup as $items) {
+            usort($items, fn ($a, $b) => $ord($a) <=> $ord($b));
+
+            $run = [];
+            foreach ($items as $r) {
+                if ($run) {
+                    $prev = $ord($run[count($run) - 1]);
+                    if ($ord($r) === $prev) continue;   // bulan duplikat → lewati
+                    if ($ord($r) !== $prev + 1) {       // ada jeda → tutup periode
+                        $periode[] = self::buatPeriodeSo($run, $namaBulan, $ordTerbaru, $ord);
+                        $run = [];
+                    }
+                }
+                $run[] = $r;
+            }
+            if ($run) $periode[] = self::buatPeriodeSo($run, $namaBulan, $ordTerbaru, $ord);
+        }
+
+        usort($periode, fn ($a, $b) => $b['_ord'] <=> $a['_ord']); // terbaru dulu
+        return $periode;
+    }
+
+    /** Bentuk satu entri periode dari rentetan baris bulan yang berurutan. */
+    private static function buatPeriodeSo(array $run, array $namaBulan, int $ordTerbaru, callable $ord): array
+    {
+        $awal  = $run[0];
+        $akhir = $run[count($run) - 1];
+        $jml   = count($run);
+
+        $thn = intdiv($jml, 12);
+        $bln = $jml % 12;
+        $bagian = [];
+        if ($thn) $bagian[] = $thn . ' tahun';
+        if ($bln) $bagian[] = $bln . ' bulan';
+
+        return [
+            'posisi'      => $awal->posisi,
+            'direktorat'  => $awal->direktorat,
+            'kompartemen' => $awal->kompartemen,
+            'job_grade'   => $awal->job_grade,
+            'core'        => $awal->core,
+            'mulai'       => $namaBulan[(int) $awal->bulan] . ' ' . $awal->tahun,
+            'selesai'     => $namaBulan[(int) $akhir->bulan] . ' ' . $akhir->tahun,
+            'durasi'      => $bagian ? implode(' ', $bagian) : '1 bulan',
+            'aktif'       => $ord($akhir) === $ordTerbaru,
+            '_ord'        => $ord($akhir),
+        ];
+    }
+
     public function getKaryawanProfile($id)
     {
         $k = Karyawan::with([
@@ -402,12 +475,15 @@ class StrukturOrganisasiController extends Controller
             ? Carbon::parse($k->tanggal_masuk)->diffForHumans(null, true)
             : null;
 
-        // SO assignments history
-        $soAssignments = StrukturOrganisasi::where('karyawan_id', $id)
+        // History penugasan SO — snapshot bulanan digabung jadi PERIODE, sehingga satu
+        // entri = satu penugasan (muncul hanya saat ada pergerakan/perubahan).
+        $soRows = StrukturOrganisasi::where('karyawan_id', $id)
             ->where('posisi', '!=', '-')
-            ->orderByDesc('tahun')
-            ->orderByDesc('bulan')
+            ->orderBy('tahun')
+            ->orderBy('bulan')
             ->get(['id','posisi','direktorat','kompartemen','bulan','tahun','job_grade','core']);
+
+        $soAssignments = self::ringkasPeriodeSo($soRows);
 
         // Activity log assign untuk karyawan ini
         $assignLogs = \App\Models\ActivityLog::where('aksi', 'assign')
