@@ -351,8 +351,8 @@
                         <th>Rek. Primer</th>
                         <th>Rek. Sekunder</th>
                         <th>Rekomendasi Final</th>
-                        <th>Tgl Exp IDP</th>
-                        <th>Status IDP</th>
+                        <th>Tgl Exp</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>

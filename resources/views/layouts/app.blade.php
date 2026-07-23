@@ -378,7 +378,7 @@
             {{-- Kepejabatan (accordion) --}}
             <div class="nav-link master-toggle {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'active open' : '' }}" data-tooltip="Kepejabatan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                <span class="nav-text">Kepejabatan</span>
+                <span class="nav-text">pejabat</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'open' : '' }}">
