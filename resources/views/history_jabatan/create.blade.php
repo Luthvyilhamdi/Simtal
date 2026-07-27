@@ -126,7 +126,7 @@
                     <input type="radio" name="tipe" value="onboarding" {{ $tipe=='onboarding' ? 'checked' : '' }}>
                     <span class="tipe-emoji">★</span>
                     <span class="tipe-name">Onboarding</span>
-                    <span class="tipe-desc">Jabatan awal</span>
+                    <span class="tipe-desc">Penempatan</span>
                 </label>
             </div>
             @error('tipe')<div class="error-msg" style="margin-top:8px">{{ $message }}</div>@enderror
