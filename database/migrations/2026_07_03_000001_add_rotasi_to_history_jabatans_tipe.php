@@ -14,6 +14,6 @@ return new class extends Migration
     {
         // Kembalikan record rotasi ke mutasi agar tidak melanggar enum lama.
         DB::table('history_jabatans')->where('tipe', 'rotasi')->update(['tipe' => 'mutasi']);
-        DB::statement("ALTER TABLE history_jabatans MODIFY tipe ENUM('mutasi','promosi','demosi','penempatan') NOT NULL DEFAULT 'mutasi'");
+        DB::statement("ALTER TABLE history_jabatans MODIFY tipe ENUM('mutasi','promosi','demosi','onboarding') NOT NULL DEFAULT 'mutasi'");
     }
 };
