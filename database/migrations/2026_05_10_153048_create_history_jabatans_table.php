@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('kode_struktur_id')->constrained('kode_struktur')->onDelete('restrict');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai')->nullable();
-            $table->enum('tipe', ['mutasi', 'promosi', 'demosi', 'onboarding'])->default('mutasi');
+            $table->enum('tipe', ['mutasi', 'promosi', 'demosi', 'penempatan'])->default('mutasi');
             $table->text('keterangan')->nullable();
             $table->boolean('is_current')->default(false);
             $table->timestamps();
