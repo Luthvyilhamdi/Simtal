@@ -166,7 +166,7 @@
                 </div>
                 <div class="kolom-item">
                     <div class="kolom-name">tipe <span class="kolom-req">*wajib</span></div>
-                    <div class="kolom-desc">penempatan / promosi / mutasi / rotasi / demosi</div>
+                    <div class="kolom-desc">onboarding / promosi / mutasi / rotasi / demosi</div>
                 </div>
                 <div class="kolom-item">
                     <div class="kolom-name">tanggal_mulai <span class="kolom-req">*wajib</span></div>
@@ -207,7 +207,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>10001</td><td>Staff</td><td>penempatan</td><td>01/01/2015</td><td>31/12/2018</td>
+                            <td>10001</td><td>Staff</td><td>onboarding</td><td>01/01/2015</td><td>31/12/2018</td>
                         </tr>
                         <tr>
                             <td>10001</td><td>Senior Staff</td><td>promosi</td><td>01/01/2019</td><td>31/12/2021</td>

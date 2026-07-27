@@ -172,7 +172,7 @@
     .tipe-mutasi     { background:#dbeafe;color:#1d4ed8; }
     .tipe-rotasi     { background:#ecfeff;color:#0891b2; }
     .tipe-demosi     { background:#fee2e2;color:#dc2626; }
-    .tipe-penempatan { background:#fef3c7;color:#d97706; }
+    .tipe-onboarding { background:#fef3c7;color:#d97706; }
     .view-all { font-size:11px;color:#16a34a;text-decoration:none;font-weight:600; }
     .view-all:hover { text-decoration:underline; }
 

@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE history_jabatans MODIFY tipe ENUM('mutasi','rotasi','promosi','demosi','penempatan') NOT NULL DEFAULT 'mutasi'");
+        DB::statement("ALTER TABLE history_jabatans MODIFY tipe ENUM('mutasi','rotasi','promosi','demosi','onboarding') NOT NULL DEFAULT 'mutasi'");
     }
 
     public function down(): void

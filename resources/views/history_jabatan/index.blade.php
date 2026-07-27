@@ -105,7 +105,7 @@
     .tipe-mutasi    { background: #dbeafe; color: #1d4ed8; }
     .tipe-rotasi    { background: #ecfeff; color: #0891b2; }
     .tipe-demosi    { background: #fee2e2; color: #dc2626; }
-    .tipe-penempatan{ background: #fef3c7; color: #d97706; }
+    .tipe-onboarding{ background: #fef3c7; color: #d97706; }
     .card-jabatan { font-size: 15px; font-weight: 700; color: #111827; }
     .card-dept { font-size: 12px; color: #6b7280; margin-top: 2px; }
     .card-right { display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0; }

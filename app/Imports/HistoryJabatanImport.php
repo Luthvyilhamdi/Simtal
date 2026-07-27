@@ -70,9 +70,9 @@ class HistoryJabatanImport implements
             : null;
 
         // Parse tipe
-        $tipe = strtolower(trim($row['tipe'] ?? 'penempatan'));
-        if (!in_array($tipe, ['promosi', 'mutasi', 'rotasi', 'demosi', 'penempatan'])) {
-            $tipe = 'penempatan';
+        $tipe = strtolower(trim($row['tipe'] ?? 'onboarding'));
+        if (!in_array($tipe, ['promosi', 'mutasi', 'rotasi', 'demosi', 'onboarding'])) {
+            $tipe = 'onboarding';
         }
 
         // Tentukan is_current

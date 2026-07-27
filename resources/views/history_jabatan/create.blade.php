@@ -44,7 +44,7 @@
     .tipe-card.selected-mutasi    { border-color:#3b82f6;background:#eff6ff; }
     .tipe-card.selected-rotasi    { border-color:#0891b2;background:#ecfeff; }
     .tipe-card.selected-demosi    { border-color:#ef4444;background:#fef2f2; }
-    .tipe-card.selected-penempatan{ border-color:#f59e0b;background:#fffbeb; }
+    .tipe-card.selected-onboarding{ border-color:#f59e0b;background:#fffbeb; }
     .tipe-emoji { font-size:22px; }
     .tipe-name { font-size:12px;font-weight:700;color:#374151; }
     .tipe-desc { font-size:10px;color:#9ca3af; }
@@ -122,10 +122,10 @@
                     <span class="tipe-name">Demosi</span>
                     <span class="tipe-desc">Turun jabatan</span>
                 </label>
-                <label class="tipe-card {{ $tipe=='penempatan' ? 'selected-penempatan' : '' }}" id="tipe-penempatan" onclick="selectTipe('penempatan')">
-                    <input type="radio" name="tipe" value="penempatan" {{ $tipe=='penempatan' ? 'checked' : '' }}>
+                <label class="tipe-card {{ $tipe=='onboarding' ? 'selected-onboarding' : '' }}" id="tipe-onboarding" onclick="selectTipe('onboarding')">
+                    <input type="radio" name="tipe" value="onboarding" {{ $tipe=='onboarding' ? 'checked' : '' }}>
                     <span class="tipe-emoji">★</span>
-                    <span class="tipe-name">Penempatan</span>
+                    <span class="tipe-name">Onboarding</span>
                     <span class="tipe-desc">Penempatan</span>
                 </label>
             </div>
@@ -297,7 +297,7 @@
 
 @push('scripts')
 <script>
-    const tipes = ['promosi', 'mutasi', 'rotasi', 'demosi', 'penempatan'];
+    const tipes = ['promosi', 'mutasi', 'rotasi', 'demosi', 'onboarding'];
     function selectTipe(val) {
         tipes.forEach(t => {
             const el = document.getElementById('tipe-' + t);

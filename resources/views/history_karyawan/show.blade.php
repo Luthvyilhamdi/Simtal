@@ -45,7 +45,7 @@
     .tipe-mutasi { background:#dbeafe;color:#1d4ed8; }
     .tipe-rotasi { background:#ecfeff;color:#0891b2; }
     .tipe-demosi { background:#fee2e2;color:#dc2626; }
-    .tipe-penempatan { background:#fef3c7;color:#d97706; }
+    .tipe-onboarding { background:#fef3c7;color:#d97706; }
     .card-jabatan { font-size:15px;font-weight:700;color:#111827; }
     .card-dept { font-size:12px;color:#6b7280;margin-top:2px; }
     .badge-current { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;background:#dcfce7;color:#15803d;font-size:11px;font-weight:700; }
