@@ -97,9 +97,10 @@ Route::middleware('auth')->group(function () {
 
         // Karyawan
         Route::get('karyawan/export',            [KaryawanController::class, 'export'])->name('karyawan.export');
-        Route::get('karyawan/import',            [KaryawanController::class, 'importPage'])->name('karyawan.import');
         Route::post('karyawan/import',           [KaryawanController::class, 'import'])->name('karyawan.import.store');
         Route::get('karyawan/template-download', [KaryawanController::class, 'downloadTemplate'])->name('karyawan.template');
+        Route::post('karyawan/import-tmt',         [KaryawanController::class, 'importTmt'])->name('karyawan.import-tmt.store');
+        Route::get('karyawan/import-tmt/template', [KaryawanController::class, 'templateTmt'])->name('karyawan.import-tmt.template');
         Route::resource('karyawan', KaryawanController::class);
 
         // History Jabatan
@@ -117,7 +118,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/',       [HistoryKaryawanController::class, 'index'])->name('index');
             Route::get('/export', [HistoryKaryawanController::class, 'export'])->name('export');
             Route::middleware('super_admin')->group(function () {
-                Route::get('/import',          [ImportHistoryJabatanController::class, 'page'])->name('import');
                 Route::post('/import',         [ImportHistoryJabatanController::class, 'import'])->name('import.store');
                 Route::get('/import/template', [ImportHistoryJabatanController::class, 'downloadTemplate'])->name('import.template');
             });

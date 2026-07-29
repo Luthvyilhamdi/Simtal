@@ -261,6 +261,16 @@
                 </div>
 
                 <div class="field">
+                    <label>Band</label>
+                    <select name="band">
+                        <option value="">Semua</option>
+                        @foreach($bandList as $b)
+                            <option value="{{ $b }}" {{ old('band')==$b?'selected':'' }}>{{ $b }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="field">
                     <label>Tier Pejabat</label>
                     <select name="tier">
                         <option value="">Semua</option>

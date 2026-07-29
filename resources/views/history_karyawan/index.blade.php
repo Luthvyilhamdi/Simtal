@@ -79,11 +79,18 @@
         </div>
 
         @if(auth()->user()->isSuperAdmin())
-        <a href="{{ route('history_karyawan.import') }}"
-           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;">
+        <button type="button" onclick="openImportModal('modalImportHistory')"
+           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Import
-        </a>
+        </button>
+        @include('partials.import-modal', [
+            'modalId'       => 'modalImportHistory',
+            'title'         => 'Import History Jabatan',
+            'cols'          => 'Kunci <code>nik</code> + <code>tanggal_mulai</code> (update jika sudah ada). <code>lanjut_mdj</code>: ya / tidak / kosong (auto ikut band). Lihat template untuk daftar kolom lengkap.',
+            'templateRoute' => route('history_karyawan.import.template'),
+            'actionRoute'   => route('history_karyawan.import.store'),
+        ])
         @endif
 
         <a href="{{ route('history_karyawan.export') }}"

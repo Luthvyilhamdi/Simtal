@@ -13,7 +13,9 @@ use App\Models\KodeStruktur;
 use App\Models\TalentPool;
 use App\Models\User;
 use App\Imports\KaryawanImport;
+use App\Imports\TmtImport;
 use App\Exports\TemplateKaryawanExport;
+use App\Exports\TemplateTmtExport;
 use App\Exports\KaryawanExport;
 use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
@@ -202,12 +204,6 @@ class KaryawanController extends Controller
     }
 
     // ===== IMPORT =====
-    public function importPage()
-    {
-        $this->checkSuperAdmin();
-        return view('karyawan.import');
-    }
-
     public function import(Request $request)
     {
         $this->checkSuperAdmin();
@@ -256,5 +252,52 @@ class KaryawanController extends Controller
             new TemplateKaryawanExport(),
             'template-import-karyawan.xlsx'
         );
+    }
+
+    // ===== IMPORT TMT (Band / Job Grade / Person Grade) =====
+    public function importTmt(Request $request)
+    {
+        $this->checkSuperAdmin();
+
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], [
+            'file.required' => 'File wajib dipilih.',
+            'file.mimes'    => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            'file.max'      => 'Ukuran file maksimal 10MB.',
+        ]);
+
+        try {
+            $import = new TmtImport();
+            Excel::import($import, $request->file('file'));
+
+            $updated = $import->getUpdatedCount();
+            $skipped = $import->getSkippedCount();
+
+            $msg = "Import TMT selesai: {$updated} karyawan diperbarui.";
+            if ($skipped > 0) $msg .= " {$skipped} dilewati (NIK tak ditemukan / tanggal kosong).";
+
+            $this->log('import', 'Karyawan', 'Import TMT', "TMT diperbarui: {$updated}");
+
+            return redirect()->route('karyawan.index')->with('success', $msg);
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $errMsg   = 'Import gagal: ';
+            foreach (array_slice($failures, 0, 3) as $failure) {
+                $errMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . '. ';
+            }
+            return back()->with('error', $errMsg);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function templateTmt()
+    {
+        $this->checkSuperAdmin();
+
+        return Excel::download(new TemplateTmtExport(), 'template-import-tmt.xlsx');
     }
 }

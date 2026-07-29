@@ -21,12 +21,6 @@ class ImportHistoryJabatanController extends Controller
         }
     }
 
-    public function page()
-    {
-        $this->checkSuperAdmin();
-        return view('history_karyawan.import');
-    }
-
     public function import(Request $request)
     {
         $this->checkSuperAdmin();

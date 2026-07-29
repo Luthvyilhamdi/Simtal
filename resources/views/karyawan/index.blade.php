@@ -181,11 +181,16 @@
             Export
         </a>
         @if(auth()->user()->isSuperAdmin())
-        <a href="{{ route('karyawan.import') }}"
-           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;">
+        <button type="button" onclick="openImportModal('modalImportKaryawan')"
+           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Import
-        </a>
+        </button>
+        <button type="button" onclick="openImportModal('modalImportTmt')"
+           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Import TMT
+        </button>
         @endif
         <a href="{{ route('karyawan.create') }}" class="btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -193,6 +198,23 @@
         </a>
     </div>
 </div>
+
+@if(auth()->user()->isSuperAdmin())
+    @include('partials.import-modal', [
+        'modalId'       => 'modalImportKaryawan',
+        'title'         => 'Import Data Karyawan',
+        'cols'          => 'Sesuai template. Kunci <code>NIK</code> — data yang sudah ada diperbarui, NIK baru ditambah.',
+        'templateRoute' => route('karyawan.template'),
+        'actionRoute'   => route('karyawan.import.store'),
+    ])
+    @include('partials.import-modal', [
+        'modalId'       => 'modalImportTmt',
+        'title'         => 'Import TMT (Band / JG / PG)',
+        'cols'          => 'Kolom: <code>nik</code> <code>tmt_band</code> <code>tmt_jg</code> <code>tmt_pg</code> · tanggal dd/mm/yyyy · kolom kosong tidak mengubah nilai lama.',
+        'templateRoute' => route('karyawan.import-tmt.template'),
+        'actionRoute'   => route('karyawan.import-tmt.store'),
+    ])
+@endif
 
 {{-- TABLE --}}
 <div class="table-card">

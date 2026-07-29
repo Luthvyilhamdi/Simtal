@@ -171,13 +171,14 @@ class ExportBuilderController extends Controller
             ->filter()->unique()->sortDesc()->values();
 
         $bulanList = self::BULAN;
+        $bandList  = array_keys(Karyawan::bandConfig());
 
         // Untuk pemilih karyawan (cari NIK/nama → tambah sebagai chip) di sisi klien.
         $karyawanPilih = Karyawan::orderBy('nama')->get(['nik', 'nama']);
 
         return view('export_builder.index', compact(
             'grouped', 'direktorats', 'kompartemens', 'departemens', 'tierList', 'tahunList', 'bulanList',
-            'karyawanPilih'
+            'bandList', 'karyawanPilih'
         ));
     }
 
@@ -239,6 +240,7 @@ class ExportBuilderController extends Controller
             'direktorat_id'  => 'nullable|exists:direktorat,id',
             'kompartemen_id' => 'nullable|exists:kompartemen,id',
             'departemen_id'  => 'nullable|exists:departemen,id',
+            'band'           => 'nullable|in:'.implode(',', array_keys(Karyawan::bandConfig())),
             'tier'           => 'nullable|in:'.implode(',', HistoryPejabat::JABATAN_DIPANTAU),
             'nik_nama'       => 'nullable|string|max:20000',
             'col_order'      => 'nullable|string|max:5000',
@@ -314,6 +316,11 @@ class ExportBuilderController extends Controller
         }
         if (! empty($validated['departemen_id'])) {
             $query->where('departemen_id', $validated['departemen_id']);
+        }
+        if (! empty($validated['band'])) {
+            // Band = turunan Job Grade. Saring karyawan yang JG-nya masuk band ini.
+            $grades = array_map('strval', Karyawan::bandConfig()[$validated['band']]['grades'] ?? []);
+            $query->whereHas('jobGrade', fn ($q) => $q->whereIn('job_grade', $grades));
         }
         if (! empty($validated['tier'])) {
             // Karyawan yang pejabat aktifnya bertier tertentu (SVP/VP/SPM/PM).
