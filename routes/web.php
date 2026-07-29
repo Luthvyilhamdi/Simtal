@@ -107,6 +107,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/',                    [HistoryJabatanController::class, 'index'])->name('index');
             Route::get('/create',              [HistoryJabatanController::class, 'create'])->name('create');
             Route::post('/',                   [HistoryJabatanController::class, 'store'])->name('store');
+            Route::get('/{historyJabatan}/edit', [HistoryJabatanController::class, 'edit'])->name('edit');
+            Route::put('/{historyJabatan}',    [HistoryJabatanController::class, 'update'])->name('update');
             Route::delete('/{historyJabatan}', [HistoryJabatanController::class, 'destroy'])->name('destroy');
         });
 

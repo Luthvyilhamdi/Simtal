@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\DynamicExport;
 use App\Models\Departemen;
 use App\Models\Direktorat;
+use App\Models\HistoryJabatan;
 use App\Models\HistoryPejabat;
 use App\Models\KalibrasiKaryawan;
 use App\Models\Karyawan;
@@ -136,6 +137,8 @@ class ExportBuilderController extends Controller
                 fn ($k) => optional($k->historyJabatan->sortByDesc('tanggal_mulai')->first())->jabatan_saat_ini ?? '-'],
             'riwayat_tgl_terakhir'     => ['History Jabatan', 'Tgl Perubahan Terakhir', 'historyJabatan',
                 fn ($k) => optional($k->historyJabatan->sortByDesc('tanggal_mulai')->first())->tanggal_mulai?->format('d/m/Y') ?? '-'],
+            'mdj'          => ['History Jabatan', 'Masa Dinas Jabatan (MDJ)', 'historyJabatan.jobGrade', fn ($k) => self::mdjLengkap($k)],
+            'mdj_mulai'    => ['History Jabatan', 'MDJ Sejak', 'historyJabatan.jobGrade', fn ($k) => ($p = self::mdjAktif($k)) ? $p['mulai']->format('d/m/Y') : '-'],
             'jumlah_promosi' => ['History Jabatan', 'Jumlah Promosi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'promosi')->count()],
             'jumlah_mutasi'  => ['History Jabatan', 'Jumlah Mutasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'mutasi')->count()],
             'jumlah_rotasi'  => ['History Jabatan', 'Jumlah Rotasi', 'historyJabatan', fn ($k) => $k->historyJabatan->where('tipe', 'rotasi')->count()],
@@ -554,6 +557,26 @@ class ExportBuilderController extends Controller
         }
 
         return ' (terbaru)';
+    }
+
+    /** Periode MDJ yang sedang berjalan untuk seorang karyawan (atau null). */
+    private static function mdjAktif($k): ?array
+    {
+        return collect(HistoryJabatan::ringkasPeriodeMdj($k->historyJabatan))->firstWhere('aktif', true);
+    }
+
+    /** MDJ (periode berjalan) format "X tahun, Y bulan, Z hari". */
+    private static function mdjLengkap($k): string
+    {
+        $p = self::mdjAktif($k);
+        if (! $p) return '-';
+
+        $parts = [];
+        if ($p['tahun'] > 0)      $parts[] = $p['tahun'].' tahun';
+        if ($p['sisa_bulan'] > 0) $parts[] = $p['sisa_bulan'].' bulan';
+        $parts[] = $p['hari'].' hari';
+
+        return implode(', ', $parts);
     }
 
     /** MDG dalam format "X tahun, Y bulan, Z hari" dari tanggal mulai grade sampai sekarang. */

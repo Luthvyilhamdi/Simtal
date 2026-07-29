@@ -79,24 +79,6 @@ class Karyawan extends Model
         ]);
     }
 
-    /**
-     * Riwayat pendidikan → satu string untuk EXPORT (dan bisa dipakai IMPORT lagi).
-     * Format: entri dipisah "; ", field dipisah "|" → "Jenjang|Jurusan|Institusi".
-     * Contoh: "SMA/SMK|IPA|SMAN 1; S1|Teknik Mesin|UGM". Urut jenjang terendah→tertinggi.
-     */
-    public function getRiwayatPendidikanStringAttribute(): string
-    {
-        return $this->riwayatPendidikan
-            ->sortBy(fn ($e) => array_search($e->jenjang, self::JENJANG_PENDIDIKAN))
-            ->map(function ($e) {
-                $parts = [trim((string) $e->jenjang), trim((string) $e->jurusan), trim((string) $e->institusi)];
-                // Buang field kosong di ujung agar ringkas (mis. tanpa institusi).
-                while (count($parts) > 1 && end($parts) === '') array_pop($parts);
-                return implode('|', $parts);
-            })
-            ->implode('; ');
-    }
-
     public function pejabatAktif()
     {
         return $this->hasOne(\App\Models\HistoryPejabat::class)
@@ -292,7 +274,9 @@ class Karyawan extends Model
             ->orderBy('id')
             ->get()
             ->map(function ($h) {
-                $grade = (int) ($h->jobGrade->job_grade ?? 0);
+                // Pakai snapshot grade (job_grade_nama) dulu, fallback relasi —
+                // agar baris historis (FK null) tetap ikut hitungan band.
+                $grade = (int) ($h->job_grade_label ?? 0);
                 return [
                     'band'    => $grade ? self::getBandFromGrade($grade) : '-',
                     'tanggal' => $h->tanggal_mulai,

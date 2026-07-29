@@ -43,11 +43,15 @@ class ImportHistoryJabatanController extends Controller
             $import = new HistoryJabatanImport();
             Excel::import($import, $request->file('file'));
 
-            $imported = $import->getRowCount();
-            $skipped  = $import->getSkippedCount();
+            // Hitung ulang jabatan current & profil untuk tiap karyawan tersentuh.
+            $import->finalize();
 
-            $msg = "Berhasil mengimport {$imported} history jabatan.";
-            if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK tidak ditemukan).";
+            $added   = $import->getCreatedCount();
+            $updated = $import->getUpdatedCount();
+            $skipped = $import->getSkippedCount();
+
+            $msg = "Import selesai: {$added} ditambah, {$updated} diperbarui.";
+            if ($skipped > 0) $msg .= " {$skipped} dilewati (NIK tidak ditemukan / tanggal mulai kosong).";
 
             return redirect()
                 ->route('history_karyawan.index')

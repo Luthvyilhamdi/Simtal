@@ -153,6 +153,32 @@
     }
     .btn-del:hover { background: #fef2f2; border-color: #fecaca; }
     .btn-del svg { width: 13px; height: 13px; stroke: #ef4444; fill: none; stroke-width: 2; }
+    .btn-edit {
+        width: 30px; height: 30px; border-radius: 7px;
+        border: 1px solid #e5e7eb; background: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.12s; text-decoration: none;
+    }
+    .btn-edit:hover { background: #f0fdf4; border-color: #bbf7d0; }
+    .btn-edit svg { width: 13px; height: 13px; stroke: #16a34a; fill: none; stroke-width: 2; }
+    .stat-cards { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px; }
+    .stat-card { display:flex;gap:10px;align-items:center;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:11px 14px; }
+    .stat-card-icon { width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .stat-card-icon svg { width:17px;height:17px;fill:none;stroke-width:2; }
+    .stat-card-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px; }
+    .stat-card-value { font-size:15px;font-weight:800;color:#111827;line-height:1.2;margin-top:1px; }
+    .stat-card-sub { font-size:11px;color:#6b7280;margin-top:2px; }
+    /* MDJ = hijau */
+    .stat-card.mdj { background:#f0fdf4;border:1px solid #bbf7d0; }
+    .stat-card.mdj .stat-card-icon { background:#dcfce7; }
+    .stat-card.mdj .stat-card-icon svg { stroke:#16a34a; }
+    .stat-card.mdj .stat-card-label { color:#15803d; }
+    /* MDG = biru */
+    .stat-card.mdg { background:#eff6ff;border:1px solid #bfdbfe; }
+    .stat-card.mdg .stat-card-icon { background:#dbeafe; }
+    .stat-card.mdg .stat-card-icon svg { stroke:#2563eb; }
+    .stat-card.mdg .stat-card-label { color:#1d4ed8; }
+    @media (max-width:768px) { .stat-cards { grid-template-columns:1fr; } }
 
     /* Empty */
     .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
@@ -286,6 +312,45 @@
     </a>
 </div>
 
+{{-- Ringkasan Masa Dinas: Jabatan (MDJ) & Grade / Person Grade (MDG-PG) --}}
+@if(!empty($mdjAktif) || !empty($mdgPg))
+<div class="stat-cards">
+    @if(!empty($mdjAktif))
+    <div class="stat-card mdj">
+        <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+            <div class="stat-card-label">Masa Dinas Jabatan (berjalan)</div>
+            <div class="stat-card-value">{{ $mdjAktif['tahun'] }} tahun {{ $mdjAktif['sisa_bulan'] }} bulan {{ $mdjAktif['hari'] }} hari</div>
+            <div class="stat-card-sub">
+                Sejak {{ \Carbon\Carbon::parse($mdjAktif['mulai'])->format('d M Y') }}
+                @if($mdjAktif['count'] > 1)
+                    · {{ $mdjAktif['count'] }} jabatan dalam periode ini (perubahan SO, dihitung menyambung)
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(!empty($mdgPg))
+    <div class="stat-card mdg">
+        <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div>
+            <div class="stat-card-label">Masa Dinas Grade (Person Grade)</div>
+            <div class="stat-card-value">{{ $mdgPg['tahun'] }} tahun {{ $mdgPg['bulan'] }} bulan {{ $mdgPg['hari'] }} hari</div>
+            <div class="stat-card-sub">
+                Sejak {{ \Carbon\Carbon::parse($mdgPg['mulai'])->format('d M Y') }}
+                @if($mdgPg['grade']) · Person Grade {{ $mdgPg['grade'] }} @endif
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+@endif
+
 {{-- Timeline --}}
 @if($histories->count() > 0)
 <div class="timeline">
@@ -305,9 +370,12 @@
                         @endif
                     </div>
                     <div class="card-jabatan">{{ $h->jabatan_saat_ini ?? $h->jabatan->nama_jabatan ?? '-' }}</div>
-                    <div class="card-dept">{{ $h->departemen->nama_departemen ?? '-' }} · {{ $h->direktorat->nama_direktorat ?? '-' }}</div>
+                    <div class="card-dept">{{ $h->departemen_label ?? '-' }} · {{ $h->direktorat_label ?? '-' }}</div>
                 </div>
                 <div class="card-right">
+                    <a href="{{ route('history_jabatan.edit', [$karyawan, $h]) }}" class="btn-edit" title="Edit">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
                     <button type="button" class="btn-del"
                         data-url="{{ route('history_jabatan.destroy', [$karyawan, $h]) }}"
                         data-jabatan="{{ $h->jabatan->nama_jabatan ?? '-' }}"
@@ -320,15 +388,15 @@
             <div class="card-details">
                 <div class="detail-item">
                     <div class="detail-label">Job Grade</div>
-                    <div class="detail-val">{{ $h->jobGrade->job_grade ?? '-' }}</div>
+                    <div class="detail-val">{{ $h->job_grade_label ?? '-' }}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Person Grade</div>
-                    <div class="detail-val">{{ $h->personGrade->person_grade ?? '-' }}</div>
+                    <div class="detail-val">{{ $h->person_grade_label ?? '-' }}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Kompartemen</div>
-                    <div class="detail-val">{{ $h->kompartemen->nama_kompartemen ?? '-' }}</div>
+                    <div class="detail-val">{{ $h->kompartemen_label ?? '-' }}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Kode Struktur</div>
