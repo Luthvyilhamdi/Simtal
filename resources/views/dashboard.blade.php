@@ -827,7 +827,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 <div class="chart-grid-3">
     <div class="chart-card">
         <div class="chart-card-title">Tren Pergerakan Jabatan</div>
-        <div class="chart-card-sub">12 bulan terakhir — promosi, mutasi, rotasi &amp; demosi · <span style="color:#15803d;font-weight:600">klik batang untuk lihat siapa</span></div>
+        <div class="chart-card-sub">12 bulan terakhir — promosi, mutasi, rotasi, demosi &amp; penempatan · <span style="color:#15803d;font-weight:600">klik batang untuk lihat siapa</span></div>
         <canvas id="trenChart" height="200"></canvas>
     </div>
     <div class="chart-card">
@@ -1310,12 +1310,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ── Popup detail pergerakan jabatan ──
-var TREN_TIPE = ['promosi','mutasi','rotasi','demosi'];
+var TREN_TIPE = ['promosi','mutasi','rotasi','demosi','penempatan'];
 var TREN_META = {
-    promosi: { label:'Promosi', color:'#16a34a', icon:'↑' },
-    mutasi:  { label:'Mutasi',  color:'#2563eb', icon:'↔' },
-    rotasi:  { label:'Rotasi',  color:'#0891b2', icon:'↻' },
-    demosi:  { label:'Demosi',  color:'#ef4444', icon:'↓' },
+    promosi:    { label:'Promosi',    color:'#16a34a', icon:'↑' },
+    mutasi:     { label:'Mutasi',     color:'#2563eb', icon:'↔' },
+    rotasi:     { label:'Rotasi',     color:'#0891b2', icon:'↻' },
+    demosi:     { label:'Demosi',     color:'#ef4444', icon:'↓' },
+    penempatan: { label:'Penempatan', color:'#f59e0b', icon:'★' },
 };
 function trenEsc(s){ return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); }
 function openTrenModal(monthIdx, tipe) {
@@ -1343,10 +1344,11 @@ new Chart(document.getElementById('trenChart'), {
     data: {
         labels: trenData.map(function(d) { return d.bulan; }),
         datasets: [
-            { label:'Promosi', data:trenData.map(function(d){return d.promosi;}), backgroundColor:'#16a34a', borderRadius:3 },
-            { label:'Mutasi',  data:trenData.map(function(d){return d.mutasi;}),  backgroundColor:'#2563eb', borderRadius:3 },
-            { label:'Rotasi',  data:trenData.map(function(d){return d.rotasi;}),  backgroundColor:'#0891b2', borderRadius:3 },
-            { label:'Demosi',  data:trenData.map(function(d){return d.demosi;}),  backgroundColor:'#ef4444', borderRadius:3 },
+            { label:'Promosi',    data:trenData.map(function(d){return d.promosi;}),    backgroundColor:'#16a34a', borderRadius:3 },
+            { label:'Mutasi',     data:trenData.map(function(d){return d.mutasi;}),     backgroundColor:'#2563eb', borderRadius:3 },
+            { label:'Rotasi',     data:trenData.map(function(d){return d.rotasi;}),     backgroundColor:'#0891b2', borderRadius:3 },
+            { label:'Demosi',     data:trenData.map(function(d){return d.demosi;}),     backgroundColor:'#ef4444', borderRadius:3 },
+            { label:'Penempatan', data:trenData.map(function(d){return d.penempatan;}), backgroundColor:'#f59e0b', borderRadius:3 },
         ]
     },
     options: {

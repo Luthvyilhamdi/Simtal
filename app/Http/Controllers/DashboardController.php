@@ -267,14 +267,16 @@ class DashboardController extends Controller
         // Detail SIAPA saja per bulan+tipe (untuk popup saat batang chart diklik).
         $trenDetailIdx = HistoryJabatan::with('karyawan:id,nama')
             ->whereBetween('tanggal_mulai', [$awalTren, now()->endOfMonth()])
-            ->whereIn('tipe', ['promosi', 'mutasi', 'rotasi', 'demosi'])
+            ->whereIn('tipe', ['promosi', 'mutasi', 'rotasi', 'demosi', 'penempatan'])
             ->orderBy('tanggal_mulai')
             ->get(['id', 'karyawan_id', 'jabatan_saat_ini', 'tipe', 'tanggal_mulai'])
             ->groupBy(fn ($h) => \Carbon\Carbon::parse($h->tanggal_mulai)->format('Y-m'));
 
         $trenBulan = [];
         for ($i = 11; $i >= 0; $i--) {
-            $bulan = now()->subMonths($i);
+            // startOfMonth() dulu agar tidak "overflow" (mis. 29 Feb → 1 Mar) yang
+            // bikin satu bulan tampil dobel & bulan lain hilang.
+            $bulan = now()->startOfMonth()->subMonths($i);
             $ym    = $bulan->format('Y-m');
             $rows  = $trenIdx[$ym] ?? collect();
             $recs  = $trenDetailIdx[$ym] ?? collect();
@@ -285,15 +287,17 @@ class DashboardController extends Controller
             ])->values();
             $trenBulan[] = [
                 'bulan'   => $bulan->translatedFormat('M Y'),
-                'promosi' => (int) ($rows->firstWhere('tipe', 'promosi')?->c ?? 0),
-                'mutasi'  => (int) ($rows->firstWhere('tipe', 'mutasi')?->c ?? 0),
-                'rotasi'  => (int) ($rows->firstWhere('tipe', 'rotasi')?->c ?? 0),
-                'demosi'  => (int) ($rows->firstWhere('tipe', 'demosi')?->c ?? 0),
+                'promosi'    => (int) ($rows->firstWhere('tipe', 'promosi')?->c ?? 0),
+                'mutasi'     => (int) ($rows->firstWhere('tipe', 'mutasi')?->c ?? 0),
+                'rotasi'     => (int) ($rows->firstWhere('tipe', 'rotasi')?->c ?? 0),
+                'demosi'     => (int) ($rows->firstWhere('tipe', 'demosi')?->c ?? 0),
+                'penempatan' => (int) ($rows->firstWhere('tipe', 'penempatan')?->c ?? 0),
                 'detail'  => [
-                    'promosi' => $orang('promosi'),
-                    'mutasi'  => $orang('mutasi'),
-                    'rotasi'  => $orang('rotasi'),
-                    'demosi'  => $orang('demosi'),
+                    'promosi'    => $orang('promosi'),
+                    'mutasi'     => $orang('mutasi'),
+                    'rotasi'     => $orang('rotasi'),
+                    'demosi'     => $orang('demosi'),
+                    'penempatan' => $orang('penempatan'),
                 ],
             ];
         }
