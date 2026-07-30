@@ -123,7 +123,7 @@ class ExportBuilderController extends Controller
             'kompetensi_tgl'        => ['Assessment Kompetensi', 'Tgl Kompetensi'.$suffix, 'historyAssessmentKompetensi', fn ($k) => optional(self::byTanggal($k->historyAssessmentKompetensi, 'tanggal_assessment', $tahun, $bulan))->tanggal_assessment?->format('d/m/Y') ?? '-'],
 
             // ── TOEFL (hasil tes TERBARU per karyawan) ──
-            'toefl_skor'    => ['TOEFL', 'Skor TOEFL (terbaru)', 'toefls', fn ($k) => $k->toefl_terbaru?->skor ?? '-'],
+            'toefl_skor'    => ['TOEFL', 'Skor TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->skor ?? '-'],
             'toefl_jenis'   => ['TOEFL', 'Jenis TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->jenis ?: '-'],
             'toefl_tanggal' => ['TOEFL', 'Tgl Tes TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->tanggal_tes?->format('d/m/Y') ?? '-'],
             'toefl_lembaga' => ['TOEFL', 'Lembaga TOEFL', 'toefls', fn ($k) => $k->toefl_terbaru?->lembaga ?: '-'],
@@ -172,13 +172,17 @@ class ExportBuilderController extends Controller
 
         $bulanList = self::BULAN;
         $bandList  = array_keys(Karyawan::bandConfig());
+        $jenjangList = Karyawan::JENJANG_PENDIDIKAN;
+        $statusKepegawaianList = Karyawan::whereNotNull('status_kepegawaian')
+            ->where('status_kepegawaian', '!=', '')
+            ->distinct()->orderBy('status_kepegawaian')->pluck('status_kepegawaian');
 
         // Untuk pemilih karyawan (cari NIK/nama → tambah sebagai chip) di sisi klien.
         $karyawanPilih = Karyawan::orderBy('nama')->get(['nik', 'nama']);
 
         return view('export_builder.index', compact(
             'grouped', 'direktorats', 'kompartemens', 'departemens', 'tierList', 'tahunList', 'bulanList',
-            'bandList', 'karyawanPilih'
+            'bandList', 'jenjangList', 'statusKepegawaianList', 'karyawanPilih'
         ));
     }
 
@@ -241,6 +245,10 @@ class ExportBuilderController extends Controller
             'kompartemen_id' => 'nullable|exists:kompartemen,id',
             'departemen_id'  => 'nullable|exists:departemen,id',
             'band'           => 'nullable|in:'.implode(',', array_keys(Karyawan::bandConfig())),
+            'status_kepegawaian' => 'nullable|string|max:50',
+            'jenis_kelamin'  => 'nullable|in:L,P',
+            'jenjang'        => 'nullable|in:'.implode(',', Karyawan::JENJANG_PENDIDIKAN),
+            'tmt'            => 'nullable|in:ada,belum',
             'tier'           => 'nullable|in:'.implode(',', HistoryPejabat::JABATAN_DIPANTAU),
             'nik_nama'       => 'nullable|string|max:20000',
             'col_order'      => 'nullable|string|max:5000',
@@ -321,6 +329,27 @@ class ExportBuilderController extends Controller
             // Band = turunan Job Grade. Saring karyawan yang JG-nya masuk band ini.
             $grades = array_map('strval', Karyawan::bandConfig()[$validated['band']]['grades'] ?? []);
             $query->whereHas('jobGrade', fn ($q) => $q->whereIn('job_grade', $grades));
+        }
+        if (! empty($validated['status_kepegawaian'])) {
+            $query->where('status_kepegawaian', $validated['status_kepegawaian']);
+        }
+        if (! empty($validated['jenis_kelamin'])) {
+            $query->where('jenis_kelamin', $validated['jenis_kelamin']);
+        }
+        if (! empty($validated['jenjang'])) {
+            $query->where('jenjang_pendidikan', $validated['jenjang']);
+        }
+        if (! empty($validated['tmt'])) {
+            // Kelengkapan TMT (band/JG/PG). 'belum' = ketiganya kosong; 'ada' = minimal satu terisi.
+            if ($validated['tmt'] === 'belum') {
+                $query->whereNull('tanggal_mulai_band')
+                      ->whereNull('tanggal_mulai_jg')
+                      ->whereNull('tanggal_mulai_pg');
+            } else {
+                $query->where(fn ($q) => $q->whereNotNull('tanggal_mulai_band')
+                                            ->orWhereNotNull('tanggal_mulai_jg')
+                                            ->orWhereNotNull('tanggal_mulai_pg'));
+            }
         }
         if (! empty($validated['tier'])) {
             // Karyawan yang pejabat aktifnya bertier tertentu (SVP/VP/SPM/PM).
@@ -550,7 +579,7 @@ class ExportBuilderController extends Controller
             ->first();
     }
 
-    /** Sufiks label kolom, mis. " Mar 2025", " 2025", atau " (terbaru)". */
+    /** Sufiks label kolom, mis. " Mar 2025" atau " 2025". Kosong bila tanpa periode (data terbaru). */
     private static function periodeSuffix(?int $tahun, ?int $bulan): string
     {
         if ($tahun && $bulan) {
@@ -563,7 +592,7 @@ class ExportBuilderController extends Controller
             return ' '.substr(self::BULAN[$bulan], 0, 3);
         }
 
-        return ' (terbaru)';
+        return '';
     }
 
     /** Periode MDJ yang sedang berjalan untuk seorang karyawan (atau null). */

@@ -198,7 +198,6 @@
                             <option value="{{ $th }}" {{ old('tahun') == $th ? 'selected' : '' }}>{{ $th }}</option>
                         @endforeach
                     </select>
-                    <div class="hint">Berlaku untuk Kalibrasi, KPI, Assessment, Kompetensi & Talent Pool. "Semua Tahun" = tetap 1 baris per karyawan, tapi tiap data tahunan dipecah jadi kolom per tahun (mis. Kalibrasi 2025, Kalibrasi 2024, …).</div>
                 </div>
 
                 <div class="field">
@@ -209,7 +208,6 @@
                             <option value="{{ $no }}" {{ old('bulan') == $no ? 'selected' : '' }}>{{ $nama }}</option>
                         @endforeach
                     </select>
-                    <div class="hint">Hanya berlaku untuk Assessment & Assessment Kompetensi (data berbasis tanggal).</div>
                 </div>
 
                 <div class="field">
@@ -218,7 +216,6 @@
                         <option value="">Tidak disertakan</option>
                         <option value="terakhir" {{ old('pendidikan')=='terakhir'?'selected':'' }}>Pendidikan Terakhir</option>
                     </select>
-                    <div class="hint">Bila dipilih, menambah kolom <b>Pendidikan Terakhir · Jurusan · Institusi</b> (jenjang tertinggi). Untuk daftar lengkap semua jenjang, gunakan menu <b>History Pendidikan</b> → Export.</div>
                 </div>
 
                 <div class="field">
@@ -271,6 +268,44 @@
                 </div>
 
                 <div class="field">
+                    <label>Status Kepegawaian</label>
+                    <select name="status_kepegawaian">
+                        <option value="">Semua</option>
+                        @foreach($statusKepegawaianList as $s)
+                            <option value="{{ $s }}" {{ old('status_kepegawaian')==$s?'selected':'' }}>{{ $s }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Jenis Kelamin</label>
+                    <select name="jenis_kelamin">
+                        <option value="">Semua</option>
+                        <option value="L" {{ old('jenis_kelamin')=='L'?'selected':'' }}>Laki-laki</option>
+                        <option value="P" {{ old('jenis_kelamin')=='P'?'selected':'' }}>Perempuan</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Jenjang Pendidikan</label>
+                    <select name="jenjang">
+                        <option value="">Semua</option>
+                        @foreach($jenjangList as $j)
+                            <option value="{{ $j }}" {{ old('jenjang')==$j?'selected':'' }}>{{ $j }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Kelengkapan TMT</label>
+                    <select name="tmt">
+                        <option value="">Semua</option>
+                        <option value="ada" {{ old('tmt')=='ada'?'selected':'' }}>Sudah ada TMT</option>
+                        <option value="belum" {{ old('tmt')=='belum'?'selected':'' }}>Belum ada TMT</option>
+                    </select>
+                </div>
+
+                <div class="field">
                     <label>Tier Pejabat</label>
                     <select name="tier">
                         <option value="">Semua</option>
@@ -278,7 +313,6 @@
                             <option value="{{ $t }}" {{ old('tier')==$t?'selected':'' }}>{{ $t }}</option>
                         @endforeach
                     </select>
-                    <div class="hint">Menyaring karyawan berdasarkan tier pejabat aktif (SVP/VP/SPM/PM).</div>
                 </div>
 
                 <div class="field">
@@ -293,7 +327,6 @@
                     <div id="empChips" class="chips"></div>
                     <div id="empChipsMeta" class="chips-meta"></div>
                     <input type="hidden" name="nik_nama" id="empNik" value="{{ old('nik_nama') }}">
-                    <div class="hint">Kosongkan untuk semua karyawan. Bisa juga tempel banyak NIK sekaligus (dipisah koma/baris) lalu klik Tambah.</div>
                 </div>
             </div>
 
