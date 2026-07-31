@@ -347,6 +347,7 @@
                         <th>JG</th>
                         <th>PG</th>
                         <th>Tgl Pelaksanaan</th>
+                        <th>Tingkat Ukur</th>
                         <th>Rek. Inti</th>
                         <th>Rek. Primer</th>
                         <th>Rek. Sekunder</th>
@@ -379,6 +380,7 @@
                         <td>{{ $a->job_grade ?? '-' }}</td>
                         <td>{{ $a->person_grade ?? '-' }}</td>
                         <td>{{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}</td>
+                        <td>{{ $a->tingkat_pengukuran ?? '-' }}</td>
                         <td>
                             @if($a->rekomendasi_inti)
                             {{-- FIX: width Blade diganti data-pct + apply via JS --}}
@@ -458,7 +460,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="12">
+                        <td colspan="13">
                             <div class="empty-state">
                                 <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                 <p style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:3px;">Belum ada data assessment rekomendasi</p>
