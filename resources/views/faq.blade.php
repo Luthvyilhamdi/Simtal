@@ -72,6 +72,8 @@
     <button class="cat-tab" data-cat="karyawan">👤 Karyawan</button>
     <button class="cat-tab" data-cat="assessment">📊 Assessment</button>
     <button class="cat-tab" data-cat="struktur">🏢 Struktur Org</button>
+    <button class="cat-tab" data-cat="jabatan">📈 Jabatan &amp; MDJ</button>
+    <button class="cat-tab" data-cat="export">📤 Export &amp; Data</button>
     <button class="cat-tab" data-cat="surat">📄 Surat</button>
     <button class="cat-tab" data-cat="akun">⚙️ Akun & Akses</button>
 </div>
@@ -208,6 +210,19 @@
                 Hanya <strong>Super Admin</strong> yang dapat menghapus posisi. Administrator biasa tidak akan melihat tombol hapus 🗑️ di halaman Struktur Organisasi.
             </div>
         </div>
+        <div class="faq-item" data-cat="struktur" data-q="jobs job stream job family cara isi apa itu">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Apa itu Jobs, Job Stream, dan Job Family? Bagaimana mengisinya?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Ketiganya adalah atribut yang <strong>melekat pada posisi (job title)</strong> di Struktur Organisasi — bukan pada orang. Karyawan otomatis mewarisi nilainya dari posisi yang sedang diduduki (periode terbaru), dan muncul di <strong>Profil Karyawan</strong>.
+                <ul>
+                    <li><strong>Cara isi cepat</strong>: tombol <strong>Import Jobs &amp; Job Stream</strong> — unduh template (sudah ada kolom <code>jobs</code>, <code>job_stream</code>, <code>job_family</code>), isi, upload. Dicocokkan per posisi ke semua periode; kolom kosong tidak menimpa data lama.</li>
+                    <li><strong>Cara isi manual</strong>: klik ikon ✏️ <strong>Edit Posisi</strong> pada posisi, isi kolom Jobs / Job Stream / Job Family.</li>
+                </ul>
+            </div>
+        </div>
         <div class="faq-item" data-cat="struktur" data-q="export struktur organisasi excel">
             <div class="faq-question" onclick="toggleFaq(this)">
                 <span class="faq-q-text">Bagaimana cara export Struktur Organisasi ke Excel?</span>
@@ -304,6 +319,105 @@
             </div>
             <div class="faq-answer">
                 Hubungi <strong>Super Admin</strong> sistem untuk mereset password Anda melalui halaman Manajemen Akun. Super Admin dapat mengubah password akun mana pun tanpa perlu mengetahui password lama.
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- === JABATAN & MDJ === --}}
+<div class="faq-section" data-section="jabatan">
+    <div class="faq-section-title">📈 History Jabatan, MDJ &amp; Grade</div>
+    <div class="faq-grid">
+        <div class="faq-item" data-cat="jabatan" data-q="apa itu mdj masa dinas jabatan cara hitung">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Apa itu MDJ (Masa Dinas Jabatan) dan bagaimana dihitung?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                <strong>MDJ</strong> = berapa lama seorang karyawan berada di jabatan yang sama. Dihitung otomatis dari Riwayat Jabatan dan ditampilkan (tahun/bulan/hari) di halaman <strong>History Jabatan</strong> tiap karyawan. Aturannya:
+                <ul>
+                    <li>Perpindahan yang hanya <strong>berganti nama karena perubahan SO</strong> (dan Anda mencentang "jabatan ini sama dengan sebelumnya") → hitungan <strong>diteruskan</strong>.</li>
+                    <li><strong>Pindah Band</strong> (mis. Band 5 → Band 4) → otomatis <strong>reset</strong>, walau dicentang sama.</li>
+                    <li>Jabatan baru / beda ranah → tidak dicentang → <strong>reset</strong> (periode baru).</li>
+                </ul>
+            </div>
+        </div>
+        <div class="faq-item" data-cat="jabatan" data-q="beda mdj dan mdg grade golongan">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Apa bedanya MDJ dan MDG?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                <ul>
+                    <li><strong>MDJ (Masa Dinas Jabatan)</strong>: lama di <em>jabatan</em> yang sama (lihat pertanyaan di atas).</li>
+                    <li><strong>MDG (Masa Dinas Grade)</strong>: lama di <em>grade/golongan</em> saat ini — dihitung dari TMT (tanggal mulai) Band / Job Grade / Person Grade, dan <strong>reset saat naik grade</strong>. Kartu MDG (Band/JG/PG) tampil di Profil Karyawan.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="faq-item" data-cat="jabatan" data-q="import history jabatan riwayat lanjut mdj kolom">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Bagaimana cara import Riwayat/History Jabatan secara massal?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Buka menu <strong>History Karyawan</strong> → tombol <strong>Import</strong> (khusus Super Admin) → unduh template → isi → upload. Bersifat <strong>smart-update</strong>: kuncinya <strong>NIK + Tanggal Mulai</strong>, jadi meng-import ulang file yang sama <em>tidak</em> menggandakan baris (baris yang cocok diperbarui). Kolom khusus <code>lanjut_mdj</code> mengatur kelangsungan MDJ:
+                <ul>
+                    <li><code>ya</code> = jabatan ini kelanjutan (ganti nama SO) → MDJ lanjut.</li>
+                    <li><code>tidak</code> = jabatan baru → MDJ reset.</li>
+                    <li><strong>kosong</strong> = otomatis: band sama → lanjut, band beda → reset.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="faq-item" data-cat="jabatan" data-q="job grade direktorat nama lama beda ketik combobox snapshot">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Kenapa Direktorat/Job Grade di History Jabatan bisa diketik dengan nama lama yang berbeda?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Karena History Jabatan adalah <strong>potret masa lalu</strong> — nama direktorat/kompartemen/departemen/grade dulu bisa berbeda akibat perubahan SO. Kolomnya berupa <strong>combobox</strong>: bisa <em>pilih dari daftar</em> atau <em>ketik nama lama</em> apa adanya. Nama lama disimpan sebagai teks pada riwayat itu saja, sehingga <strong>data master tetap bersih</strong> (hanya berisi struktur yang berlaku sekarang).
+            </div>
+        </div>
+        <div class="faq-item" data-cat="jabatan" data-q="edit hapus history jabatan cara">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Bagaimana cara mengubah atau menghapus satu entri History Jabatan?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Di halaman History Jabatan karyawan, tiap kartu jabatan punya ikon ✏️ <strong>Edit</strong> dan 🗑️ <strong>Hapus</strong>. Setelah mengubah/menghapus, <strong>jabatan saat ini, profil karyawan, dan TMT band dihitung ulang otomatis</strong> — jabatan dengan tanggal terbaru selalu jadi "jabatan saat ini" (paling atas).
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- === EXPORT & DATA === --}}
+<div class="faq-section" data-section="export">
+    <div class="faq-section-title">📤 Export Builder &amp; Data</div>
+    <div class="faq-grid">
+        <div class="faq-item" data-cat="export" data-q="export builder cara pakai kolom filter excel pdf">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Bagaimana cara membuat export data khusus (Export Builder)?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Buka <strong>Export Builder</strong>, centang kolom yang diinginkan (Data Diri, Jabatan &amp; Unit, Grade, Assessment, MDJ, Job Family, TOEFL, dll), atur filternya, klik <strong>Preview</strong> untuk cek, lalu unduh sebagai <strong>Excel</strong> atau <strong>PDF</strong>. Urutan kolom bisa diatur, dan karyawan tertentu bisa dipilih via kolom NIK/Nama.
+            </div>
+        </div>
+        <div class="faq-item" data-cat="export" data-q="filter export builder band status kepegawaian jenis kelamin jenjang">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Filter apa saja yang tersedia di Export Builder?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Tersedia filter: <strong>Tahun/Bulan</strong> data periodik, <strong>Pendidikan</strong>, <strong>Status</strong>, <strong>Direktorat/Kompartemen/Departemen</strong>, <strong>Band</strong>, <strong>Status Kepegawaian</strong>, <strong>Jenis Kelamin</strong>, <strong>Jenjang Pendidikan</strong>, <strong>Kelengkapan TMT</strong>, dan <strong>Tier Pejabat</strong>. Semua bisa dikombinasikan.
+            </div>
+        </div>
+        <div class="faq-item" data-cat="export" data-q="cari data kosong belum lengkap tmt kelengkapan">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-q-text">Bagaimana cara mencari karyawan yang datanya belum lengkap (mis. belum ada TMT)?</span>
+                <div class="faq-q-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            <div class="faq-answer">
+                Di Export Builder, pakai filter <strong>Kelengkapan TMT</strong> → pilih <strong>"Belum ada TMT"</strong> untuk memunculkan karyawan yang tanggal mulai Band/JG/PG-nya masih kosong. Praktis untuk merapikan data secara bertahap per unit.
             </div>
         </div>
     </div>
