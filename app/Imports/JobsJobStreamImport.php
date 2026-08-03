@@ -39,11 +39,13 @@ class JobsJobStreamImport implements OnEachRow, WithHeadingRow
 
         $jobs      = $this->val($row, 'jobs');
         $jobStream = $this->val($row, 'job_stream');
+        $jobFamily = $this->val($row, 'job_family');
 
         // Hanya kolom yang terisi yang diperbarui (kosong = biarkan nilai lama).
         $data = [];
         if ($jobs !== null)      $data['jobs'] = $jobs;
         if ($jobStream !== null) $data['job_stream'] = $jobStream;
+        if ($jobFamily !== null) $data['job_family'] = $jobFamily;
 
         if (empty($data)) {
             $this->skipped++;

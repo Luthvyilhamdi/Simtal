@@ -466,6 +466,11 @@ class Karyawan extends Model
         return $this->struktur_aktif?->job_stream;
     }
 
+    public function getJobFamilyAttribute(): ?string
+    {
+        return $this->struktur_aktif?->job_family;
+    }
+
     public function getCoreAttribute(): ?string
     {
         // 'Core' / 'Non Core' dari posisi Struktur Organisasi (bisa '' bila belum diisi).

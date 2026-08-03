@@ -28,9 +28,9 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
     const BG_DEV_NEG= 'FF0000';
     const FONT_NAME = 'Calibri';
 
-    // Semua kolom A-AH untuk background full row
+    // Semua kolom A-AI untuk background full row
     const ALL_COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X',
-                      'Y','Z','AA','AB','AC','AD','AE','AF','AG','AH'];
+                      'Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI'];
 
     public function __construct($filters = [])
     {
@@ -95,8 +95,8 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                     'Q'=>'Nama','R'=>'Jabatan Lama','S'=>'Jabatan Baru',
                     'T'=>'Job Grade','U'=>'Person Grade','V'=>'Direktorat','W'=>'Kompartemen','X'=>'Departemen',
                     'Y'=>'Struktural/Fungsional','Z'=>'Band','AA'=>'Jobs','AB'=>'Job Stream',
-                    'AC'=>'Status Kepegawaian','AD'=>'No. HP','AE'=>'Email',
-                    'AF'=>'Jenjang Pendidikan','AG'=>'Jurusan','AH'=>'TMT Band',
+                    'AC'=>'Job Family','AD'=>'Status Kepegawaian','AE'=>'No. HP',
+                    'AF'=>'Email','AG'=>'Jenjang Pendidikan','AH'=>'Jurusan','AI'=>'TMT Band',
                 ];
 
                 foreach ($headers as $col => $val) {
@@ -110,7 +110,7 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                 }
 
                 // Header background A-AH (per-range agar cepat)
-                $sheet->getStyle('A1:AH1')->getFill()
+                $sheet->getStyle('A1:AI1')->getFill()
                     ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_HEADER);
                 $sheet->getRowDimension(1)->setRowHeight(30);
 
@@ -121,7 +121,7 @@ class StrukturOrganisasiExport implements FromCollection, WithEvents, WithTitle
                 $sheet->getCell('M2')->setValue($totalDev);
 
                 // Total background A-AH (per-range agar cepat)
-                $totalStyle = $sheet->getStyle('A2:AH2');
+                $totalStyle = $sheet->getStyle('A2:AI2');
                 $totalStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_TOTAL);
                 $totalStyle->getFont()->setBold(true)->setName(self::FONT_NAME)->setSize(10)->getColor()->setRGB('FFFFFF');
 $devStyle = $sheet->getCell('M2')->getStyle();
@@ -132,7 +132,7 @@ $devStyle = $sheet->getCell('M2')->getStyle();
                 $currentRow = 3;
                 // Helper apply background A-AH (per-range → 1 operasi/baris, jauh lebih cepat)
                 $applyBg = function($row, $bg, $bold = false) use ($sheet) {
-                    $style = $sheet->getStyle('A'.$row.':AH'.$row);
+                    $style = $sheet->getStyle('A'.$row.':AI'.$row);
                     $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
                     $style->getFont()->setName(self::FONT_NAME)->setSize(10)->setBold($bold);
                 };
@@ -304,12 +304,13 @@ $devStyle = $sheet->getCell('M2')->getStyle();
                                             $sheet->getCell('Z'.$r)->setValue($k->band ?? '');
                                             $sheet->getCell('AA'.$r)->setValue($k->jobs ?? '');
                                             $sheet->getCell('AB'.$r)->setValue($k->job_stream ?? '');
-                                            $sheet->getCell('AC'.$r)->setValue($k->status_kepegawaian ?? '');
-                                            $sheet->getCell('AD'.$r)->setValue($k->no_hp ?? '');
-                                            $sheet->getCell('AE'.$r)->setValue($k->email ?? '');
-                                            $sheet->getCell('AF'.$r)->setValue($k->jenjang_pendidikan ?? '');
-                                            $sheet->getCell('AG'.$r)->setValue($k->jurusan ?? '');
-                                            $sheet->getCell('AH'.$r)->setValue($k->tanggal_mulai_band ? Carbon::parse($k->tanggal_mulai_band)->format('d/m/Y') : '');
+                                            $sheet->getCell('AC'.$r)->setValue($k->job_family ?? '');
+                                            $sheet->getCell('AD'.$r)->setValue($k->status_kepegawaian ?? '');
+                                            $sheet->getCell('AE'.$r)->setValue($k->no_hp ?? '');
+                                            $sheet->getCell('AF'.$r)->setValue($k->email ?? '');
+                                            $sheet->getCell('AG'.$r)->setValue($k->jenjang_pendidikan ?? '');
+                                            $sheet->getCell('AH'.$r)->setValue($k->jurusan ?? '');
+                                            $sheet->getCell('AI'.$r)->setValue($k->tanggal_mulai_band ? Carbon::parse($k->tanggal_mulai_band)->format('d/m/Y') : '');
                                         }
 
                                         $applyBg($r, self::BG_POSISI, false);
@@ -319,7 +320,7 @@ $devStyle = $sheet->getCell('M2')->getStyle();
                                                 ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::BG_DEV_NEG);
                                         }
 
-                                        $sheet->getStyle('A'.$r.':AH'.$r)->getFont()->setName(self::FONT_NAME)->setSize(10);
+                                        $sheet->getStyle('A'.$r.':AI'.$r)->getFont()->setName(self::FONT_NAME)->setSize(10);
                                         $sheet->getStyle('J'.$r.':M'.$r)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                                     }
                                 }
@@ -334,8 +335,8 @@ $devStyle = $sheet->getCell('M2')->getStyle();
                     'H'=>48.6,'I'=>46.2,'J'=>10.3,'K'=>10.0,'L'=>18.3,'M'=>15.9,
                     'N'=>15.7,'O'=>22.8,'P'=>18.3,'Q'=>41.7,'R'=>51.4,'S'=>74.1,
                     'T'=>18.9,'U'=>18.3,'V'=>30.7,'W'=>30.0,'X'=>47.2,
-                    'Y'=>20.0,'Z'=>9.0,'AA'=>30.0,'AB'=>22.0,'AC'=>18.0,'AD'=>16.0,
-                    'AE'=>30.0,'AF'=>16.0,'AG'=>24.0,'AH'=>13.0,
+                    'Y'=>20.0,'Z'=>9.0,'AA'=>30.0,'AB'=>22.0,'AC'=>30.0,'AD'=>18.0,
+                    'AE'=>16.0,'AF'=>30.0,'AG'=>16.0,'AH'=>24.0,'AI'=>13.0,
                 ];
                 foreach ($widths as $col => $width) {
                     $sheet->getColumnDimension($col)->setWidth($width);
@@ -356,14 +357,14 @@ $devStyle = $sheet->getCell('M2')->getStyle();
                             ],
                         ],
                     ];
-                    $sheet->getStyle('A1:AH'.$lastDataRow)->applyFromArray($borderStyle);
+                    $sheet->getStyle('A1:AI'.$lastDataRow)->applyFromArray($borderStyle);
                 }
 
                 $sheet->freezePane('A3');
 
                 $lastRow = $sheet->getHighestRow();
                 $sheet->getStyle('H1:I'.$lastRow)->getAlignment()->setWrapText(true);
-                $sheet->getStyle('A1:AH1')->getAlignment()
+                $sheet->getStyle('A1:AI1')->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER)
                     ->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle('J3:M'.$lastRow)->getAlignment()

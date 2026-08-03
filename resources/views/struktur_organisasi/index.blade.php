@@ -272,7 +272,7 @@ $isUser = auth()->user()->isUser();
                   @if(!$isUser)
                   <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                     <div style="display:flex;gap:4px;justify-content:center">
-                      <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+                      <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" data-jobfamily="{{ addslashes($row->job_family ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
                       <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center">
@@ -368,7 +368,7 @@ $isUser = auth()->user()->isUser();
                 @if(!$isUser)
                 <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                   <div style="display:flex;gap:4px;justify-content:center">
-                    <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center">
+                    <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" data-jobfamily="{{ addslashes($row->job_family ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
@@ -452,7 +452,7 @@ $isUser = auth()->user()->isUser();
               @if(!$isUser)
               <td style="padding:10px 14px;text-align:center;white-space:nowrap">
                 <div style="display:flex;gap:4px;justify-content:center">
-                  <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center">
+                  <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" data-jobfamily="{{ addslashes($row->job_family ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
                   <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
@@ -531,7 +531,7 @@ $isUser = auth()->user()->isUser();
           @if(!$isUser)
           <td style="padding:10px 14px;text-align:center;white-space:nowrap">
             <div style="display:flex;gap:4px;justify-content:center">
-              <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
+              <button data-action="openEdit" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-jg="{{ $row->job_grade??'null' }}" data-mc="{{ $row->mc_tko }}" data-core="{{ $row->core }}" data-pengisian="{{ $row->pengisian??0 }}" data-jobs="{{ addslashes($row->jobs ?? '') }}" data-jobstream="{{ addslashes($row->job_stream ?? '') }}" data-jobfamily="{{ addslashes($row->job_family ?? '') }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#f59e0b;display:inline-flex;align-items:center;justify-content:center" title="Edit Posisi">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
               <button data-action="openModal" data-id="{{ $row->id }}" data-posisi="{{ addslashes($row->posisi) }}" data-karyawan="{{ $row->karyawan_id??'null' }}" data-mc="{{ $row->mc_tko }}" style="width:28px;height:28px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;color:#185fa5;display:inline-flex;align-items:center;justify-content:center" title="Assign Karyawan">
@@ -733,6 +733,7 @@ $isUser = auth()->user()->isUser();
         <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Title / Posisi <span style="color:#dc2626">*</span></label><input type="text" id="inputPosisi" placeholder="Contoh: Officer Komunikasi Korporat" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
         <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Jobs <span style="font-size:11px;color:#9ca3af;font-weight:400">(opsional)</span></label><input type="text" name="jobs" placeholder="Contoh: Officer Corporate Communication" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
         <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Stream <span style="font-size:11px;color:#9ca3af;font-weight:400">(opsional)</span></label><input type="text" name="job_stream" placeholder="Contoh: Corporate Services" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
+        <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Family <span style="font-size:11px;color:#9ca3af;font-weight:400">(opsional)</span></label><input type="text" name="job_family" placeholder="Contoh: Corporate Communication" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
           <div><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Grade</label><input type="number" name="job_grade" placeholder="Contoh: 16" min="1" max="30" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none"></div>
           <div><label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">MC / TKO <span style="font-size:11px;color:#9ca3af;font-weight:400">(opsional)</span></label><input type="number" id="inputMcTko" value="" placeholder="Contoh: 1" min="0" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none"></div>
@@ -836,6 +837,10 @@ $isUser = auth()->user()->isUser();
         <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Stream <span style="font-size:11px;color:#9ca3af;font-weight:400">(opsional)</span></label>
         <input type="text" id="editInputJobStream" placeholder="Contoh: Corporate Services" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827">
       </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Family <span style="font-size:11px;color:#9ca3af;font-weight:400">(opsional)</span></label>
+        <input type="text" id="editInputJobFamily" placeholder="Contoh: Corporate Communication" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;color:#111827">
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
         <div>
           <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Job Grade</label>
@@ -885,7 +890,7 @@ $isUser = auth()->user()->isUser();
     <div style="padding:20px 22px">
       <ol style="margin:0 0 16px;padding-left:18px;font-size:12.5px;color:#4b5563;line-height:1.7">
         <li>Unduh template — sudah berisi semua <strong>Job Title</strong> yang ada.</li>
-        <li>Isi kolom <strong>jobs</strong> &amp; <strong>job_stream</strong> (kolom kosong tidak menimpa data lama).</li>
+        <li>Isi kolom <strong>jobs</strong>, <strong>job_stream</strong> &amp; <strong>job_family</strong> (kolom kosong tidak menimpa data lama).</li>
         <li>Upload kembali. Semua orang dengan job title sama otomatis ikut terisi.</li>
       </ol>
       <a href="{{ route('struktur-organisasi.template-jobs', ['bulan' => $bulan, 'tahun' => $tahun]) }}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#eff6ff;color:#185fa5;border:1px solid #bfdbfe;border-radius:8px;font-size:12.5px;font-weight:600;text-decoration:none;margin-bottom:16px">
@@ -1074,7 +1079,7 @@ document.addEventListener('click', function(e) {
     const action = el.dataset.action;
     const d = el.dataset;
     if (action === 'openEdit') {
-        openEdit(d.id, d.posisi, d.jg !== 'null' ? d.jg : null, d.mc, d.core, d.pengisian, d.jobs, d.jobstream);
+        openEdit(d.id, d.posisi, d.jg !== 'null' ? d.jg : null, d.mc, d.core, d.pengisian, d.jobs, d.jobstream, d.jobfamily);
     } else if (action === 'openModal') {
         openModal(d.id, d.posisi, d.karyawan !== 'null' ? d.karyawan : null, d.mc);
     } else if (action === 'confirmHapus') {
@@ -1190,7 +1195,7 @@ function openPanel(karyawanId){
     const rows=[
       ['Direktorat',d.direktorat],['Kompartemen',d.kompartemen],['Departemen',d.departemen],
       ['Struktural/Fungsional',d.struktural_fungsional],['Band',d.band],
-      ['Jobs',d.jobs],['Job Stream',d.job_stream],['Status Kepegawaian',d.status_kepegawaian],
+      ['Jobs',d.jobs],['Job Stream',d.job_stream],['Job Family',d.job_family],['Status Kepegawaian',d.status_kepegawaian],
       ['No. SK',noSk],['Tanggal SK',tglSk],
       ['Tgl Masuk',d.tanggal_masuk],['Tgl Lahir',d.tanggal_lahir],['Pensiun',d.pensiun],['Lama Bekerja',d.lama_bekerja],
       ['No. HP',d.no_hp],['Email',d.email],['Jenjang Pendidikan',d.jenjang_pendidikan],['Jurusan',d.jurusan]
@@ -1363,12 +1368,13 @@ function initials(nama, max = 3) {
 }
 
 let currentEditId=null;
-function openEdit(soId,posisi,jg,mc,core,pengisian,jobs,jobStream){
+function openEdit(soId,posisi,jg,mc,core,pengisian,jobs,jobStream,jobFamily){
   currentEditId=soId;
   document.getElementById('editPosisiLabel').textContent=posisi;
   document.getElementById('editInputPosisi').value=posisi;
   document.getElementById('editInputJobs').value=jobs||'';
   document.getElementById('editInputJobStream').value=jobStream||'';
+  document.getElementById('editInputJobFamily').value=jobFamily||'';
   document.getElementById('editInputJg').value=jg||'';
   document.getElementById('editInputMc').value=mc||'';
   document.getElementById('editInputCore').value=core||'Non Core';
@@ -1390,6 +1396,7 @@ function saveEdit(){
   if(!posisi){alert('Posisi wajib diisi!');return;}
   const jobs=document.getElementById('editInputJobs').value.trim();
   const jobStream=document.getElementById('editInputJobStream').value.trim();
+  const jobFamily=document.getElementById('editInputJobFamily').value.trim();
   const jg=document.getElementById('editInputJg').value;
   const mc=document.getElementById('editInputMc').value;
   const core=document.getElementById('editInputCore').value;
@@ -1397,13 +1404,13 @@ function saveEdit(){
   fetch('/struktur-organisasi/'+currentEditId+'/posisi',{
     method:'PATCH',
     headers:{'Content-Type':'application/json','X-CSRF-TOKEN':_pd.csrf},
-    body:JSON.stringify({posisi,jobs:jobs||null,job_stream:jobStream||null,job_grade:jg||null,mc_tko:mc!==''?mc:null,core,pengisian:pengisian!==''?parseInt(pengisian):null}),
+    body:JSON.stringify({posisi,jobs:jobs||null,job_stream:jobStream||null,job_family:jobFamily||null,job_grade:jg||null,mc_tko:mc!==''?mc:null,core,pengisian:pengisian!==''?parseInt(pengisian):null}),
   }).then(r=>r.json()).then(d=>{
     if(!d.success){alert('Gagal menyimpan');return;}
     const row=document.getElementById('row-'+currentEditId);
     if(row){
       const editBtn=row.querySelector('[data-action="openEdit"]');
-      if(editBtn){editBtn.dataset.jobs=d.jobs||'';editBtn.dataset.jobstream=d.job_stream||'';}
+      if(editBtn){editBtn.dataset.jobs=d.jobs||'';editBtn.dataset.jobstream=d.job_stream||'';editBtn.dataset.jobfamily=d.job_family||'';}
       const posisiSpan=row.querySelector('td:first-child span:first-child');
       if(posisiSpan)posisiSpan.textContent=d.posisi;
       const jgCell=row.cells[1];

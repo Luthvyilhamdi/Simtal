@@ -36,14 +36,14 @@ class TemplateJobsJobStreamExport implements FromArray, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        return ['direktorat', 'kompartemen', 'dept', 'bagian', 'posisi', 'jobs', 'job_stream'];
+        return ['direktorat', 'kompartemen', 'dept', 'bagian', 'posisi', 'jobs', 'job_stream', 'job_family'];
     }
 
     public function array(): array
     {
         if (empty($this->rows)) {
             return [
-                ['Direktorat Utama', 'Sekretaris Perusahaan', 'Dept. Komunikasi & ADM Korporat', '', 'Officer Komunikasi Korporat', 'Officer Corporate Communication', 'Corporate Services'],
+                ['Direktorat Utama', 'Sekretaris Perusahaan', 'Dept. Komunikasi & ADM Korporat', '', 'Officer Komunikasi Korporat', 'Officer Corporate Communication', 'Corporate Services', 'Corporate Communication'],
             ];
         }
 
@@ -55,13 +55,14 @@ class TemplateJobsJobStreamExport implements FromArray, WithHeadings, WithStyles
             $r->posisi,
             $r->jobs        ?? '',
             $r->job_stream  ?? '',
+            $r->job_family  ?? '',
         ], $this->rows);
     }
 
     public function styles(Worksheet $sheet): array
     {
         // Header hijau
-        $sheet->getStyle('A1:G1')->applyFromArray([
+        $sheet->getStyle('A1:H1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '15803D']],
             'alignment' => ['horizontal' => 'center'],

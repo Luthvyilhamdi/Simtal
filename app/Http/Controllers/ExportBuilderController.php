@@ -68,6 +68,7 @@ class ExportBuilderController extends Controller
             'jabatan'               => ['Jabatan & Unit', 'Jabatan', 'jabatan', fn ($k) => $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-')],
             'jobs'                  => ['Jabatan & Unit', 'Jobs', 'strukturAssignments', fn ($k) => $k->jobs ?: '-'],
             'job_stream'            => ['Jabatan & Unit', 'Job Stream', 'strukturAssignments', fn ($k) => $k->job_stream ?: '-'],
+            'job_family'            => ['Jabatan & Unit', 'Job Family', 'strukturAssignments', fn ($k) => $k->job_family ?: '-'],
             'core'                  => ['Jabatan & Unit', 'Core / Non Core', 'strukturAssignments', fn ($k) => $k->core ?: '-'],
             'direktorat'            => ['Jabatan & Unit', 'Direktorat', 'direktorat', fn ($k) => $k->direktorat->nama_direktorat ?? '-'],
             'kompartemen'           => ['Jabatan & Unit', 'Kompartemen', 'kompartemen', fn ($k) => $k->kompartemen->nama_kompartemen ?? '-'],
