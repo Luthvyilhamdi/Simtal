@@ -444,6 +444,42 @@ class Karyawan extends Model
         ];
     }
 
+    // ===== DUKUNGAN KALIBRASI UNTUK PROMOSI =====
+    /** Nilai kalibrasi yang dianggap "mendukung promosi". */
+    public const KALIBRASI_PROMOSI = ['FEE', 'PEE', 'EXE', 'MEE', 'ME'];
+
+    /**
+     * Status dukungan kalibrasi untuk promosi.
+     *
+     * Aturan (dipakai Reminder Promosi): evaluasi 2 kalibrasi TERBARU yang
+     * tersedia (sesuai ketentuan promosi "2 tahun"; kalau tahun terbaru kosong
+     * mundur ke tahun sebelumnya). Dukungan tercapai bila ADA kalibrasi DAN
+     * SEMUA (maks 2) nilai terbaru termasuk FEE/PEE/EXE/MEE/ME. Bila salah satu
+     * di luar set → tidak mendukung. Belum ada kalibrasi → tidak mendukung.
+     *
+     * @return array{mendukung: bool, nilai: ?string, tahun: ?int, ada: bool}
+     */
+    public function statusKalibrasiPromosi(): array
+    {
+        $recent = $this->kalibrasis
+            ->sortByDesc('tahun')
+            ->take(2);
+
+        if ($recent->isEmpty()) {
+            return ['mendukung' => false, 'nilai' => null, 'tahun' => null, 'ada' => false];
+        }
+
+        $semuaBagus = $recent->every(fn ($r) => in_array($r->nilai, self::KALIBRASI_PROMOSI, true));
+        $terbaru    = $recent->first();
+
+        return [
+            'mendukung' => $semuaBagus,
+            'nilai'     => $terbaru->nilai,
+            'tahun'     => (int) $terbaru->tahun,
+            'ada'       => true,
+        ];
+    }
+
     // ===== JOBS & JOB STREAM (mengikuti posisi di Struktur Organisasi) =====
     // Diambil dari baris Struktur Organisasi tempat karyawan ini di-assign,
     // pada periode (tahun/bulan) TERBARU. Jadi jobs & job stream otomatis

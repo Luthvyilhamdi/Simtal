@@ -44,12 +44,13 @@
     .hidden-body { display:none;border-top:1px solid #f3f4f6; }
     .hidden-panel.open .hidden-body { display:block; }
 
-    .summary-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px; }
+    .summary-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px; }
     .sum-card { background:white;border-radius:14px;border:1px solid var(--card-border);padding:18px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:14px; }
     .sum-ico { width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
     .sum-ico svg { width:22px;height:22px;fill:none;stroke-width:1.9; }
     .sum-ico.green { background:#dcfce7; } .sum-ico.green svg { stroke:#15803d; }
     .sum-ico.amber { background:#fef3c7; } .sum-ico.amber svg { stroke:#b45309; }
+    .sum-ico.orange { background:#ffedd5; } .sum-ico.orange svg { stroke:#c2410c; }
     .sum-ico.gray  { background:#f3f4f6; } .sum-ico.gray svg { stroke:#6b7280; }
     .sum-num { font-size:26px;font-weight:800;color:#111827;line-height:1; }
     .sum-label { font-size:12px;color:#6b7280;margin-top:3px;font-weight:500; }
@@ -91,9 +92,19 @@
     .badge-purple { background:#f5f3ff;color:#7c3aed; }
     .badge-gray   { background:#f3f4f6;color:#374151; }
 
-    .status-now  { color:#15803d;font-weight:700; }
-    .status-soon { color:#b45309;font-weight:700; }
-    .status-sub  { font-size:11px;color:#9ca3af;margin-top:2px;white-space:nowrap; }
+    .status-now   { color:#15803d;font-weight:700; }
+    .status-soon  { color:#b45309;font-weight:700; }
+    .status-hold  { color:#c2410c;font-weight:700; }
+    .status-sub   { font-size:11px;color:#9ca3af;margin-top:2px;white-space:nowrap; }
+
+    /* Sel Kalibrasi */
+    .kal-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap; }
+    .kal-ok   { background:#dcfce7;color:#15803d; }
+    .kal-no   { background:#ffedd5;color:#c2410c; }
+    .kal-none { background:#f3f4f6;color:#9ca3af; }
+    .kal-year { font-size:10.5px;color:#9ca3af;margin-top:2px; }
+    /* Nilai kalibrasi tahun sebelumnya (lebih kecil) — tetap ikut menentukan */
+    .kal-badge.kal-sm { font-size:10px;padding:2px 8px;margin-top:4px; }
 
     .btn-usul { display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .15s; }
     .btn-usul:hover { background:#166534; }
@@ -122,7 +133,7 @@
 
 <div class="page-header">
     <div class="page-title">Reminder Daftar Promosi Karyawan</div>
-    <div class="page-sub">Karyawan yang sudah / akan memenuhi Masa Dinas Grade dalam {{ $windowBulan }} bulan ke depan.</div>
+    <div class="page-sub">Karyawan yang sudah / akan memenuhi Masa Dinas Grade dalam {{ $windowBulan }} bulan ke depan, sekaligus seluruh nilai kalibrasi 2 tahun terakhir memenuhi syarat.</div>
 </div>
 
 <div class="rm-legend">
@@ -130,7 +141,7 @@
     <span class="lg-sep"></span>
     <span>Normal — Band 3 / JG 2 / PG 1 thn</span>
     <span class="lg-sep"></span>
-    <span>Hanya karyawan ber-TMT yang dihitung</span>
+    <span>Eligible = MDG terpenuhi <strong>&amp;</strong> <strong>semua</strong> kalibrasi 2 thn terakhir ∈ FEE/PEE/EXE/MEE/ME</span>
 </div>
 
 {{-- SUMMARY --}}
@@ -146,7 +157,14 @@
         <div class="sum-ico amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div>
             <div class="sum-num">{{ $countSoon }}</div>
-            <div class="sum-label">Akan eligible ≤ {{ $windowBulan }} bulan</div>
+            <div class="sum-label">Akan eligible ≤ {{ $windowBulan }} bulan (MDG)</div>
+        </div>
+    </div>
+    <div class="sum-card">
+        <div class="sum-ico orange"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div>
+            <div class="sum-num">{{ $countTertahan }}</div>
+            <div class="sum-label">MDG cukup, tertahan kalibrasi</div>
         </div>
     </div>
     <div class="sum-card">
@@ -202,6 +220,7 @@
                     <th>Karyawan</th>
                     <th>Jabatan &amp; Unit</th>
                     <th>Band / Grade</th>
+                    <th>Kalibrasi (2 terakhir)</th>
                     <th>Rencana Kenaikan</th>
                     <th>Status</th>
                     <th style="text-align:right">Aksi</th>
@@ -227,28 +246,49 @@
                         <span class="badge badge-gray" style="margin-left:3px">JG {{ $k->jobGrade->job_grade ?? '-' }}</span>
                     </td>
                     <td class="col-nowrap">
+                        @if(!empty($i['kalibrasi_list']))
+                            @foreach($i['kalibrasi_list'] as $idx => $kal)
+                                <div>
+                                    <span class="kal-badge {{ $kal['ok'] ? 'kal-ok' : 'kal-no' }} {{ $idx > 0 ? 'kal-sm' : '' }}"
+                                          title="{{ $kal['ok'] ? 'Memenuhi (FEE/PEE/EXE/MEE/ME)' : 'Tidak memenuhi — menggugurkan eligible' }}">
+                                        {{ $kal['ok'] ? '✓' : '✕' }} {{ $kal['nilai'] }} <span style="opacity:.7">{{ $kal['tahun'] }}</span>
+                                    </span>
+                                </div>
+                            @endforeach
+                        @else
+                            <span class="kal-badge kal-none" title="Karyawan belum punya nilai kalibrasi">— belum ada</span>
+                        @endif
+                    </td>
+                    <td class="col-nowrap">
                         <span class="badge {{ $jenisBadge[$sk['status']] ?? 'badge-gray' }}">{{ $jenisLabel[$sk['status']] ?? $sk['status'] }}</span>
                         <div class="status-sub">{{ $sk['label'] }}</div>
                     </td>
                     <td class="col-nowrap">
                         @if($i['eligible_now'])
                             <div class="status-now">✅ Eligible sekarang</div>
-                            <div class="status-sub">syarat MDG terpenuhi</div>
+                            <div class="status-sub">MDG + kalibrasi terpenuhi</div>
+                        @elseif($i['tertahan_kalibrasi'])
+                            <div class="status-hold">⚠ Tertahan kalibrasi</div>
+                            <div class="status-sub">MDG cukup, kalibrasi belum mendukung</div>
                         @else
                             <div class="status-soon">⏳ ± {{ $i['sisa'] }} bulan lagi</div>
-                            <div class="status-sub">menuju syarat terlama</div>
+                            <div class="status-sub">menuju syarat MDG</div>
                         @endif
                     </td>
                     <td style="text-align:right">
-                        <a href="{{ route('usulan_promosi.create') }}" class="btn-usul" title="Buat usulan promosi untuk {{ $k->nama }}">
-                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            Buat Usulan
-                        </a>
+                        @if($i['tertahan_kalibrasi'])
+                            <span class="status-sub" style="white-space:normal">Perlu kalibrasi mendukung</span>
+                        @else
+                            <a href="{{ route('usulan_promosi.create') }}" class="btn-usul" title="Buat usulan promosi untuk {{ $k->nama }}">
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Buat Usulan
+                            </a>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
                 <tr id="noMatchRow" style="display:none">
-                    <td colspan="6" style="text-align:center;padding:30px;color:#9ca3af;font-size:13px">Tidak ada karyawan yang cocok dengan pencarian.</td>
+                    <td colspan="7" style="text-align:center;padding:30px;color:#9ca3af;font-size:13px">Tidak ada karyawan yang cocok dengan pencarian.</td>
                 </tr>
             </tbody>
         </table>

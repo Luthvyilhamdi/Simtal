@@ -54,7 +54,7 @@ class ReminderPromosiService
 
         // Hanya karyawan aktif yang punya minimal satu TMT (kalau tidak, MDG = 0
         // dan sisa bulannya pasti > window → tidak masuk daftar).
-        $karyawans = Karyawan::with(['jobGrade', 'personGrade', 'direktorat', 'jabatan'])
+        $karyawans = Karyawan::with(['jobGrade', 'personGrade', 'direktorat', 'jabatan', 'kalibrasis'])
             ->where('status', 'aktif')
             ->where(function ($q) {
                 $q->whereNotNull('tanggal_mulai_pg')
@@ -78,19 +78,49 @@ class ReminderPromosiService
                 continue;
             }
 
-            $eligibleNow = ($sk['eligible'] ?? false) === true;
+            // Eligible = syarat TMT/MDG terpenuhi DAN kalibrasi terbaru (2 tahun
+            // terakhir) mendukung (FEE/PEE/EXE/MEE/ME).
+            $tmtEligible = ($sk['eligible'] ?? false) === true;
+            $kal         = $k->statusKalibrasiPromosi();
+            $kalOk       = $kal['mendukung'] === true;
+
+            // 2 kalibrasi terbaru untuk ditampilkan (yang paling baru = penentu).
+            $kalList = $k->kalibrasis
+                ->sortByDesc('tahun')
+                ->take(2)
+                ->map(fn ($r) => [
+                    'nilai' => $r->nilai,
+                    'tahun' => (int) $r->tahun,
+                    'ok'    => in_array($r->nilai, Karyawan::KALIBRASI_PROMOSI, true),
+                ])
+                ->values()
+                ->all();
+
+            $eligibleNow = $tmtEligible && $kalOk;
             $sisa        = (int) ($sk['sisa_bulan'] ?? 0);
 
-            if (!$eligibleNow && ($sisa < 1 || $sisa > self::WINDOW_BULAN)) {
+            // "Tertahan kalibrasi": MDG sudah cukup, tapi kalibrasi belum mendukung.
+            // Tetap ditampilkan (bukan disembunyikan) agar HR tahu tinggal soal kinerja.
+            $tertahanKalibrasi = $tmtEligible && !$kalOk;
+
+            // Masuk daftar bila: eligible sekarang, tertahan kalibrasi, atau
+            // MDG akan terpenuhi dalam window bulan ke depan.
+            if (!$eligibleNow && !$tertahanKalibrasi && ($sisa < 1 || $sisa > self::WINDOW_BULAN)) {
                 continue;
             }
 
             $row = [
-                'karyawan'     => $k,
-                'sk'           => $sk,
-                'eligible_now' => $eligibleNow,
-                'sisa'         => $eligibleNow ? 0 : $sisa,
-                'is_shortlist' => $isShortlist,
+                'karyawan'            => $k,
+                'sk'                  => $sk,
+                'eligible_now'        => $eligibleNow,
+                'tmt_eligible'        => $tmtEligible,
+                'tertahan_kalibrasi'  => $tertahanKalibrasi,
+                'kalibrasi_mendukung' => $kalOk,
+                'kalibrasi_nilai'     => $kal['nilai'],
+                'kalibrasi_tahun'     => $kal['tahun'],
+                'kalibrasi_list'      => $kalList,
+                'sisa'                => $eligibleNow ? 0 : $sisa,
+                'is_shortlist'        => $isShortlist,
             ];
 
             // Sudah diusulkan (berjalan/lulus) → masuk daftar tersembunyi, bukan daftar utama.

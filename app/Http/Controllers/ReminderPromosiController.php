@@ -40,18 +40,27 @@ class ReminderPromosiController extends Controller
         $items       = array_values($items);
         $hiddenItems = array_values($hiddenItems);
 
-        // Urutkan: paling mendesak dulu (sisa terkecil), lalu nama.
-        usort($items, function ($a, $b) {
-            return [$a['sisa'], $a['karyawan']->nama] <=> [$b['sisa'], $b['karyawan']->nama];
+        // Urutkan: eligible sekarang dulu, lalu yang akan datang (sisa terkecil),
+        // lalu yang tertahan kalibrasi paling bawah. Rank: 0=now, 1=soon, 2=tertahan.
+        $rank = function ($i) {
+            if ($i['eligible_now'])       return 0;
+            if ($i['tertahan_kalibrasi']) return 2;
+            return 1;
+        };
+        usort($items, function ($a, $b) use ($rank) {
+            return [$rank($a), $a['sisa'], $a['karyawan']->nama]
+               <=> [$rank($b), $b['sisa'], $b['karyawan']->nama];
         });
 
-        $countNow  = count(array_filter($items, fn ($i) => $i['eligible_now']));
-        $countSoon = count($items) - $countNow;
+        $countNow      = count(array_filter($items, fn ($i) => $i['eligible_now']));
+        $countTertahan = count(array_filter($items, fn ($i) => $i['tertahan_kalibrasi']));
+        $countSoon     = count($items) - $countNow - $countTertahan;
 
         return view('reminder_promosi.index', [
             'items'            => $items,
             'countNow'         => $countNow,
             'countSoon'        => $countSoon,
+            'countTertahan'    => $countTertahan,
             'totalDinilai'     => $data['totalDinilai'],
             'direktorats'      => Direktorat::orderBy('nama_direktorat')->get(),
             'direktoratFilter' => $direktoratFilter,
