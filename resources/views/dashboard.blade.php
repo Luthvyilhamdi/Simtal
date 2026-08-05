@@ -326,9 +326,9 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
 <div class="kpi-grid">
     <div class="kpi-card green">
         <div class="kpi-left">
-            <div class="kpi-label">Total Karyawan</div>
-            <div class="kpi-num">{{ $totalKaryawan }}</div>
-            <div class="kpi-sub">{{ $karyawanTidakAktif }} tidak aktif</div>
+            <div class="kpi-label">Karyawan Aktif</div>
+            <div class="kpi-num">{{ $karyawanAktif }}</div>
+            <div class="kpi-sub">dari {{ $totalKaryawan }} total · {{ $karyawanTidakAktif }} tidak aktif</div>
             @if($karyawanBaru > 0)
             <span class="kpi-badge" style="background:#dcfce7;color:#15803d;">+{{ $karyawanBaru }} bulan ini</span>
             @endif

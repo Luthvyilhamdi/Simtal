@@ -23,15 +23,15 @@ class DashboardController extends Controller
             COUNT(*) as total,
             SUM(status = 'aktif') as aktif,
             SUM(status = 'tidak aktif') as tidak_aktif,
-            SUM(status_kepegawaian = 'Organik')   as organik,
-            SUM(status_kepegawaian = 'PKWT')      as pkwt,
-            SUM(status_kepegawaian = 'Penugasan') as penugasan
+            SUM(status_kepegawaian = 'Organik'   AND status = 'aktif') as organik,
+            SUM(status_kepegawaian = 'PKWT'      AND status = 'aktif') as pkwt,
+            SUM(status_kepegawaian = 'Penugasan' AND status = 'aktif') as penugasan
         ")->first();
         $totalKaryawan      = (int) $kStat->total;
         $karyawanAktif      = (int) $kStat->aktif;
         $karyawanTidakAktif = (int) $kStat->tidak_aktif;
 
-        // Rincian status kepegawaian untuk kartu Total Karyawan.
+        // Rincian status kepegawaian (hanya karyawan AKTIF) untuk kartu Karyawan Aktif.
         $kepegawaian = [
             'Organik'   => (int) $kStat->organik,
             'PKWT'      => (int) $kStat->pkwt,
@@ -410,7 +410,7 @@ class DashboardController extends Controller
             ->whereBetween('tanggal_exp_idp', [now(), now()->addDays(30)])
             ->orderBy('tanggal_exp_idp')->take(5)->get();
 
-        $karyawanTerbaru = Karyawan::with(['jabatan', 'departemen'])->latest('tanggal_masuk')->take(5)->get();
+        $karyawanTerbaru = Karyawan::with(['jabatan', 'departemen'])->where('status', 'aktif')->latest('tanggal_masuk')->take(5)->get();
 
         // === DEMOGRAFI === (gender 2 + usia 4 = 6 query → 1 query grouped)
         $demo = Karyawan::where('status', 'aktif')->selectRaw("
