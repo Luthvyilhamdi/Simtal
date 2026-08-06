@@ -302,22 +302,23 @@ class DashboardController extends Controller
             ];
         }
 
-        // === CHART: Tren Kompetensi === (12 bln x 2 = 24 query → 1 query grouped)
-        $kompIdx = HistoryAssessmentKompetensi::whereBetween('tanggal_assessment', [$awalTren, now()->endOfMonth()])
-            ->selectRaw("DATE_FORMAT(tanggal_assessment, '%Y-%m') as ym, kesimpulan, COUNT(*) as c")
-            ->groupBy('ym', 'kesimpulan')
+        // === CHART: Tren Rekomendasi Assessment === (Ready/RWD/Not Ready per bulan, 12 bln → 1 query grouped)
+        $rekomIdx = HistoryAssessment::whereBetween('tanggal_pelaksanaan', [$awalTren, now()->endOfMonth()])
+            ->selectRaw("DATE_FORMAT(tanggal_pelaksanaan, '%Y-%m') as ym, rekomendasi_final, COUNT(*) as c")
+            ->groupBy('ym', 'rekomendasi_final')
             ->get()
             ->groupBy('ym');
 
-        $trenKompetensi = [];
+        $trenRekomendasi = [];
         for ($i = 11; $i >= 0; $i--) {
             $bulan = now()->subMonths($i);
             $ym    = $bulan->format('Y-m');
-            $rows  = $kompIdx[$ym] ?? collect();
-            $trenKompetensi[] = [
-                'bulan'         => $bulan->translatedFormat('M Y'),
-                'qualified'     => (int) ($rows->firstWhere('kesimpulan', 'QUALIFIED')?->c ?? 0),
-                'not_qualified' => (int) ($rows->firstWhere('kesimpulan', 'NOT QUALIFIED')?->c ?? 0),
+            $rows  = $rekomIdx[$ym] ?? collect();
+            $trenRekomendasi[] = [
+                'bulan'     => $bulan->translatedFormat('M Y'),
+                'ready'     => (int) ($rows->firstWhere('rekomendasi_final', 'ready')?->c ?? 0),
+                'rwd'       => (int) ($rows->firstWhere('rekomendasi_final', 'ready_with_development')?->c ?? 0),
+                'not_ready' => (int) ($rows->firstWhere('rekomendasi_final', 'not_ready')?->c ?? 0),
             ];
         }
 
@@ -483,7 +484,7 @@ class DashboardController extends Controller
             'totalKaryawan', 'karyawanAktif', 'karyawanTidakAktif', 'karyawanBaru', 'kepegawaian',
             'totalHistoryJabatan', 'promosiThisYear', 'mutasiThisYear', 'rotasiThisYear', 'demosiThisYear',
             'totalAssessment', 'assessmentReady', 'assessmentRWD', 'assessmentNR',
-            'totalKompetensi', 'totalQualified', 'totalNotQualified', 'trenKompetensi',
+            'totalKompetensi', 'totalQualified', 'totalNotQualified', 'trenRekomendasi',
             'pejabatAktif', 'pejabatSVP', 'pejabatVP', 'pejabatSPM', 'pejabatPM',
             'pgsAktif', 'pjsAktif', 'talentPool',
             'trenBulan', 'assessmentChart', 'distribusiJobGrade', 'distribusiPersonGrade',

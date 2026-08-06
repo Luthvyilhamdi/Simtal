@@ -278,7 +278,7 @@
 <div id="dashMeta"
     data-tren-bulan='@json($trenBulan)'
     data-assessment-chart='@json($assessmentChart)'
-    data-tren-kompetensi='@json($trenKompetensi)'
+    data-tren-rekomendasi='@json($trenRekomendasi)'
     data-gender-l="{{ $genderChart['L'] }}"
     data-gender-p="{{ $genderChart['P'] }}"
     data-total-qualified="{{ $totalQualified }}"
@@ -866,12 +866,12 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
     </div>
 </div>
 
-{{-- ASSESSMENT KOMPETENSI CHART --}}
+{{-- TREN REKOMENDASI + PIE KOMPETENSI --}}
 <div class="chart-grid-3" style="margin-bottom:18px;">
     <div class="chart-card">
-        <div class="chart-card-title">Tren Assessment Kompetensi</div>
-        <div class="chart-card-sub">QUALIFIED vs NOT QUALIFIED per bulan (12 bulan terakhir)</div>
-        <canvas id="kompChart" height="200"></canvas>
+        <div class="chart-card-title">Tren Rekomendasi Assessment</div>
+        <div class="chart-card-sub">Ready / Ready with Development / Not Ready per bulan (12 bulan terakhir)</div>
+        <canvas id="rekomChart" height="200"></canvas>
     </div>
     <div class="chart-card">
         <div class="chart-card-title">Kompetensi: QUALIFIED vs NOT QUALIFIED</div>
@@ -1282,7 +1282,7 @@ Chart.defaults.color = '#6b7280';
 var _m              = document.getElementById('dashMeta');
 var trenData        = JSON.parse(_m.dataset.trenBulan);
 var pieData         = JSON.parse(_m.dataset.assessmentChart);
-var kompTren        = JSON.parse(_m.dataset.trenKompetensi);
+var rekomTren       = JSON.parse(_m.dataset.trenRekomendasi);
 var genderL         = parseInt(_m.dataset.genderL);
 var genderP         = parseInt(_m.dataset.genderP);
 var totalQualified  = parseInt(_m.dataset.totalQualified);
@@ -1390,13 +1390,14 @@ new Chart(document.getElementById('genderChart'), {
     options:{ responsive:false, cutout:'65%', plugins:{ legend:{display:false} } }
 });
 
-new Chart(document.getElementById('kompChart'), {
+new Chart(document.getElementById('rekomChart'), {
     type: 'bar',
     data: {
-        labels: kompTren.map(function(d){return d.bulan;}),
+        labels: rekomTren.map(function(d){return d.bulan;}),
         datasets: [
-            { label:'QUALIFIED',     data:kompTren.map(function(d){return d.qualified;}),     backgroundColor:'#15803d', borderRadius:3 },
-            { label:'NOT QUALIFIED', data:kompTren.map(function(d){return d.not_qualified;}),  backgroundColor:'#ef4444', borderRadius:3 },
+            { label:'Ready',                 data:rekomTren.map(function(d){return d.ready;}),     backgroundColor:'#16a34a', borderRadius:3 },
+            { label:'Ready with Development', data:rekomTren.map(function(d){return d.rwd;}),       backgroundColor:'#f59e0b', borderRadius:3 },
+            { label:'Not Ready',             data:rekomTren.map(function(d){return d.not_ready;}), backgroundColor:'#ef4444', borderRadius:3 },
         ]
     },
     options: {
