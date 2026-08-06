@@ -18,6 +18,7 @@ use App\Http\Controllers\HistoryPejabatController;
 use App\Http\Controllers\HistoryPenilaianKalibrasiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AkunController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\SuratPentingController;
 use App\Http\Controllers\MasterJabatanController;
@@ -315,6 +316,13 @@ Route::middleware('auth')->group(function () {
             Route::prefix('activity-log')->name('activity_log.')->group(function () {
                 Route::get('/',    [ActivityLogController::class, 'index'])->name('index');
                 Route::delete('/', [ActivityLogController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('backup')->name('backup.')->group(function () {
+                Route::get('/',                [BackupController::class, 'index'])->name('index');
+                Route::post('/',               [BackupController::class, 'store'])->name('store');
+                Route::get('/{file}/download', [BackupController::class, 'download'])->name('download');
+                Route::delete('/{file}',       [BackupController::class, 'destroy'])->name('destroy');
             });
 
             Route::prefix('akun')->name('akun.')->group(function () {

@@ -470,6 +470,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <span class="nav-text">Manajemen Akun</span>
             </a>
+            <a href="{{ route('backup.index') }}" data-tooltip="Backup Database" class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+                <span class="nav-text">Backup Database</span>
+            </a>
 
             <div class="nav-link master-toggle {{ request()->routeIs('master.*') ? 'active open' : '' }}" data-tooltip="Master Data" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>

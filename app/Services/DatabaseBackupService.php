@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use ZipArchive;
+
+/**
+ * Backup database SIMTAL dengan PHP murni (tanpa mysqldump), agar jalan sama
+ * baiknya di XAMPP lokal maupun shared hosting cPanel.
+ *
+ * Hasil: file .zip berisi satu dump .sql (CREATE TABLE + INSERT), disimpan di
+ * storage/app/backups. Hanya menyimpan sejumlah backup terbaru (retensi).
+ */
+class DatabaseBackupService
+{
+    /** Folder penyimpanan relatif terhadap disk 'local' (storage/app). */
+    private string $dir = 'backups';
+
+    /** Jumlah backup terbaru yang dipertahankan; sisanya dihapus otomatis. */
+    private int $keep = 10;
+
+    /**
+     * Jalankan backup. Mengembalikan info file yang dibuat.
+     *
+     * @return array{file: string, size: int, path: string}
+     */
+    public function run(): array
+    {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
+        $disk = Storage::disk('local');
+        $disk->makeDirectory($this->dir);
+
+        $dbName   = DB::getDatabaseName();
+        $baseName = 'simtal-backup-' . now()->format('Y-m-d_His');
+
+        $sqlRel  = $this->dir . '/' . $baseName . '.sql';
+        $sqlPath = $disk->path($sqlRel);
+
+        $handle = @fopen($sqlPath, 'w');
+        if (!$handle) {
+            throw new RuntimeException('Tidak bisa menulis file backup (cek ruang disk & izin folder storage).');
+        }
+
+        try {
+            $this->writeDump($handle, $dbName);
+        } finally {
+            fclose($handle);
+        }
+
+        // Kompres .sql menjadi .zip lalu hapus .sql mentah.
+        $zipRel  = $this->dir . '/' . $baseName . '.zip';
+        $zipPath = $disk->path($zipRel);
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            @unlink($sqlPath);
+            throw new RuntimeException('Tidak bisa membuat file .zip.');
+        }
+        $zip->addFile($sqlPath, $baseName . '.sql');
+        $zip->close();
+        @unlink($sqlPath);
+
+        $this->cleanup($disk);
+
+        return [
+            'file' => $baseName . '.zip',
+            'size' => $disk->size($zipRel),
+            'path' => $zipRel,
+        ];
+    }
+
+    /** Tulis seluruh dump ke file handle. */
+    private function writeDump($handle, string $dbName): void
+    {
+        fwrite($handle,
+            "-- SIMTAL Database Backup\n" .
+            "-- Database : {$dbName}\n" .
+            "-- Dibuat   : " . now()->toDateTimeString() . "\n" .
+            "-- ------------------------------------------------------------\n\n" .
+            "SET FOREIGN_KEY_CHECKS=0;\n" .
+            "SET NAMES utf8mb4;\n"
+        );
+
+        $tables = DB::select('SHOW FULL TABLES');
+        $key    = 'Tables_in_' . $dbName;
+
+        foreach ($tables as $row) {
+            $arr   = (array) $row;
+            $table = $arr[$key] ?? array_values($arr)[0];
+            $type  = $arr['Table_type'] ?? 'BASE TABLE';
+
+            if ($type === 'VIEW') {
+                continue; // lewati view (bukan tabel data)
+            }
+
+            $this->dumpTable($handle, (string) $table);
+        }
+
+        fwrite($handle, "\nSET FOREIGN_KEY_CHECKS=1;\n");
+    }
+
+    /** Tulis struktur + data satu tabel. */
+    private function dumpTable($handle, string $table): void
+    {
+        $create    = (array) DB::select("SHOW CREATE TABLE `{$table}`")[0];
+        $createSql = $create['Create Table'] ?? '';
+
+        fwrite($handle,
+            "\n-- ----------------------------\n" .
+            "-- Tabel `{$table}`\n" .
+            "-- ----------------------------\n" .
+            "DROP TABLE IF EXISTS `{$table}`;\n" .
+            $createSql . ";\n\n"
+        );
+
+        $pdo   = DB::getPdo();
+        $count = 0;
+
+        foreach (DB::table($table)->cursor() as $rowObj) {
+            $row  = (array) $rowObj;
+            $vals = array_map(
+                // Kutip semua nilai non-null sebagai string; MySQL meng-cast
+                // otomatis ke tipe kolom saat import (aman untuk angka/tanggal).
+                fn ($v) => is_null($v) ? 'NULL' : $pdo->quote((string) $v),
+                array_values($row)
+            );
+            $cols = '`' . implode('`,`', array_keys($row)) . '`';
+            fwrite($handle, "INSERT INTO `{$table}` ({$cols}) VALUES (" . implode(',', $vals) . ");\n");
+            $count++;
+        }
+
+        if ($count === 0) {
+            fwrite($handle, "-- (tabel kosong)\n");
+        }
+    }
+
+    /** Hapus backup lama, sisakan $keep terbaru. */
+    private function cleanup($disk): void
+    {
+        $this->files($disk)->slice($this->keep)->each(fn ($f) => $disk->delete($f['path']));
+    }
+
+    /**
+     * Daftar file backup (.zip), terbaru dulu.
+     *
+     * @return Collection<int, array{name: string, size: int, time: int, path: string}>
+     */
+    public function files($disk = null): Collection
+    {
+        $disk = $disk ?: Storage::disk('local');
+
+        if (!$disk->exists($this->dir)) {
+            return collect();
+        }
+
+        return collect($disk->files($this->dir))
+            ->filter(fn ($f) => str_ends_with($f, '.zip'))
+            ->map(fn ($f) => [
+                'name' => basename($f),
+                'size' => $disk->size($f),
+                'time' => $disk->lastModified($f),
+                'path' => $f,
+            ])
+            ->sortByDesc('time')
+            ->values();
+    }
+
+    /** Path relatif yang aman untuk nama file backup (cegah path traversal). */
+    public function safePath(string $file): ?string
+    {
+        $file = basename($file);
+        if (!str_ends_with($file, '.zip')) {
+            return null;
+        }
+        return $this->dir . '/' . $file;
+    }
+}
