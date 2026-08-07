@@ -123,7 +123,7 @@
                             {{ $b['name'] }}
                         </span>
                     </td>
-                    <td class="bk-date">{{ \Carbon\Carbon::createFromTimestamp($b['time'])->translatedFormat('d M Y, H:i') }}</td>
+                    <td class="bk-date">{{ \Carbon\Carbon::createFromTimestamp($b['time'], config('app.timezone'))->translatedFormat('d M Y, H:i') }}</td>
                     <td class="bk-size">
                         @if($b['size'] >= 1048576)
                             {{ number_format($b['size'] / 1048576, 1) }} MB

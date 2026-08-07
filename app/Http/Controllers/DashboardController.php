@@ -411,6 +411,12 @@ class DashboardController extends Controller
             ->whereBetween('tanggal_exp_idp', [now(), now()->addDays(30)])
             ->orderBy('tanggal_exp_idp')->take(5)->get();
 
+        // Jumlah IDP: sudah lewat exp vs akan exp dalam 30 hari (untuk kartu Rekomendasi Assessment).
+        $assessmentExpired = HistoryAssessment::whereNotNull('tanggal_exp_idp')
+            ->whereDate('tanggal_exp_idp', '<', today())->count();
+        $assessmentAkanExp = HistoryAssessment::whereNotNull('tanggal_exp_idp')
+            ->whereBetween('tanggal_exp_idp', [now(), now()->addDays(30)])->count();
+
         $karyawanTerbaru = Karyawan::with(['jabatan', 'departemen'])->where('status', 'aktif')->latest('tanggal_masuk')->take(5)->get();
 
         // === DEMOGRAFI === (gender 2 + usia 4 = 6 query → 1 query grouped)
@@ -489,6 +495,7 @@ class DashboardController extends Controller
             'pgsAktif', 'pjsAktif', 'talentPool',
             'trenBulan', 'assessmentChart', 'distribusiJobGrade', 'distribusiPersonGrade',
             'ringkasanDirektorat', 'akanPensiun', 'aktivitasTerbaru', 'assessmentExpire',
+            'assessmentExpired', 'assessmentAkanExp',
             'karyawanTerbaru', 'genderChart', 'usiaChart',
             'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
             'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc',

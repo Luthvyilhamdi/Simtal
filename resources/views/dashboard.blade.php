@@ -847,6 +847,17 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 </div>
                 @endforeach
             </div>
+            {{-- Status IDP: sudah exp & akan exp --}}
+            <div style="width:100%;display:flex;gap:8px;border-top:1px solid #f0f0ec;padding-top:12px;">
+                <div style="flex:1;background:#fef2f2;border-radius:9px;padding:9px 10px;text-align:center;">
+                    <div style="font-size:17px;font-weight:800;color:#dc2626;line-height:1.1;">{{ $assessmentExpired }}</div>
+                    <div style="font-size:10.5px;color:#dc2626;font-weight:600;margin-top:2px;">IDP sudah exp</div>
+                </div>
+                <div style="flex:1;background:#fffbeb;border-radius:9px;padding:9px 10px;text-align:center;">
+                    <div style="font-size:17px;font-weight:800;color:#d97706;line-height:1.1;">{{ $assessmentAkanExp }}</div>
+                    <div style="font-size:10.5px;color:#d97706;font-weight:600;margin-top:2px;">Akan exp (30 hari)</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
