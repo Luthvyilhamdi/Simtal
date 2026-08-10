@@ -302,7 +302,7 @@ class ExportBuilderController extends Controller
             ->flatMap(fn ($r) => explode(',', $r))
             ->unique()->values()->all();
 
-        if ($pendidikan) {
+        if ($pendidikan || ! empty($validated['jenjang'])) {
             $relations[] = 'riwayatPendidikan';
         }
 
@@ -338,7 +338,9 @@ class ExportBuilderController extends Controller
             $query->where('jenis_kelamin', $validated['jenis_kelamin']);
         }
         if (! empty($validated['jenjang'])) {
-            $query->where('jenjang_pendidikan', $validated['jenjang']);
+            // Saring karyawan yang PUNYA jenjang ini di riwayat pendidikan
+            // (bukan sekadar pendidikan terakhirnya).
+            $query->whereHas('riwayatPendidikan', fn ($q) => $q->where('jenjang', $validated['jenjang']));
         }
         if (! empty($validated['tmt'])) {
             // Kelengkapan TMT (band/JG/PG). 'belum' = ketiganya kosong; 'ada' = minimal satu terisi.
@@ -371,7 +373,10 @@ class ExportBuilderController extends Controller
 
         // Kolom pendidikan dinamis (Terakhir / Semua / jenjang tertentu) — ditempel
         // di belakang kolom terpilih. Dihitung dari query TERFILTER (sebelum limit).
-        $eduCols = self::pendidikanColumns($pendidikan);
+        $eduCols = array_merge(
+            self::pendidikanColumns($pendidikan),
+            self::jenjangColumns($validated['jenjang'] ?? null)
+        );
 
         // Mode "semua tahun" + ada kolom tahunan → satu baris per (karyawan, tahun).
         $adaKolomTahunan = (bool) array_intersect($selected, self::yearDependentKeys());
@@ -488,6 +493,26 @@ class ExportBuilderController extends Controller
             ['label' => 'Pendidikan Terakhir', 'resolver' => fn ($k) => $k->jenjang_pendidikan ?: '-'],
             ['label' => 'Jurusan',             'resolver' => fn ($k) => $k->jurusan ?: '-'],
             ['label' => 'Institusi',           'resolver' => fn ($k) => $entri($k)->institusi ?: '-'],
+        ];
+    }
+
+    /**
+     * Kolom pendidikan untuk jenjang SPESIFIK yang dipilih di filter (mis. S2):
+     * Jenjang Pendidikan + Jurusan + Institusi, diambil dari entri riwayat jenjang
+     * itu (walau bukan pendidikan tertinggi karyawan). Baris sudah difilter agar
+     * hanya karyawan yang punya jenjang ini yang muncul.
+     * Return list of ['label' => string, 'resolver' => fn(Karyawan): string].
+     */
+    private static function jenjangColumns(?string $jenjang): array
+    {
+        if (empty($jenjang)) return [];
+
+        $entri = fn ($k) => $k->riwayatPendidikan->firstWhere('jenjang', $jenjang);
+
+        return [
+            ['label' => 'Jenjang Pendidikan', 'resolver' => fn ($k) => $entri($k)?->jenjang ?: '-'],
+            ['label' => 'Jurusan',            'resolver' => fn ($k) => $entri($k)?->jurusan ?: '-'],
+            ['label' => 'Institusi',          'resolver' => fn ($k) => $entri($k)?->institusi ?: '-'],
         ];
     }
 
