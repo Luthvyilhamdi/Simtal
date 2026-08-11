@@ -36,6 +36,7 @@ use App\Http\Controllers\UsulanPromosiController;
 use App\Http\Controllers\ReminderPromosiController;
 use App\Http\Controllers\UsulanMutasiController;
 use App\Http\Controllers\StrukturOrganisasiController;
+use App\Http\Controllers\StrukturOrganisasiVersiController;
 use App\Http\Controllers\ExportBuilderController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -278,6 +279,36 @@ Route::middleware('auth')->group(function () {
         });
         // Reminder Promosi (read-only) — daftar karyawan yang akan/segera eligible naik grade
         Route::get('reminder-promosi', [ReminderPromosiController::class, 'index'])->name('reminder_promosi.index');
+
+        // ===== ORGANIZATION & HC STRATEGY =====
+        Route::prefix('organisasi')->name('organisasi.')->group(function () {
+            Route::prefix('struktur')->name('struktur.')->group(function () {
+                Route::get('/',            [StrukturOrganisasiVersiController::class, 'index'])->name('index');
+                Route::get('/create',      [StrukturOrganisasiVersiController::class, 'create'])->name('create');
+                Route::post('/',           [StrukturOrganisasiVersiController::class, 'store'])->name('store');
+                Route::get('/compare',     [StrukturOrganisasiVersiController::class, 'compare'])->name('compare');
+                Route::get('/search',      [StrukturOrganisasiVersiController::class, 'search'])->name('search');
+                Route::get('/import',         [StrukturOrganisasiVersiController::class, 'importForm'])->name('import');
+                Route::post('/import',        [StrukturOrganisasiVersiController::class, 'importUpload'])->name('import.upload');
+                Route::get('/import/preview', [StrukturOrganisasiVersiController::class, 'importPreview'])->name('import.preview');
+                Route::post('/import/confirm',[StrukturOrganisasiVersiController::class, 'importConfirm'])->name('import.confirm');
+                Route::get('/import-lanjutan',         [StrukturOrganisasiVersiController::class, 'importLanjutanForm'])->name('import-lanjutan');
+                Route::post('/import-lanjutan',        [StrukturOrganisasiVersiController::class, 'importLanjutanUpload'])->name('import-lanjutan.upload');
+                Route::get('/import-lanjutan/preview', [StrukturOrganisasiVersiController::class, 'importLanjutanPreview'])->name('import-lanjutan.preview');
+                Route::post('/import-lanjutan/confirm',[StrukturOrganisasiVersiController::class, 'importLanjutanConfirm'])->name('import-lanjutan.confirm');
+                Route::get('/{versi}',     [StrukturOrganisasiVersiController::class, 'show'])->name('show');
+                Route::get('/{versi}/tree',[StrukturOrganisasiVersiController::class, 'tree'])->name('tree');
+                Route::get('/{versi}/export-excel', [StrukturOrganisasiVersiController::class, 'exportExcel'])->name('export-excel');
+                Route::get('/{versi}/export-pdf',   [StrukturOrganisasiVersiController::class, 'exportPdf'])->name('export-pdf');
+                Route::get('/{versi}/edit',[StrukturOrganisasiVersiController::class, 'edit'])->name('edit');
+                Route::put('/{versi}',     [StrukturOrganisasiVersiController::class, 'update'])->name('update');
+                Route::patch('/{versi}/finalize', [StrukturOrganisasiVersiController::class, 'finalize'])->name('finalize');
+            });
+
+            Route::prefix('unit')->name('unit.')->group(function () {
+                Route::get('/{unit}/timeline', [StrukturOrganisasiVersiController::class, 'unitTimeline'])->name('timeline');
+            });
+        });
 
         Route::get('api/usulan-promosi/karyawan',  [UsulanPromosiController::class, 'getKaryawanData'])->name('usulan_promosi.karyawan_data');
         Route::get('api/usulan-promosi/assessments',[UsulanPromosiController::class, 'getAssessments'])->name('usulan_promosi.assessments');

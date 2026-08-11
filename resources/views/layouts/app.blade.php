@@ -375,6 +375,23 @@
                 </a>
             </div>
 
+            {{-- Organization & HC Strategy (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('organisasi.*') ? 'active open' : '' }}" data-tooltip="Organization & HC Strategy" onclick="toggleMaster(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M12 12H5v4M12 12h7v4"/></svg>
+                <span class="nav-text">Organization & HC Strategy</span>
+                <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="master-sub {{ request()->routeIs('organisasi.*') ? 'open' : '' }}">
+                <a href="{{ route('organisasi.struktur.index') }}" data-tooltip="Riwayat Struktur Organisasi" class="nav-link {{ request()->routeIs('organisasi.struktur.*') && !request()->routeIs('organisasi.struktur.search') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
+                    <span class="nav-text">Riwayat Struktur Organisasi</span>
+                </a>
+                <a href="{{ route('organisasi.struktur.search') }}" data-tooltip="Cari Unit" class="nav-link {{ request()->routeIs('organisasi.struktur.search') || request()->routeIs('organisasi.unit.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span class="nav-text">Cari Unit</span>
+                </a>
+            </div>
+
             {{-- Kepejabatan (accordion) --}}
             <div class="nav-link master-toggle {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'active open' : '' }}" data-tooltip="Kepejabatan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
