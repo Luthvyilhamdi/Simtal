@@ -85,6 +85,10 @@
     .col-group-all input { width:13px;height:13px;accent-color:#15803d;cursor:pointer; }
     .col-group.hidden-search, .col-check.hidden-search { display:none; }
     .no-col-result { font-size:12px;color:#9ca3af;text-align:center;padding:16px 0;display:none; }
+    .prev-placeholder { text-align:center;color:#9ca3af;padding:40px 20px; }
+    .prev-placeholder svg { width:40px;height:40px;stroke:#d1d5db;margin-bottom:10px; }
+    .prev-placeholder .pp-title { font-size:14px;font-weight:600;color:#6b7280; }
+    .prev-placeholder .pp-sub { font-size:12.5px;margin-top:4px;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.5; }
 
     /* Sidebar kanan sticky agar tombol unduh selalu terlihat */
     .eb-side { position:sticky;top:16px;align-self:start; }
@@ -220,10 +224,11 @@
 
                 <div class="field">
                     <label>Status</label>
+                    @php $selStatus = old('status', 'aktif'); @endphp
                     <select name="status">
-                        <option value="">Semua</option>
-                        <option value="aktif" {{ old('status')=='aktif'?'selected':'' }}>Aktif</option>
-                        <option value="tidak aktif" {{ old('status')=='tidak aktif'?'selected':'' }}>Tidak Aktif</option>
+                        <option value=""            {{ $selStatus===''            ? 'selected' : '' }}>Semua</option>
+                        <option value="aktif"       {{ $selStatus==='aktif'       ? 'selected' : '' }}>Aktif</option>
+                        <option value="tidak aktif" {{ $selStatus==='tidak aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                     </select>
                 </div>
 
@@ -384,7 +389,7 @@
 </div>
 
 {{-- Panel preview --}}
-<div class="card" id="previewPanel" style="display:none;margin-top:20px;">
+<div class="card" id="previewPanel" style="margin-top:20px;">
     <div class="card-title" style="justify-content:space-between;">
         <span style="display:flex;align-items:center;gap:8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -392,7 +397,13 @@
         </span>
         <span id="previewMeta" style="font-size:12px;font-weight:500;color:#6b7280;"></span>
     </div>
-    <div id="previewBody" style="overflow-x:auto;"></div>
+    <div id="previewBody" style="overflow-x:auto;">
+        <div class="prev-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <div class="pp-title">Preview data akan tampil di sini</div>
+            <div class="pp-sub">Pilih kolom &amp; filter, lalu klik tombol <strong>Preview Data</strong> di panel kanan. Yang tampil hanya sebagian baris — file export berisi seluruh data.</div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -645,13 +656,22 @@
     });
     refreshColCounts();
 
-    async function doPreview() {
+    async function doPreview(scrollTo = true) {
         const btn = document.getElementById('previewBtn');
         const panel = document.getElementById('previewPanel');
         const meta = document.getElementById('previewMeta');
         const body = document.getElementById('previewBody');
 
         if (!exportForm.querySelector('input[name="columns[]"]:checked')) {
+            // Auto-muat (scrollTo=false): jangan ganggu dengan alert, tampilkan placeholder.
+            if (!scrollTo) {
+                meta.textContent = '';
+                body.innerHTML = '<div class="prev-placeholder">'
+                    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                    + '<div class="pp-title">Belum ada kolom dipilih</div>'
+                    + '<div class="pp-sub">Centang kolom di panel kiri, lalu klik <strong>Preview Data</strong>.</div></div>';
+                return;
+            }
             alert('Pilih minimal satu kolom terlebih dahulu.');
             return;
         }
@@ -696,7 +716,7 @@
             html += '</tbody></table>';
             body.innerHTML = html;
             panel.style.display = 'block';
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (scrollTo) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } catch (err) {
             alert('Terjadi kesalahan saat memuat preview.');
         } finally {
