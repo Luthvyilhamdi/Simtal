@@ -43,7 +43,12 @@
     .suggest-item { padding:8px 10px;font-size:12.5px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #f3f4f6; }
     .suggest-item:last-child { border-bottom:none; }
     .suggest-item:hover, .suggest-item.active { background:#f0fdf4; }
-    .chips { display:flex;flex-wrap:wrap;gap:6px;margin-top:8px; }
+    .chips { display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:132px;overflow-y:auto; }
+    .chips.has-items { border:1px solid #eef0f2;border-radius:8px;padding:8px;background:#fcfcfd; }
+    .chips-header { display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px; }
+    .chips-count { font-size:11px;color:#6b7280;font-weight:600; }
+    .chips-clear { border:none;background:none;color:#dc2626;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0; }
+    .chips-clear:hover { color:#b91c1c; }
     .chip { display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:999px;padding:3px 6px 3px 10px;font-size:12px;font-weight:500; }
     .chip .cx { border:none;background:#d1fae5;color:#15803d;border-radius:50%;width:16px;height:16px;line-height:14px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center; }
     .chip .cx:hover { background:#15803d;color:#fff; }
@@ -324,13 +329,16 @@
                     <label>Pilih Karyawan (opsional)</label>
                     <div class="picker">
                         <div class="pk-wrap">
-                            <input type="text" id="empSearch" autocomplete="off" placeholder="Cari NIK atau nama…">
+                            <input type="text" id="empSearch" autocomplete="off" placeholder="Cari Nama / NIK">
                             <div id="empSuggest" class="suggest" style="display:none;"></div>
                         </div>
                         <button type="button" class="pk-add" id="empAddBtn">+ Tambah</button>
                     </div>
+                    <div id="empChipsHeader" class="chips-header" style="display:none;">
+                        <span id="empChipsMeta" class="chips-count"></span>
+                        <button type="button" id="empClearAll" class="chips-clear">Hapus semua</button>
+                    </div>
                     <div id="empChips" class="chips"></div>
-                    <div id="empChipsMeta" class="chips-meta"></div>
                     <input type="hidden" name="nik_nama" id="empNik" value="{{ old('nik_nama') }}">
                 </div>
             </div>
@@ -566,17 +574,19 @@
     const searchEl  = document.getElementById('empSearch');
     const suggestEl = document.getElementById('empSuggest');
     const chipsEl   = document.getElementById('empChips');
+    const headerEl  = document.getElementById('empChipsHeader');
     const metaEl    = document.getElementById('empChipsMeta');
     const hiddenEl  = document.getElementById('empNik');
 
     function syncEmp() {
         hiddenEl.value = Array.from(selectedEmp.keys()).join(',');
         const n = selectedEmp.size;
-        metaEl.style.display = n ? 'block' : 'none';
+        headerEl.style.display = n ? 'flex' : 'none';
         metaEl.textContent = n ? `${n} karyawan dipilih` : '';
     }
     function renderChips() {
         chipsEl.innerHTML = '';
+        chipsEl.classList.toggle('has-items', selectedEmp.size > 0);
         selectedEmp.forEach((nama, nik) => {
             const chip = document.createElement('span');
             chip.className = 'chip';
@@ -613,17 +623,48 @@
         });
         suggestEl.style.display = 'block';
     }
-    function commitEmp() {
-        const raw = searchEl.value;
-        const tokens = raw.split(/[\n,;]+/).map(t => t.trim()).filter(Boolean);
-        if (tokens.length > 1) {
-            // Tempel banyak: cocokkan tiap token ke NIK persis / nama persis.
-            tokens.forEach(tok => {
-                if (empByNik.has(tok)) { addEmp(tok, empByNik.get(tok)); return; }
+    // Cocokkan sekumpulan token (NIK/nama) → tambah chip. Kembalikan ringkasan.
+    function resolveTokens(tokens) {
+        let added = 0, unknown = 0, skipped = 0;
+        tokens.forEach(tok => {
+            const before = selectedEmp.size;
+            if (empByNik.has(tok)) {
+                addEmp(tok, empByNik.get(tok));
+            } else {
                 const byName = EMP.filter(e => e.nama.toLowerCase() === tok.toLowerCase());
-                if (byName.length === 1) { addEmp(byName[0].nik, byName[0].nama); return; }
-                if (/^\d+$/.test(tok)) addEmp(tok, null); // NIK mentah walau tak ada di daftar
-            });
+                if (byName.length === 1) {
+                    addEmp(byName[0].nik, byName[0].nama);
+                } else if (/^\d+$/.test(tok)) {
+                    addEmp(tok, null);          // NIK tak ada di daftar → tetap dipakai sbg filter
+                    unknown++;
+                } else {
+                    skipped++;                  // bukan NIK & nama tak cocok
+                    return;
+                }
+            }
+            if (selectedEmp.size > before) added++;
+        });
+        return { added, unknown, skipped };
+    }
+
+    let _empMsgTimer = null;
+    function flashEmpMsg(r) {
+        const parts = [];
+        if (r.added)   parts.push(`${r.added} ditambahkan`);
+        if (r.unknown) parts.push(`${r.unknown} NIK tak dikenal (tetap dipakai)`);
+        if (r.skipped) parts.push(`${r.skipped} dilewati`);
+        if (!parts.length) return;
+        headerEl.style.display = 'flex';
+        metaEl.innerHTML = `<span style="color:#15803d;font-weight:600;">✓ ${parts.join(' · ')}</span>`;
+        clearTimeout(_empMsgTimer);
+        _empMsgTimer = setTimeout(syncEmp, 4000);   // kembali ke "N karyawan dipilih"
+    }
+
+    function commitEmp() {
+        const tokens = searchEl.value.split(/[\n\t,;]+/).map(t => t.trim()).filter(Boolean);
+        if (tokens.length > 1) {
+            const r = resolveTokens(tokens);
+            renderChips(); syncEmp(); flashEmpMsg(r);
         } else if (tokens.length === 1) {
             const tok = tokens[0];
             if (empByNik.has(tok)) { addEmp(tok, empByNik.get(tok)); }
@@ -632,8 +673,8 @@
                 if (m) addEmp(m.nik, m.nama);
                 else if (/^\d+$/.test(tok)) addEmp(tok, null);
             }
+            renderChips(); syncEmp();
         }
-        renderChips(); syncEmp();
         searchEl.value = ''; suggestEl.style.display = 'none';
     }
     searchEl.addEventListener('input', renderSuggest);
@@ -641,6 +682,20 @@
         if (e.key === 'Enter') { e.preventDefault(); commitEmp(); }
     });
     document.getElementById('empAddBtn').addEventListener('click', commitEmp);
+    document.getElementById('empClearAll').addEventListener('click', () => {
+        selectedEmp.clear(); renderChips(); syncEmp();
+    });
+    // Tempel banyak NIK sekaligus (mis. satu kolom / baris dari Excel).
+    searchEl.addEventListener('paste', e => {
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const tokens = text.split(/[\n\r\t,;]+/).map(t => t.trim()).filter(Boolean);
+        if (tokens.length > 1) {
+            e.preventDefault();
+            const r = resolveTokens(tokens);
+            renderChips(); syncEmp(); flashEmpMsg(r);
+            searchEl.value = ''; suggestEl.style.display = 'none';
+        }
+    });
     document.addEventListener('click', e => { if (!e.target.closest('.picker')) suggestEl.style.display = 'none'; });
 
     // Pulihkan pilihan bila halaman reload (mis. gagal validasi).

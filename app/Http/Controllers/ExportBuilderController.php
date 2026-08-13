@@ -369,6 +369,16 @@ class ExportBuilderController extends Controller
                       ->orWhere('nama', 'like', '%'.$t.'%');
                 }
             });
+
+            // Urutkan hasil MENGIKUTI urutan NIK/nama yang dipaste (bukan grade/nama).
+            // FIELD(nik, t1, t2, ...) → posisi token; token yang cocok via nama (nik
+            // tak ada di daftar) bernilai 0 → ditaruh di belakang.
+            $ph = implode(',', array_fill(0, count($tokens), '?'));
+            $query->reorder()
+                  ->orderByRaw("FIELD(karyawans.nik, {$ph}) = 0", $tokens)
+                  ->orderByRaw("FIELD(karyawans.nik, {$ph})", $tokens)
+                  ->orderByRaw('CAST(jg_sort.job_grade AS UNSIGNED) DESC')
+                  ->orderBy('karyawans.nama');
         }
 
         // Kolom pendidikan dinamis (Terakhir / Semua / jenjang tertentu) — ditempel
