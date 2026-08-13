@@ -30,7 +30,7 @@ class DatabaseBackupService
      */
     public function run(): array
     {
-        @set_time_limit(300);
+        @set_time_limit(600);
         @ini_set('memory_limit', '512M');
 
         $disk = Storage::disk('local');
@@ -63,16 +63,81 @@ class DatabaseBackupService
             throw new RuntimeException('Tidak bisa membuat file .zip.');
         }
         $zip->addFile($sqlPath, $baseName . '.sql');
+
+        // Sertakan seluruh file upload (storage/app) agar backup lengkap —
+        // kecuali folder backup itu sendiri (hindari menyertakan backup lama / rekursif).
+        $excludeDir = $disk->path($this->dir); // storage/app/private/backups
+        $fileCount  = $this->addDirToZip($zip, storage_path('app'), 'storage/app', [$excludeDir]);
+
+        $zip->addFromString('RESTORE.txt',
+            "SIMTAL — Backup Lengkap\n" .
+            "Dibuat: " . now()->toDateTimeString() . "\n\n" .
+            "Isi paket:\n" .
+            "  - {$baseName}.sql  : dump database\n" .
+            "  - storage/app/...   : semua file upload (foto, surat, dll) — {$fileCount} file\n\n" .
+            "Cara restore:\n" .
+            "  1. Import {$baseName}.sql ke database tujuan (phpMyAdmin / mysql).\n" .
+            "  2. Salin isi folder 'storage/app' ke 'storage/app' pada project tujuan\n" .
+            "     (timpa foto-karyawan/, surat-penting/, dll).\n" .
+            "  3. Aktifkan symlink: php artisan storage:link\n"
+        );
+
         $zip->close();
         @unlink($sqlPath);
 
         $this->cleanup($disk);
 
         return [
-            'file' => $baseName . '.zip',
-            'size' => $disk->size($zipRel),
-            'path' => $zipRel,
+            'file'  => $baseName . '.zip',
+            'size'  => $disk->size($zipRel),
+            'path'  => $zipRel,
+            'files' => $fileCount,
         ];
+    }
+
+    /**
+     * Tambahkan seluruh isi $absDir ke $zip di bawah prefix $zipPrefix,
+     * melewati path apa pun yang berada di dalam salah satu $excludeAbs.
+     *
+     * @return int jumlah file (bukan folder) yang ditambahkan
+     */
+    private function addDirToZip(ZipArchive $zip, string $absDir, string $zipPrefix, array $excludeAbs = []): int
+    {
+        if (!is_dir($absDir)) {
+            return 0;
+        }
+
+        $norm = fn ($p) => str_replace('\\', '/', $p);
+        $excl = array_map($norm, $excludeAbs);
+        $base = $norm($absDir);
+        $count = 0;
+
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($absDir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($it as $item) {
+            $abs = $norm($item->getPathname());
+
+            foreach ($excl as $ex) {
+                if ($abs === $ex || str_starts_with($abs, $ex . '/')) {
+                    continue 2; // lewati file/folder yang dikecualikan
+                }
+            }
+
+            $rel     = ltrim(substr($abs, strlen($base)), '/');
+            $zipPath = $zipPrefix . '/' . $rel;
+
+            if ($item->isDir()) {
+                $zip->addEmptyDir($zipPath);
+            } else {
+                $zip->addFile($item->getPathname(), $zipPath);
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /** Tulis seluruh dump ke file handle. */

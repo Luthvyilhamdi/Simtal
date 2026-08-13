@@ -160,16 +160,21 @@ class KaryawanController extends Controller
             'jabatan_saat_ini'        => 'required|string',
             'struktural_fungsional'  => 'nullable|in:Struktural,Fungsional',
             'foto'               => 'nullable|image|max:2048',
+            'hapus_foto'         => 'nullable|boolean',
             'tanggal_mulai_pg'   => 'nullable|date',
             'tanggal_mulai_jg'   => 'nullable|date',
             'tanggal_mulai_band' => 'nullable|date',
         ]);
 
-        $data = $request->except('foto');
+        $data = $request->except('foto', 'hapus_foto');
 
         if ($request->hasFile('foto')) {
             if ($karyawan->foto) Storage::disk('public')->delete($karyawan->foto);
             $data['foto'] = $request->file('foto')->store('foto-karyawan', 'public');
+        } elseif ($request->boolean('hapus_foto')) {
+            // Hapus foto tanpa mengganti dengan yang baru.
+            if ($karyawan->foto) Storage::disk('public')->delete($karyawan->foto);
+            $data['foto'] = null;
         }
 
         $karyawan->update($data);

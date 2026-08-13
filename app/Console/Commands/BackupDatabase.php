@@ -21,7 +21,7 @@ class BackupDatabase extends Command
             return self::FAILURE;
         }
 
-        $this->info('✓ Backup dibuat: ' . $res['file'] . ' (' . number_format($res['size'] / 1024, 1) . ' KB)');
+        $this->info('✓ Backup dibuat: ' . $res['file'] . ' (' . number_format($res['size'] / 1048576, 2) . ' MB, ' . ($res['files'] ?? 0) . ' file upload)');
         return self::SUCCESS;
     }
 }

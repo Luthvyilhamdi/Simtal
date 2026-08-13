@@ -69,7 +69,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">Backup Database</div>
-        <div class="page-sub">Cadangkan seluruh data SIMTAL ke satu file <strong>.zip</strong> (berisi dump <strong>.sql</strong>). Sistem menyimpan otomatis <strong>10 backup terakhir</strong>; yang lebih lama dihapus agar tidak memakan ruang disk.</div>
+        <div class="page-sub">Cadangkan <strong>database + seluruh file upload</strong> (foto, surat, dll) ke satu file <strong>.zip</strong> — berisi dump <strong>.sql</strong> dan folder <strong>storage/app</strong>, plus petunjuk restore. Sistem menyimpan otomatis <strong>10 backup terakhir</strong>; yang lebih lama dihapus agar tidak memakan ruang disk.</div>
     </div>
 </div>
 
@@ -80,7 +80,7 @@
         </div>
         <div>
             <div class="bk-cta-title">Buat backup sekarang</div>
-            <div class="bk-cta-desc">Dump semua tabel &amp; data terkini, lalu dikompres ke .zip. Prosesnya beberapa detik.</div>
+            <div class="bk-cta-desc">Dump database + salin semua file upload, lalu dikompres ke .zip. Bisa beberapa detik s/d menit tergantung jumlah file.</div>
         </div>
     </div>
     <form method="POST" action="{{ route('backup.store') }}" id="backupForm">

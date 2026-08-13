@@ -78,6 +78,31 @@
     .foto-upload-text { font-size:12px;color:#6b7280; }
     .foto-upload-text strong { color:#15803d; }
     .foto-upload-hint { font-size:10px;color:#9ca3af;margin-top:2px; }
+    .btn-hapus-foto { display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit; }
+    .btn-hapus-foto:hover { background:#fee2e2; }
+    .btn-hapus-foto svg { width:14px;height:14px; }
+    .foto-hapus-note { margin-top:8px;font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px; }
+    .foto-undo { background:none;border:none;color:#15803d;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit;text-decoration:underline;padding:0; }
+    /* Modal crop foto */
+    .crop-modal { display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center; }
+    .crop-modal.open { display:flex; }
+    .crop-backdrop { position:absolute;inset:0;background:rgba(17,24,39,0.55); }
+    .crop-card { position:relative;background:#fff;border-radius:16px;padding:20px;width:min(360px,92vw);box-shadow:0 20px 50px rgba(0,0,0,0.25); }
+    .crop-head { margin-bottom:14px; }
+    .crop-title { font-size:16px;font-weight:700;color:#111827; }
+    .crop-sub { font-size:11.5px;color:#6b7280;margin-top:2px; }
+    .crop-stage { position:relative;width:100%;aspect-ratio:1;background:#111827;border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;user-select:none; }
+    .crop-stage.grabbing { cursor:grabbing; }
+    .crop-stage img { position:absolute;top:0;left:0;transform-origin:0 0;pointer-events:none;max-width:none; }
+    .crop-mask { position:absolute;inset:0;pointer-events:none;box-shadow:0 0 0 9999px rgba(17,24,39,0.5) inset;border-radius:50%; }
+    .crop-zoom { display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:#6b7280;font-weight:700; }
+    .crop-zoom input[type=range] { flex:1;accent-color:#16a34a; }
+    .crop-actions { display:flex;gap:10px;margin-top:14px; }
+    .crop-btn { flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid transparent; }
+    .crop-btn.cancel { background:#fff;border-color:#e5e7eb;color:#6b7280; }
+    .crop-btn.cancel:hover { background:#f9fafb; }
+    .crop-btn.apply { background:#16a34a;color:#fff; }
+    .crop-btn.apply:hover { background:#15803d; }
 
     .band-info-box { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px; }
     .band-info-badge { display:inline-flex;padding:5px 15px;border-radius:20px;font-size:14px;font-weight:800;background:#15803d;color:white; }
@@ -223,21 +248,47 @@
                 <label class="form-label">Foto Karyawan</label>
                 <div class="foto-upload-wrap">
                     <div class="foto-preview-box">
-                        @if($karyawan->foto)
-                            <img src="{{ Storage::url($karyawan->foto) }}" id="fotoPreview" alt="foto">
-                        @else
-                            <span id="fotoInitial">{{ initials($karyawan->nama) }}</span>
-                            <img id="fotoPreview" style="display:none;" alt="foto">
-                        @endif
+                        <span id="fotoInitial" style="{{ $karyawan->foto ? 'display:none;' : '' }}">{{ initials($karyawan->nama) }}</span>
+                        <img id="fotoPreview" src="{{ $karyawan->foto ? Storage::url($karyawan->foto) : '' }}" style="{{ $karyawan->foto ? '' : 'display:none;' }}" alt="foto">
                     </div>
                     <div class="foto-upload-area">
-                        <input type="file" name="foto" accept="image/*" onchange="previewFoto(this)" />
+                        <input type="file" id="fotoFile" name="foto" accept="image/*" onchange="onFotoPick(this)" />
                         <div class="foto-upload-icon">📷</div>
                         <div class="foto-upload-text"><strong>Klik untuk upload</strong> atau drag & drop</div>
-                        <div class="foto-upload-hint">Kosongkan bila tidak ingin mengubah · PNG, JPG (maks. 2MB)</div>
+                        <div class="foto-upload-hint">Bisa di-zoom &amp; geser setelah dipilih · PNG, JPG (maks. 2MB)</div>
+                    </div>
+                    <input type="hidden" name="hapus_foto" id="hapusFoto" value="0">
+                    <button type="button" id="btnHapusFoto" class="btn-hapus-foto" onclick="hapusFotoAction()" style="{{ $karyawan->foto ? '' : 'display:none;' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Hapus Foto
+                    </button>
+                </div>
+                <div id="fotoHapusNote" class="foto-hapus-note" style="display:none;">Foto akan dihapus saat disimpan. <button type="button" onclick="batalHapusFoto()" class="foto-undo">Batalkan</button></div>
+                @error('foto')<div class="error-msg">{{ $message }}</div>@enderror
+            </div>
+
+            {{-- Modal crop/zoom foto --}}
+            <div class="crop-modal" id="cropModal">
+                <div class="crop-backdrop" onclick="cropCancel()"></div>
+                <div class="crop-card">
+                    <div class="crop-head">
+                        <div class="crop-title">Atur Foto</div>
+                        <div class="crop-sub">Geser untuk memindah · zoom untuk memperbesar/memperkecil</div>
+                    </div>
+                    <div class="crop-stage" id="cropStage">
+                        <img id="cropImg" alt="crop" draggable="false">
+                        <div class="crop-mask"></div>
+                    </div>
+                    <div class="crop-zoom">
+                        <span>−</span>
+                        <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1">
+                        <span>+</span>
+                    </div>
+                    <div class="crop-actions">
+                        <button type="button" class="crop-btn cancel" onclick="cropCancel()">Batal</button>
+                        <button type="button" class="crop-btn apply" onclick="cropApply()">Terapkan</button>
                     </div>
                 </div>
-                @error('foto')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
         </div>
     </div>
@@ -555,19 +606,135 @@
         document.getElementById('bandDisplay').textContent = bandMap[grade] || '-';
     }
 
-    function previewFoto(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const preview = document.getElementById('fotoPreview');
-                const initial = document.getElementById('fotoInitial');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                if (initial) initial.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
+    // ===== Foto: hapus + crop/zoom saat upload =====
+    const ORIG_FOTO = @json($karyawan->foto ? Storage::url($karyawan->foto) : '');
+    const fFile    = document.getElementById('fotoFile');
+    const fPreview = document.getElementById('fotoPreview');
+    const fInitial = document.getElementById('fotoInitial');
+    const fBtnHps  = document.getElementById('btnHapusFoto');
+    const fHapus   = document.getElementById('hapusFoto');
+    const fNote    = document.getElementById('fotoHapusNote');
+
+    function onFotoPick(input) {
+        if (!input.files || !input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = e => openCrop(e.target.result);
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function hapusFotoAction() {
+        fHapus.value = '1';
+        fFile.value = '';
+        fPreview.style.display = 'none';
+        fInitial.style.display = '';
+        fBtnHps.style.display = 'none';
+        fNote.style.display = '';
+    }
+    function batalHapusFoto() {
+        fHapus.value = '0';
+        fNote.style.display = 'none';
+        if (ORIG_FOTO) {
+            fPreview.src = ORIG_FOTO;
+            fPreview.style.display = 'block';
+            fInitial.style.display = 'none';
+            fBtnHps.style.display = 'inline-flex';
+        } else {
+            fInitial.style.display = '';
+            fPreview.style.display = 'none';
         }
     }
+
+    // ── Cropper ──
+    const cModal = document.getElementById('cropModal');
+    const cStage = document.getElementById('cropStage');
+    const cImg   = document.getElementById('cropImg');
+    const cZoom  = document.getElementById('cropZoom');
+    let natW, natH, coverScale, scale, offX, offY, V;
+    let dragging = false, lastX = 0, lastY = 0;
+
+    function clampScale(s) { return Math.min(coverScale * 3, Math.max(coverScale, s)); }
+    function clampOff() {
+        const w = natW * scale, h = natH * scale;
+        offX = Math.min(0, Math.max(V - w, offX));
+        offY = Math.min(0, Math.max(V - h, offY));
+    }
+    function renderCrop() {
+        cImg.style.width = natW + 'px';
+        cImg.style.height = natH + 'px';
+        cImg.style.transform = `translate(${offX}px,${offY}px) scale(${scale})`;
+    }
+    function setScale(ns) {
+        ns = clampScale(ns);
+        const px = (V / 2 - offX) / scale, py = (V / 2 - offY) / scale;
+        scale = ns;
+        offX = V / 2 - px * scale; offY = V / 2 - py * scale;
+        clampOff(); renderCrop();
+    }
+
+    function openCrop(dataUrl) {
+        cModal.classList.add('open');
+        cImg.onload = () => {
+            natW = cImg.naturalWidth; natH = cImg.naturalHeight;
+            V = cStage.clientWidth || 300;
+            coverScale = Math.max(V / natW, V / natH);
+            scale = coverScale;
+            offX = (V - natW * scale) / 2;
+            offY = (V - natH * scale) / 2;
+            cZoom.value = 1;
+            renderCrop();
+        };
+        cImg.src = dataUrl;
+    }
+    function closeCrop() { cModal.classList.remove('open'); }
+
+    function cropCancel() {
+        closeCrop();
+        fFile.value = ''; // buang file yang belum di-crop
+    }
+
+    function cropApply() {
+        const C = 400;
+        const canvas = document.createElement('canvas');
+        canvas.width = C; canvas.height = C;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, C, C);
+        ctx.save();
+        ctx.beginPath(); ctx.arc(C / 2, C / 2, C / 2, 0, Math.PI * 2); ctx.clip();
+        const sx = -offX / scale, sy = -offY / scale, sw = V / scale, sh = V / scale;
+        ctx.drawImage(cImg, sx, sy, sw, sh, 0, 0, C, C);
+        ctx.restore();
+        canvas.toBlob(blob => {
+            const file = new File([blob], 'foto.jpg', { type: 'image/jpeg' });
+            const dt = new DataTransfer(); dt.items.add(file);
+            fFile.files = dt.files;
+            fPreview.src = canvas.toDataURL('image/jpeg', 0.9);
+            fPreview.style.display = 'block';
+            fInitial.style.display = 'none';
+            fBtnHps.style.display = 'inline-flex';
+            fHapus.value = '0';
+            fNote.style.display = 'none';
+            closeCrop();
+        }, 'image/jpeg', 0.9);
+    }
+
+    cZoom.addEventListener('input', () => setScale(coverScale * parseFloat(cZoom.value)));
+    cStage.addEventListener('wheel', e => {
+        e.preventDefault();
+        setScale(scale * (e.deltaY < 0 ? 1.08 : 0.92));
+        cZoom.value = (scale / coverScale).toFixed(2);
+    }, { passive: false });
+    cStage.addEventListener('pointerdown', e => {
+        dragging = true; lastX = e.clientX; lastY = e.clientY;
+        cStage.setPointerCapture(e.pointerId); cStage.classList.add('grabbing');
+    });
+    cStage.addEventListener('pointermove', e => {
+        if (!dragging) return;
+        offX += e.clientX - lastX; offY += e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        clampOff(); renderCrop();
+    });
+    cStage.addEventListener('pointerup', () => { dragging = false; cStage.classList.remove('grabbing'); });
+    cStage.addEventListener('pointercancel', () => { dragging = false; cStage.classList.remove('grabbing'); });
 
     function selectRadio(val) {
         document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
