@@ -116,7 +116,7 @@ class ExportBuilderController extends Controller
             'assessment_job_stream' => ['Assessment', 'Job Stream'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->job_stream ?? '-'],
             'assessment_lembaga'    => ['Assessment', 'Lembaga Assessment'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->lembaga ?? '-'],
             'assessment_tgl'        => ['Assessment', 'Tgl Pelaksanaan'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->tanggal_pelaksanaan?->format('d/m/Y') ?? '-'],
-            'assessment_exp_idp'    => ['Assessment', 'Tgl Exp IDP'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->tanggal_exp_idp?->format('d/m/Y') ?? '-'],
+            'assessment_exp_idp'    => ['Assessment', 'Tgl Exp Assessment'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->tanggal_exp_idp?->format('d/m/Y') ?? '-'],
 
             // ── Assessment Kompetensi (tahun + bulan; kosong = terbaru) ──
             'kompetensi_kesimpulan' => ['Assessment Kompetensi', 'Kesimpulan Kompetensi'.$suffix, 'historyAssessmentKompetensi', fn ($k) => optional(self::byTanggal($k->historyAssessmentKompetensi, 'tanggal_assessment', $tahun, $bulan))->kesimpulan ?? '-'],
