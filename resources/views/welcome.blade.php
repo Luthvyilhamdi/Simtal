@@ -308,17 +308,17 @@
             <div class="login-title">Selamat Datang</div>
             <div class="login-sub">Masuk ke SIMTAL untuk melanjutkan</div>
 
-            <a href="#" class="btn-identik" id="btnMasuk" role="button" aria-label="Login dengan Identik">
+            <a href="#" class="btn-identik" id="btnMasuk" role="button" aria-label="Masuk dengan Identik">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                Login with Identik
+                Masuk dengan Identik
             </a>
 
             <div class="login-date">{{ $tanggal }} · {{ $jamWib }} WIB</div>
         </div>
 
         <div class="panel-footer">
-            <span class="copy">© {{ date('Y') }} Talent Manajement System · v1.0</span>
-            <a href="#" class="privacy-link">
+            <span class="copy">© {{ date('Y') }} SIMTAL — Talent Management System</span>
+            <a href="{{ route('kebijakan-privasi') }}" class="privacy-link">
                 Kebijakan Privasi
                 <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>

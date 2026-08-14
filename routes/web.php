@@ -46,6 +46,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/kebijakan-privasi', function () {
+    return view('kebijakan-privasi');
+})->name('kebijakan-privasi');
+
 Route::middleware('auth')->group(function () {
 
     // ===== PROFILE (semua role) =====
