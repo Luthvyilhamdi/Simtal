@@ -9,6 +9,10 @@ use App\Models\StrukturOrganisasiVersi;
 use App\Models\UnitOrganisasi;
 use App\Models\UnitOrganisasiSnapshot;
 use App\Models\UnitOrganisasiTransisi;
+use App\Services\GenealogyBandLayout;
+use App\Services\GenealogyGraphBuilder;
+use App\Services\LeveledTransitionNarrator;
+use App\Services\TransitionNarrator;
 use App\Traits\LogsActivity;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -55,6 +59,13 @@ class StrukturOrganisasiVersiController extends Controller
         $level        = $request->input('level');
         $direktoratId = $request->filled('direktorat') ? (int) $request->input('direktorat') : null;
 
+        // Filter jenis transisi: whitelist thd enum yg sudah ada, union (OR) antar kategori yg dicentang.
+        $jenisTransisiFilter = array_values(array_intersect(
+            (array) $request->input('jenis_transisi', []),
+            self::TRANSISI_LANJUTAN_ENUM
+        ));
+        $lintasDirektoratOnly = $request->boolean('lintas_direktorat') && in_array('pindah_induk', $jenisTransisiFilter, true);
+
         $ledger = $this->buildUnitLedger();
 
         // Opsi dropdown direktorat: unit level 'direktorat' pada versi final TERBARU saja
@@ -65,9 +76,26 @@ class StrukturOrganisasiVersiController extends Controller
                 ->values()
             : collect();
 
+        // Kejadian transisi yg cocok filter, dikelompokkan per unit_organisasi_id yg terlibat.
+        // Kosong kalau filter tidak aktif — dipakai baik utk narrowing hasil maupun badge di kartu.
+        $matchedEventsByUnit = empty($jenisTransisiFilter)
+            ? []
+            : $this->findMatchingTransisiEvents($jenisTransisiFilter, $lintasDirektoratOnly, $ledger);
+
         $results = [];
 
-        foreach ($ledger['snapshotsByUnit'] as $unitId => $snaps) {
+        // Kandidat unit: SEMUA unit (spt semula) kalau filter tidak aktif, atau HANYA unit yg
+        // punya kejadian yg cocok filter (browse mode kalau $q kosong, intersection kalau $q diisi).
+        $candidateUnitIds = empty($jenisTransisiFilter)
+            ? $ledger['snapshotsByUnit']->keys()
+            : collect(array_keys($matchedEventsByUnit));
+
+        foreach ($candidateUnitIds as $unitId) {
+            $snaps = $ledger['snapshotsByUnit']->get($unitId, collect());
+            if ($snaps->isEmpty()) {
+                continue;
+            }
+
             if ($q !== '' && $snaps->first(fn ($s) => stripos($s->nama_unit, $q) !== false) === null) {
                 continue;
             }
@@ -96,18 +124,40 @@ class StrukturOrganisasiVersiController extends Controller
                 'level'              => $latestSnap->level,
                 'status'             => $this->statusUnit($unitId, $ledger),
                 'nama_sebelumnya'    => count($riwayat) > 1 ? array_slice($riwayat, 0, -1) : [],
+                'matched_events'     => $matchedEventsByUnit[$unitId] ?? [],
             ];
         }
 
         usort($results, fn ($a, $b) => strcmp($a['nama_saat_ini'], $b['nama_saat_ini']));
 
+        // Pagination hanya utk mode filter jenis-transisi aktif (bisa hasilkan puluhan/ratusan
+        // baris tanpa nama), agar tidak menyentuh perilaku default (tanpa filter) sama sekali.
+        $showPagination = false;
+        if (!empty($jenisTransisiFilter) && count($results) > 50) {
+            $showPagination = true;
+            $perPage = 50;
+            $total   = count($results);
+            $page    = max(1, (int) $request->input('page', 1));
+            $results = new \Illuminate\Pagination\LengthAwarePaginator(
+                array_slice($results, ($page - 1) * $perPage, $perPage),
+                $total,
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
         return view('organisasi.struktur.search', [
-            'q'                 => $q,
-            'level'             => $level,
-            'direktoratId'      => $direktoratId,
-            'levels'            => self::LEVELS,
-            'direktoratOptions' => $direktoratOptions,
-            'results'           => $results,
+            'q'                     => $q,
+            'level'                 => $level,
+            'direktoratId'          => $direktoratId,
+            'levels'                => self::LEVELS,
+            'direktoratOptions'     => $direktoratOptions,
+            'jenisTransisiOptions'  => self::TRANSISI_LANJUTAN_ENUM,
+            'jenisTransisiFilter'   => $jenisTransisiFilter,
+            'lintasDirektoratOnly'  => $lintasDirektoratOnly,
+            'results'               => $results,
+            'showPagination'        => $showPagination,
         ]);
     }
 
@@ -183,12 +233,40 @@ class StrukturOrganisasiVersiController extends Controller
             ])
             ->values();
 
+        $graph = (new GenealogyGraphBuilder())->build(
+            $unit->id, $ledger['finalVersions'], $ledger['allSnapshots'], $ledger['allTransisi']
+        );
+        $graph = (new GenealogyBandLayout())->layout(
+            $graph, $ledger['finalVersions'], $ledger['allSnapshots'], $ledger['allTransisi']
+        );
+
         return view('organisasi.struktur.unit-timeline', [
             'unit'       => $unit,
             'points'     => $points,
             'statusInfo' => $statusInfo,
             'asalDari'   => $asalDari,
+            'graph'      => $graph,
         ]);
+    }
+
+    /**
+     * Isi panel overlay riwayat (dipicu dari tombol "Lihat Riwayat" di Tree View &
+     * Detail Versi) — return PARTIAL saja (bukan halaman penuh), di-fetch via AJAX.
+     * Sumber data SAMA PERSIS dgn Tab Diagram/List di unitTimeline() (GenealogyGraphBuilder
+     * + GenealogyBandLayout, tidak ada traversal/narasi baru).
+     */
+    public function unitRiwayatOverlay(UnitOrganisasi $unit)
+    {
+        $ledger = $this->buildUnitLedger();
+
+        $graph = (new GenealogyGraphBuilder())->build(
+            $unit->id, $ledger['finalVersions'], $ledger['allSnapshots'], $ledger['allTransisi']
+        );
+        $graph = (new GenealogyBandLayout())->layout(
+            $graph, $ledger['finalVersions'], $ledger['allSnapshots'], $ledger['allTransisi']
+        );
+
+        return view('organisasi.struktur.partials.riwayat-narasi-list', ['graph' => $graph]);
     }
 
     /**
@@ -207,6 +285,7 @@ class StrukturOrganisasiVersiController extends Controller
                 'latestVersiId'    => null,
                 'snapshotsByUnit'  => collect(),
                 'snapshotsByVersi' => collect(),
+                'allSnapshots'     => collect(),
                 'latestNameByUnit' => collect(),
                 'allTransisi'      => collect(),
                 'transisiByAsal'   => collect(),
@@ -228,6 +307,7 @@ class StrukturOrganisasiVersiController extends Controller
             'latestVersiId'    => $finalVersions->last()->id,
             'snapshotsByUnit'  => $snapshotsByUnit,
             'snapshotsByVersi' => $allSnapshots->groupBy('struktur_organisasi_versi_id'),
+            'allSnapshots'     => $allSnapshots,
             'latestNameByUnit' => $snapshotsByUnit->map(fn ($g) => $g->last()->nama_unit),
             'allTransisi'      => $allTransisi,
             'transisiByAsal'   => $allTransisi->groupBy('unit_asal_id'),
@@ -261,6 +341,7 @@ class StrukturOrganisasiVersiController extends Controller
         $successors = $eventRows->pluck('unit_baru_id')->filter()->map(fn ($id) => [
             'unit_organisasi_id' => $id,
             'nama'               => $ledger['latestNameByUnit'][$id] ?? '-',
+            'level'              => $ledger['snapshotsByUnit']->get($id)?->last()->level,
         ])->values()->all();
 
         return [
@@ -270,13 +351,20 @@ class StrukturOrganisasiVersiController extends Controller
         ];
     }
 
-    /** Daftar nama berurutan sepanjang histori unit ini (nama duplikat berturut-turut digabung jadi 1 "era"). */
+    /**
+     * Daftar nama berurutan sepanjang histori unit ini (nama duplikat berturut-turut
+     * digabung jadi 1 "era"), plus level di era itu — dipakai search.blade.php utk
+     * prefix level per nama (levelnya bisa beda antar era kalau ganti_level terjadi
+     * bareng rename).
+     *
+     * @return array<int, array{nama_unit: string, level: string}>
+     */
     private function riwayatNama(Collection $snapsKronologis): array
     {
         $eras = [];
         foreach ($snapsKronologis as $s) {
-            if (empty($eras) || end($eras) !== $s->nama_unit) {
-                $eras[] = $s->nama_unit;
+            if (empty($eras) || end($eras)['nama_unit'] !== $s->nama_unit) {
+                $eras[] = ['nama_unit' => $s->nama_unit, 'level' => $s->level];
             }
         }
         return $eras;
@@ -294,6 +382,223 @@ class StrukturOrganisasiVersiController extends Controller
             $current = $parent;
         }
         return $current;
+    }
+
+    /**
+     * Telusuri parent_unit_organisasi_id ke atas sampai ketemu node level='direktorat' PERTAMA
+     * (berhenti di situ, tidak lanjut ke atas). Beda dari rootAncestorSnapshot() yg jalan sampai
+     * parent NULL — dibutuhkan khusus utk sub-filter "Lintas Direktorat Saja" krn kolom
+     * parent_unit_organisasi_id pada baris snapshot level direktorat sendiri TIDAK konsisten
+     * antar versi (kadang NULL/flat, kadang diisi node "Utama") — kalau pakai rootAncestorSnapshot()
+     * apa adanya, unit yg direktoratnya TIDAK berubah bisa salah ke-flag lintas direktorat hanya
+     * krn versi pembanding kebetulan beda flat/nested-nya (divalidasi thd data riil sebelum dipakai).
+     */
+    private function directoratAncestorSnapshot($snapshot, Collection $snapshotsKeyedByUnitId)
+    {
+        $current = $snapshot;
+        $seen = [];
+        while ($current && $current->level !== 'direktorat' && $current->parent_unit_organisasi_id && !isset($seen[$current->unit_organisasi_id])) {
+            $seen[$current->unit_organisasi_id] = true;
+            $parent = $snapshotsKeyedByUnitId->get($current->parent_unit_organisasi_id);
+            if (!$parent) break;
+            $current = $parent;
+        }
+        return $current;
+    }
+
+    /** Map versi_id => versi_id sebelumnya (null kalau versi paling awal), berdasar urutan tanggal_mulai_berlaku. */
+    private function buildPreviousVersiMap(Collection $finalVersions): array
+    {
+        $ids = $finalVersions->pluck('id')->values();
+        $map = [];
+        foreach ($ids as $i => $id) {
+            $map[$id] = $i > 0 ? $ids[$i - 1] : null;
+        }
+        return $map;
+    }
+
+    /** Closure ber-memo: versi_id => snapshot versi itu, keyBy unit_organisasi_id (dihitung sekali per versi). */
+    private function getKeyedSnapshotsFactory(array $ledger): \Closure
+    {
+        $cache = [];
+        return function (int $versiId) use ($ledger, &$cache) {
+            if (!isset($cache[$versiId])) {
+                $cache[$versiId] = $ledger['snapshotsByVersi']->get($versiId, collect())->keyBy('unit_organisasi_id');
+            }
+            return $cache[$versiId];
+        };
+    }
+
+    /**
+     * Sub-filter "Lintas Direktorat Saja" utk pindah_induk: bandingkan direktorat akar dari
+     * parent SEBELUM vs SESUDAH pindah (telusuri parent_unit_organisasi_id ke atas via
+     * rootAncestorSnapshot() yg sudah ada, masing2 di snapshot versi yg relevan).
+     */
+    private function isPindahIndukLintasDirektorat(UnitOrganisasiTransisi $t, array $prevVersiMap, \Closure $getKeyedSnapshots): bool
+    {
+        $versiId     = $t->struktur_organisasi_versi_id;
+        $prevVersiId = $prevVersiMap[$versiId] ?? null;
+        if (!$prevVersiId) {
+            return false;
+        }
+
+        $newSnap = $getKeyedSnapshots($versiId)->get($t->unit_asal_id);
+        $oldSnap = $getKeyedSnapshots($prevVersiId)->get($t->unit_asal_id);
+        if (!$newSnap || !$oldSnap) {
+            return false;
+        }
+
+        $newRoot = $this->directoratAncestorSnapshot($newSnap, $getKeyedSnapshots($versiId));
+        $oldRoot = $this->directoratAncestorSnapshot($oldSnap, $getKeyedSnapshots($prevVersiId));
+        if (!$newRoot || !$oldRoot) {
+            return false;
+        }
+
+        return $newRoot->unit_organisasi_id !== $oldRoot->unit_organisasi_id;
+    }
+
+    /** Bangun TransitionNarrator dari seluruh data ledger (semua versi final), bukan cuma 2 versi seperti di compare(). */
+    /**
+     * Dipakai HANYA oleh findMatchingTransisiEvents() (badge kejadian di halaman "Cari
+     * Unit") — tidak ada consumer lain, jadi aman pakai LeveledTransitionNarrator
+     * (prefix level per nama unit) langsung tanpa memengaruhi Diagram/Compare/overlay
+     * riwayat (yg punya jalur narasi sendiri lewat GenealogyBandLayout).
+     */
+    private function buildNarratorForLedger(array $ledger): LeveledTransitionNarrator
+    {
+        $snapshotIndex = [];
+        foreach ($ledger['allSnapshots'] as $s) {
+            $snapshotIndex["{$s->unit_organisasi_id}_{$s->struktur_organisasi_versi_id}"] = [
+                'nama_unit'                 => $s->nama_unit,
+                'level'                     => $s->level,
+                'mc_formasi'                => $s->mc_formasi,
+                'parent_unit_organisasi_id' => $s->parent_unit_organisasi_id,
+            ];
+        }
+
+        $transisiIndex = [];
+        foreach ($ledger['allTransisi'] as $t) {
+            $key = ($t->unit_asal_id ?? '') . '_' . ($t->unit_baru_id ?? '') . '_' . $t->struktur_organisasi_versi_id . '_' . $t->jenis_transisi;
+            $transisiIndex[$key] = $t->keterangan;
+        }
+
+        return new LeveledTransitionNarrator($snapshotIndex, $transisiIndex);
+    }
+
+    /**
+     * Cari semua baris unit_organisasi_transisi yg cocok filter jenis transisi (+ sub-filter
+     * lintas direktorat kalau aktif), lalu kelompokkan jadi "kejadian" (pecah/gabung yg terdiri
+     * dari beberapa baris digabung jadi 1 kejadian — pola yg sama spt groupNarrativeSources() di
+     * GenealogyBandLayout) dan narasikan via TransitionNarrator. Return: unit_organisasi_id =>
+     * daftar kejadian yg melibatkan unit itu. 0 query tambahan — semua dari $ledger yg sudah di-load.
+     */
+    private function findMatchingTransisiEvents(array $jenisTransisiFilter, bool $lintasDirektoratOnly, array $ledger): array
+    {
+        $prevVersiMap      = $this->buildPreviousVersiMap($ledger['finalVersions']);
+        $getKeyedSnapshots = $this->getKeyedSnapshotsFactory($ledger);
+
+        $matchedRows = $ledger['allTransisi']->filter(function ($t) use ($jenisTransisiFilter, $lintasDirektoratOnly, $prevVersiMap, $getKeyedSnapshots) {
+            if (!in_array($t->jenis_transisi, $jenisTransisiFilter, true)) {
+                return false;
+            }
+            if ($t->jenis_transisi === 'pindah_induk' && $lintasDirektoratOnly) {
+                return $this->isPindahIndukLintasDirektorat($t, $prevVersiMap, $getKeyedSnapshots);
+            }
+            return true;
+        });
+
+        if ($matchedRows->isEmpty()) {
+            return [];
+        }
+
+        $narrator  = $this->buildNarratorForLedger($ledger);
+        $versiById = $ledger['finalVersions']->keyBy('id');
+
+        $nodeFor = function (?int $unitId, int $versiId) use ($getKeyedSnapshots) {
+            if (!$unitId) {
+                return null;
+            }
+            $snap = $getKeyedSnapshots($versiId)->get($unitId);
+            return [
+                'nama_unit'                    => $snap->nama_unit ?? '-',
+                'level'                        => $snap->level ?? null,
+                'unit_organisasi_id'           => $unitId,
+                'struktur_organisasi_versi_id' => $versiId,
+            ];
+        };
+
+        $eventGroups = [];
+        foreach ($matchedRows->where('jenis_transisi', 'pecah')->groupBy(fn ($t) => $t->unit_asal_id . '_' . $t->struktur_organisasi_versi_id) as $rows) {
+            $eventGroups[] = ['jenis' => 'pecah', 'rows' => $rows->values()];
+        }
+        foreach ($matchedRows->where('jenis_transisi', 'gabung')->groupBy(fn ($t) => $t->unit_baru_id . '_' . $t->struktur_organisasi_versi_id) as $rows) {
+            $eventGroups[] = ['jenis' => 'gabung', 'rows' => $rows->values()];
+        }
+        foreach ($matchedRows->whereNotIn('jenis_transisi', ['pecah', 'gabung']) as $t) {
+            $eventGroups[] = ['jenis' => $t->jenis_transisi, 'rows' => collect([$t])];
+        }
+
+        $byUnit = [];
+        foreach ($eventGroups as $group) {
+            $jenis  = $group['jenis'];
+            $rows   = $group['rows'];
+            $anyRow = $rows->first();
+
+            $versiId     = $anyRow->struktur_organisasi_versi_id;
+            $prevVersiId = $prevVersiMap[$versiId] ?? $versiId;
+            $versi       = $versiById->get($versiId);
+
+            switch ($jenis) {
+                case 'pecah':
+                    $fromId = $anyRow->unit_asal_id;
+                    $narasi = $narrator->narrate([
+                        'kind'    => 'pecah',
+                        'from'    => $nodeFor($fromId, $prevVersiId),
+                        'targets' => $rows->map(fn ($r) => $nodeFor($r->unit_baru_id, $versiId))->values()->all(),
+                    ]);
+                    $involved = $rows->pluck('unit_baru_id')->push($fromId)->unique()->filter()->all();
+                    break;
+
+                case 'gabung':
+                    $toId   = $anyRow->unit_baru_id;
+                    $narasi = $narrator->narrate([
+                        'kind'    => 'gabung',
+                        'sources' => $rows->map(fn ($r) => $nodeFor($r->unit_asal_id, $prevVersiId))->values()->all(),
+                        'to'      => $nodeFor($toId, $versiId),
+                    ]);
+                    $involved = $rows->pluck('unit_asal_id')->push($toId)->unique()->filter()->all();
+                    break;
+
+                case 'baru':
+                    $unitId = $anyRow->unit_baru_id;
+                    $node   = $nodeFor($unitId, $versiId);
+                    $node['jenis_event'] = 'baru';
+                    $narasi   = $narrator->narrate(['kind' => 'root', 'node' => $node]);
+                    $involved = [$unitId];
+                    break;
+
+                default: // rename, pindah_induk, ganti_level, bubar
+                    $unitId = $anyRow->unit_asal_id;
+                    $narasi = $narrator->narrate([
+                        'kind'  => 'carryover',
+                        'jenis' => $jenis,
+                        'from'  => $nodeFor($unitId, $prevVersiId),
+                        'to'    => $nodeFor($unitId, $versiId),
+                    ]);
+                    $involved = [$unitId];
+            }
+
+            foreach ($involved as $id) {
+                $byUnit[$id][] = [
+                    'jenis'   => $jenis,
+                    'nomor_sk' => $versi->nomor_sk ?? '-',
+                    'tanggal' => $versi->tanggal_mulai_berlaku ?? null,
+                    'narasi'  => $narasi,
+                ];
+            }
+        }
+
+        return $byUnit;
     }
 
     public function create()
@@ -1615,13 +1920,17 @@ class StrukturOrganisasiVersiController extends Controller
 
     public function show(StrukturOrganisasiVersi $versi)
     {
-        $units = $versi->unitOrganisasiSnapshots()
-            ->orderBy('level')
-            ->orderBy('nama_unit')
-            ->get();
+        $units = $versi->unitOrganisasiSnapshots()->get();
 
         $namaByUnitId = $units->pluck('nama_unit', 'unit_organisasi_id');
         $totals       = UnitOrganisasiSnapshot::totalFormasiBawahanBatch($units);
+
+        // Tabel utama dirender urut DFS top-down mengikuti struktur parent-child asli
+        // (1 direktorat & SELURUH cabangnya penuh dulu, baru direktorat berikutnya) —
+        // BUKAN flat alfabetis/level spt sebelumnya. Reuse dfsOrderSnapshots() yg sama
+        // dipakai exportPdf(), 0 query tambahan (murni reorder $units yg sudah di-load).
+        // HANYA utk tabel di halaman INI — Cari Unit/Tree View/dll TIDAK ikut berubah.
+        $unitsOrdered = collect($this->dfsOrderSnapshots($units))->pluck('node');
 
         $isBaseline = StrukturOrganisasiVersi::where('tanggal_mulai_berlaku', '<', $versi->tanggal_mulai_berlaku)->doesntExist();
 
@@ -1632,7 +1941,7 @@ class StrukturOrganisasiVersiController extends Controller
                 ->groupBy('jenis_transisi')
                 ->pluck('total', 'jenis_transisi');
 
-        return view('organisasi.struktur.show', compact('versi', 'units', 'namaByUnitId', 'totals', 'isBaseline', 'ringkasanTransisi'));
+        return view('organisasi.struktur.show', compact('versi', 'units', 'unitsOrdered', 'namaByUnitId', 'totals', 'isBaseline', 'ringkasanTransisi'));
     }
 
     public function exportExcel(StrukturOrganisasiVersi $versi)
@@ -1642,6 +1951,56 @@ class StrukturOrganisasiVersiController extends Controller
         $this->log('export', 'Struktur Organisasi (Versi)', $versi->nomor_sk, 'Export Excel');
 
         return Excel::download(new StrukturOrganisasiVersiExport($versi), $filename);
+    }
+
+    /**
+     * Urutkan snapshot units scr DFS top-down mengikuti struktur parent-child ASLI
+     * (root -> semua descendant-nya PENUH dulu, baru lanjut ke root/sibling berikutnya)
+     * — BUKAN flat alfabetis/level spt query default. Sibling (baik root maupun anak)
+     * diurutkan alfabetis by nama_unit di tiap tingkat, PERSIS spt konvensi yg sudah
+     * dipakai export PDF (diekstrak dari sana apa adanya, bukan logic baru) — dipakai
+     * juga oleh show() utk tabel Detail Versi. 0 query tambahan: murni reorder in-memory
+     * dari $units yg sudah di-load (butuh parent_unit_organisasi_id & nama_unit, keduanya
+     * sudah ada di snapshot row).
+     *
+     * PENGECUALIAN PENTING: anak yg levelnya SENDIRI = 'direktorat' TIDAK PERNAH
+     * di-descend sbg bagian DFS parent-nya, walau scr data parent_unit_organisasi_id dia
+     * memang child (satu2nya kasus ini terjadi: SEMUA direktorat lain adalah child dari
+     * "Utama", satu2nya node dgn parent NULL sungguhan). Kalau didescend spt anak biasa,
+     * begitu direktorat pertama ketemu (mis. "Keuangan & Umum") DFS langsung nyemplung ke
+     * seluruh subtree-nya SEBELUM anak non-direktorat Utama yg LAIN (Kompartemen SPI,
+     * Sekretaris Perusahaan, dst) sempat tampil — salah. Jadi tiap kali walk() nemu anak
+     * level='direktorat', ditunda (masuk antrian $direktoratChildren) & BARU diproses
+     * (masing2 sbg root top-level baru, depth=0, urutan sesama direktorat ttp alfabetis)
+     * SETELAH semua anak non-direktorat node saat ini tuntas total.
+     *
+     * @return array<int, array{node: UnitOrganisasiSnapshot, depth: int}>
+     */
+    private function dfsOrderSnapshots(Collection $units): array
+    {
+        $byParent = $units->groupBy('parent_unit_organisasi_id');
+        $roots    = $byParent->get(null, collect())->values()->sortBy('nama_unit');
+
+        $ordered = [];
+        $walk = function ($node, $depth) use (&$walk, &$ordered, $byParent) {
+            $ordered[] = ['node' => $node, 'depth' => $depth];
+
+            $children = $byParent->get($node->unit_organisasi_id, collect())->sortBy('nama_unit');
+            $direktoratChildren = $children->filter(fn ($c) => $c->level === 'direktorat')->values();
+            $lainnya            = $children->reject(fn ($c) => $c->level === 'direktorat')->values();
+
+            foreach ($lainnya as $child) {
+                $walk($child, $depth + 1);
+            }
+            foreach ($direktoratChildren as $child) {
+                $walk($child, 0);
+            }
+        };
+        foreach ($roots as $root) {
+            $walk($root, 0);
+        }
+
+        return $ordered;
     }
 
     public function exportPdf(StrukturOrganisasiVersi $versi)
@@ -1655,21 +2014,10 @@ class StrukturOrganisasiVersiController extends Controller
 
         $units        = $versi->unitOrganisasiSnapshots()->get();
         $namaByUnitId = $units->pluck('nama_unit', 'unit_organisasi_id');
-        $byParent     = $units->groupBy('parent_unit_organisasi_id');
-        $roots        = $byParent->get(null, collect())->values()->sortBy('nama_unit');
 
         // Urutan depth-first (bukan flat alfabetis) supaya hierarki tetap kebaca di tabel cetak,
         // meski PDF tidak menampilkan garis penghubung visual seperti tree.blade.php.
-        $ordered = [];
-        $walk = function ($node, $depth) use (&$walk, &$ordered, $byParent) {
-            $ordered[] = ['node' => $node, 'depth' => $depth];
-            foreach ($byParent->get($node->unit_organisasi_id, collect())->sortBy('nama_unit') as $child) {
-                $walk($child, $depth + 1);
-            }
-        };
-        foreach ($roots as $root) {
-            $walk($root, 0);
-        }
+        $ordered = $this->dfsOrderSnapshots($units);
 
         $totals = UnitOrganisasiSnapshot::totalFormasiBawahanBatch($units);
 
@@ -1741,9 +2089,16 @@ class StrukturOrganisasiVersiController extends Controller
         // lintas beberapa versi tetap kekelompokkan sebagai satu cerita lineage yang sama.
         $parent = [];
         $hopTransisiByUnit = [];
+        // Ditampung apa adanya (BUKAN query tambahan — row yg SAMA yg diambil di
+        // ->get() bawahnya) supaya bisa dipakai lagi utk TransitionNarrator di Tab
+        // Visual, tanpa query ulang.
+        $allTransisiRows = collect();
 
         foreach ($hops as $hop) {
-            foreach ($hop->unitOrganisasiTransisis()->get() as $t) {
+            $transisiRows = $hop->unitOrganisasiTransisis()->get();
+            $allTransisiRows = $allTransisiRows->concat($transisiRows);
+
+            foreach ($transisiRows as $t) {
                 $asal = $t->unit_asal_id;
                 $tujuan = $t->unit_baru_id;
 
@@ -1786,14 +2141,14 @@ class StrukturOrganisasiVersiController extends Controller
 
             if ($countA === 0) {
                 foreach ($inB as $id) {
-                    $hasil['baru'][] = ['nama' => $namaByIdB[$id] ?? '-'];
+                    $hasil['baru'][] = ['nama' => $namaByIdB[$id] ?? '-', 'level' => $snapshotsB[$id]->level ?? null, 'unit_organisasi_id' => $id];
                 }
                 continue;
             }
 
             if ($countB === 0) {
                 foreach ($inA as $id) {
-                    $hasil['bubar'][] = ['nama' => $namaByIdA[$id] ?? '-'];
+                    $hasil['bubar'][] = ['nama' => $namaByIdA[$id] ?? '-', 'level' => $snapshotsA[$id]->level ?? null, 'unit_organisasi_id' => $id];
                 }
                 continue;
             }
@@ -1805,6 +2160,8 @@ class StrukturOrganisasiVersiController extends Controller
                 $snapB = $snapshotsB[$idB];
                 $parentNamaA = $snapA->parent_unit_organisasi_id ? ($namaByIdA[$snapA->parent_unit_organisasi_id] ?? '-') : '-';
                 $parentNamaB = $snapB->parent_unit_organisasi_id ? ($namaByIdB[$snapB->parent_unit_organisasi_id] ?? '-') : '-';
+                $parentLevelA = $snapA->parent_unit_organisasi_id ? ($snapshotsA[$snapA->parent_unit_organisasi_id]->level ?? null) : null;
+                $parentLevelB = $snapB->parent_unit_organisasi_id ? ($snapshotsB[$snapB->parent_unit_organisasi_id]->level ?? null) : null;
                 // Dipakai HANYA utk gate anomali di bawah (bukan utk membatasi atribut apa yg
                 // dibandingkan) — "pernah terdeklarasi" berarti ADA row transisi resmi apa pun
                 // yg menyentuh unit ini sepanjang rentang hop, walau labelnya cuma satu jenis.
@@ -1821,28 +2178,32 @@ class StrukturOrganisasiVersiController extends Controller
                 $adaPerubahan = $bedaNama || $bedaLevel || $bedaParent || $bedaFormasi;
 
                 if ($bedaNama) {
-                    $hasil['rename'][] = ['dari' => $snapA->nama_unit, 'ke' => $snapB->nama_unit];
+                    $hasil['rename'][] = ['dari' => $snapA->nama_unit, 'ke' => $snapB->nama_unit, 'dari_level' => $snapA->level, 'ke_level' => $snapB->level, 'unit_organisasi_id' => $idB];
                 }
                 if ($bedaParent) {
-                    $hasil['pindah_induk'][] = ['nama' => $snapB->nama_unit, 'dari' => $parentNamaA, 'ke' => $parentNamaB];
+                    $hasil['pindah_induk'][] = ['nama' => $snapB->nama_unit, 'dari' => $parentNamaA, 'ke' => $parentNamaB, 'nama_level' => $snapB->level, 'dari_level' => $parentLevelA, 'ke_level' => $parentLevelB, 'unit_organisasi_id' => $idB];
                 }
                 if ($bedaLevel) {
-                    $hasil['ganti_level'][] = ['nama' => $snapB->nama_unit, 'dari' => $snapA->level, 'ke' => $snapB->level];
+                    $hasil['ganti_level'][] = ['nama' => $snapB->nama_unit, 'dari' => $snapA->level, 'ke' => $snapB->level, 'nama_level' => $snapB->level, 'unit_organisasi_id' => $idB];
                 }
                 if ($bedaFormasi) {
-                    $hasil['formasi_berubah'][] = ['nama' => $snapB->nama_unit, 'dari' => $snapA->mc_formasi, 'ke' => $snapB->mc_formasi];
+                    $hasil['formasi_berubah'][] = ['nama' => $snapB->nama_unit, 'dari' => $snapA->mc_formasi, 'ke' => $snapB->mc_formasi, 'level' => $snapB->level, 'unit_organisasi_id' => $idB];
                 }
 
                 if ($adaPerubahan && !$pernahDideklarasikan) {
                     // Berubah tapi TIDAK PERNAH tercatat sbg transisi resmi apa pun sepanjang
                     // rentang ini — kemungkinan luput didokumentasikan tim OD saat input, perlu
-                    // dicek ulang. (Perubahannya sendiri tetap sudah masuk bucket di atas.)
+                    // dicek ulang. (Perubahannya sendiri tetap sudah masuk bucket di atas.) Baris
+                    // Nama/Parent diberi prefix level (formatUnitLabel, reuse dari fitur prefix
+                    // level yg sudah ada) krn ini teks final siap-tampil (bukan data mentah yg
+                    // diformat di Blade spt bucket lain) — Level/Formasi TIDAK, krn itu bukan
+                    // nama unit.
                     $detail = [];
-                    if ($bedaNama)    $detail[] = "Nama: {$snapA->nama_unit} → {$snapB->nama_unit}";
+                    if ($bedaNama)    $detail[] = 'Nama: ' . formatUnitLabel($snapA->nama_unit, $snapA->level) . ' → ' . formatUnitLabel($snapB->nama_unit, $snapB->level);
                     if ($bedaLevel)   $detail[] = "Level: {$snapA->level} → {$snapB->level}";
-                    if ($bedaParent)  $detail[] = "Parent: {$parentNamaA} → {$parentNamaB}";
+                    if ($bedaParent)  $detail[] = 'Parent: ' . formatUnitLabel($parentNamaA, $parentLevelA) . ' → ' . formatUnitLabel($parentNamaB, $parentLevelB);
                     if ($bedaFormasi) $detail[] = "Formasi: {$snapA->mc_formasi} → {$snapB->mc_formasi}";
-                    $hasil['anomali'][] = ['nama' => $snapB->nama_unit, 'detail' => $detail];
+                    $hasil['anomali'][] = ['nama' => $snapB->nama_unit, 'level' => $snapB->level, 'detail' => $detail];
                 }
 
                 if (!$adaPerubahan) {
@@ -1855,6 +2216,10 @@ class StrukturOrganisasiVersiController extends Controller
                 $hasil['pecah'][] = [
                     'dari' => $namaByIdA[$inA[0]] ?? '-',
                     'ke'   => collect($inB)->map(fn ($id) => $namaByIdB[$id] ?? '-')->all(),
+                    'dari_level' => $snapshotsA[$inA[0]]->level ?? null,
+                    'ke_levels'  => collect($inB)->map(fn ($id) => $snapshotsB[$id]->level ?? null)->all(),
+                    'dari_id' => $inA[0],
+                    'ke_ids'  => $inB,
                 ];
                 continue;
             }
@@ -1863,6 +2228,10 @@ class StrukturOrganisasiVersiController extends Controller
                 $hasil['gabung'][] = [
                     'dari' => collect($inA)->map(fn ($id) => $namaByIdA[$id] ?? '-')->all(),
                     'ke'   => $namaByIdB[$inB[0]] ?? '-',
+                    'dari_levels' => collect($inA)->map(fn ($id) => $snapshotsA[$id]->level ?? null)->all(),
+                    'ke_level'    => $snapshotsB[$inB[0]]->level ?? null,
+                    'dari_ids' => $inA,
+                    'ke_id'    => $inB[0],
                 ];
                 continue;
             }
@@ -1871,15 +2240,302 @@ class StrukturOrganisasiVersiController extends Controller
             $hasil['reorganisasi'][] = [
                 'dari' => collect($inA)->map(fn ($id) => $namaByIdA[$id] ?? '-')->all(),
                 'ke'   => collect($inB)->map(fn ($id) => $namaByIdB[$id] ?? '-')->all(),
+                'dari_levels' => collect($inA)->map(fn ($id) => $snapshotsA[$id]->level ?? null)->all(),
+                'ke_levels'   => collect($inB)->map(fn ($id) => $snapshotsB[$id]->level ?? null)->all(),
             ];
         }
+
+        // Tab "Tampilan Visual" — 2 pohon berdampingan. Data pohon dibangun dari
+        // $snapshotsA/$snapshotsB yg SUDAH di-fetch di atas (0 query tambahan). Warna
+        // status & narasi popover REUSE $hasil yg sudah dihitung + TransitionNarrator
+        // (diekstrak dari Fitur A, refactor murni).
+        $treeLama = $this->buildCompareTreeData($snapshotsA);
+        $treeBaru = $this->buildCompareTreeData($snapshotsB);
+        $visual   = $this->buildCompareVisualData($hasil, $lama, $baru, $snapshotsA, $snapshotsB, $allTransisiRows);
 
         return view('organisasi.struktur.compare', [
             'lama'      => $lama,
             'baru'      => $baru,
             'hops'      => $hops,
             'hasil'     => $hasil,
+            'treeLama'  => $treeLama,
+            'treeBaru'  => $treeBaru,
+            'visual'    => $visual,
         ]);
+    }
+
+    /** Data pohon (byParent/roots/totals) dari snapshot yg SUDAH di-fetch — 0 query tambahan, TIDAK query ulang spt tree(). */
+    private function buildCompareTreeData(Collection $snapshotsKeyedByUnitId): array
+    {
+        $snapshots = $snapshotsKeyedByUnitId->values()->sortBy('nama_unit')->values();
+        $byParent  = $snapshots->groupBy('parent_unit_organisasi_id');
+        $roots     = $byParent->get(null, collect())->values();
+        $totals    = UnitOrganisasiSnapshot::totalFormasiBawahanBatch($snapshots);
+
+        return compact('byParent', 'roots', 'totals');
+    }
+
+    /**
+     * Bangun data khusus Tab "Tampilan Visual": warna status per unit_organisasi_id,
+     * narasi popover (via TransitionNarrator), nama utk label overlay, & daftar id ancestor
+     * yg wajib expand default (jalur ke tiap node yg berubah, di kedua kolom). REUSE
+     * kategorisasi $hasil yg SUDAH dihitung di atas — TIDAK menghitung ulang diff.
+     *
+     * Skema warna & keputusan sisi asal pecah/gabung ikut warna event-nya (dikonfirmasi
+     * eksplisit) — lihat komentar per blok di bawah.
+     */
+    private function buildCompareVisualData(
+        array $hasil,
+        StrukturOrganisasiVersi $lama,
+        StrukturOrganisasiVersi $baru,
+        Collection $snapshotsA,
+        Collection $snapshotsB,
+        Collection $allTransisiRows
+    ): array {
+        $snapshotIndex = [];
+        foreach ($snapshotsA as $s) {
+            $snapshotIndex["{$s->unit_organisasi_id}_{$lama->id}"] = [
+                'nama_unit' => $s->nama_unit, 'level' => $s->level, 'mc_formasi' => $s->mc_formasi,
+                'parent_unit_organisasi_id' => $s->parent_unit_organisasi_id,
+            ];
+        }
+        foreach ($snapshotsB as $s) {
+            $snapshotIndex["{$s->unit_organisasi_id}_{$baru->id}"] = [
+                'nama_unit' => $s->nama_unit, 'level' => $s->level, 'mc_formasi' => $s->mc_formasi,
+                'parent_unit_organisasi_id' => $s->parent_unit_organisasi_id,
+            ];
+        }
+
+        $transisiIndex = [];
+        foreach ($allTransisiRows as $t) {
+            $key = ($t->unit_asal_id ?? '') . '_' . ($t->unit_baru_id ?? '') . '_' . $t->struktur_organisasi_versi_id . '_' . $t->jenis_transisi;
+            $transisiIndex[$key] = $t->keterangan;
+        }
+
+        // LeveledTransitionNarrator (bukan TransitionNarrator asli) — narasi popover di
+        // Tab Visual ini sekarang ikut diberi prefix level per nama unit yg dirujuk
+        // (reuse dari fitur "Cari Unit"/"Timeline List" yg sudah ada), sesuai perluasan
+        // scope task ini. TransitionNarrator asli TETAP TIDAK diubah & tetap dipakai di
+        // tempat lain (belum ada consumer lain yg pakai method ini scr langsung, tapi
+        // class aslinya sendiri tetap utuh).
+        $narrator = new LeveledTransitionNarrator($snapshotIndex, $transisiIndex);
+
+        $categoriesByUnitId = []; // unitId => list kategori (bisa >1, lihat catatan di bawah)
+        $narrativeLines      = []; // unitId => list narasi (html+plain+keterangan)
+        $namesByUnitId       = [];
+        $idsInLama = [];
+        $idsInBaru = [];
+
+        // Kategori (BUKAN warna final — resolusi warna/gradient dilakukan di Blade dari
+        // daftar kategori ini, lihat CATEGORY_PRIORITY) diakumulasi per unit, TIDAK
+        // ditimpa — satu2nya kombinasi yg mungkin collide adalah rename/pindah_induk/
+        // ganti_level (ketiganya union-find 1:1); pecah/gabung/baru/bubar pakai cabang
+        // union-find yg berbeda jadi tidak pernah collide dgn ketiganya atau satu sama
+        // lain. Narasi JUGA diakumulasi (bukan ditimpa) supaya SEMUA perubahan yg terjadi
+        // pada 1 unit tetap lengkap di narasi gabungan, bukan cuma kategori terakhir.
+        // $namesByUnitId dipakai SATU-SATUNYA tujuan: judul overlay "Riwayat Unit" saat
+        // dibuka lewat tombol "Lihat riwayat lengkap ->" di popover Tab Visual (bukan
+        // ditampilkan langsung di popover-nya sendiri, itu pakai narrativeByUnitId) — jadi
+        // aman diformat dgn prefix level di sini (formatUnitLabel), konsisten dgn 2 entry
+        // point lain overlay ini (org-tree-node.blade.php & show.blade.php). Level dicoba
+        // dari snapshot BARU dulu (identitas paling relevan/terkini), fallback ke LAMA utk
+        // unit yg sudah tidak ada di versi baru (bubar/sumber pecah/gabung).
+        $apply = function (array $ids, string $category, array $narasi, array $names, array $sideLama, array $sideBaru)
+            use (&$categoriesByUnitId, &$narrativeLines, &$namesByUnitId, &$idsInLama, &$idsInBaru, $snapshotsA, $snapshotsB) {
+            foreach ($ids as $id) {
+                $categoriesByUnitId[$id][] = $category;
+                $narrativeLines[$id][]     = $narasi;
+                if (isset($names[$id])) {
+                    $level = $snapshotsB[$id]->level ?? $snapshotsA[$id]->level ?? null;
+                    $namesByUnitId[$id] = formatUnitLabel($names[$id], $level);
+                }
+            }
+            foreach ($sideLama as $id) {
+                $idsInLama[$id] = true;
+            }
+            foreach ($sideBaru as $id) {
+                $idsInBaru[$id] = true;
+            }
+        };
+
+        // --- baru: cuma sisi baru ---
+        foreach ($hasil['baru'] as $u) {
+            $id = $u['unit_organisasi_id'];
+            $narasi = $narrator->narrate(['kind' => 'root', 'node' => [
+                'jenis_event' => 'baru', 'nama_unit' => $u['nama'], 'level' => $u['level'] ?? null,
+                'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $baru->id,
+            ]]);
+            $apply([$id], 'baru', $narasi, [$id => $u['nama']], [], [$id]);
+        }
+
+        // --- bubar: strikethrough, cuma sisi lama (unit ini benar2 tidak ada penerus) ---
+        foreach ($hasil['bubar'] as $u) {
+            $id = $u['unit_organisasi_id'];
+            $narasi = $narrator->narrate(['kind' => 'carryover', 'jenis' => 'bubar',
+                'from' => ['nama_unit' => $u['nama'], 'level' => $u['level'] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $lama->id],
+                'to'   => ['nama_unit' => $u['nama'], 'level' => $u['level'] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $baru->id],
+            ]);
+            $apply([$id], 'bubar', $narasi, [$id => $u['nama']], [$id], []);
+        }
+
+        // --- rename / pindah_induk / ganti_level: kategori TERPISAH (dulu 1 warna, sekarang
+        // masing2 warna sendiri), identitas SAMA di kedua sisi ---
+        foreach ($hasil['rename'] as $r) {
+            $id = $r['unit_organisasi_id'];
+            $narasi = $narrator->narrate(['kind' => 'carryover', 'jenis' => 'rename',
+                'from' => ['nama_unit' => $r['dari'], 'level' => $r['dari_level'] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $lama->id],
+                'to'   => ['nama_unit' => $r['ke'], 'level' => $r['ke_level'] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $baru->id],
+            ]);
+            $apply([$id], 'rename', $narasi, [$id => $r['ke']], [$id], [$id]);
+        }
+        foreach ($hasil['pindah_induk'] as $p) {
+            $id = $p['unit_organisasi_id'];
+            $narasi = $narrator->narrate(['kind' => 'carryover', 'jenis' => 'pindah_induk',
+                'from' => ['nama_unit' => $p['nama'], 'level' => $p['nama_level'] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $lama->id],
+                'to'   => ['nama_unit' => $p['nama'], 'level' => $p['nama_level'] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $baru->id],
+            ]);
+            $apply([$id], 'pindah_induk', $narasi, [$id => $p['nama']], [$id], [$id]);
+        }
+        foreach ($hasil['ganti_level'] as $g) {
+            $id = $g['unit_organisasi_id'];
+            $narasi = $narrator->narrate(['kind' => 'carryover', 'jenis' => 'ganti_level',
+                'from' => ['nama_unit' => $g['nama'], 'level' => $g['dari'], 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $lama->id],
+                'to'   => ['nama_unit' => $g['nama'], 'level' => $g['ke'], 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $baru->id],
+            ]);
+            $apply([$id], 'ganti_level', $narasi, [$id => $g['nama']], [$id], [$id]);
+        }
+
+        // --- pecah: DI KEDUA SISI (sumber yg lenyap krn di-split & tiap hasil pecahannya) ---
+        foreach ($hasil['pecah'] as $p) {
+            $fromId  = $p['dari_id'];
+            $targets = collect($p['ke_ids'])->map(fn ($id, $i) => [
+                'nama_unit' => $p['ke'][$i], 'level' => $p['ke_levels'][$i] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $baru->id,
+            ])->values()->all();
+            $narasi = $narrator->narrate(['kind' => 'pecah',
+                'from'    => ['nama_unit' => $p['dari'], 'level' => $p['dari_level'] ?? null, 'unit_organisasi_id' => $fromId, 'struktur_organisasi_versi_id' => $lama->id],
+                'targets' => $targets,
+            ]);
+            $names = [$fromId => $p['dari']];
+            foreach ($p['ke_ids'] as $i => $id) {
+                $names[$id] = $p['ke'][$i];
+            }
+            $apply(array_merge([$fromId], $p['ke_ids']), 'pecah', $narasi, $names, [$fromId], $p['ke_ids']);
+        }
+
+        // --- gabung: DI KEDUA SISI (semua sumber yg lenyap krn digabung & hasil gabungannya) ---
+        foreach ($hasil['gabung'] as $g) {
+            $toId    = $g['ke_id'];
+            $sources = collect($g['dari_ids'])->map(fn ($id, $i) => [
+                'nama_unit' => $g['dari'][$i], 'level' => $g['dari_levels'][$i] ?? null, 'unit_organisasi_id' => $id, 'struktur_organisasi_versi_id' => $lama->id,
+            ])->values()->all();
+            $narasi = $narrator->narrate(['kind' => 'gabung',
+                'sources' => $sources,
+                'to'      => ['nama_unit' => $g['ke'], 'level' => $g['ke_level'] ?? null, 'unit_organisasi_id' => $toId, 'struktur_organisasi_versi_id' => $baru->id],
+            ]);
+            $names = [$toId => $g['ke']];
+            foreach ($g['dari_ids'] as $i => $id) {
+                $names[$id] = $g['dari'][$i];
+            }
+            $apply(array_merge($g['dari_ids'], [$toId]), 'gabung', $narasi, $names, $g['dari_ids'], [$toId]);
+        }
+
+        // Urutan prioritas tampil kalau 1 unit masuk >1 kategori (menentukan urutan warna
+        // di gradient background node-nya, kiri=prioritas tertinggi) — event yg mengubah
+        // IDENTITAS/struktur (pecah/gabung/baru/bubar) didahulukan drpd yg cuma mengubah
+        // ATRIBUT (rename/pindah_induk/ganti_level); di antara ketiga atribut itu sendiri,
+        // pindah_induk (posisi struktural) > ganti_level > rename (paling kosmetik).
+        // Narasi TIDAK terpengaruh urutan ini — narasi selalu menggabungkan semua baris.
+        $categoryPriority = ['bubar', 'gabung', 'pecah', 'baru', 'pindah_induk', 'ganti_level', 'rename'];
+        $statusByUnitId = [];
+        foreach ($categoriesByUnitId as $id => $cats) {
+            $unique = array_values(array_unique($cats));
+            usort($unique, fn ($a, $b) => array_search($a, $categoryPriority, true) <=> array_search($b, $categoryPriority, true));
+            $statusByUnitId[$id] = $unique;
+        }
+
+        // Gabung semua baris narasi per unit (biasanya cuma 1, tapi bisa >1 kalau unit
+        // itu punya beberapa perubahan sekaligus, mis. rename + pindah_induk bersamaan)
+        // jadi 1 entri html+plain+keterangan gabungan, bukan cuma yg terakhir diproses.
+        // 'plain' dipakai utk baris narasi ringkas (truncated) langsung di kotak node;
+        // 'html' (lengkap, ber-<strong>) dipakai di popover saat kotak diklik.
+        $narrativeByUnitId = [];
+        foreach ($narrativeLines as $id => $lines) {
+            $htmls  = array_column($lines, 'html');
+            $plains = array_column($lines, 'plain');
+            $kets   = array_values(array_unique(array_filter(array_column($lines, 'keterangan'))));
+            $narrativeByUnitId[$id] = [
+                'html'       => implode('<br>', $htmls),
+                'plain'      => implode(' · ', $plains),
+                'keterangan' => empty($kets) ? null : implode(' / ', $kets),
+            ];
+        }
+
+        $ancestorIdsLama = $this->ancestorPathIds(array_keys($idsInLama), $snapshotsA);
+        $ancestorIdsBaru = $this->ancestorPathIds(array_keys($idsInBaru), $snapshotsB);
+
+        // Parent map datar (id => parent_id|null) per versi — dibangun dari $snapshotsA/B
+        // yg SUDAH di-fetch (0 query tambahan), dikirim ke client apa adanya supaya filter
+        // fokus-unit (jalur ancestor tunggal + descendant penuh) bisa dihitung 100% di
+        // browser tanpa round-trip server sama sekali.
+        $parentMapLama = $snapshotsA->mapWithKeys(fn ($s) => [$s->unit_organisasi_id => $s->parent_unit_organisasi_id])->all();
+        $parentMapBaru = $snapshotsB->mapWithKeys(fn ($s) => [$s->unit_organisasi_id => $s->parent_unit_organisasi_id])->all();
+
+        // Level datar (id => level) per versi — utk filter depth-cutoff (Revisi lanjutan),
+        // dibangun dari koleksi yg sama, 0 query tambahan.
+        $levelMapLama = $snapshotsA->mapWithKeys(fn ($s) => [$s->unit_organisasi_id => $s->level])->all();
+        $levelMapBaru = $snapshotsB->mapWithKeys(fn ($s) => [$s->unit_organisasi_id => $s->level])->all();
+
+        // Daftar unit utk autocomplete filter — 1 entri per unit_organisasi_id yg ada di
+        // SALAH SATU/kedua versi, 'aliases' berisi nama di versi lama DAN baru (bisa beda
+        // krn rename) supaya pencarian tetap ketemu walau user ketik nama lama. 'level'
+        // dari snapshot yg SAMA dgn label (baru menang kalau ada di kedua versi).
+        $searchUnits = [];
+        foreach ($snapshotsA as $s) {
+            $searchUnits[$s->unit_organisasi_id]['label']     = $s->nama_unit;
+            $searchUnits[$s->unit_organisasi_id]['level']     = $s->level;
+            $searchUnits[$s->unit_organisasi_id]['aliases'][] = $s->nama_unit;
+        }
+        foreach ($snapshotsB as $s) {
+            $searchUnits[$s->unit_organisasi_id]['label']     = $s->nama_unit; // nama versi baru menang sbg label tampil
+            $searchUnits[$s->unit_organisasi_id]['level']     = $s->level;
+            $searchUnits[$s->unit_organisasi_id]['aliases'][] = $s->nama_unit;
+        }
+        $searchUnitsList = [];
+        foreach ($searchUnits as $id => $row) {
+            $searchUnitsList[] = [
+                'id' => $id, 'label' => $row['label'], 'level' => $row['level'],
+                'aliases' => array_values(array_unique($row['aliases'])),
+            ];
+        }
+
+        return [
+            'statusByUnitId'     => $statusByUnitId,
+            'narrativeByUnitId'  => $narrativeByUnitId,
+            'namesByUnitId'      => $namesByUnitId,
+            'defaultExpandedIds' => array_values(array_unique(array_merge($ancestorIdsLama, $ancestorIdsBaru))),
+            'parentMapLama'      => $parentMapLama,
+            'parentMapBaru'      => $parentMapBaru,
+            'levelMapLama'       => $levelMapLama,
+            'levelMapBaru'       => $levelMapBaru,
+            'searchUnits'        => $searchUnitsList,
+        ];
+    }
+
+    /** Rantai id ancestor (parent_unit_organisasi_id berulang) dari tiap id di $unitIds, ditelusuri dalam 1 roster versi. */
+    private function ancestorPathIds(array $unitIds, Collection $snapshotsKeyedByUnitId): array
+    {
+        $result = [];
+        foreach ($unitIds as $id) {
+            $current = $snapshotsKeyedByUnitId->get($id)?->parent_unit_organisasi_id;
+            $seen = [];
+            while ($current && !isset($seen[$current])) {
+                $seen[$current] = true;
+                $result[$current] = true;
+                $current = $snapshotsKeyedByUnitId->get($current)?->parent_unit_organisasi_id;
+            }
+        }
+
+        return array_keys($result);
     }
 
     /** Union-Find sederhana untuk mengelompokkan lineage unit lintas beberapa hop versi. */

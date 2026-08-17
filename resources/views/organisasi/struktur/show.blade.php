@@ -63,6 +63,10 @@
     .level-badge { display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:#f3f4f6;color:#374151;text-transform:capitalize; }
     .muted { color:#9ca3af; }
 
+    .org-history-btn { width:18px;height:18px;border-radius:5px;border:1px solid #e5e7eb;background:#f9fafb;color:#6b7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none; }
+    .org-history-btn:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
+    .org-history-btn svg { width:11px;height:11px; }
+
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
     .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:280px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
     .toast.hiding { animation:toastOut 0.3s forwards; }
@@ -224,34 +228,47 @@
                     <th>Total Bawahan</th>
                     <th>Grand Total</th>
                     <th>Keterangan</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($units as $unit)
+                {{-- Urut DFS top-down (1 direktorat & seluruh cabangnya penuh dulu, baru
+                     direktorat berikutnya) — lihat StrukturOrganisasiVersiController::
+                     dfsOrderSnapshots(), dipakai juga oleh export PDF. BUKAN $units biasa. --}}
+                @forelse($unitsOrdered as $unit)
                 @php $totalBawahan = $totals[$unit->unit_organisasi_id] ?? null; @endphp
                 <tr>
-                    <td style="font-weight:600;color:#111827;">{{ $unit->nama_unit }}</td>
+                    <td style="font-weight:600;color:#111827;">{{ formatUnitLabel($unit->nama_unit, $unit->level) }}</td>
                     <td><span class="level-badge">{{ $unit->level }}</span></td>
                     <td>{{ $unit->parent_unit_organisasi_id ? ($namaByUnitId[$unit->parent_unit_organisasi_id] ?? '-') : '-' }}</td>
                     <td>{{ $unit->mc_formasi }}</td>
                     <td>{{ is_null($totalBawahan) ? '–' : $totalBawahan }}</td>
                     <td style="font-weight:700;color:#111827;">{{ $unit->mc_formasi + ($totalBawahan ?? 0) }}</td>
                     <td>{{ $unit->keterangan ?: '-' }}</td>
+                    <td>
+                        <a href="javascript:void(0)" class="org-history-btn" title="Lihat Riwayat Unit" x-data
+                           @click="$store.riwayatOverlay.openPanel({{ $unit->unit_organisasi_id }}, {{ \Illuminate\Support\Js::from(formatUnitLabel($unit->nama_unit, $unit->level)) }})">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </a>
+                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="muted" style="text-align:center;padding:30px;">Belum ada unit di versi ini.</td></tr>
+                <tr><td colspan="8" class="muted" style="text-align:center;padding:30px;">Belum ada unit di versi ini.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
 
+@include('organisasi.struktur.partials.riwayat-overlay-shell')
+
 @endsection
 
 @push('scripts')
-@if($versi->isDraft())
+{{-- Sebelumnya cuma di-load pas draft (utk modal finalisasi) — sekarang WAJIB selalu,
+     krn overlay riwayat (dipicu dari kolom Aksi tabel di bawah) butuh Alpine apapun
+     status versi-nya. --}}
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-@endif
 <script>
     function closeToast() {
         const t = document.getElementById('toast');

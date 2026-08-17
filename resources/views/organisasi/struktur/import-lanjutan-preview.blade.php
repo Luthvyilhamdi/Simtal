@@ -84,14 +84,20 @@
     .tree-scroll-wrap { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow-x:auto;overflow-y:hidden;padding:36px 24px;margin-bottom:16px; }
     .tree-scroll-inner { display:inline-flex;justify-content:center;min-width:100%; }
     .org-node { display:flex;flex-direction:column;align-items:center; }
-    .org-box { width:190px;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(16,24,40,.04);position:relative;flex-shrink:0; }
+    /* height:160px TETAP (bukan min-height) — lihat catatan panjang di tree.blade.php
+       soal kenapa ini WAJIB utk perataan tier lintas cabang (Masalah A). */
+    .org-box { width:190px;height:160px;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(16,24,40,.04);position:relative;flex-shrink:0; }
     .org-box-leaf { border-radius:22px;border-style:dashed;border-color:#c4b5fd;background:#faf8ff; }
+    /* Level Fungsional = cylinder/drum — lihat catatan sama di tree.blade.php. */
+    .org-box-fungsional { border-radius:50%/24px; padding:26px 12px 10px; }
     .org-box-highlight { border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25);background:#fffbeb; }
     .org-box-top { display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px; }
     .org-box-level { font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px; }
     .org-toggle { width:18px;height:18px;border-radius:5px;border:1px solid #e5e7eb;background:#f9fafb;color:#374151;font-size:12px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0; }
     .org-toggle:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .org-box-name { font-size:12.5px;font-weight:700;color:#111827;line-height:1.3;margin-bottom:8px;min-height:32px; }
+    /* line-clamp 3 baris — pasangan dari height:160px tetap di .org-box. Lihat catatan
+       sama di tree.blade.php. */
+    .org-box-name { font-size:12.5px;font-weight:700;color:#111827;line-height:1.3;margin-bottom:8px;min-height:32px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-clamp:3;overflow:hidden; }
     .org-box-stats { display:flex;flex-direction:column;gap:3px;border-top:1px solid #f3f4f6;padding-top:6px; }
     .org-stat { display:flex;align-items:center;justify-content:space-between;font-size:11px; }
     .org-stat-label { color:#9ca3af; }
@@ -105,10 +111,16 @@
     .org-child-branch::after { content:'';position:absolute;top:0;right:50%;border-top:1.5px solid #d1d5db;width:50%;height:28px; }
     .org-child-branch::after { right:auto;left:50%;border-left:1.5px solid #d1d5db; }
     .org-child-branch:first-child::before { border:0 none; }
-    .org-child-branch:last-child::after { border-left:0 none; }
+    /* FIX (garis buntu di node paling kanan) — lihat catatan sama di tree.blade.php. */
+    .org-child-branch:last-child::after { border-top:0 none; }
     .org-child-branch:only-child { padding-top:0; }
     .org-child-branch:only-child::before,
     .org-child-branch:only-child::after { display:none; }
+
+    /* Tier-spacer (perataan by level) — lihat catatan sama di tree.blade.php &
+       org-tree-node.blade.php. */
+    .org-tier-spacer { position:relative; }
+    .org-tier-spacer::before { content:'';position:absolute;top:0;left:50%;width:0;border-left:1.5px solid #d1d5db;height:100%; }
     [x-cloak] { display:none !important; }
 
     @media (max-width:900px) {

@@ -5,6 +5,8 @@
 
 @push('styles')
 <style>
+    [x-cloak] { display:none !important; }
+
     .back-link { display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#6b7280;text-decoration:none;margin-bottom:20px;transition:color .12s; }
     .back-link:hover { color:#15803d; }
     .back-link svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
@@ -47,11 +49,44 @@
     .empty-state { text-align:center;padding:50px 20px;color:#9ca3af;background:white;border-radius:var(--radius);border:1px solid var(--card-border); }
     .empty-state svg { width:40px;height:40px;margin:0 auto 10px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
 
+    .transisi-filter { width:100%;display:flex;flex-direction:column;gap:8px;padding-top:12px;margin-top:2px;border-top:1px dashed #e5e7eb; }
+    .transisi-checkbox-row { display:flex;flex-wrap:wrap;gap:8px 14px; }
+    .transisi-checkbox { display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#374151;cursor:pointer;user-select:none; }
+    .transisi-checkbox input { width:15px;height:15px;accent-color:#15803d;cursor:pointer; }
+    .transisi-subfilter { margin-left:2px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px; }
+    .transisi-subfilter .transisi-checkbox { color:#166534;font-weight:600; }
+
+    .event-badge-list { display:flex;flex-direction:column;gap:5px;margin-top:8px;width:100%; }
+    .event-badge { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 11px;font-size:11.5px;color:#166534;line-height:1.45; }
+    .event-badge strong { color:#14532d; }
+    .event-badge-jenis { display:inline-block;font-weight:700;text-transform:uppercase;letter-spacing:.3px;font-size:9.5px;color:#15803d;margin-right:6px; }
+    .event-badge-tanggal { color:#4d7c0f;font-size:10.5px;margin-left:6px;white-space:nowrap; }
+
+    .table-footer { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:8px;margin-top:4px; }
+    .pagination-wrap { display:flex;align-items:center;gap:3px; }
+    .page-btn { width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#374151;cursor:pointer;text-decoration:none;transition:all 0.12s; }
+    .page-btn:hover { background:#f5f5f0; }
+    .page-btn.active { background:#15803d;color:white;border-color:#15803d; }
+    .page-btn.disabled { opacity:0.4;pointer-events:none; }
+    .page-btn svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
+
     @media (max-width:640px) {
         .result-card { flex-direction:column;align-items:flex-start; }
     }
 </style>
 @endpush
+
+@php
+    $jenisTransisiLabels = [
+        'rename'       => 'Ganti Nama',
+        'pindah_induk' => 'Pindah Induk',
+        'ganti_level'  => 'Ganti Level',
+        'pecah'        => 'Pecah',
+        'gabung'       => 'Gabung',
+        'bubar'        => 'Bubar',
+        'baru'         => 'Unit Baru',
+    ];
+@endphp
 
 @section('content')
 <a href="{{ route('organisasi.struktur.index') }}" class="back-link">
@@ -65,7 +100,7 @@
 </div>
 
 <div class="filter-card">
-    <form method="GET" action="{{ route('organisasi.struktur.search') }}" class="filter-row">
+    <form method="GET" action="{{ route('organisasi.struktur.search') }}" class="filter-row" x-data="{ pindahInduk: {{ in_array('pindah_induk', $jenisTransisiFilter, true) ? 'true' : 'false' }} }">
         <div class="filter-group grow">
             <label class="filter-label">Nama Unit</label>
             <input type="text" name="q" value="{{ $q }}" class="filter-input" placeholder="Ketik nama unit (nama lama maupun baru)...">
@@ -94,9 +129,29 @@
             <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Cari
         </button>
-        @if($q || $level || $direktoratId)
+        @if($q || $level || $direktoratId || count($jenisTransisiFilter))
         <a href="{{ route('organisasi.struktur.search') }}" class="btn-reset">Reset</a>
         @endif
+
+        <div class="transisi-filter">
+            <label class="filter-label">Filter Jenis Transisi</label>
+            <div class="transisi-checkbox-row">
+                @foreach($jenisTransisiOptions as $opt)
+                <label class="transisi-checkbox">
+                    <input type="checkbox" name="jenis_transisi[]" value="{{ $opt }}"
+                        {{ in_array($opt, $jenisTransisiFilter, true) ? 'checked' : '' }}
+                        @if($opt === 'pindah_induk') @change="pindahInduk = $event.target.checked" @endif>
+                    {{ $jenisTransisiLabels[$opt] ?? ucfirst($opt) }}
+                </label>
+                @endforeach
+            </div>
+            <div class="transisi-subfilter" x-show="pindahInduk" x-cloak>
+                <label class="transisi-checkbox">
+                    <input type="checkbox" name="lintas_direktorat" value="1" {{ $lintasDirektoratOnly ? 'checked' : '' }}>
+                    Lintas Direktorat Saja
+                </label>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -105,18 +160,29 @@
     <div class="result-card">
         <div class="result-main">
             <div class="result-nama">
-                {{ $r['nama_saat_ini'] }}
+                {{ formatUnitLabel($r['nama_saat_ini'], $r['level']) }}
                 <span class="result-level">{{ $r['level'] }}</span>
                 <span class="status-badge status-{{ $r['status']['jenis'] }}">{{ $r['status']['label'] }}</span>
             </div>
             @if(count($r['nama_sebelumnya']))
-            <div class="result-sebelumnya">Sebelumnya: {{ implode(' → ', $r['nama_sebelumnya']) }}</div>
+            <div class="result-sebelumnya">Sebelumnya: {{ implode(' → ', array_map(fn ($era) => formatUnitLabel($era['nama_unit'], $era['level']), $r['nama_sebelumnya'])) }}</div>
             @endif
             @if(count($r['status']['successors']))
             <div class="successor-list">
                 {{ $r['status']['jenis'] === 'pecah' ? 'Menjadi: ' : 'Bergabung dengan unit lain menjadi: ' }}
                 @foreach($r['status']['successors'] as $i => $s)
-                    <a href="{{ route('organisasi.unit.timeline', $s['unit_organisasi_id']) }}">{{ $s['nama'] }}</a>{{ !$loop->last ? ', ' : '' }}
+                    <a href="{{ route('organisasi.unit.timeline', $s['unit_organisasi_id']) }}">{{ formatUnitLabel($s['nama'], $s['level']) }}</a>{{ !$loop->last ? ', ' : '' }}
+                @endforeach
+            </div>
+            @endif
+            @if(count($jenisTransisiFilter) && count($r['matched_events']))
+            <div class="event-badge-list">
+                @foreach($r['matched_events'] as $ev)
+                <div class="event-badge">
+                    <span class="event-badge-jenis">{{ $jenisTransisiLabels[$ev['jenis']] ?? ucfirst($ev['jenis']) }}{{ ($ev['jenis'] === 'pindah_induk' && $lintasDirektoratOnly) ? ' (Lintas Direktorat)' : '' }}</span>
+                    {!! $ev['narasi']['html'] !!}
+                    <span class="event-badge-tanggal">&middot; {{ $ev['tanggal'] ? $ev['tanggal']->translatedFormat('F Y') : '-' }}</span>
+                </div>
                 @endforeach
             </div>
             @endif
@@ -129,7 +195,7 @@
     @empty
     <div class="empty-state">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        @if($q || $level || $direktoratId)
+        @if($q || $level || $direktoratId || count($jenisTransisiFilter))
             Tidak ada unit yang cocok dengan pencarian ini.
         @else
             Belum ada versi final — data unit akan muncul di sini setelah minimal 1 versi difinalisasi.
@@ -138,4 +204,45 @@
     @endforelse
 </div>
 
+@if($showPagination)
+<div class="table-footer">
+    <span>
+        Menampilkan <strong>{{ $results->firstItem() ?? 0 }}</strong>–<strong>{{ $results->lastItem() ?? 0 }}</strong>
+        dari <strong>{{ $results->total() }}</strong> unit
+    </span>
+    <div class="pagination-wrap">
+        @if($results->onFirstPage())
+            <span class="page-btn disabled"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></span>
+        @else
+            <a href="{{ $results->previousPageUrl() }}" class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
+        @endif
+        @php $cur=$results->currentPage();$last=$results->lastPage();$s=max(1,$cur-2);$e=min($last,$cur+2); @endphp
+        @if($s > 1)
+            <a href="{{ $results->url(1) }}" class="page-btn">1</a>
+            @if($s > 2)
+                <span class="page-btn disabled" style="border:none;background:transparent;width:auto;padding:0 2px;">…</span>
+            @endif
+        @endif
+        @for($i = $s; $i <= $e; $i++)
+            <a href="{{ $results->url($i) }}" class="page-btn {{ $i == $cur ? 'active' : '' }}">{{ $i }}</a>
+        @endfor
+        @if($e < $last)
+            @if($e < $last - 1)
+                <span class="page-btn disabled" style="border:none;background:transparent;width:auto;padding:0 2px;">…</span>
+            @endif
+            <a href="{{ $results->url($last) }}" class="page-btn">{{ $last }}</a>
+        @endif
+        @if($results->hasMorePages())
+            <a href="{{ $results->nextPageUrl() }}" class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+        @else
+            <span class="page-btn disabled"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+        @endif
+    </div>
+</div>
+@endif
+
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+@endpush

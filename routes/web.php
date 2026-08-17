@@ -307,6 +307,7 @@ Route::middleware('auth')->group(function () {
 
             Route::prefix('unit')->name('unit.')->group(function () {
                 Route::get('/{unit}/timeline', [StrukturOrganisasiVersiController::class, 'unitTimeline'])->name('timeline');
+                Route::get('/{unit}/riwayat-overlay', [StrukturOrganisasiVersiController::class, 'unitRiwayatOverlay'])->name('riwayat-overlay');
             });
         });
 

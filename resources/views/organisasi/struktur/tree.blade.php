@@ -34,14 +34,40 @@
 
     /* ===== Org box ===== */
     .org-node { display:flex;flex-direction:column;align-items:center; }
-    .org-box { width:190px;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(16,24,40,.04);position:relative;flex-shrink:0; }
+    /* height:160px TETAP (bukan min-height) — SENGAJA, ini yg menjamin semua node level
+       sama sejajar sempurna lintas cabang (Masalah A): tanpa tinggi box yg konstan, garis
+       tier-spacer (org-tier-spacer, lihat bawah) tidak akan pernah bisa dijamin PERSIS
+       sama tingginya dgn box asli, krn box asli tingginya ikut memanjang/memendek sesuai
+       jumlah baris nama unit. 160px dibudget cukup utk 3 baris nama (line-clamp di
+       .org-box-name) + padding-top terbesar (26px, dipakai varian fungsional). Kalau
+       angka ini diubah, WAJIB update juga $tierRowHeight di org-tree-node.blade.php. */
+    .org-box { width:190px;height:160px;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(16,24,40,.04);position:relative;flex-shrink:0; }
     .org-box-leaf { border-radius:22px;border-style:dashed;border-color:#c4b5fd;background:#faf8ff; }
+    /* Level Fungsional = cylinder/drum (meniru manning chart PDF PIM): oval di atas &
+       bawah, sisi kiri-kanan lurus. Fungsional selalu leaf (tidak pernah punya anak) jadi
+       TIDAK pakai org-box-leaf dashed spt level lain — cylinder-nya sendiri sudah jadi
+       penanda visual "ujung cabang". Radius vertikal 24px (naik dari 16px) biar lengkungan
+       lebih jelas ke-baca sbg oval/tabung, bukan kotak bersudut membulat dikit. SENGAJA
+       cuma 1 lengkungan per sisi (dari border-radius box itu sendiri) — versi awal sempat
+       nambah ::before sbg garis "seam" tutup drum, tapi itu bikin sisi atas kelihatan 2
+       lengkungan menumpuk (dihapus). padding-top >= radius (26px) biar teks tidak
+       kepotong lengkungan. */
+    .org-box-fungsional { border-radius:50%/24px; padding:26px 12px 10px; }
     .org-box-highlight { border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25);background:#fffbeb; }
     .org-box-top { display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px; }
     .org-box-level { font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px; }
+    .org-box-top-actions { display:flex;align-items:center;gap:5px;flex-shrink:0; }
     .org-toggle { width:18px;height:18px;border-radius:5px;border:1px solid #e5e7eb;background:#f9fafb;color:#374151;font-size:12px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0; }
     .org-toggle:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .org-box-name { font-size:12.5px;font-weight:700;color:#111827;line-height:1.3;margin-bottom:8px;min-height:32px; }
+    .org-history-btn { width:18px;height:18px;border-radius:5px;border:1px solid #e5e7eb;background:#f9fafb;color:#6b7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none; }
+    .org-history-btn:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
+    .org-history-btn svg { width:11px;height:11px; }
+    /* line-clamp 3 baris + ellipsis — pasangan dari height:160px tetap di .org-box di
+       atas: nama unit TIDAK BOLEH lagi memanjangkan box (itu yg bikin tinggi box beda2
+       per cabang), jadi dibatasi keras 3 baris. Data terpanjang saat ini (43 karakter)
+       masih muat 2 baris, jadi tidak ada nama yg ke-potong hari ini — ini jaring pengaman
+       utk nama yg jauh lebih panjang di masa depan. */
+    .org-box-name { font-size:12.5px;font-weight:700;color:#111827;line-height:1.3;margin-bottom:8px;min-height:32px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-clamp:3;overflow:hidden; }
     .org-box-stats { display:flex;flex-direction:column;gap:3px;border-top:1px solid #f3f4f6;padding-top:6px; }
     .org-stat { display:flex;align-items:center;justify-content:space-between;font-size:11px; }
     .org-stat-label { color:#9ca3af; }
@@ -57,10 +83,26 @@
     .org-child-branch::after { content:'';position:absolute;top:0;right:50%;border-top:1.5px solid #d1d5db;width:50%;height:28px; }
     .org-child-branch::after { right:auto;left:50%;border-left:1.5px solid #d1d5db; }
     .org-child-branch:first-child::before { border:0 none; }
-    .org-child-branch:last-child::after { border-left:0 none; }
+    /* FIX (garis buntu di node paling kanan): dulu salah nge-null-kan border-left
+       (drop vertikal ke box anak terakhir sendiri) alih-alih border-top (sisa spine
+       horizontal yg menjorok ke padding kosong di kanan branch terakhir, krn tidak
+       ada sibling lagi di situ). Akibatnya box paling kanan tiap baris kehilangan
+       garis turun ke dirinya sendiri — persis gejala "garis buntu di tengah". */
+    .org-child-branch:last-child::after { border-top:0 none; }
     .org-child-branch:only-child { padding-top:0; }
     .org-child-branch:only-child::before,
     .org-child-branch:only-child::after { display:none; }
+
+    /* Tier-spacer: garis pass-through utk tier level yg dilompati (mis. Bagian ->
+       Fungsional langsung, lewat Seksi & Foreman) — lihat org-tree-node.blade.php.
+       Selalu 1 "anak" (spacer lain atau node asli), jadi tanpa spine horizontal spt
+       .org-child-branch (yg bisa punya banyak sibling); cukup 1 garis vertikal lurus
+       di tengah. height di-set inline per instance dari component = kelipatan PERSIS
+       $tierRowHeight (160px box + 56px gap konektor ganda, lihat catatan di
+       org-tree-node.blade.php) — bukan taksiran lagi, HARUS tetap sinkron dgn
+       height:160px di .org-box supaya 1 spacer = 1 box asli persis. */
+    .org-tier-spacer { position:relative; }
+    .org-tier-spacer::before { content:'';position:absolute;top:0;left:50%;width:0;border-left:1.5px solid #d1d5db;height:100%; }
 
     [x-cloak] { display:none !important; }
 
@@ -118,6 +160,8 @@
     </div>
 </div>
 </div>
+
+@include('organisasi.struktur.partials.riwayat-overlay-shell')
 
 @endsection
 
