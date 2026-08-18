@@ -22,7 +22,7 @@ class HistoryKaryawanController extends Controller
                   ->orWhere('nik', 'like', '%'.$request->search.'%');
         }
 
-        $karyawans = $query->latest()->paginate(10);
+        $karyawans = $query->latest()->paginate(10)->withQueryString();
         return view('history_karyawan.index', compact('karyawans'));
     }
 

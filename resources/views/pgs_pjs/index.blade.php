@@ -190,7 +190,7 @@
         <div class="page-title">{{ $labelTipe }}</div>
         <div class="page-sub">{{ $subTipe }}</div>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;">
         {{-- Tombol Export --}}
         <a href="{{ route('pgs_pjs.export', request()->query()) }}"
            style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;transition:all 0.15s;"

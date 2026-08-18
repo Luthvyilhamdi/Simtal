@@ -232,7 +232,7 @@
         <div class="page-title">🎯 Data Talent Pool</div>
         <div class="page-sub">Daftar karyawan Longlist & Shortlist per periode</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto;">
         @if(auth()->user()->isSuperAdmin())
         <button onclick="openImport()"
            style="display:inline-flex;align-items:center;gap:8px;background:white;color:#374151;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">

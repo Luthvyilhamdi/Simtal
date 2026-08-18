@@ -46,7 +46,7 @@ class KaryawanController extends Controller
                   ->orWhere('nik', 'like', '%'.$request->search.'%');
         }
 
-        $karyawans = $query->latest()->paginate(10);
+        $karyawans = $query->latest()->paginate(10)->withQueryString();
         return view('karyawan.index', compact('karyawans'));
     }
 

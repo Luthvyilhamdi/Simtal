@@ -93,7 +93,7 @@
         <div class="page-title">Nilai TOEFL</div>
         <div class="page-sub" id="jumlahInfo">{{ $karyawans->total() }} karyawan</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto;">
         <div class="search-mini">
             <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="searchInput" placeholder="Cari nama / NIK..." value="{{ request('search') }}" autocomplete="off">

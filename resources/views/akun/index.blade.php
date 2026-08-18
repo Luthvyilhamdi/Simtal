@@ -100,7 +100,7 @@
     .empty-state { text-align:center;padding:40px 20px;color:#9ca3af;font-size:13px; }
 
     @media (max-width:768px) {
-        .master-wrap { grid-template-columns:1fr; }
+        .master-wrap { grid-template-columns:minmax(0,1fr); }
         .form-card { position:static; }
         .table-card { overflow-x:visible; }
     }
@@ -112,19 +112,28 @@
 
         .table-header { padding:14px 16px; }
         table thead { display:none; }
-        table, tbody, tr, td { display:block; width:100%; }
-        tbody tr { border-bottom:8px solid #f9fafb; padding:14px 16px; }
-        tbody tr:last-child { border-bottom:none; }
-        tbody tr:hover td { background:transparent; }
-        tbody td { border-bottom:none; padding:6px 0; }
-        tbody td[data-label]:not(.no-label)::before {
-            content: attr(data-label);
-            display:block; font-size:10px; font-weight:700; color:#9ca3af;
-            text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;
+        table, tbody { display:block; width:100%; }
+        tbody { display:flex; flex-direction:column; gap:12px; padding:12px 12px 4px; }
+        tbody tr {
+            display:flex; flex-wrap:wrap; align-items:center; position:relative;
+            border:1px solid #eef0f2; border-radius:12px; padding:14px; background:#fff;
         }
+        tbody tr:hover td { background:transparent; }
+        tbody td { display:block; border:none; padding:0; }
+        tbody td[data-label]::before { content:none; }               /* buang label uppercase yang bikin sesak */
         td.col-index { display:none; }
-        .user-info { gap:12px; }
-        .action-btns { margin-top:4px; }
+
+        td.no-label { flex:1 1 100%; min-width:0; padding-right:104px; } /* user info penuh; sisakan ruang badge role */
+        td.no-label .user-info { min-width:0; }
+        td.no-label .user-info > div:last-child { min-width:0; }
+        .user-email { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+        td[data-label="Role"] { position:absolute; top:14px; right:14px; }  /* role → pojok kanan atas */
+        td[data-label="Terdaftar"] {
+            flex:1 1 auto; margin-top:12px; font-size:11.5px; color:#9ca3af; font-weight:600;
+        }
+        td[data-label="Terdaftar"]::before { content:'Terdaftar · '; color:#c7cbd2; }
+        td[data-label="Action"] { margin-top:10px; margin-left:auto; }
+        .action-btns { margin:0; }
 
         .modal-box { padding:20px; }
     }

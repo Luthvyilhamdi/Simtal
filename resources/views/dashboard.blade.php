@@ -203,7 +203,8 @@
         .pejabat-grid { grid-template-columns:repeat(3,1fr); }
     }
     @media (max-width:768px) {
-        .welcome-card { padding:18px 16px; }
+        .welcome-card { padding:18px 16px; flex-direction:column; align-items:flex-start; }
+        .welcome-card > div:last-child { align-items:flex-start !important; width:100%; }
         .welcome-title { font-size:15px; }
         .welcome-date { font-size:11px;padding:5px 10px; }
         .kpi-grid { grid-template-columns:1fr 1fr;gap:8px; }

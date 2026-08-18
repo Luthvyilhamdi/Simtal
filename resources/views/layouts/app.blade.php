@@ -85,6 +85,7 @@
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -248px; height: 100vh; z-index: 50; box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
             .sidebar.mobile-open { left: 0; }
+            .collapse-btn { display: none !important; } /* di HP pakai hamburger — sembunyikan tombol collapse agar tak dobel */
             html.sidebar-collapsed .sidebar { width: 248px; min-width: 248px; left: -248px; }
             html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
             html.sidebar-collapsed .sidebar .nav-section-label, html.sidebar-collapsed .sidebar .nav-text,
@@ -206,6 +207,7 @@
 
         .content-area { flex: 1; overflow-y: auto; padding: 24px; }
         @media (max-width: 480px) { .content-area { padding: 16px; } }
+
 
         #pageLoader { display:none;position:fixed;inset:0;background:rgba(255,255,255,0.78);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(2px); }
         @keyframes spin-fade { 0%,100%{opacity:1} 50%{opacity:0.15} }

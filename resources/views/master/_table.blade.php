@@ -13,6 +13,7 @@
     .btn-save:hover { background:#166534; }
 
     .table-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
+    .table-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch; }
     .table-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f3f4f6; }
     .table-title { font-size:14px;font-weight:700;color:#111827; }
     .table-count { font-size:12px;color:#9ca3af; }
@@ -159,6 +160,7 @@
             <div class="table-title">Daftar {{ $title }}</div>
             <div class="table-count">{{ $data->total() }} data</div>
         </div>
+        <div class="table-wrap">
         <table>
             <thead>
                 <tr>
@@ -198,6 +200,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         @if($data->hasPages())
         <div class="table-footer">
