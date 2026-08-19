@@ -132,6 +132,24 @@
 
 @section('content')
 
+@php
+    // Nilai placeholder / "belum ditentukan" agar tampil paling bawah pada dropdown
+    $phValues = ['', '-', '–', '—', 'belum ditentukan', 'belum ada', 'tidak ada', 'n/a', 'na', 'undefined', 'null'];
+    $sortMaster = function ($collection, $col) use ($phValues) {
+        return $collection->sortBy(function ($x) use ($col, $phValues) {
+            $val = trim(mb_strtolower($x->$col ?? ''));
+            $isPlaceholder = in_array($val, $phValues, true);
+            // Prefix "0"/"1": placeholder selalu ke bawah, sisanya alfabetis
+            return ($isPlaceholder ? '1' : '0') . '_' . $val;
+        })->values();
+    };
+    $direktorats   = $sortMaster($direktorats,   'nama_direktorat');
+    $kompartemens  = $sortMaster($kompartemens,  'nama_kompartemen');
+    $departemens   = $sortMaster($departemens,   'nama_departemen');
+    $jabatans      = $sortMaster($jabatans,      'nama_jabatan');
+    $kodeStrukturs = $sortMaster($kodeStrukturs, 'kode_struktur');
+@endphp
+
 <a href="{{ route('karyawan.show', $karyawan) }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Kembali ke Detail Karyawan
@@ -235,12 +253,14 @@
 
             <div class="form-group">
                 <label class="form-label">Status Kepegawaian</label>
-                <select name="status_kepegawaian" class="form-input">
-                    <option value="">— Pilih Status Kepegawaian —</option>
-                    @foreach(\App\Models\Karyawan::STATUS_KEPEGAWAIAN as $sk)
-                        <option value="{{ $sk }}" {{ old('status_kepegawaian', $karyawan->status_kepegawaian)==$sk ? 'selected' : '' }}>{{ $sk }}</option>
-                    @endforeach
-                </select>
+                <div class="select-wrap">
+                    <select name="status_kepegawaian" class="form-input">
+                        <option value="">— Pilih Status Kepegawaian —</option>
+                        @foreach(\App\Models\Karyawan::STATUS_KEPEGAWAIAN as $sk)
+                            <option value="{{ $sk }}" {{ old('status_kepegawaian', $karyawan->status_kepegawaian)==$sk ? 'selected' : '' }}>{{ $sk }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 @error('status_kepegawaian')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
 
@@ -473,7 +493,7 @@
                 <div class="select-wrap">
                     <select name="job_grade_id" class="form-input" id="jobGradeSelect" onchange="updateBand()">
                         <option value="">-- Pilih Job Grade --</option>
-                        @foreach($jobGrades as $j)
+                        @foreach($jobGrades->sortByDesc(fn($j) => (int) $j->job_grade) as $j)
                             <option value="{{ $j->id }}"
                                     data-grade="{{ $j->job_grade }}"
                                     {{ old('job_grade_id', $karyawan->job_grade_id)==$j->id ? 'selected' : '' }}>
@@ -490,7 +510,7 @@
                 <div class="select-wrap">
                     <select name="person_grade_id" class="form-input">
                         <option value="">-- Pilih Person Grade --</option>
-                        @foreach($personGrades as $p)
+                        @foreach($personGrades->sortByDesc(fn($p) => (int) $p->person_grade) as $p)
                             <option value="{{ $p->id }}" {{ old('person_grade_id', $karyawan->person_grade_id)==$p->id ? 'selected' : '' }}>
                                 PG {{ $p->person_grade }}
                             </option>

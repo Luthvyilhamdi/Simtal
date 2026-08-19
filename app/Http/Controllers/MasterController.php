@@ -17,6 +17,14 @@ abstract class MasterController extends Controller
     /** Nama kolom utama (mis. 'nama_jabatan', 'job_grade'). */
     protected string $column;
 
+    /** Kolom berisi angka (mis. 'job_grade') → diurutkan numerik, bukan alfabetis. */
+    protected bool $columnIsNumeric = false;
+
+    /** Nilai placeholder / "belum ditentukan" agar selalu tampil paling bawah. */
+    protected array $placeholderValues = [
+        '', '-', '–', '—', 'belum ditentukan', 'belum ada', 'tidak ada', 'n/a', 'na', 'undefined', 'null',
+    ];
+
     /** Prefix nama route (mis. 'master.jabatan'). */
     protected string $routeName;
 
@@ -34,7 +42,22 @@ abstract class MasterController extends Controller
 
     public function index()
     {
-        $data = $this->model::orderBy($this->column)->paginate(15);
+        $col   = $this->column;
+        $query = $this->model::query();
+
+        if ($this->columnIsNumeric) {
+            // Angka diurutkan numerik (8, 9, 10 … 22); nilai non-angka (mis. "-") didorong ke bawah
+            $query->orderByRaw("(CASE WHEN `{$col}` REGEXP '^[0-9]+$' THEN 0 ELSE 1 END)")
+                  ->orderByRaw("CAST(`{$col}` AS UNSIGNED)")
+                  ->orderBy($col);
+        } else {
+            // Alfabetis; placeholder / "belum ditentukan" / "-" selalu di paling bawah
+            $marks = implode(',', array_fill(0, count($this->placeholderValues), '?'));
+            $query->orderByRaw("(CASE WHEN LOWER(TRIM(`{$col}`)) IN ({$marks}) THEN 1 ELSE 0 END)", $this->placeholderValues)
+                  ->orderBy($col);
+        }
+
+        $data = $query->paginate(15);
 
         return view($this->view, compact('data'));
     }
