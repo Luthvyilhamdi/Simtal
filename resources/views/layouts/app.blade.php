@@ -168,7 +168,7 @@
         .topbar-icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #e5e7eb; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; color: #6b7280; transition: all 0.12s; flex-shrink: 0; }
         .topbar-icon-btn:hover { background: #f5f5f0; }
         .topbar-icon-btn svg { width: 16px; height: 16px; }
-        .notif-badge { position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+        .notif-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; line-height: 1; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 1px 3px rgba(239,68,68,0.4); }
 
         .user-dropdown-wrap { position: relative; }
         .user-trigger { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 40px; border: 1px solid #e5e7eb; background: white; cursor: pointer; transition: all 0.15s; }

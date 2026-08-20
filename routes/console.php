@@ -1,14 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Notifikasi harian kini digenerate otomatis dari dalam aplikasi (tanpa cron),
+// lihat App\Http\Middleware\GenerateDailyNotifikasi. Baris schedule cron dihapus
+// karena server produksi tidak menjalankan `schedule:run`.
 
-Schedule::command('notifikasi:generate')->dailyAt('07:00');
-
-// Backup database otomatis tiap Minggu 02:00 (hanya jalan bila cron server aktif).
+// Backup database otomatis tiap Minggu 02:00 (hanya jalan bila cron server aktif;
+// bila cron tidak tersedia, gunakan tombol Backup manual di aplikasi).
 Schedule::command('db:backup')->weeklyOn(0, '02:00');

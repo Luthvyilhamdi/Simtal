@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'not_user_role' => \App\Http\Middleware\UserRoleMiddleware::class,
             'role'          => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+
+        // Auto-generate notifikasi harian tanpa cron (jalan sekali/hari, setelah response)
+        $middleware->web(append: [
+            \App\Http\Middleware\GenerateDailyNotifikasi::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

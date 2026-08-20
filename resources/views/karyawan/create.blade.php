@@ -126,6 +126,25 @@
 
 @section('content')
 
+@php
+    // Nilai placeholder / "belum ditentukan" agar tampil paling bawah pada dropdown
+    $phValues = ['', '-', '–', '—', 'belum ditentukan', 'belum ada', 'tidak ada', 'n/a', 'na', 'undefined', 'null'];
+    $sortMaster = function ($collection, $col) use ($phValues) {
+        return $collection->sortBy(function ($x) use ($col, $phValues) {
+            $val = trim(mb_strtolower($x->$col ?? ''));
+            return (in_array($val, $phValues, true) ? '1' : '0') . '_' . $val;
+        })->values();
+    };
+    $direktorats   = $sortMaster($direktorats,   'nama_direktorat');
+    $kompartemens  = $sortMaster($kompartemens,  'nama_kompartemen');
+    $departemens   = $sortMaster($departemens,   'nama_departemen');
+    $jabatans      = $sortMaster($jabatans,      'nama_jabatan');
+    $kodeStrukturs = $sortMaster($kodeStrukturs, 'kode_struktur');
+    // Job Grade & Person Grade: besar → kecil (numerik)
+    $jobGrades     = $jobGrades->sortByDesc(fn ($j) => (int) $j->job_grade)->values();
+    $personGrades  = $personGrades->sortByDesc(fn ($p) => (int) $p->person_grade)->values();
+@endphp
+
 <a href="{{ route('karyawan.index') }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Kembali ke Profil Karyawan

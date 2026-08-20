@@ -48,8 +48,8 @@ class GenerateNotifikasi extends Command
             if (!$exists) {
                 $level = $sisaHari <= 7 ? 'danger' : 'warning';
                 Notifikasi::create([
-                    'judul'           => 'IDP Akan Expire',
-                    'pesan'           => "IDP {$a->karyawan->nama} akan berakhir dalam {$sisaHari} hari ({$a->tanggal_exp_idp->format('d M Y')})",
+                    'judul'           => 'Assessment Akan Expire',
+                    'pesan'           => "Assessment {$a->karyawan->nama} akan berakhir dalam {$sisaHari} hari ({$a->tanggal_exp_idp->format('d M Y')})",
                     'tipe'            => 'idp_expire',
                     'level'           => $level,
                     'notifiable_type' => HistoryAssessment::class,

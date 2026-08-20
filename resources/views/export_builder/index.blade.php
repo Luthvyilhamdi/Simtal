@@ -131,6 +131,19 @@
 @endpush
 
 @section('content')
+@php
+    // Urutkan filter master: nama alfabetis, placeholder / "belum ditentukan" / "-" ke paling bawah
+    $phValues = ['', '-', '–', '—', 'belum ditentukan', 'belum ada', 'tidak ada', 'n/a', 'na', 'undefined', 'null'];
+    $sortMaster = function ($collection, $col) use ($phValues) {
+        return $collection->sortBy(function ($x) use ($col, $phValues) {
+            $val = trim(mb_strtolower($x->$col ?? ''));
+            return (in_array($val, $phValues, true) ? '1' : '0') . '_' . $val;
+        })->values();
+    };
+    $direktorats  = $sortMaster($direktorats,  'nama_direktorat');
+    $kompartemens = $sortMaster($kompartemens, 'nama_kompartemen');
+    $departemens  = $sortMaster($departemens,  'nama_departemen');
+@endphp
 <div class="page-header">
     <div class="page-title">Export Builder</div>
     <div class="page-sub">Pilih kolom yang ingin diexport, atur filter, lalu unduh sebagai Excel atau PDF.</div>
