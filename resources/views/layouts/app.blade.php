@@ -170,6 +170,15 @@
         .topbar-icon-btn svg { width: 16px; height: 16px; }
         .notif-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; line-height: 1; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 1px 3px rgba(239,68,68,0.4); }
 
+        /* Dropdown notifikasi */
+        .notif-dropdown { position: absolute; right: 0; top: 44px; width: 360px; background: white; border-radius: 14px; border: 1px solid #e5e7eb; box-shadow: 0 12px 40px rgba(0,0,0,0.12); z-index: 1200; overflow: hidden; }
+        .notif-dropdown #notifList { max-height: 380px; overflow-y: auto; }
+        @media (max-width: 640px) {
+            /* Di HP: dropdown compact menempel kanan bawah topbar; min() jaga agar tetap muat di layar sempit */
+            .notif-dropdown { position: fixed; top: 62px; right: 10px; left: auto; width: min(300px, calc(100vw - 20px)); border-radius: 14px; }
+            .notif-dropdown #notifList { max-height: 60vh; }
+        }
+
         .user-dropdown-wrap { position: relative; }
         .user-trigger { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 40px; border: 1px solid #e5e7eb; background: white; cursor: pointer; transition: all 0.15s; }
         .user-trigger:hover { background: #f9fafb; border-color: #d1d5db; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
@@ -518,15 +527,15 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     <div class="notif-badge" id="notifBadge" style="display:none;">0</div>
                 </button>
-                <div id="notifDropdown" style="display:none;position:absolute;right:0;top:44px;width:360px;background:white;border-radius:14px;border:1px solid #e5e7eb;box-shadow:0 12px 40px rgba(0,0,0,0.12);z-index:1000;overflow:hidden;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f3f4f6;">
+                <div id="notifDropdown" class="notif-dropdown" style="display:none;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f3f4f6;gap:10px;">
                         <span style="font-size:14px;font-weight:700;color:#111827;">🔔 Notifikasi</span>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <button onclick="readAllNotif()" style="font-size:12px;color:#16a34a;font-weight:600;border:none;background:transparent;cursor:pointer;">Tandai semua dibaca</button>
-                            <a href="{{ route('notifikasi.index') }}" style="font-size:12px;color:#6b7280;text-decoration:none;">Lihat semua</a>
+                        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                            <button onclick="readAllNotif()" style="font-size:12px;color:#16a34a;font-weight:600;border:none;background:transparent;cursor:pointer;white-space:nowrap;">Tandai semua dibaca</button>
+                            <a href="{{ route('notifikasi.index') }}" style="font-size:12px;color:#6b7280;text-decoration:none;white-space:nowrap;">Lihat semua</a>
                         </div>
                     </div>
-                    <div id="notifList" style="max-height:380px;overflow-y:auto;">
+                    <div id="notifList">
                         <div style="text-align:center;padding:40px 20px;color:#9ca3af;font-size:13px;">Memuat notifikasi...</div>
                     </div>
                 </div>
