@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Auto-generate notifikasi harian tanpa cron (jalan sekali/hari, setelah response)
         $middleware->web(append: [
             \App\Http\Middleware\GenerateDailyNotifikasi::class,
+            \App\Http\Middleware\EnforceMenuAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

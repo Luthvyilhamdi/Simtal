@@ -28,7 +28,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Landing disesuaikan dengan akses (admin bisa jadi tak punya Dashboard).
+        return redirect()->intended(route($request->user()->homeRoute(), absolute: false));
     }
 
     /**

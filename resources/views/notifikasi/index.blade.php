@@ -63,17 +63,31 @@
 </div>
 
 {{-- Filter --}}
+@php
+    // Sembunyikan chip filter untuk jenis notifikasi yang tak boleh dilihat user.
+    $u = auth()->user();
+    $tipeMenu = \App\Support\MenuAccess::notifikasiTypeMenu();
+    $canSeeTipe = fn ($tipe) => $u->isSuperAdmin() || !isset($tipeMenu[$tipe]) || $u->canAccessMenu($tipeMenu[$tipe]);
+@endphp
 <div class="filter-row">
     <a href="{{ route('notifikasi.index') }}"
        class="filter-chip {{ !request('tipe') ? 'active' : '' }}">Semua</a>
+    @if($canSeeTipe('idp_expire'))
     <a href="{{ route('notifikasi.index', ['tipe' => 'idp_expire']) }}"
        class="filter-chip {{ request('tipe') == 'idp_expire' ? 'active' : '' }}">📋 Assessment Expire</a>
+    @endif
+    @if($canSeeTipe('pensiun'))
     <a href="{{ route('notifikasi.index', ['tipe' => 'pensiun']) }}"
        class="filter-chip {{ request('tipe') == 'pensiun' ? 'active' : '' }}">🎯 Pensiun</a>
+    @endif
+    @if($canSeeTipe('masa_kerja'))
     <a href="{{ route('notifikasi.index', ['tipe' => 'masa_kerja']) }}"
        class="filter-chip {{ request('tipe') == 'masa_kerja' ? 'active' : '' }}">🏆 Masa Kerja</a>
+    @endif
+    @if($canSeeTipe('pgs_pjs_berakhir'))
     <a href="{{ route('notifikasi.index', ['tipe' => 'pgs_pjs_berakhir']) }}"
        class="filter-chip {{ request('tipe') == 'pgs_pjs_berakhir' ? 'active' : '' }}">⏰ PGS/PJS</a>
+    @endif
 </div>
 
 @if($notifikasis->count() > 0)

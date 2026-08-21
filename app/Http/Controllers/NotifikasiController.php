@@ -4,11 +4,50 @@ namespace App\Http\Controllers;
 
 use App\Models\Notifikasi;
 use App\Models\NotifikasiRead;
+use App\Support\MenuAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotifikasiController extends Controller
 {
+    /**
+     * Batasi notifikasi sesuai akses menu user.
+     *  - super_admin → semua (tanpa filter)
+     *  - lainnya     → hanya jenis yang menunya boleh diakses; jenis yang tidak
+     *                  terpetakan (umum) tetap tampil untuk semua.
+     */
+    private function applyTipeFilter($query)
+    {
+        $user = Auth::user();
+        if (! $user || $user->isSuperAdmin()) {
+            return $query;
+        }
+
+        $map         = MenuAccess::notifikasiTypeMenu();
+        $mappedTipes = array_keys($map);
+        $allowed     = [];
+        foreach ($map as $tipe => $menu) {
+            if ($user->canAccessMenu($menu)) {
+                $allowed[] = $tipe;
+            }
+        }
+
+        return $query->where(function ($q) use ($allowed, $mappedTipes) {
+            // Jenis umum (tak terpetakan) selalu tampil …
+            $q->whereNotIn('tipe', $mappedTipes);
+            // … plus jenis yang menunya boleh diakses user ini.
+            if (! empty($allowed)) {
+                $q->orWhereIn('tipe', $allowed);
+            }
+        });
+    }
+
+    /** Query dasar notifikasi yang sudah difilter sesuai akses user. */
+    private function baseQuery()
+    {
+        return $this->applyTipeFilter(Notifikasi::query());
+    }
+
     /**
      * Subquery: notifikasi yang BELUM dibaca oleh user tertentu
      * (tidak ada baris pasangan di notifikasi_reads).
@@ -37,7 +76,7 @@ class NotifikasiController extends Controller
     {
         $userId = Auth::id();
 
-        $notifikasis = Notifikasi::orderBy('created_at', 'desc')->take(10)->get();
+        $notifikasis = $this->baseQuery()->orderBy('created_at', 'desc')->take(10)->get();
         $readIds     = $this->readIdsFor($userId, $notifikasis->pluck('id'));
 
         $mapped = $notifikasis->map(function ($n) use ($readIds) {
@@ -54,7 +93,7 @@ class NotifikasiController extends Controller
             ];
         });
 
-        $unread = $this->scopeUnreadFor(Notifikasi::query(), $userId)->count();
+        $unread = $this->scopeUnreadFor($this->baseQuery(), $userId)->count();
 
         return response()->json([
             'notifikasis' => $mapped,
@@ -67,7 +106,7 @@ class NotifikasiController extends Controller
     {
         $userId = Auth::id();
 
-        $unreadIds = $this->scopeUnreadFor(Notifikasi::query(), $userId)->pluck('id');
+        $unreadIds = $this->scopeUnreadFor($this->baseQuery(), $userId)->pluck('id');
 
         if ($unreadIds->isNotEmpty()) {
             $now  = now();
@@ -109,7 +148,8 @@ class NotifikasiController extends Controller
     {
         $userId = Auth::id();
 
-        $notifikasis = Notifikasi::when($request->tipe, fn ($q, $tipe) => $q->where('tipe', $tipe))
+        $notifikasis = $this->baseQuery()
+            ->when($request->tipe, fn ($q, $tipe) => $q->where('tipe', $tipe))
             ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->withQueryString();
@@ -120,7 +160,7 @@ class NotifikasiController extends Controller
             return $n;
         });
 
-        $unread = $this->scopeUnreadFor(Notifikasi::query(), $userId)->count();
+        $unread = $this->scopeUnreadFor($this->baseQuery(), $userId)->count();
 
         return view('notifikasi.index', compact('notifikasis', 'unread'));
     }

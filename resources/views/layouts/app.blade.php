@@ -320,7 +320,9 @@
         </div>
         @else
         {{-- ===== SIDEBAR ADMIN / SUPER ADMIN ===== --}}
+        @php $u = auth()->user(); @endphp
 
+        @if($u->canAccessMenu('dashboard'))
         <div class="nav-group">
             <div class="nav-section-label">Beranda</div>
             <a href="{{ route('dashboard') }}" data-tooltip="Dashboard" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -330,73 +332,97 @@
         </div>
 
         <div class="nav-sep"></div>
+        @endif
 
+        @if($u->canAccessMenu('karyawan') || $u->canAccessMenu('history_jabatan') || $u->canAccessMenu('history_pendidikan') || $u->canAccessMenu('struktur') || $u->canAccessMenu('talent_pool') || $u->canAccessMenu('usulan_promosi') || $u->canAccessMenu('reminder_promosi') || $u->canAccessMenu('usulan_mutasi') || $u->canAccessMenu('history_pejabat') || $u->canAccessMenu('pgs_pjs') || $u->canAccessMenu('assessment') || $u->canAccessMenu('kalibrasi') || $u->canAccessMenu('toefl'))
         <div class="nav-group">
             <div class="nav-section-label">Menu Utama</div>
 
             {{-- Data Karyawan (accordion) --}}
+            @if($u->canAccessMenu('karyawan') || $u->canAccessMenu('history_jabatan') || $u->canAccessMenu('history_pendidikan') || $u->canAccessMenu('struktur'))
             <div class="nav-link master-toggle {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <span class="nav-text">Data Karyawan</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'open' : '' }}">
+                @if($u->canAccessMenu('karyawan'))
                 <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-text">Profil Karyawan</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('history_jabatan'))
                 <a href="{{ route('history_karyawan.index') }}" data-tooltip="History Jabatan" class="nav-link {{ request()->routeIs('history_karyawan.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     <span class="nav-text">History Jabatan</span>
                 </a>
-                @if(auth()->user()->isSuperAdmin())
+                @endif
+                @if($u->canAccessMenu('history_pendidikan'))
                 <a href="{{ route('riwayat_pendidikan_all.index') }}" data-tooltip="History Pendidikan" class="nav-link {{ request()->routeIs('riwayat_pendidikan_all.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                     <span class="nav-text">History Pendidikan</span>
                 </a>
                 @endif
+                @if($u->canAccessMenu('struktur'))
                 <a href="{{ route('struktur-organisasi.index') }}" data-tooltip="Struktur Organisasi" class="nav-link {{ request()->routeIs('struktur-organisasi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
                     <span class="nav-text">Struktur Organisasi</span>
                 </a>
+                @endif
             </div>
+            @endif
 
             {{-- Manajemen Talenta (accordion) --}}
+            @if($u->canAccessMenu('talent_pool') || $u->canAccessMenu('usulan_promosi') || $u->canAccessMenu('reminder_promosi') || $u->canAccessMenu('usulan_mutasi'))
             <div class="nav-link master-toggle {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*') ? 'active open' : '' }}" data-tooltip="Manajemen Talenta" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
                 <span class="nav-text">Manajemen Talenta</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*') ? 'open' : '' }}">
+                @if($u->canAccessMenu('talent_pool'))
                 <a href="{{ route('talent_pool.index') }}" data-tooltip="Data Talent" class="nav-link {{ request()->routeIs('talent_pool.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     <span class="nav-text">Data Talent</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('usulan_promosi'))
                 <a href="{{ route('usulan_promosi.index') }}" data-tooltip="Usulan Promosi" class="nav-link {{ request()->routeIs('usulan_promosi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="18 15 12 9 6 15"/><path d="M12 9v12"/><path d="M4 6h16"/></svg>
                     <span class="nav-text">Usulan Promosi</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('reminder_promosi'))
                 <a href="{{ route('reminder_promosi.index') }}" data-tooltip="Reminder Promosi" class="nav-link {{ request()->routeIs('reminder_promosi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     <span class="nav-text">Reminder Promosi</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('usulan_mutasi'))
                 <a href="{{ route('usulan_mutasi.index') }}" data-tooltip="Rotasi & Mutasi" class="nav-link {{ request()->routeIs('usulan_mutasi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg>
                     <span class="nav-text">Rotasi &amp; Mutasi</span>
                 </a>
+                @endif
             </div>
+            @endif
 
             {{-- Kepejabatan (accordion) --}}
+            @if($u->canAccessMenu('history_pejabat') || $u->canAccessMenu('pgs_pjs'))
             <div class="nav-link master-toggle {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'active open' : '' }}" data-tooltip="Kepejabatan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                 <span class="nav-text">Pejabat</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('history_pejabat.*','pgs_pjs.*') ? 'open' : '' }}">
+                @if($u->canAccessMenu('history_pejabat'))
                 <a href="{{ route('history_pejabat.index') }}" data-tooltip="Pejabat Definitif" class="nav-link {{ request()->routeIs('history_pejabat.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                     <span class="nav-text">Pejabat Definitif</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('pgs_pjs'))
                 <a href="{{ route('pgs_pjs.index', ['tipe' => 'pjs']) }}" data-tooltip="PJS" class="nav-link {{ request()->routeIs('pgs_pjs.*') && request('tipe') === 'pjs' ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <span class="nav-text">PJS</span>
@@ -405,68 +431,91 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <span class="nav-text">PGS</span>
                 </a>
+                @endif
             </div>
+            @endif
 
             {{-- Assessment & Penilaian (accordion) --}}
+            @if($u->canAccessMenu('assessment') || $u->canAccessMenu('kalibrasi') || $u->canAccessMenu('toefl'))
             <div class="nav-link master-toggle {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*','toefl_all.*','toefl.*') ? 'active open' : '' }}" data-tooltip="Assessment & Penilaian" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 <span class="nav-text">Assessment & Penilaian</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*','toefl_all.*','toefl.*') ? 'open' : '' }}">
+                @if($u->canAccessMenu('assessment'))
                 <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     <span class="nav-text">History Assessment</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('kalibrasi'))
                 <a href="{{ route('history_penilaian_kalibrasi.index') }}" data-tooltip="Penilaian & Kalibrasi" class="nav-link {{ request()->routeIs('history_penilaian_kalibrasi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
                     <span class="nav-text">Penilaian &amp; Kalibrasi</span>
                 </a>
+                @endif
+                @if($u->canAccessMenu('toefl'))
                 <a href="{{ route('toefl_all.index') }}" data-tooltip="Nilai TOEFL" class="nav-link {{ request()->routeIs('toefl_all.*') || request()->routeIs('toefl.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                     <span class="nav-text">Nilai TOEFL</span>
                 </a>
+                @endif
             </div>
+            @endif
         </div>
+        @endif
 
+        @if($u->canAccessMenu('surat_penting') || $u->canAccessMenu('faq') || $u->canAccessMenu('laporan') || $u->canAccessMenu('export_builder'))
         <div class="nav-sep"></div>
 
         <div class="nav-group">
             <div class="nav-section-label">Layanan & Laporan</div>
 
             {{-- Layanan (accordion) --}}
+            @if($u->canAccessMenu('surat_penting') || $u->canAccessMenu('faq'))
             <div class="nav-link master-toggle {{ request()->routeIs('surat_penting.*','faq') ? 'active open' : '' }}" data-tooltip="Layanan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
                 <span class="nav-text">Layanan</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('surat_penting.*','faq') ? 'open' : '' }}">
+                @if($u->canAccessMenu('surat_penting'))
                 <a href="{{ route('surat_penting.index') }}" data-tooltip="Surat Penting" class="nav-link {{ request()->routeIs('surat_penting.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     <span class="nav-text">Surat Penting</span>
                 </a>
+                @endif
                 <a href="https://luthvyilhamdi.github.io/idp-dashboard/" target="_blank" rel="noopener noreferrer" data-tooltip="Progress IDP" class="nav-link">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                     <span class="nav-text">Progress IDP</span>
                 </a>
+                @if($u->canAccessMenu('faq'))
                 <a href="{{ route('faq') }}" data-tooltip="FAQ" class="nav-link {{ request()->routeIs('faq') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     <span class="nav-text">FAQ & Panduan</span>
                 </a>
+                @endif
             </div>
+            @endif
 
             {{-- Laporan (link langsung) --}}
+            @if($u->canAccessMenu('laporan'))
             <a href="{{ route('laporan.bulanan') }}" data-tooltip="Laporan Bulanan" class="nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 <span class="nav-text">Laporan Bulanan</span>
             </a>
+            @endif
 
             {{-- Export Builder (export custom Excel/PDF) --}}
+            @if($u->canAccessMenu('export_builder'))
             <a href="{{ route('export_builder.index') }}" data-tooltip="Export Builder" class="nav-link {{ request()->routeIs('export_builder.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span class="nav-text">Export Builder</span>
             </a>
+            @endif
         </div>
+        @endif
 
         @if(auth()->user()->isSuperAdmin())
         <div class="nav-sep"></div>
@@ -586,6 +635,18 @@
     </div>
 
     <div class="content-area">
+        @if(session('impersonator_id'))
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="font-size:13px;color:#92400e;display:flex;align-items:center;gap:9px;min-width:0;">
+                <span style="font-size:17px;flex-shrink:0;">🎭</span>
+                <span style="min-width:0;">Anda sedang masuk sebagai <strong>{{ auth()->user()->name }}</strong> — semua tindakan atas nama akun ini.</span>
+            </div>
+            <form method="POST" action="{{ route('impersonate.leave') }}" style="margin:0;flex-shrink:0;">
+                @csrf
+                <button type="submit" style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">← Kembali ke akun Anda</button>
+            </form>
+        </div>
+        @endif
         @yield('content')
     </div>
 </div>
@@ -687,6 +748,9 @@
         loader.style.display = 'flex';
     });
     document.addEventListener('submit', function(e) {
+        // Submit yang dibatalkan (mis. confirm/modal batal) — jangan tampilkan loader,
+        // karena tak ada navigasi & 'pageshow' tak jalan → spinner akan menggantung.
+        if (e.defaultPrevented) return;
         // Form yang menghasilkan unduhan file tidak memuat ulang halaman,
         // sehingga 'pageshow' tak pernah jalan & loader akan menggantung.
         // Lewati loader untuk form bertanda data-download.

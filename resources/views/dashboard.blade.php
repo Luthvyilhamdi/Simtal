@@ -76,7 +76,11 @@
     .bar-label { font-size:11px;color:#6b7280;font-weight:600;min-width:80px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
     .bar-track { flex:1;height:20px;background:#f3f4f6;border-radius:5px;overflow:hidden; }
     .bar-fill { height:100%;border-radius:5px;display:flex;align-items:center;padding-left:7px;font-size:10px;font-weight:700;color:white;transition:width 0.8s ease;min-width:28px; }
-    .bar-val { font-size:11px;font-weight:700;color:#374151;min-width:26px;text-align:right; }
+    .bar-val { font-size:11px;font-weight:700;color:#374151;min-width:64px;text-align:right;white-space:nowrap; }
+    .bar-pct { color:#9ca3af;font-weight:500; }
+    .chart-total-line { margin-top:12px;padding-top:10px;border-top:1px solid #f0f0ec;display:flex;align-items:center;justify-content:space-between;font-size:11.5px; }
+    .chart-total-line .ctl-label { color:#6b7280;font-weight:600; }
+    .chart-total-line .ctl-val { color:#111827;font-weight:800; }
 
     /* FIX: bar-fill warna via class statis */
     .bar-fill-blue   { background:#2563eb; }
@@ -913,38 +917,42 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
     <div class="chart-card">
         <div class="chart-card-title">Distribusi per Job Grade</div>
         <div class="chart-card-sub">Jumlah karyawan aktif (JG tertinggi → terendah)</div>
-        @php $maxJG = $distribusiJobGrade->max('total') ?: 1; @endphp
+        @php $maxJG = $distribusiJobGrade->max('total') ?: 1; $totalJG = $distribusiJobGrade->sum('total'); @endphp
         <div class="bar-chart">
             @foreach($distribusiJobGrade as $j)
-            @php $pctJG = round(($j['total']/$maxJG)*100); @endphp
+            @php $pctJG = round(($j['total']/$maxJG)*100); $pctTotJG = round(($j['total']/($totalJG ?: 1))*100); @endphp
             <div class="bar-row">
                 <div class="bar-label">{{ $j['nama'] }}</div>
                 <div class="bar-track">
                     <div class="bar-fill bar-fill-brand" data-pct="{{ $pctJG }}">{{ $j['total'] }}</div>
                 </div>
-                <div class="bar-val">{{ $j['total'] }}</div>
+                <div class="bar-val">{{ $j['total'] }} <span class="bar-pct">({{ $pctTotJG }}%)</span></div>
             </div>
             @endforeach
         </div>
+        <div class="chart-total-line"><span class="ctl-label">Total karyawan</span><span class="ctl-val">{{ $totalJG }}</span></div>
     </div>
     <div class="chart-card">
         <div class="chart-card-title">Distribusi per Person Grade</div>
         <div class="chart-card-sub">Jumlah karyawan aktif (PG tertinggi → terendah)</div>
-        @php $maxPG = $distribusiPersonGrade->max('total') ?: 1; @endphp
+        @php $maxPG = $distribusiPersonGrade->max('total') ?: 1; $totalPG = $distribusiPersonGrade->sum('total'); @endphp
         <div class="bar-chart">
             @forelse($distribusiPersonGrade as $pg)
-            @php $pctPG = round(($pg['total']/$maxPG)*100); @endphp
+            @php $pctPG = round(($pg['total']/$maxPG)*100); $pctTotPG = round(($pg['total']/($totalPG ?: 1))*100); @endphp
             <div class="bar-row">
                 <div class="bar-label">{{ $pg['nama'] }}</div>
                 <div class="bar-track">
                     <div class="bar-fill bar-fill-brand" data-pct="{{ $pctPG }}">{{ $pg['total'] }}</div>
                 </div>
-                <div class="bar-val">{{ $pg['total'] }}</div>
+                <div class="bar-val">{{ $pg['total'] }} <span class="bar-pct">({{ $pctTotPG }}%)</span></div>
             </div>
             @empty
             <div style="text-align:center;padding:14px;color:#9ca3af;font-size:12px;">Belum ada data person grade</div>
             @endforelse
         </div>
+        @if($totalPG > 0)
+        <div class="chart-total-line"><span class="ctl-label">Total karyawan</span><span class="ctl-val">{{ $totalPG }}</span></div>
+        @endif
     </div>
 </div>
 
@@ -953,34 +961,38 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
     <div class="chart-card">
         <div class="chart-card-title">Distribusi per Band</div>
         <div class="chart-card-sub">Jumlah karyawan aktif per Band</div>
-        @php $maxBand = collect($distribusiBand)->max('total') ?: 1; @endphp
+        @php $maxBand = collect($distribusiBand)->max('total') ?: 1; $totalBand = collect($distribusiBand)->sum('total'); @endphp
         <div class="bar-chart">
             @foreach($distribusiBand as $b)
-            @php $pctB = round(($b['total'] / $maxBand) * 100); @endphp
+            @php $pctB = round(($b['total'] / $maxBand) * 100); $pctTotB = round(($b['total'] / ($totalBand ?: 1)) * 100); @endphp
             <div class="bar-row">
                 <div class="bar-label" title="{{ $b['nama'] }}">{{ $b['nama'] }}</div>
                 <div class="bar-track"><div class="bar-fill bar-fill-brand" data-pct="{{ $pctB }}">{{ $b['total'] }}</div></div>
-                <div class="bar-val">{{ $b['total'] }}</div>
+                <div class="bar-val">{{ $b['total'] }} <span class="bar-pct">({{ $pctTotB }}%)</span></div>
             </div>
             @endforeach
         </div>
+        <div class="chart-total-line"><span class="ctl-label">Total karyawan</span><span class="ctl-val">{{ $totalBand }}</span></div>
     </div>
     <div class="chart-card">
         <div class="chart-card-title">Distribusi Pendidikan</div>
         <div class="chart-card-sub">Jenjang pendidikan karyawan aktif</div>
-        @php $maxPend = collect($distribusiPendidikan)->max('total') ?: 1; @endphp
+        @php $maxPend = collect($distribusiPendidikan)->max('total') ?: 1; $totalPend = collect($distribusiPendidikan)->sum('total'); @endphp
         <div class="bar-chart">
             @forelse($distribusiPendidikan as $p)
-            @php $pctP = round(($p['total'] / $maxPend) * 100); @endphp
+            @php $pctP = round(($p['total'] / $maxPend) * 100); $pctTotP = round(($p['total'] / ($totalPend ?: 1)) * 100); @endphp
             <div class="bar-row">
                 <div class="bar-label" title="{{ $p['nama'] }}">{{ $p['nama'] }}</div>
                 <div class="bar-track"><div class="bar-fill bar-fill-brand" data-pct="{{ $pctP }}">{{ $p['total'] }}</div></div>
-                <div class="bar-val">{{ $p['total'] }}</div>
+                <div class="bar-val">{{ $p['total'] }} <span class="bar-pct">({{ $pctTotP }}%)</span></div>
             </div>
             @empty
             <div style="text-align:center;padding:14px;color:#9ca3af;font-size:12px;">Belum ada data pendidikan</div>
             @endforelse
         </div>
+        @if($totalPend > 0)
+        <div class="chart-total-line"><span class="ctl-label">Total karyawan</span><span class="ctl-val">{{ $totalPend }}</span></div>
+        @endif
     </div>
 </div>
 

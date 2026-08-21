@@ -31,6 +31,23 @@
     .role-info { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;margin-top:6px;font-size:11px;color:#374151;line-height:1.7; }
     .role-info strong { color:#15803d; }
 
+    /* Panel akses menu (per-admin) */
+    .ma-head { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px; }
+    .ma-count { font-size:11px;font-weight:700;color:#15803d;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;white-space:nowrap; }
+    .menu-access-tools { display:flex;gap:8px; }
+    .menu-access-tools button { font-size:11px;color:#15803d;background:#f0fdf4;border:1px solid #bbf7d0;cursor:pointer;font-weight:600;font-family:inherit;padding:3px 10px;border-radius:7px;transition:all .12s; }
+    .menu-access-tools button:hover { background:#dcfce7; }
+    .menu-access-box { border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;max-height:260px;overflow-y:auto;background:#fafafa; }
+    .ma-group-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#15803d;margin:14px 0 6px;display:flex;align-items:center;gap:8px; }
+    .ma-group-label::after { content:'';flex:1;height:1px;background:#e5e7eb; }
+    .ma-group-label:first-child { margin-top:0; }
+    .ma-items { display:grid;grid-template-columns:1fr 1fr;gap:2px 8px; }
+    .ma-check { display:flex;align-items:center;gap:8px;font-size:12.5px;color:#374151;padding:5px 8px;border-radius:7px;cursor:pointer;transition:background .12s;min-width:0; }
+    .ma-check:hover { background:#f0fdf4; }
+    .ma-check span { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .ma-check input { width:15px;height:15px;accent-color:#15803d;cursor:pointer;flex-shrink:0; }
+    @media (max-width:520px){ .ma-items { grid-template-columns:1fr; } }
+
     .table-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden; }
     .table-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f3f4f6; }
     .table-title { font-size:14px;font-weight:700;color:#111827; }
@@ -58,6 +75,8 @@
     .btn-del-sm:hover { background:#fef2f2;border-color:#fecaca; }
     .btn-del-sm svg { width:13px;height:13px;stroke:#ef4444;fill:none;stroke-width:2; }
     .btn-del-sm.disabled { opacity:0.4;cursor:not-allowed;pointer-events:none; }
+    .btn-imp-sm { display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;border:1px solid #ddd6fe;background:#f5f3ff;color:#6d28d9;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.12s;white-space:nowrap; }
+    .btn-imp-sm:hover { background:#ede9fe;border-color:#c4b5fd; }
 
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
     .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:280px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
@@ -76,7 +95,7 @@
 
     .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center; }
     .modal-backdrop.show { display:flex; }
-    .modal-box { background:white;border-radius:16px;padding:28px;width:100%;max-width:460px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.4,0,0.2,1); }
+    .modal-box { background:white;border-radius:16px;padding:28px;width:100%;max-width:480px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.4,0,0.2,1);max-height:90vh;overflow-y:auto; }
     .modal-title { font-size:16px;font-weight:700;color:#111827;margin-bottom:16px; }
     .modal-actions { display:flex;gap:10px;margin-top:20px; }
     .modal-btn { flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all 0.15s; }
@@ -191,13 +210,39 @@
             <div class="form-group">
                 <label class="form-label">Role</label>
                 <div class="select-wrap">
-                    <select name="role" id="editRole" class="form-input">
+                    <select name="role" id="editRole" class="form-input" onchange="toggleMenuPanel('editMenuPanel', this.value)">
                         <option value="user">User (Hanya Struktur Organisasi)</option>
                         <option value="admin">Admin</option>
                         <option value="super_admin">Super Admin</option>
                     </select>
                 </div>
             </div>
+
+            {{-- Akses menu — hanya untuk role Admin --}}
+            <div class="form-group" id="editMenuPanel" style="display:none;">
+                <div class="ma-head">
+                    <label class="form-label" style="margin:0;display:flex;align-items:center;gap:8px;">Akses Menu <span class="ma-count" id="editMenuCount">0 dipilih</span></label>
+                    <div class="menu-access-tools">
+                        <button type="button" onclick="toggleAllMenus('editMenuBox', true)">Pilih semua</button>
+                        <button type="button" onclick="toggleAllMenus('editMenuBox', false)">Kosongkan</button>
+                    </div>
+                </div>
+                <div class="menu-access-box" id="editMenuBox">
+                    @foreach($menuGroups as $group => $items)
+                    <div class="ma-group-label">{{ $group }}</div>
+                    <div class="ma-items">
+                        @foreach($items as $key => $def)
+                        <label class="ma-check">
+                            <input type="checkbox" name="menu_access[]" value="{{ $key }}">
+                            <span>{{ $def['label'] }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                    @endforeach
+                </div>
+                <span class="form-hint">Centang menu yang boleh dibuka admin ini.</span>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Password Baru</label>
                 <input type="password" name="password" class="form-input" placeholder="Kosongkan jika tidak diubah" />
@@ -232,6 +277,24 @@
 <form id="formHapus" method="POST" style="display:none">
     @csrf
     @method('DELETE')
+</form>
+
+{{-- Modal Masuk Sebagai --}}
+<div class="modal-backdrop" id="modalImpersonate">
+    <div class="modal-box center">
+        <div class="modal-icon-wrap" style="background:#f5f3ff;">
+            <span style="font-size:26px;line-height:1;">🎭</span>
+        </div>
+        <div class="modal-title">Masuk sebagai akun ini?</div>
+        <p style="font-size:13px;color:#6b7280;margin-bottom:24px;" id="impDesc">—</p>
+        <div class="modal-actions">
+            <button type="button" class="modal-btn cancel" onclick="closeImpersonateModal()">Batal</button>
+            <button type="button" class="modal-btn save" onclick="submitImpersonate(this)">Ya, Masuk</button>
+        </div>
+    </div>
+</div>
+<form id="formImpersonate" method="POST" style="display:none">
+    @csrf
 </form>
 
 <div class="page-header">
@@ -291,6 +354,33 @@
                     <div class="error-msg">{{ $message }}</div>
                 @enderror
             </div>
+
+            {{-- Akses menu — hanya untuk role Admin --}}
+            <div class="form-group" id="createMenuPanel" style="display:none;">
+                <div class="ma-head">
+                    <label class="form-label" style="margin:0;display:flex;align-items:center;gap:8px;">Akses Menu <span class="ma-count" id="createMenuCount">0 dipilih</span></label>
+                    <div class="menu-access-tools">
+                        <button type="button" onclick="toggleAllMenus('createMenuBox', true)">Pilih semua</button>
+                        <button type="button" onclick="toggleAllMenus('createMenuBox', false)">Kosongkan</button>
+                    </div>
+                </div>
+                <div class="menu-access-box" id="createMenuBox">
+                    @foreach($menuGroups as $group => $items)
+                    <div class="ma-group-label">{{ $group }}</div>
+                    <div class="ma-items">
+                        @foreach($items as $key => $def)
+                        <label class="ma-check">
+                            <input type="checkbox" name="menu_access[]" value="{{ $key }}"
+                                   {{ in_array($key, old('menu_access', []), true) ? 'checked' : '' }}>
+                            <span>{{ $def['label'] }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                    @endforeach
+                </div>
+                <span class="form-hint">Centang menu yang boleh dibuka admin ini.</span>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Password *</label>
                 <input type="password" name="password"
@@ -367,10 +457,18 @@
                                 data-nik="{{ $user->nik }}"
                                 data-email="{{ $user->email }}"
                                 data-role="{{ $user->role }}"
+                                data-menus='@json($user->menu_access ?? [])'
                                 data-url="{{ route('akun.update', $user) }}"
                                 onclick="openEditModal(this)">
                                 Edit
                             </button>
+                            @if($user->role !== 'super_admin' && $user->id !== auth()->id())
+                            <button type="button" class="btn-imp-sm"
+                                data-url="{{ route('akun.impersonate', $user) }}"
+                                data-name="{{ $user->name }}"
+                                onclick="openImpersonateModal(this.dataset.url, this.dataset.name)"
+                                title="Masuk sebagai akun ini untuk melihat aksesnya">🎭 Masuk sebagai</button>
+                            @endif
                             <button type="button"
                                 class="btn-del-sm {{ $user->id === auth()->id() ? 'disabled' : '' }}"
                                 data-url="{{ route('akun.destroy', $user) }}"
@@ -434,7 +532,39 @@
     };
     function updateRoleInfo(val) {
         document.getElementById('roleInfo').innerHTML = roleDesc[val] || '';
+        toggleMenuPanel('createMenuPanel', val);
+        updateMenuCount('createMenuBox', 'createMenuCount');
     }
+
+    // Tampilkan panel akses menu hanya saat role = admin
+    function toggleMenuPanel(panelId, role) {
+        const p = document.getElementById(panelId);
+        if (p) p.style.display = (role === 'admin') ? '' : 'none';
+    }
+
+    // Centang / kosongkan semua checkbox di sebuah kotak menu
+    function toggleAllMenus(boxId, checked) {
+        document.querySelectorAll('#' + boxId + ' input[type=checkbox]')
+            .forEach(cb => cb.checked = checked);
+        updateMenuCount(boxId, boxId === 'createMenuBox' ? 'createMenuCount' : 'editMenuCount');
+    }
+
+    // Perbarui teks "X dipilih"
+    function updateMenuCount(boxId, countId) {
+        const box = document.getElementById(boxId);
+        const el  = document.getElementById(countId);
+        if (!box || !el) return;
+        const total   = box.querySelectorAll('input[type=checkbox]').length;
+        const checked = box.querySelectorAll('input[type=checkbox]:checked').length;
+        el.textContent = checked + ' / ' + total + ' dipilih';
+    }
+
+    // Pasang listener count untuk kedua kotak
+    ['createMenuBox', 'editMenuBox'].forEach(boxId => {
+        const box = document.getElementById(boxId);
+        if (box) box.addEventListener('change', () =>
+            updateMenuCount(boxId, boxId === 'createMenuBox' ? 'createMenuCount' : 'editMenuCount'));
+    });
     window.addEventListener('DOMContentLoaded', () => {
         const sel = document.getElementById('roleSelect');
         if (sel) updateRoleInfo(sel.value);
@@ -460,6 +590,15 @@
         document.getElementById('editEmail').value = btn.dataset.email;
         document.getElementById('editRole').value  = btn.dataset.role;
         document.getElementById('formEdit').action = btn.dataset.url;
+
+        // Isi checkbox akses menu sesuai data user, lalu tampilkan bila admin
+        let menus = [];
+        try { menus = JSON.parse(btn.dataset.menus || '[]'); } catch (e) { menus = []; }
+        document.querySelectorAll('#editMenuBox input[type=checkbox]')
+            .forEach(cb => cb.checked = menus.includes(cb.value));
+        toggleMenuPanel('editMenuPanel', btn.dataset.role);
+        updateMenuCount('editMenuBox', 'editMenuCount');
+
         document.getElementById('modalEdit').classList.add('show');
         document.body.style.overflow = 'hidden';
     }
@@ -486,13 +625,33 @@
         document.getElementById('formHapus').submit();
     }
 
-    ['modalEdit', 'modalHapus'].forEach(id => {
+    // ── Masuk sebagai (impersonate) ──
+    let impUrl = null;
+    function openImpersonateModal(url, nama) {
+        impUrl = url;
+        document.getElementById('impDesc').innerHTML =
+            'Anda akan masuk sebagai <strong>' + nama + '</strong> dan melihat aplikasi sesuai aksesnya. Bisa kembali kapan saja lewat banner di atas.';
+        document.getElementById('modalImpersonate').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeImpersonateModal() {
+        document.getElementById('modalImpersonate').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function submitImpersonate(btn) {
+        if (btn) { btn.disabled = true; btn.textContent = 'Memproses…'; }
+        const f = document.getElementById('formImpersonate');
+        f.action = impUrl;
+        f.submit();
+    }
+
+    ['modalEdit', 'modalHapus', 'modalImpersonate'].forEach(id => {
         document.getElementById(id).addEventListener('click', function(e) {
             if (e.target === this) { this.classList.remove('show'); document.body.style.overflow = ''; }
         });
     });
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { closeEditModal(); closeHapusModal(); }
+        if (e.key === 'Escape') { closeEditModal(); closeHapusModal(); closeImpersonateModal(); }
     });
 </script>
 @endpush

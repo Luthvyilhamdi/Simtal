@@ -18,6 +18,7 @@ use App\Http\Controllers\HistoryPejabatController;
 use App\Http\Controllers\HistoryPenilaianKalibrasiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AkunController;
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\SuratPentingController;
@@ -51,6 +52,9 @@ Route::get('/kebijakan-privasi', function () {
 })->name('kebijakan-privasi');
 
 Route::middleware('auth')->group(function () {
+
+    // Halaman "belum ada akses" — landing admin yang belum diberi menu apa pun.
+    Route::get('/no-access', fn () => view('no-access'))->name('no-access');
 
     // ===== PROFILE (semua role) =====
     Route::get('/profile',           [ProfileController::class, 'edit'])->name('profile.edit');
@@ -96,6 +100,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/{notifikasi}/read', [NotifikasiController::class, 'read'])->name('read');
         Route::delete('/{notifikasi}',    [NotifikasiController::class, 'destroy'])->name('destroy');
     });
+
+    // Keluar dari mode "masuk sebagai" — harus di grup auth (bukan super_admin)
+    // agar tetap bisa diakses selagi menyamar sebagai akun lain.
+    Route::post('/impersonate/leave', [ImpersonationController::class, 'leave'])->name('impersonate.leave');
 
     // ===== SEMUA ROUTE BERIKUT: HANYA ADMIN & SUPER ADMIN =====
     Route::middleware('not_user_role')->group(function () {
@@ -334,6 +342,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('/',         [AkunController::class, 'store'])->name('store');
                 Route::put('/{akun}',    [AkunController::class, 'update'])->name('update');
                 Route::delete('/{akun}', [AkunController::class, 'destroy'])->name('destroy');
+                Route::post('/{akun}/impersonate', [ImpersonationController::class, 'start'])->name('impersonate');
             });
 
             Route::prefix('master')->name('master.')->group(function () {
