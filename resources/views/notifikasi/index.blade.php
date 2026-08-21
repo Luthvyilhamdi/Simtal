@@ -54,16 +54,12 @@
 <div class="page-header">
     <div>
         <div class="page-title">🔔 Notifikasi</div>
-        <div class="page-sub">{{ $unread }} belum dibaca · {{ $notifikasis->total() }} total</div>
+        <div class="page-sub"><span id="unreadCount">{{ $unread }}</span> belum dibaca · <span id="totalCount">{{ $notifikasis->total() }}</span> total</div>
     </div>
-    @if($unread > 0)
-    <form method="POST" action="{{ route('notifikasi.readAll') }}">
-        @csrf
-        <button type="submit" class="btn-read-all">
-            ✓ Tandai Semua Dibaca
-        </button>
-    </form>
-    @endif
+    <button type="button" class="btn-read-all" id="btnReadAll" onclick="readAllNotifIndex()"
+            style="{{ $unread > 0 ? '' : 'display:none;' }}">
+        ✓ Tandai Semua Dibaca
+    </button>
 </div>
 
 {{-- Filter --}}
@@ -86,6 +82,7 @@
     @foreach($notifikasis as $n)
     @php $w = $n->warna; @endphp
     <div class="notif-item {{ !$n->is_read ? 'unread ' . $n->level : '' }}"
+         id="notif-{{ $n->id }}" data-id="{{ $n->id }}"
          style="{{ !$n->is_read ? 'background:'.$w['bg'].';' : '' }}">
         <div class="notif-icon" style="background:{{ $w['bg'] }};border:1px solid {{ $w['border'] }};">
             {{ $n->icon }}
@@ -99,15 +96,12 @@
         </div>
         <div class="notif-right">
             @if(!$n->is_read)
-                <div class="unread-dot" style="background:{{ $w['text'] }};"></div>
+                <button type="button" class="btn-read js-read" onclick="markReadIndex({{ $n->id }})">Tandai dibaca</button>
+                <div class="unread-dot js-dot" style="background:{{ $w['text'] }};"></div>
             @endif
-            <form method="POST" action="{{ route('notifikasi.destroy', $n) }}" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn-del-notif" title="Hapus">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </form>
+            <button type="button" class="btn-del-notif" title="Hapus" onclick="deleteNotifIndex({{ $n->id }})">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
     </div>
     @endforeach
@@ -185,3 +179,63 @@
 @endif
 
 @endsection
+
+@push('scripts')
+<script>
+    const CSRF = '{{ csrf_token() }}';
+
+    function currentUnread() {
+        return parseInt(document.getElementById('unreadCount').textContent) || 0;
+    }
+    function setUnread(n) {
+        n = Math.max(0, n);
+        document.getElementById('unreadCount').textContent = n;
+        const btn = document.getElementById('btnReadAll');
+        if (btn) btn.style.display = n > 0 ? '' : 'none';
+    }
+    // Ubah tampilan kartu jadi "sudah dibaca"
+    function markCardRead(card) {
+        if (!card) return;
+        card.classList.remove('unread', 'info', 'warning', 'danger');
+        card.style.background = '';
+        const judul = card.querySelector('.notif-judul');
+        if (judul) judul.style.color = '';
+        card.querySelectorAll('.js-read, .js-dot').forEach(el => el.remove());
+    }
+
+    // Tandai 1 notifikasi sudah dibaca
+    async function markReadIndex(id) {
+        const card = document.getElementById('notif-' + id);
+        try {
+            await fetch(`/notifikasi/${id}/read`, { method: 'POST', headers: { 'X-CSRF-TOKEN': CSRF } });
+        } catch (e) { return; }
+        if (card && card.classList.contains('unread')) setUnread(currentUnread() - 1);
+        markCardRead(card);
+    }
+
+    // Hapus 1 notifikasi (langsung hilang tanpa pindah halaman)
+    async function deleteNotifIndex(id) {
+        const card = document.getElementById('notif-' + id);
+        try {
+            await fetch(`/notifikasi/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': CSRF } });
+        } catch (e) { return; }
+        if (card) {
+            if (card.classList.contains('unread')) setUnread(currentUnread() - 1);
+            card.remove();
+        }
+        const totalEl = document.getElementById('totalCount');
+        if (totalEl) totalEl.textContent = Math.max(0, (parseInt(totalEl.textContent) || 0) - 1);
+        // Bila halaman jadi kosong, muat ulang agar empty-state / paginasi benar
+        if (!document.querySelector('.notif-item')) location.reload();
+    }
+
+    // Tandai semua sudah dibaca (untuk akun ini)
+    async function readAllNotifIndex() {
+        try {
+            await fetch('{{ route('notifikasi.readAll') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': CSRF } });
+        } catch (e) { return; }
+        document.querySelectorAll('.notif-item.unread').forEach(markCardRead);
+        setUnread(0);
+    }
+</script>
+@endpush

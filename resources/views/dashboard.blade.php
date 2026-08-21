@@ -848,7 +848,7 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 </div>
                 @endforeach
             </div>
-            {{-- Status IDP: sudah exp & akan exp --}}
+            {{-- Status Assessment: sudah exp & akan exp --}}
             <div style="width:100%;display:flex;gap:8px;border-top:1px solid #f0f0ec;padding-top:12px;">
                 <div style="flex:1;background:#fef2f2;border-radius:9px;padding:9px 10px;text-align:center;">
                     <div style="font-size:17px;font-weight:800;color:#dc2626;line-height:1.1;">{{ $assessmentExpired }}</div>
