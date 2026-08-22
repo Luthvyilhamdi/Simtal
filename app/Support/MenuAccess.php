@@ -25,7 +25,7 @@ class MenuAccess
     {
         return [
             'dashboard'          => ['label' => 'Dashboard',             'group' => 'Umum',              'home' => 'dashboard',                       'routes' => ['dashboard']],
-            'karyawan'           => ['label' => 'Profil Karyawan',       'group' => 'Data Karyawan',     'home' => 'karyawan.index',                  'routes' => ['karyawan.*', 'history_jabatan.*', 'riwayat_pendidikan.*', 'history_assessment.*', 'assessment_kompetensi.*', 'toefl.*']],
+            'karyawan'           => ['label' => 'Profil Karyawan',       'group' => 'Data Karyawan',     'home' => 'karyawan.index',                  'routes' => ['karyawan.*', 'history_jabatan.*', 'riwayat_pendidikan.*', 'history_assessment.*', 'assessment_kompetensi.*', 'toefl.*', 'penilaian_karyawan.*', 'kalibrasi_karyawan.*']],
             'history_jabatan'    => ['label' => 'History Jabatan',       'group' => 'Data Karyawan',     'home' => 'history_karyawan.index',          'routes' => ['history_karyawan.*']],
             'history_pendidikan' => ['label' => 'History Pendidikan',    'group' => 'Data Karyawan',     'home' => 'riwayat_pendidikan_all.index',    'routes' => ['riwayat_pendidikan_all.*']],
             'struktur'           => ['label' => 'Struktur Organisasi',   'group' => 'Data Karyawan',     'home' => 'struktur-organisasi.index',       'routes' => ['struktur-organisasi.*']],
@@ -33,6 +33,10 @@ class MenuAccess
             'usulan_promosi'     => ['label' => 'Usulan Promosi',       'group' => 'Manajemen Talenta', 'home' => 'usulan_promosi.index',            'routes' => ['usulan_promosi.*']],
             'reminder_promosi'   => ['label' => 'Reminder Promosi',     'group' => 'Manajemen Talenta', 'home' => 'reminder_promosi.index',          'routes' => ['reminder_promosi.*']],
             'usulan_mutasi'      => ['label' => 'Rotasi & Mutasi',      'group' => 'Manajemen Talenta', 'home' => 'usulan_mutasi.index',             'routes' => ['usulan_mutasi.*']],
+            'struktur_versi'     => ['label' => 'Riwayat Struktur Organisasi', 'group' => 'Organisasi', 'home' => 'organisasi.struktur.index',  'routes' => ['organisasi.struktur.*', 'organisasi.unit.*']],
+            'job_profile'        => ['label' => 'Job Profile',          'group' => 'Organisasi',        'home' => 'organisasi.job-profile.index', 'routes' => ['organisasi.job-profile.*']],
+            'kompetensi_teknis'  => ['label' => 'Kompetensi Teknis',    'group' => 'Organisasi',        'home' => 'organisasi.kompetensi-teknis.index', 'routes' => ['organisasi.kompetensi-teknis.*']],
+            'job_family'         => ['label' => 'Job Family',           'group' => 'Organisasi',        'home' => 'organisasi.job-family.index', 'routes' => ['organisasi.job-family.*']],
             'history_pejabat'    => ['label' => 'Pejabat Definitif',    'group' => 'Kepejabatan',       'home' => 'history_pejabat.index',           'routes' => ['history_pejabat.*']],
             'pgs_pjs'            => ['label' => 'PGS / PJS',            'group' => 'Kepejabatan',       'home' => 'pgs_pjs.index',                   'routes' => ['pgs_pjs.*']],
             'assessment'         => ['label' => 'History Assessment',   'group' => 'Assessment & Penilaian', 'home' => 'history_assessment_all.index', 'routes' => ['history_assessment_all.*']],

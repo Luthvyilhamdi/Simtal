@@ -19,10 +19,14 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        // Login pakai NIK, bukan email — lihat LoginRequest::rules().
+        $user = User::factory()->create([
+            'nik'  => '1234567890',
+            'role' => 'super_admin',
+        ]);
 
         $response = $this->post('/login', [
-            'email' => $user->email,
+            'nik' => $user->nik,
             'password' => 'password',
         ]);
 
@@ -32,10 +36,10 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['nik' => '1234567890']);
 
         $this->post('/login', [
-            'email' => $user->email,
+            'nik' => $user->nik,
             'password' => 'wrong-password',
         ]);
 

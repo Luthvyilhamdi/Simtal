@@ -23,8 +23,12 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <!-- MySQL, bukan sqlite: sebagian migrasi pakai DDL raw MySQL (ALTER
+             TABLE MODIFY COLUMN) yang tidak jalan di SQLite. DB_HOST/PORT/
+             USERNAME/PASSWORD diambil dari .env lokal masing-masing dev;
+             database ini harus sudah dibuat manual sebelum jalan test. -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="simtal_testing"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
