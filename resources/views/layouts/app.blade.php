@@ -375,10 +375,10 @@
                 </a>
             </div>
 
-            {{-- Organization & HC Strategy (accordion) --}}
-            <div class="nav-link master-toggle {{ request()->routeIs('organisasi.*') ? 'active open' : '' }}" data-tooltip="Organization & HC Strategy" onclick="toggleMaster(this)">
+            {{-- Organisasi (accordion) --}}
+            <div class="nav-link master-toggle {{ request()->routeIs('organisasi.*') ? 'active open' : '' }}" data-tooltip="Organisasi" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M12 12H5v4M12 12h7v4"/></svg>
-                <span class="nav-text">Organization & HC Strategy</span>
+                <span class="nav-text">Organisasi</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="master-sub {{ request()->routeIs('organisasi.*') ? 'open' : '' }}">
@@ -386,9 +386,17 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
                     <span class="nav-text">Riwayat Struktur Organisasi</span>
                 </a>
-                <a href="{{ route('organisasi.struktur.search') }}" data-tooltip="Cari Unit" class="nav-link {{ request()->routeIs('organisasi.struktur.search') || request()->routeIs('organisasi.unit.*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <span class="nav-text">Cari Unit</span>
+                <a href="{{ route('organisasi.job-profile.index') }}" data-tooltip="Job Profile" class="nav-link {{ request()->routeIs('organisasi.job-profile.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span class="nav-text">Job Profile</span>
+                </a>
+                <a href="{{ route('organisasi.kompetensi-teknis.index') }}" data-tooltip="Kompetensi Teknis" class="nav-link {{ request()->routeIs('organisasi.kompetensi-teknis.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                    <span class="nav-text">Kompetensi Teknis</span>
+                </a>
+                <a href="{{ route('organisasi.job-family.index') }}" data-tooltip="Job Family" class="nav-link {{ request()->routeIs('organisasi.job-family.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5"/></svg>
+                    <span class="nav-text">Job Family</span>
                 </a>
             </div>
 

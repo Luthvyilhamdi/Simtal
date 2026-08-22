@@ -32,6 +32,11 @@ class StrukturOrganisasiVersi extends Model
         return $this->hasMany(UnitOrganisasiTransisi::class);
     }
 
+    public function jobProfiles()
+    {
+        return $this->hasMany(JobProfile::class);
+    }
+
     // Versi berikutnya (berdasarkan tanggal_mulai_berlaku)
     public function versiBerikutnya()
     {

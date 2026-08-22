@@ -61,7 +61,29 @@
     .org-toggle:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
     .org-history-btn { width:18px;height:18px;border-radius:5px;border:1px solid #e5e7eb;background:#f9fafb;color:#6b7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none; }
     .org-history-btn:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .org-history-btn svg { width:11px;height:11px; }
+    {{-- 14px (naik dari 11px): tombol pembungkus TETAP 18x18 (interior 16x16 stlh border
+         1px box-sizing:border-box) — 14px sisa 1px margin tiap sisi, cukup besar utk
+         lebih mudah dilihat/diklik tapi tidak mepet ke border tombol. 15px sisa cuma
+         0.5px, terlalu mepet. Lihat .org-jobprofile-btn svg (sama persis, biar konsisten). --}}
+    .org-history-btn svg { width:14px;height:14px; }
+    /* Badge indikator Job Profile — 2 state warna SAMA PERSIS dgn skema yg sudah dipakai
+       di halaman Job Profile sendiri (.profile-count-badge has/none di organisasi/
+       job-profile/show.blade.php): hijau = ada, abu-abu netral = belum ada (BUKAN
+       merah/warning — kondisi data wajar, bukan error). */
+    .org-jobprofile-btn { width:18px;height:18px;border-radius:5px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none; }
+    .org-jobprofile-btn svg { width:14px;height:14px; }
+    .org-jobprofile-btn.has { background:#dcfce7;color:#15803d;border-color:#bbf7d0; }
+    .org-jobprofile-btn.has:hover { background:#bbf7d0; }
+    .org-jobprofile-btn.none { background:#f3f4f6;color:#9ca3af; }
+    .org-jobprofile-btn.none:hover { background:#e5e7eb;color:#6b7280; }
+    /* Icon Kompetensi Teknis — elemen BARU di sebelah icon Job Profile (fitur beda,
+       tombol Job Profile di atas TIDAK disentuh). Ungu (SAMA dgn skema warna
+       status-pecah/status-gabung yg sudah ada di project ini, mis. unit-timeline.blade.php)
+       biar beda jelas dari hijau (Job Profile) & abu-abu (Riwayat), sengaja BUKAN amber
+       krn amber sudah dipakai konsisten sbg warna highlight pencarian (.org-box-highlight). */
+    .org-komtek-btn { width:18px;height:18px;border-radius:5px;border:1px solid #ddd6fe;background:#f5f3ff;color:#7c3aed;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none; }
+    .org-komtek-btn:hover { background:#ede9fe; }
+    .org-komtek-btn svg { width:14px;height:14px; }
     /* line-clamp 3 baris + ellipsis — pasangan dari height:160px tetap di .org-box di
        atas: nama unit TIDAK BOLEH lagi memanjangkan box (itu yg bikin tinggi box beda2
        per cabang), jadi dibatasi keras 3 baris. Data terpanjang saat ini (43 karakter)
@@ -154,7 +176,7 @@
             <div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">Belum ada unit di versi ini.</div>
         @else
             @foreach($roots as $root)
-                <x-org-tree-node :node="$root" :by-parent="$byParent" :totals="$totals" />
+                <x-org-tree-node :node="$root" :by-parent="$byParent" :totals="$totals" :job-profile-unit-ids="$jobProfileUnitIds" :job-profile-versi-id="$versi->id" :kompetensi-teknis-unit-ids="$kompetensiTeknisUnitIds" :kompetensi-teknis-versi-id="$versi->id" />
             @endforeach
         @endif
     </div>
@@ -162,6 +184,7 @@
 </div>
 
 @include('organisasi.struktur.partials.riwayat-overlay-shell')
+@include('kompetensi_teknis.partials.overlay-shell')
 
 @endsection
 

@@ -85,7 +85,9 @@
     .org-toggle:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
     .org-history-btn { width:18px;height:18px;border-radius:5px;border:1px solid #e5e7eb;background:#f9fafb;color:#6b7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none; }
     .org-history-btn:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .org-history-btn svg { width:11px;height:11px; }
+    {{-- 14px (naik dari 11px), konsisten dgn tree.blade.php — tombol pembungkus tetap
+         18x18, cukup ruang (lihat catatan di tree.blade.php). --}}
+    .org-history-btn svg { width:14px;height:14px; }
     /* line-clamp 3 baris — pasangan dari height:240px tetap di .org-box. Lihat catatan
        sama di tree.blade.php. */
     .org-box-name { font-size:12.5px;font-weight:700;color:#111827;line-height:1.3;margin-bottom:8px;min-height:32px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-clamp:3;overflow:hidden; }

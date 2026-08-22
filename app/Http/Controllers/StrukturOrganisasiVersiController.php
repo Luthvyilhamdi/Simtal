@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Exports\StrukturOrganisasiVersiExport;
 use App\Imports\StrukturOrganisasiBaselineImport;
 use App\Imports\StrukturOrganisasiLanjutanImport;
+use App\Models\JobProfile;
 use App\Models\StrukturOrganisasiVersi;
+use App\Models\UnitKompetensiTeknis;
 use App\Models\UnitOrganisasi;
 use App\Models\UnitOrganisasiSnapshot;
 use App\Models\UnitOrganisasiTransisi;
 use App\Services\GenealogyBandLayout;
 use App\Services\GenealogyGraphBuilder;
 use App\Services\LeveledTransitionNarrator;
+use App\Services\SnapshotDfsOrderer;
 use App\Services\TransitionNarrator;
 use App\Traits\LogsActivity;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -222,6 +225,21 @@ class StrukturOrganisasiVersiController extends Controller
 
         $statusInfo = $this->statusUnit($unit->id, $ledger);
 
+        // Tab "Job Profile": 1 entri per versi final di mana unit ini EKSIS (snapshot ada,
+        // sama persis $snaps yg dipakai tab Diagram/List di atas — bubar/belum lahir di
+        // suatu versi otomatis tidak ikut). 1 query tambahan saja (IN pada versi milik
+        // $snaps), di-groupBy di memori spy tidak N+1 per versi.
+        $jobProfilesByVersi = JobProfile::where('unit_organisasi_id', $unit->id)
+            ->whereIn('struktur_organisasi_versi_id', $snaps->pluck('struktur_organisasi_versi_id'))
+            ->orderBy('nama_jabatan')
+            ->get()
+            ->groupBy('struktur_organisasi_versi_id');
+
+        $jobProfileTimeline = $snaps->map(fn ($snap) => [
+            'versi'    => $ledger['finalVersions']->firstWhere('id', $snap->struktur_organisasi_versi_id),
+            'profiles' => $jobProfilesByVersi->get($snap->struktur_organisasi_versi_id, collect()),
+        ])->values();
+
         // Relasi asal: event di mana unit ini adalah HASIL (unit_baru_id) dari pecah/gabung unit lain
         $asalDari = $transisiTerkait
             ->where('unit_baru_id', $unit->id)
@@ -241,11 +259,12 @@ class StrukturOrganisasiVersiController extends Controller
         );
 
         return view('organisasi.struktur.unit-timeline', [
-            'unit'       => $unit,
-            'points'     => $points,
-            'statusInfo' => $statusInfo,
-            'asalDari'   => $asalDari,
-            'graph'      => $graph,
+            'unit'               => $unit,
+            'points'             => $points,
+            'statusInfo'         => $statusInfo,
+            'asalDari'           => $asalDari,
+            'graph'              => $graph,
+            'jobProfileTimeline' => $jobProfileTimeline,
         ]);
     }
 
@@ -1978,29 +1997,9 @@ class StrukturOrganisasiVersiController extends Controller
      */
     private function dfsOrderSnapshots(Collection $units): array
     {
-        $byParent = $units->groupBy('parent_unit_organisasi_id');
-        $roots    = $byParent->get(null, collect())->values()->sortBy('nama_unit');
-
-        $ordered = [];
-        $walk = function ($node, $depth) use (&$walk, &$ordered, $byParent) {
-            $ordered[] = ['node' => $node, 'depth' => $depth];
-
-            $children = $byParent->get($node->unit_organisasi_id, collect())->sortBy('nama_unit');
-            $direktoratChildren = $children->filter(fn ($c) => $c->level === 'direktorat')->values();
-            $lainnya            = $children->reject(fn ($c) => $c->level === 'direktorat')->values();
-
-            foreach ($lainnya as $child) {
-                $walk($child, $depth + 1);
-            }
-            foreach ($direktoratChildren as $child) {
-                $walk($child, 0);
-            }
-        };
-        foreach ($roots as $root) {
-            $walk($root, 0);
-        }
-
-        return $ordered;
+        // Logic aslinya diekstrak apa adanya ke SnapshotDfsOrderer supaya bisa
+        // dipakai bareng JobProfileController tanpa duplikasi (lihat docblock di sana).
+        return SnapshotDfsOrderer::order($units);
     }
 
     public function exportPdf(StrukturOrganisasiVersi $versi)
@@ -2569,6 +2568,22 @@ class StrukturOrganisasiVersiController extends Controller
         $roots    = $byParent->get(null, collect())->values();
         $totals   = UnitOrganisasiSnapshot::totalFormasiBawahanBatch($units);
 
+        // SET unit_organisasi_id yg punya >=1 Job Profile di versi ini — dihitung SEKALI
+        // di sini (1 query), dipakai <x-org-tree-node> per-node via containment check
+        // (bukan query per-node). Cuma tree.blade.php yg pass ini ke komponen; Compare &
+        // Preview Import Lanjutan tidak menyentuh variabel ini sama sekali.
+        $jobProfileUnitIds = JobProfile::where('struktur_organisasi_versi_id', $versi->id)
+            ->distinct()
+            ->pluck('unit_organisasi_id');
+
+        // SET unit_organisasi_id yg punya >=1 baris Kompetensi Teknis di versi ini — pola
+        // SAMA PERSIS dgn $jobProfileUnitIds di atas (1 query, containment check per-node
+        // di <x-org-tree-node>, bukan query per-node). Fitur baru, TIDAK menyentuh variabel
+        // $jobProfileUnitIds di atas.
+        $kompetensiTeknisUnitIds = UnitKompetensiTeknis::where('struktur_organisasi_versi_id', $versi->id)
+            ->distinct()
+            ->pluck('unit_organisasi_id');
+
         // Depth tiap unit (BFS dari root) — dipakai untuk default expand 2 level teratas
         $defaultExpandedIds = [];
         $queue = $roots->map(fn ($r) => [$r, 0])->all();
@@ -2590,6 +2605,8 @@ class StrukturOrganisasiVersiController extends Controller
             'totals'             => $totals,
             'defaultExpandedIds' => $defaultExpandedIds,
             'allIds'             => $units->pluck('unit_organisasi_id')->values(),
+            'jobProfileUnitIds'  => $jobProfileUnitIds,
+            'kompetensiTeknisUnitIds' => $kompetensiTeknisUnitIds,
         ]);
     }
 

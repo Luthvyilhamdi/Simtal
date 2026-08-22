@@ -22,4 +22,9 @@ class UnitOrganisasi extends Model
     {
         return $this->hasMany(UnitOrganisasiTransisi::class, 'unit_baru_id');
     }
+
+    public function jobProfiles()
+    {
+        return $this->hasMany(JobProfile::class);
+    }
 }

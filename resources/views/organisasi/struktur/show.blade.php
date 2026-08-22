@@ -143,6 +143,10 @@
             <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 8v8M9 11l3-3 3 3"/></svg>
             Bandingkan dengan Versi Lain
         </a>
+        <a href="{{ route('organisasi.job-profile.show', $versi) }}" class="btn-edit">
+            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Job Profile
+        </a>
         @endif
         @if($versi->isDraft())
         <button type="button" class="btn-finalize" @click="showFinalizeModal = true">

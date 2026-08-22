@@ -35,6 +35,10 @@ use App\Http\Controllers\KalibrasiKaryawanController;
 use App\Http\Controllers\UsulanPromosiController;
 use App\Http\Controllers\ReminderPromosiController;
 use App\Http\Controllers\UsulanMutasiController;
+use App\Http\Controllers\JobFamilyController;
+use App\Http\Controllers\JobProfileController;
+use App\Http\Controllers\KompetensiTeknisController;
+use App\Http\Controllers\KompetensiTeknisImportController;
 use App\Http\Controllers\StrukturOrganisasiController;
 use App\Http\Controllers\StrukturOrganisasiVersiController;
 use App\Http\Controllers\ExportBuilderController;
@@ -308,6 +312,40 @@ Route::middleware('auth')->group(function () {
             Route::prefix('unit')->name('unit.')->group(function () {
                 Route::get('/{unit}/timeline', [StrukturOrganisasiVersiController::class, 'unitTimeline'])->name('timeline');
                 Route::get('/{unit}/riwayat-overlay', [StrukturOrganisasiVersiController::class, 'unitRiwayatOverlay'])->name('riwayat-overlay');
+                Route::get('/{unit}/kompetensi-teknis-overlay', [KompetensiTeknisController::class, 'unitOverlay'])->name('kompetensi-teknis-overlay');
+            });
+
+            Route::prefix('job-profile')->name('job-profile.')->group(function () {
+                Route::get('/',            [JobProfileController::class, 'index'])->name('index');
+                Route::get('/{versi}',     [JobProfileController::class, 'show'])->name('show');
+                Route::get('/{versi}/edit',[JobProfileController::class, 'edit'])->name('edit');
+                Route::post('/{versi}',    [JobProfileController::class, 'store'])->name('store');
+                Route::post('/{versi}/batch', [JobProfileController::class, 'storeBatch'])->name('storeBatch');
+                Route::delete('/{jobProfile}', [JobProfileController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('kompetensi-teknis')->name('kompetensi-teknis.')->group(function () {
+                Route::get('/', [KompetensiTeknisController::class, 'index'])->name('index');
+                Route::get('/{unit}/posisi-overlay', [KompetensiTeknisController::class, 'posisiOverlay'])->name('posisi-overlay');
+
+                // STEP 1 alur import self-service (upload -> parse -> preview mentah).
+                // Mapping unit & commit BELUM ada di sini (tahap terpisah berikutnya).
+                Route::prefix('import')->name('import.')->group(function () {
+                    Route::get('/',               [KompetensiTeknisImportController::class, 'create'])->name('create');
+                    Route::post('/',              [KompetensiTeknisImportController::class, 'store'])->name('store');
+                    Route::get('/{token}/preview',[KompetensiTeknisImportController::class, 'preview'])->name('preview');
+                    Route::get('/{token}/mapping',[KompetensiTeknisImportController::class, 'mapping'])->name('mapping');
+                    Route::post('/{token}/mapping',[KompetensiTeknisImportController::class, 'mappingStore'])->name('mapping.store');
+                    Route::get('/{token}/primary',[KompetensiTeknisImportController::class, 'primary'])->name('primary');
+                    Route::post('/{token}/primary',[KompetensiTeknisImportController::class, 'primaryStore'])->name('primary.store');
+                    Route::get('/{token}/review', [KompetensiTeknisImportController::class, 'review'])->name('review');
+                    Route::post('/{token}/review',[KompetensiTeknisImportController::class, 'reviewCommit'])->name('review.commit');
+                });
+            });
+
+            Route::prefix('job-family')->name('job-family.')->group(function () {
+                Route::get('/', [JobFamilyController::class, 'index'])->name('index');
+                Route::post('/', [JobFamilyController::class, 'store'])->name('store');
             });
         });
 

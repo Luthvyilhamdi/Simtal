@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Riwayat Struktur Organisasi')
-@section('breadcrumb-parent', 'Organization & HC Strategy')
+@section('breadcrumb-parent', 'Organisasi')
 @section('breadcrumb', 'Riwayat Struktur Organisasi')
 
 @push('styles')

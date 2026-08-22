@@ -16,8 +16,35 @@
     mis. "DIREKTORAT") TIDAK berubah/dihapus, prefix ini nambah di teks judul, bukan
     gantiin badge. Default false supaya Tree View & Preview Import TIDAK berubah sama
     sekali (di luar scope fitur prefix level) — HANYA compare.blade.php yg pass true.
+
+    $jobProfileUnitIds (Collection<int>|null, default null) & $jobProfileVersiId
+    (int|null, default null): pasangan prop OPT-IN utk badge indikator Job Profile
+    (link ke organisasi.job-profile.show). Default null KEDUANYA supaya consumer lain
+    (Compare, Preview Import Lanjutan) — yg TIDAK pernah pass prop ini — 0 berubah,
+    di SEMUA kedalaman rekursi, bukan cuma di panggilan root: komponen ini rekursif
+    manggil dirinya sendiri per anak (lihat @foreach($children) di bawah), jadi kedua
+    prop ini WAJIB diteruskan apa adanya ke tiap panggilan anak supaya node di
+    kedalaman berapa pun tetap bisa hitung status Job Profile-nya sendiri — tapi
+    selama caller root (tree.blade.php) satu2nya yg pass nilai non-null, seluruh
+    pohon di halaman LAIN tetap null total. $hasJobProfile per node dihitung sekali
+    di bawah dari containment check ke $jobProfileUnitIds (SET yg sudah dihitung
+    SEKALI oleh controller, bukan query per-node).
+
+    $kompetensiTeknisUnitIds (Collection<int>|null) & $kompetensiTeknisVersiId (int|null):
+    pasangan prop OPT-IN yg SAMA POLANYA persis dgn $jobProfileUnitIds/$jobProfileVersiId
+    di atas, utk icon Kompetensi Teknis (beda fitur, elemen BARU di sebelah icon Job
+    Profile — bukan pengganti/modifikasi elemen Job Profile yg sudah ada). Beda dgn Job
+    Profile (badge 2-state has/none SELALU tampil), icon ini HANYA muncul kalau
+    $hasKompetensiTeknis true — unit tanpa data kompetensi teknis tidak dapat icon sama
+    sekali. Klik icon membuka overlay vanilla JS (bukan Alpine), lihat
+    kompetensi_teknis/partials/overlay-shell.blade.php yg di-include sekali dari
+    tree.blade.php.
 --}}
-@props(['node', 'byParent', 'totals', 'boxHeight' => 160, 'showLevelPrefix' => false])
+@props([
+    'node', 'byParent', 'totals', 'boxHeight' => 160, 'showLevelPrefix' => false,
+    'jobProfileUnitIds' => null, 'jobProfileVersiId' => null,
+    'kompetensiTeknisUnitIds' => null, 'kompetensiTeknisVersiId' => null,
+])
 
 @php
     $children = $byParent->get($node->unit_organisasi_id, collect());
@@ -53,6 +80,13 @@
     // kurang 28px krn ke-lewat 1 gap) — itu akar penyebab kenapa node lintas-cabang
     // masih bisa beda tinggi meski jumlah tier yg dilompati sudah benar.
     $tierRowHeight = $boxHeight + 56;
+
+    // null = prop opt-in tidak dipakai oleh caller (Compare/Preview Import Lanjutan) ->
+    // badge SAMA SEKALI tidak dirender di bawah. true/false hanya mungkin kalau
+    // tree.blade.php yg manggil (satu2nya caller yg pass $jobProfileUnitIds non-null).
+    $hasJobProfile = is_null($jobProfileUnitIds) ? null : $jobProfileUnitIds->contains($node->unit_organisasi_id);
+
+    $hasKompetensiTeknis = is_null($kompetensiTeknisUnitIds) ? null : $kompetensiTeknisUnitIds->contains($node->unit_organisasi_id);
 @endphp
 
 <div class="org-node">
@@ -67,6 +101,20 @@
                    @click.stop="$store.riwayatOverlay.openPanel({{ $node->unit_organisasi_id }}, {{ \Illuminate\Support\Js::from(formatUnitLabel($node->nama_unit, $node->level)) }})">
                     <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </a>
+                @if(!is_null($hasJobProfile))
+                <a href="{{ route('organisasi.job-profile.show', ['versi' => $jobProfileVersiId, 'highlight' => $node->unit_organisasi_id]) }}"
+                   class="org-jobprofile-btn {{ $hasJobProfile ? 'has' : 'none' }}"
+                   title="{{ $hasJobProfile ? 'Ada Job Profile' : 'Belum ada Job Profile' }}"
+                   @click.stop>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </a>
+                @endif
+                @if($hasKompetensiTeknis === true)
+                <a href="javascript:void(0)" class="org-komtek-btn" title="Lihat Kompetensi Teknis"
+                   onclick="event.stopPropagation(); openKomtekOverlay({{ $node->unit_organisasi_id }}, {{ \Illuminate\Support\Js::from(formatUnitLabel($node->nama_unit, $node->level)) }}, {{ $kompetensiTeknisVersiId }})">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                </a>
+                @endif
                 @if($children->isNotEmpty())
                 <button type="button" class="org-toggle" @click="$store.tree.toggle({{ $node->unit_organisasi_id }})" :title="expanded ? 'Ciutkan' : 'Perluas'">
                     <span x-show="expanded" x-cloak>&minus;</span>
@@ -107,7 +155,7 @@
                 @if($tierGap > 1)
                 <div class="org-tier-spacer" style="height: {{ ($tierGap - 1) * $tierRowHeight }}px"></div>
                 @endif
-                <x-org-tree-node :node="$child" :by-parent="$byParent" :totals="$totals" :box-height="$boxHeight" :show-level-prefix="$showLevelPrefix" />
+                <x-org-tree-node :node="$child" :by-parent="$byParent" :totals="$totals" :box-height="$boxHeight" :show-level-prefix="$showLevelPrefix" :job-profile-unit-ids="$jobProfileUnitIds" :job-profile-versi-id="$jobProfileVersiId" :kompetensi-teknis-unit-ids="$kompetensiTeknisUnitIds" :kompetensi-teknis-versi-id="$kompetensiTeknisVersiId" />
             </div>
             @endforeach
         </div>
