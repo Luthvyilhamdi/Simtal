@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('history_assessments', function (Blueprint $table) {
-            $table->string('link_file')->nullable()->after('lembaga');
+            $table->string('link_file')->nullable()->after('keterangan');
         });
         Schema::table('history_assessment_kompetensi', function (Blueprint $table) {
             $table->string('link_file')->nullable()->after('lembaga');
