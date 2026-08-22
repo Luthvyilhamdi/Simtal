@@ -334,7 +334,7 @@
         <div class="nav-sep"></div>
         @endif
 
-        @if($u->canAccessMenu('karyawan') || $u->canAccessMenu('history_jabatan') || $u->canAccessMenu('history_pendidikan') || $u->canAccessMenu('struktur') || $u->canAccessMenu('talent_pool') || $u->canAccessMenu('usulan_promosi') || $u->canAccessMenu('reminder_promosi') || $u->canAccessMenu('usulan_mutasi') || $u->canAccessMenu('history_pejabat') || $u->canAccessMenu('pgs_pjs') || $u->canAccessMenu('assessment') || $u->canAccessMenu('kalibrasi') || $u->canAccessMenu('toefl'))
+        @if($u->canAccessMenu('karyawan') || $u->canAccessMenu('history_jabatan') || $u->canAccessMenu('history_pendidikan') || $u->canAccessMenu('struktur') || $u->canAccessMenu('talent_pool') || $u->canAccessMenu('usulan_promosi') || $u->canAccessMenu('reminder_promosi') || $u->canAccessMenu('usulan_mutasi') || $u->canAccessMenu('struktur_versi') || $u->canAccessMenu('job_profile') || $u->canAccessMenu('kompetensi_teknis') || $u->canAccessMenu('job_family') || $u->canAccessMenu('history_pejabat') || $u->canAccessMenu('pgs_pjs') || $u->canAccessMenu('assessment') || $u->canAccessMenu('kalibrasi') || $u->canAccessMenu('toefl'))
         <div class="nav-group">
             <div class="nav-section-label">Menu Utama</div>
 
