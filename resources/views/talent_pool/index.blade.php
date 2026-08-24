@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Data Talent Pool')
+@section('breadcrumb-parent', 'Manajemen Talenta')
 @section('breadcrumb', 'Data Talent')
 
 @push('styles')

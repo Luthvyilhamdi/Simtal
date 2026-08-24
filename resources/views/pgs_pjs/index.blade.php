@@ -7,6 +7,7 @@
         : 'Pejabat Sementara dan Pejabat Jabatan Sementara';
 @endphp
 @section('title', $labelTipe)
+@section('breadcrumb-parent', 'Kepejabatan')
 @section('breadcrumb', $labelTipe)
 
 @push('styles')

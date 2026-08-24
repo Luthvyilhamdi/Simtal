@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SIMTAL - Login</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     {{-- PWA / mobile app feel --}}
     <meta name="theme-color" content="#14532d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SIMTAL">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @php
@@ -91,16 +91,16 @@
             transform: translateX(-50%);
             background: white;
             border-radius: 10px;
-            padding: 7px 14px;
+            padding: 5px 12px 5px 8px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             z-index: 2;
             max-width: calc(100% - 32px);
         }
         .top-logos .company-name { font-size: 13px; font-weight: 700; color: #14532d; letter-spacing: .5px; }
         .top-logos .divider-v { width: 1px; height: 18px; background: #e5e7eb; flex-shrink: 0; }
-        .top-logos img { height: 26px; width: auto; object-fit: contain; flex-shrink: 0; }
+        .top-logos img { height: 40px; width: auto; object-fit: contain; flex-shrink: 0; }
         .top-logos .sub-name { font-size: 11px; font-weight: 500; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* Center illustration */
@@ -120,16 +120,6 @@
         .app-name { font-size: clamp(26px, 7vw, 32px); font-weight: 700; letter-spacing: 1px; }
         .app-tagline { font-size: clamp(12px, 3.4vw, 13px); color: rgba(255,255,255,0.6); margin-top: 6px; letter-spacing: .5px; }
 
-        /* Rotator */
-        .rotator {
-            margin-top: 10px;
-            font-size: clamp(12px, 3.4vw, 13px);
-            font-weight: 600;
-            color: #bbf7d0;
-            min-height: 1.2em;
-            transition: opacity .35s ease;
-        }
-
         /* Floating info chips */
         .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 28px; position: relative; z-index: 2; }
         .chip {
@@ -143,8 +133,10 @@
             backdrop-filter: blur(4px);
             animation: fadeUp .5s ease both;
         }
-        .chip:nth-child(1){ animation-delay:.15s } .chip:nth-child(2){ animation-delay:.25s }
-        .chip:nth-child(3){ animation-delay:.35s } .chip:nth-child(4){ animation-delay:.45s }
+        .chip:nth-child(1){ animation-delay:.15s } .chip:nth-child(2){ animation-delay:.22s }
+        .chip:nth-child(3){ animation-delay:.29s } .chip:nth-child(4){ animation-delay:.36s }
+        .chip:nth-child(5){ animation-delay:.43s } .chip:nth-child(6){ animation-delay:.50s }
+        .chip:nth-child(7){ animation-delay:.57s }
 
         /* RIGHT - Login */
         .panel-right {
@@ -240,8 +232,10 @@
         }
         /* HP kecil */
         @media (max-width: 400px) {
+            /* Teks tetap tampil di HP — dikecilkan, bukan disembunyikan. */
             .top-logos { gap: 8px; padding: 6px 10px; }
-            .top-logos .sub-name { display: none; }
+            .top-logos img { height: 42px; }
+            .top-logos .sub-name { font-size: 10px; white-space: normal; line-height: 1.25; }
             .chips { gap: 6px; }
             .panel-right { padding: 28px 20px; }
             .panel-footer { justify-content: center; }
@@ -272,10 +266,8 @@
     <!-- LEFT -->
     <div class="panel-left">
         <div class="top-logos">
-            <span class="company-name">SIMTAL</span>
-            <div class="divider-v"></div>
-            <img src="{{ asset('images/PIM.png') }}" alt="Pupuk Iskandar Muda">
-            <span class="sub-name">Pupuk Iskandar Muda</span>
+            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SIMTAL">
+            <span class="sub-name">Talent Management System</span>
         </div>
 
         <div class="illus-wrap">
@@ -290,14 +282,16 @@
 
             <div class="app-name">SIMTAL</div>
             <div class="app-tagline">Sistem Manajemen Talenta</div>
-            <div class="rotator" id="rotator">Kelola Talenta</div>
         </div>
 
         <div class="chips">
-            <span class="chip">👥 Manajemen Karyawan</span>
-            <span class="chip">📊 Assessment</span>
-            <span class="chip">🏅 PGS &amp; PJS</span>
-            <span class="chip">🎓 Kompetensi</span>
+            <span class="chip">Manajemen Karyawan</span>
+            <span class="chip">Assessment</span>
+            <span class="chip">PGS &amp; PJS</span>
+            <span class="chip">Kompetensi Teknis</span>
+            <span class="chip">Struktur Organisasi</span>
+            <span class="chip">Job Profile</span>
+            <span class="chip">Job Family</span>
         </div>
     </div>
 
@@ -317,7 +311,7 @@
         </div>
 
         <div class="panel-footer">
-            <span class="copy">© {{ date('Y') }} SIMTAL — Talent Management System</span>
+            <span class="copy">© {{ date('Y') }} SIMTAL</span>
             <a href="{{ route('kebijakan-privasi') }}" class="privacy-link">
                 Kebijakan Privasi
                 <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -328,23 +322,6 @@
 </div>
 
 <script>
-    // Rotator tagline
-    (function () {
-        var items = ['Kelola Talenta', 'Pantau MDG & Promosi', 'Assessment & Kompetensi', 'Perencanaan Suksesi'];
-        var el = document.getElementById('rotator');
-        var i = 0;
-        if (el && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            setInterval(function () {
-                el.style.opacity = 0;
-                setTimeout(function () {
-                    i = (i + 1) % items.length;
-                    el.textContent = items[i];
-                    el.style.opacity = 1;
-                }, 350);
-            }, 2600);
-        }
-    })();
-
     // Transisi masuk + loading state
     var LOGIN_URL = '{{ route("login") }}';
     var btn = document.getElementById('btnMasuk');

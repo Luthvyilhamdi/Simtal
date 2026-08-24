@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Backup Database')
+@section('breadcrumb-parent', 'Administrasi')
 @section('breadcrumb', 'Backup Database')
 
 @push('styles')

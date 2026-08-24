@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Profil Karyawan')
+@section('breadcrumb-parent', 'Data Karyawan')
 @section('breadcrumb', 'Profil Karyawan')
 
 @push('styles')

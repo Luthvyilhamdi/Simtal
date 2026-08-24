@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'History Penilaian & Kalibrasi')
+@section('breadcrumb-parent', 'Assessment &amp; Penilaian')
 @section('breadcrumb', 'History Penilaian & Kalibrasi')
 
 @php $isSA = auth()->user()->isSuperAdmin(); @endphp

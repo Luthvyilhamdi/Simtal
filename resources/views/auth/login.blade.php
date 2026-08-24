@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#14532d">
     <title>Login - SIMTAL</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -81,6 +84,11 @@
         .left-desc { position: relative; z-index: 1; }
         .left-desc h2 { font-size: 24px; font-weight: 700; line-height: 1.35; margin-bottom: 14px; }
         .left-desc p { font-size: 13.5px; color: #bbf7d0; line-height: 1.7; max-width: 320px; }
+        /* Identitas perusahaan — ditahan tenang, bukan daftar fitur bergaya promosi. */
+        .left-org { position: relative; z-index: 1; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.14); }
+        .left-org-label { display: block; font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+                          text-transform: uppercase; color: rgba(187,247,208,0.65); margin-bottom: 4px; }
+        .left-org-name { display: block; font-size: 14px; font-weight: 600; color: #dcfce7; letter-spacing: .2px; }
         .left-badges { display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
         .badge-item {
             display: flex; align-items: center; gap: 12px;
@@ -215,29 +223,19 @@
     {{-- LEFT PANEL (desktop) --}}
     <div class="login-left">
         <div class="brand-logo">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo SIMTAL">
+            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SIMTAL">
             <div class="brand-text">
                 <h1>SIMTAL</h1>
                 <p>Sistem Manajemen Talenta</p>
             </div>
         </div>
         <div class="left-desc">
-            <h2>Sistem Manajemen Talenta Karyawan</h2>
+            <h2>Manajemen Talenta Karyawan Terpadu</h2>
             <p>Kelola data karyawan, history jabatan, dan assessment secara terpusat, aman, dan efisien.</p>
         </div>
-        <div class="left-badges">
-            <div class="badge-item">
-                <div class="badge-dot"></div>
-                <span>History Jabatan &amp; Assessment</span>
-            </div>
-            <div class="badge-item">
-                <div class="badge-dot"></div>
-                <span>Pemantauan Karyawan Real-time</span>
-            </div>
-            <div class="badge-item">
-                <div class="badge-dot"></div>
-                <span>Laporan &amp; Repository Dokumen</span>
-            </div>
+        <div class="left-org">
+            <span class="left-org-label">Sistem Internal</span>
+            <span class="left-org-name">Pupuk Iskandar Muda</span>
         </div>
     </div>
 
@@ -245,7 +243,7 @@
     <div class="login-right">
         {{-- Brand ringkas untuk HP --}}
         <div class="mobile-brand">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo SIMTAL">
+            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SIMTAL">
             <div>
                 <h1>SIMTAL</h1>
                 <p>Sistem Manajemen Talenta</p>
@@ -253,7 +251,7 @@
         </div>
 
         <div class="welcome-head">
-            <h2>Selamat Datang 👋</h2>
+            <h2>Selamat Datang</h2>
             <p class="sub">Masuk ke akun SIMTAL Anda</p>
         </div>
 

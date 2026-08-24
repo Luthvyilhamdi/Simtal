@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
-    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <title>SIMTAL - @yield('title')</title>
     {{-- ===== Design tokens (sistem desain global) ===== --}}
     <style>
@@ -68,7 +68,7 @@
             box-shadow: 1px 0 0 rgba(15,23,42,.02), 2px 0 16px rgba(15,23,42,.03);
         }
         html.sidebar-collapsed .sidebar { width: 64px; min-width: 64px; }
-        html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
+        html.sidebar-collapsed .sidebar .brand-text,
         html.sidebar-collapsed .sidebar .nav-section-label, html.sidebar-collapsed .sidebar .nav-text,
         html.sidebar-collapsed .sidebar .user-info { display: none; }
         html.sidebar-collapsed .sidebar .nav-link { justify-content: center; padding: 10px; }
@@ -78,6 +78,8 @@
         html.sidebar-collapsed .sidebar .user-row { justify-content: center; padding: 8px; }
         html.sidebar-collapsed .sidebar .brand-row { justify-content: center; }
         html.sidebar-collapsed .sidebar .brand-icon { margin: 0; }
+        /* Sidebar menciut hanya 64px — kecilkan padding agar kotak logo 44px tetap muat */
+        html.sidebar-collapsed .sidebar .sidebar-brand { padding-left: 8px; padding-right: 8px; }
         html.sidebar-collapsed .sidebar .logout-btn { justify-content: center; padding: 10px; }
         html.sidebar-collapsed .sidebar .collapse-btn svg { transform: rotate(180deg); }
         html.sidebar-collapsed .sidebar .nav-sep { display: none; }
@@ -87,9 +89,10 @@
             .sidebar.mobile-open { left: 0; }
             .collapse-btn { display: none !important; } /* di HP pakai hamburger — sembunyikan tombol collapse agar tak dobel */
             html.sidebar-collapsed .sidebar { width: 248px; min-width: 248px; left: -248px; }
-            html.sidebar-collapsed .sidebar .brand-name, html.sidebar-collapsed .sidebar .brand-sub,
+            html.sidebar-collapsed .sidebar .brand-text,
             html.sidebar-collapsed .sidebar .nav-section-label, html.sidebar-collapsed .sidebar .nav-text,
             html.sidebar-collapsed .sidebar .user-info { display: block; }
+            html.sidebar-collapsed .sidebar .sidebar-brand { padding-left: 16px; padding-right: 16px; }
             html.sidebar-collapsed .sidebar .toggle-chevron { display: block; }
             html.sidebar-collapsed .sidebar .master-sub.open { display: block; }
             html.sidebar-collapsed .sidebar .nav-link { justify-content: flex-start; padding: 8px 10px; }
@@ -101,14 +104,14 @@
 
         .sidebar-brand { padding: 18px 16px 14px; display: flex; align-items: center; border-bottom: 1px solid #f3f4f6; flex-shrink: 0; }
         .brand-row { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-        .brand-icon { width: 34px; height: 34px; flex-shrink: 0; background: #f0fdf4; border-radius: 9px; display: flex; align-items: center; justify-content: center; border: 1px solid #bbf7d0; }
-        .brand-icon img { width: 22px; height: 22px; object-fit: contain; }
+        .brand-icon { width: 44px; height: 44px; flex-shrink: 0; background: #f0fdf4; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid #bbf7d0; }
+        .brand-icon img { width: 36px; height: 36px; object-fit: contain; }
         .brand-name { font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 1px; white-space: nowrap; }
-        .brand-sub { font-size: 10px; color: #9ca3af; margin-top: 1px; white-space: nowrap; font-weight: 500; }
+        .brand-sub { font-size: 9.5px; color: #9ca3af; margin-top: 1px; font-weight: 500; line-height: 1.3; }
 
         /* Collapse handle: kapsul menempel di tepi border sidebar, ikon double-chevron khas app corporate */
         .collapse-btn {
-            position: absolute; top: 27px; right: -14px;
+            position: absolute; top: 24px; right: -14px;
             width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0;
             border: 1px solid #e5e7eb; background: linear-gradient(180deg, #ffffff, #f9fafb);
             display: flex; align-items: center; justify-content: center;
@@ -219,20 +222,31 @@
 
 
         #pageLoader { display:none;position:fixed;inset:0;background:rgba(255,255,255,0.78);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(2px); }
-        @keyframes spin-fade { 0%,100%{opacity:1} 50%{opacity:0.15} }
-        .sp { position:absolute;width:5px;height:16px;border-radius:3px;background:#15803d;left:50%;top:50%;transform-origin:center 25px; }
-        .sp:nth-child(1)  { transform:translateX(-50%) rotate(0deg);   animation:spin-fade 1.2s 0s    infinite; }
-        .sp:nth-child(2)  { transform:translateX(-50%) rotate(30deg);  animation:spin-fade 1.2s 0.1s  infinite; }
-        .sp:nth-child(3)  { transform:translateX(-50%) rotate(60deg);  animation:spin-fade 1.2s 0.2s  infinite; }
-        .sp:nth-child(4)  { transform:translateX(-50%) rotate(90deg);  animation:spin-fade 1.2s 0.3s  infinite; }
-        .sp:nth-child(5)  { transform:translateX(-50%) rotate(120deg); animation:spin-fade 1.2s 0.4s  infinite; }
-        .sp:nth-child(6)  { transform:translateX(-50%) rotate(150deg); animation:spin-fade 1.2s 0.5s  infinite; }
-        .sp:nth-child(7)  { transform:translateX(-50%) rotate(180deg); animation:spin-fade 1.2s 0.6s  infinite; }
-        .sp:nth-child(8)  { transform:translateX(-50%) rotate(210deg); animation:spin-fade 1.2s 0.7s  infinite; }
-        .sp:nth-child(9)  { transform:translateX(-50%) rotate(240deg); animation:spin-fade 1.2s 0.8s  infinite; }
-        .sp:nth-child(10) { transform:translateX(-50%) rotate(270deg); animation:spin-fade 1.2s 0.9s  infinite; }
-        .sp:nth-child(11) { transform:translateX(-50%) rotate(300deg); animation:spin-fade 1.2s 1.0s  infinite; }
-        .sp:nth-child(12) { transform:translateX(-50%) rotate(330deg); animation:spin-fade 1.2s 1.1s  infinite; }
+        /* Loader layar penuh — logo SIMTAL berputar dengan halo yang berdenyut. */
+        .loader-box { position:relative; width:74px; height:74px; display:flex; align-items:center; justify-content:center; }
+        .loader-halo {
+            position:absolute; inset:0; border-radius:50%;
+            background:radial-gradient(circle, rgba(21,128,61,0.16) 0%, rgba(21,128,61,0) 68%);
+            animation:loader-halo 1.6s ease-in-out infinite;
+        }
+        .loader-ring {
+            position:absolute; inset:4px; border-radius:50%;
+            border:2px solid rgba(21,128,61,0.14);
+            border-top-color:#15803d;
+            animation:loader-ring 0.85s linear infinite;
+        }
+        /* Logo ikut berputar, sedikit lebih lambat dari cincin agar dua geraknya
+           tidak terkunci sinkron (terlihat kaku bila sama persis). */
+        .loader-logo {
+            width:40px; height:40px; object-fit:contain; position:relative;
+            animation:loader-spin 1.4s linear infinite;
+        }
+        @keyframes loader-ring  { to { transform:rotate(360deg); } }
+        @keyframes loader-spin  { to { transform:rotate(360deg); } }
+        @keyframes loader-halo  { 0%,100%{ transform:scale(.86); opacity:.55 } 50%{ transform:scale(1); opacity:1 } }
+        @media (prefers-reduced-motion: reduce) {
+            .loader-halo, .loader-ring, .loader-logo { animation:none; }
+        }
     </style>
     {{-- Date picker: paksa tampilan dd/mm/yyyy (submit tetap Y-m-d) --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -283,11 +297,10 @@
 <body>
 
 <div id="pageLoader">
-  <div style="position:relative;width:24px;height:24px">
-    <div class="sp"></div><div class="sp"></div><div class="sp"></div>
-    <div class="sp"></div><div class="sp"></div><div class="sp"></div>
-    <div class="sp"></div><div class="sp"></div><div class="sp"></div>
-    <div class="sp"></div><div class="sp"></div><div class="sp"></div>
+  <div class="loader-box">
+    <div class="loader-halo"></div>
+    <div class="loader-ring"></div>
+    <img class="loader-logo" src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Memuat">
   </div>
 </div>
 
@@ -296,8 +309,8 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <div class="brand-row">
-            <div class="brand-icon"><img src="{{ asset('images/logo.png') }}" alt="Logo"></div>
-            <div>
+            <div class="brand-icon"><img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo"></div>
+            <div class="brand-text">
                 <div class="brand-name">SIMTAL</div>
                 <div class="brand-sub">Talent Management System</div>
             </div>

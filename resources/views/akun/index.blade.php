@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Manajemen Akun')
+@section('breadcrumb-parent', 'Administrasi')
 @section('breadcrumb', 'Manajemen Akun')
 
 @push('styles')

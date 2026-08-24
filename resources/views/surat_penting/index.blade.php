@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Surat Penting')
+@section('breadcrumb-parent', 'Layanan')
 @section('breadcrumb', 'Surat Penting')
 
 @push('styles')

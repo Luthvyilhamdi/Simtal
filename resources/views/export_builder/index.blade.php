@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Export Builder')
+@section('breadcrumb-parent', 'Layanan &amp; Laporan')
 @section('breadcrumb', 'Export Builder')
 
 @push('styles')

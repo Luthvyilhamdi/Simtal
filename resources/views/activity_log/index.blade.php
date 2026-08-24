@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Log Aktivitas')
+@section('breadcrumb-parent', 'Administrasi')
 @section('breadcrumb', 'Log Aktivitas')
 
 @push('styles')

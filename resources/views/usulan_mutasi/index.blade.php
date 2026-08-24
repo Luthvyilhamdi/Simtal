@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Rotasi & Mutasi')
+@section('breadcrumb-parent', 'Manajemen Talenta')
 @section('breadcrumb', 'Rotasi & Mutasi')
 
 @push('styles')
