@@ -8,11 +8,55 @@ use App\Models\PgsPjs;
 use App\Models\Notifikasi;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class GenerateNotifikasi extends Command
 {
     protected $signature   = 'notifikasi:generate';
     protected $description = 'Generate notifikasi otomatis untuk sistem SIMTAL';
+
+    /** Urutan tingkat kegentingan, untuk mendeteksi kenaikan. */
+    private const URUTAN_LEVEL = ['info' => 0, 'warning' => 1, 'danger' => 2];
+
+    /**
+     * Simpan SATU baris notifikasi per subjek (tipe + notifiable), bukan baris
+     * baru setiap hari.
+     *
+     * Status "sudah dibaca" menempel pada baris tertentu (tabel
+     * notifikasi_reads). Kalau tiap hari dibuatkan baris baru, tanda baca
+     * kemarin tidak berlaku untuk baris hari ini — akibatnya notifikasi yang
+     * sudah dibaca muncul lagi keesokan harinya.
+     *
+     * Isi pesan & level tetap diperbarui agar hitungan sisa harinya akurat.
+     * Bila tingkatnya NAIK (mis. warning → danger karena makin mendesak),
+     * tanda baca dihapus supaya notifikasi itu muncul kembali — memang layak
+     * diperhatikan ulang.
+     */
+    private function simpanNotifikasi(string $tipe, string $notifiableType, int $notifiableId, array $isi): void
+    {
+        $kunci = [
+            'tipe'            => $tipe,
+            'notifiable_type' => $notifiableType,
+            'notifiable_id'   => $notifiableId,
+        ];
+
+        $lama = Notifikasi::where($kunci)->first();
+
+        if (! $lama) {
+            Notifikasi::create($isi + $kunci);
+            return;
+        }
+
+        $levelBaru = self::URUTAN_LEVEL[$isi['level'] ?? 'info'] ?? 0;
+        $levelLama = self::URUTAN_LEVEL[$lama->level ?? 'info'] ?? 0;
+
+        $lama->update($isi);
+
+        if ($levelBaru > $levelLama) {
+            DB::table('notifikasi_reads')->where('notifikasi_id', $lama->id)->delete();
+            $lama->update(['is_read' => false, 'read_at' => null]);
+        }
+    }
 
     public function handle()
     {
@@ -39,23 +83,11 @@ class GenerateNotifikasi extends Command
 
             $sisaHari = (int) now()->diffInDays($a->tanggal_exp_idp);
 
-            $exists = Notifikasi::where('tipe', 'idp_expire')
-                ->where('notifiable_type', HistoryAssessment::class)
-                ->where('notifiable_id', $a->id)
-                ->whereDate('created_at', today())
-                ->exists();
-
-            if (!$exists) {
-                $level = $sisaHari <= 7 ? 'danger' : 'warning';
-                Notifikasi::create([
-                    'judul'           => 'Assessment Akan Expire',
-                    'pesan'           => "Assessment {$a->karyawan->nama} akan berakhir dalam {$sisaHari} hari ({$a->tanggal_exp_idp->format('d M Y')})",
-                    'tipe'            => 'idp_expire',
-                    'level'           => $level,
-                    'notifiable_type' => HistoryAssessment::class,
-                    'notifiable_id'   => $a->id,
-                ]);
-            }
+            $this->simpanNotifikasi('idp_expire', HistoryAssessment::class, $a->id, [
+                'judul' => 'Assessment Akan Expire',
+                'pesan' => "Assessment {$a->karyawan->nama} akan berakhir dalam {$sisaHari} hari ({$a->tanggal_exp_idp->format('d M Y')})",
+                'level' => $sisaHari <= 7 ? 'danger' : 'warning',
+            ]);
         }
 
         $this->info("✓ IDP expire: {$assessments->count()} dicek");
@@ -76,23 +108,11 @@ class GenerateNotifikasi extends Command
             // Sudah lewat pensiun
             if ($sisaTahun < 0) continue;
 
-            $exists = Notifikasi::where('tipe', 'pensiun')
-                ->where('notifiable_type', Karyawan::class)
-                ->where('notifiable_id', $k->id)
-                ->whereDate('created_at', today())
-                ->exists();
-
-            if (!$exists) {
-                $level = $sisaTahun <= 1 ? 'danger' : 'warning';
-                Notifikasi::create([
-                    'judul'           => 'Mendekati Pensiun',
-                    'pesan'           => "{$k->nama} akan pensiun dalam {$sisaTahun} tahun lagi (usia {$usia} tahun)",
-                    'tipe'            => 'pensiun',
-                    'level'           => $level,
-                    'notifiable_type' => Karyawan::class,
-                    'notifiable_id'   => $k->id,
-                ]);
-            }
+            $this->simpanNotifikasi('pensiun', Karyawan::class, $k->id, [
+                'judul' => 'Mendekati Pensiun',
+                'pesan' => "{$k->nama} akan pensiun dalam {$sisaTahun} tahun lagi (usia {$usia} tahun)",
+                'level' => $sisaTahun <= 1 ? 'danger' : 'warning',
+            ]);
         }
 
         $this->info("✓ Pensiun: {$karyawans->count()} dicek");
@@ -149,26 +169,15 @@ class GenerateNotifikasi extends Command
 
             $sisaHari = (int) now()->diffInDays($p->tanggal_berakhir);
 
-            $exists = Notifikasi::where('tipe', 'pgs_pjs_berakhir')
-                ->where('notifiable_type', PgsPjs::class)
-                ->where('notifiable_id', $p->id)
-                ->whereDate('created_at', today())
-                ->exists();
+            // FIX: gunakan kolom yang benar (tipe bukan jenis)
+            $tipLabel = strtoupper($p->tipe ?? 'PGS/PJS');
+            $jabatan  = $p->jabatan_pgs_pjs ?? $p->jabatan ?? '-';
 
-            if (!$exists) {
-                // FIX: gunakan kolom yang benar (tipe bukan jenis)
-                $tipLabel = strtoupper($p->tipe ?? 'PGS/PJS');
-                $jabatan  = $p->jabatan_pgs_pjs ?? $p->jabatan ?? '-';
-
-                Notifikasi::create([
-                    'judul'           => "{$tipLabel} Akan Berakhir",
-                    'pesan'           => "{$p->karyawan->nama} sebagai {$jabatan} akan berakhir dalam {$sisaHari} hari",
-                    'tipe'            => 'pgs_pjs_berakhir',
-                    'level'           => $sisaHari <= 3 ? 'danger' : 'warning',
-                    'notifiable_type' => PgsPjs::class,
-                    'notifiable_id'   => $p->id,
-                ]);
-            }
+            $this->simpanNotifikasi('pgs_pjs_berakhir', PgsPjs::class, $p->id, [
+                'judul' => "{$tipLabel} Akan Berakhir",
+                'pesan' => "{$p->karyawan->nama} sebagai {$jabatan} akan berakhir dalam {$sisaHari} hari",
+                'level' => $sisaHari <= 3 ? 'danger' : 'warning',
+            ]);
         }
 
         $this->info("✓ PGS/PJS berakhir: {$pgsPjs->count()} dicek");
