@@ -293,6 +293,60 @@
         .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color:#15803d; }
     </style>
     @stack('styles')
+
+    {{-- ===================================================================
+         Perapian tampilan HP untuk baris alat (pencarian + filter + tombol).
+         Sengaja diletakkan SETELAH @stack('styles') karena CSS tiap halaman
+         dimuat di situ — kalau ditaruh sebelumnya, aturan ini kalah.
+         Menyasar pola yang dipakai berulang di seluruh halaman sidebar:
+         .page-header (61 halaman), .filter-row (9), .toolbar (4).
+    =================================================================== --}}
+    <style>
+        @media (max-width: 640px) {
+            /* Kotak pencarian dipatok 220px tetap — di HP jadi meluber. */
+            .page-header .search-mini, .page-header .search-box, .page-header .search-wrap,
+            .filter-row .search-mini,  .filter-row .search-box,  .filter-row .search-wrap,
+            .toolbar .search-mini,     .toolbar .search-box,     .toolbar .search-wrap {
+                width: 100%; flex: 1 1 100%; min-width: 0;
+            }
+
+            /* Dropdown filter: dua per baris, lebarnya sama rata. */
+            .filter-row .filter-select, .toolbar .filter-select {
+                flex: 1 1 calc(50% - 4px); min-width: 0;
+            }
+            .filter-row .btn-reset, .toolbar .btn-reset {
+                flex: 1 1 100%; justify-content: center;
+            }
+
+            /* Judul halaman & kelompok tombolnya menumpuk, tidak berdesakan. */
+            .page-header { flex-direction: column; align-items: stretch; }
+            .page-header > div { min-width: 0; }
+
+            /* Kelompok tombol yang didorong ke kanan lewat margin-left:auto
+               (ditulis inline di banyak halaman) — turunkan jadi satu baris penuh. */
+            .filter-row > [style*="margin-left:auto"],
+            .toolbar    > [style*="margin-left:auto"],
+            .page-header > [style*="margin-left:auto"] {
+                margin-left: 0 !important; flex: 1 1 100%; width: 100%;
+            }
+
+            /* Tombol aksi (Import/Export/Tambah/dll): dua per baris.
+               ":not(:first-child)" menjaga blok judul di kiri tidak ikut terkena. */
+            .filter-row > [style*="margin-left:auto"] > a,
+            .filter-row > [style*="margin-left:auto"] > button,
+            .filter-row > [style*="margin-left:auto"] > div,
+            .toolbar > [style*="margin-left:auto"] > a,
+            .toolbar > [style*="margin-left:auto"] > button,
+            .page-header > div:not(:first-child) > a,
+            .page-header > div:not(:first-child) > button {
+                flex: 1 1 calc(50% - 4px); min-width: 0; justify-content: center;
+            }
+
+            /* Sebagian halaman menaruh tombol langsung sebagai anak .page-header
+               (tanpa div pembungkus) — biarkan selebar layar, isinya ditengahkan. */
+            .page-header > a, .page-header > button { justify-content: center; }
+        }
+    </style>
 </head>
 <body>
 

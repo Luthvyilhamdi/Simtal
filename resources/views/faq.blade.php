@@ -47,6 +47,22 @@
     .no-result svg { width:48px;height:48px;stroke:#d1d5db;fill:none;margin:0 auto 12px;display:block; }
     #qrWa img { border-radius:6px; }
     #qrWa canvas { border-radius:6px; }
+
+    /* ---- Tampilan HP ----
+       8 kategori dengan panjang teks berbeda-beda membuat barisnya membungkus
+       bergerigi (3-2-3) dan memakan tinggi layar. Di HP dijadikan satu baris
+       yang bisa digeser ke samping — rapi dan menyisakan ruang untuk isi FAQ. */
+    @media (max-width: 640px) {
+        .cat-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+        }
+        .cat-tabs::-webkit-scrollbar { display: none; }
+        .cat-tab { flex: 0 0 auto; }
+    }
 </style>
 @endpush
 
