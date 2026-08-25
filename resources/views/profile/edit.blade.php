@@ -65,9 +65,13 @@
     /* Karyawan Info Card */
     .karyawan-card { background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:16px; }
     .karyawan-card-header { padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between; }
-    .karyawan-info-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0; }
-    .karyawan-info-item { padding:14px 20px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6; }
-    .karyawan-info-item:last-child { border-right:none; }
+    /* Garis pemisah digambar sebagai bayangan dalam, bukan border. Dengan
+       auto-fit jumlah kolom berubah-ubah, sehingga border-right menyisakan
+       garis menggantung di baris yang tidak penuh. */
+    .karyawan-info-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;background:#fff; }
+    .karyawan-info-item { padding:14px 20px;box-shadow:inset -1px 0 0 #f3f4f6, inset 0 -1px 0 #f3f4f6;min-width:0; }
+    /* Jabatan biasanya paling panjang — beri dua kolom agar tidak terpotong sempit. */
+    .karyawan-info-item:first-child { grid-column:span 2; }
     .ki-label { font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px; }
     .ki-val { font-size:13px;color:#111827;font-weight:600; }
 
@@ -97,6 +101,8 @@
         .form-group.full { grid-column:1; }
         .stats-mini { grid-template-columns:repeat(2,1fr); }
         .karyawan-info-grid { grid-template-columns:1fr 1fr; }
+        /* Di HP dua kolom saja — jabatan yang panjang diberi satu baris penuh. */
+        .karyawan-info-item:first-child { grid-column:1 / -1; }
     }
 </style>
 @endpush
@@ -187,6 +193,10 @@
                 <div class="ki-val">{{ $karyawan->departemen->nama_departemen ?? '-' }}</div>
             </div>
             <div class="karyawan-info-item">
+                <div class="ki-label">Band</div>
+                <div class="ki-val">{{ $karyawan->band ?? '-' }}</div>
+            </div>
+            <div class="karyawan-info-item">
                 <div class="ki-label">Job Grade</div>
                 <div class="ki-val">{{ $karyawan->jobGrade->job_grade ?? '-' }}</div>
             </div>
@@ -210,11 +220,35 @@
             </div>
             <div class="karyawan-info-item">
                 <div class="ki-label">Masa Kerja</div>
-                <div class="ki-val">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->diffInYears(now()) }} Tahun</div>
+                <div class="ki-val">
+                    @php
+                        // diffInYears() di Carbon versi baru mengembalikan pecahan
+                        // (mis. 8.4865...), jadi dibulatkan ke bawah lalu sisanya
+                        // dihitung sebagai bulan agar lebih berguna dibaca.
+                        $masuk = \Carbon\Carbon::parse($karyawan->tanggal_masuk);
+                        $mkTahun = (int) $masuk->diffInYears(now());
+                        $mkBulan = (int) $masuk->copy()->addYears($mkTahun)->diffInMonths(now());
+                    @endphp
+                    {{ $mkTahun }} Tahun{{ $mkBulan ? ' ' . $mkBulan . ' Bulan' : '' }}
+                </div>
             </div>
             <div class="karyawan-info-item">
                 <div class="ki-label">Usia</div>
-                <div class="ki-val">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} Tahun</div>
+                <div class="ki-val">{{ (int) \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} Tahun</div>
+            </div>
+            <div class="karyawan-info-item">
+                <div class="ki-label">Pendidikan</div>
+                <div class="ki-val">
+                    {{ $karyawan->jenjang_pendidikan ?: '-' }}@if($karyawan->jurusan) — {{ $karyawan->jurusan }}@endif
+                </div>
+            </div>
+            <div class="karyawan-info-item">
+                <div class="ki-label">Email</div>
+                <div class="ki-val" style="word-break:break-all;">{{ $karyawan->email ?: '-' }}</div>
+            </div>
+            <div class="karyawan-info-item">
+                <div class="ki-label">No. HP</div>
+                <div class="ki-val">{{ $karyawan->no_hp ?: '-' }}</div>
             </div>
         </div>
 
