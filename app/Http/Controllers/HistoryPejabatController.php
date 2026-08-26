@@ -16,6 +16,7 @@ class HistoryPejabatController extends Controller
 
     /** Hanya perpindahan ini yang ditampilkan di daftar "sudah selesai". */
     private const TIPE_SELESAI = ['promosi', 'rotasi'];
+
     private function checkSuperAdmin(): void
     {
         /** @var User $user */
@@ -42,6 +43,20 @@ class HistoryPejabatController extends Controller
             });
         }
 
+        // Filter tahun — mencari siapa yang MENJABAT pada tahun tersebut, bukan
+        // sekadar yang mulai di tahun itu. Jadi jabatan 2023–2025 tetap muncul
+        // saat dicari tahun 2024. Penting untuk penelusuran audit.
+        if ($request->tahun) {
+            $awal  = $request->tahun . '-01-01';
+            $akhir = $request->tahun . '-12-31';
+
+            $query->whereDate('tanggal_mulai', '<=', $akhir)
+                  ->where(function ($q) use ($awal) {
+                      $q->whereNull('tanggal_selesai')
+                        ->orWhereDate('tanggal_selesai', '>=', $awal);
+                  });
+        }
+
         // Pisah aktif dan selesai.
         // Aktif diurutkan per tingkat jabatan (SVP paling atas), baru per tanggal.
         $urutan = "'" . implode("','", self::URUTAN_JABATAN) . "'";
@@ -50,7 +65,8 @@ class HistoryPejabatController extends Controller
             ->whereNull('tanggal_selesai')
             ->orderByRaw("FIELD(jabatan, {$urutan})")
             ->orderBy('tanggal_mulai', 'desc')
-            ->paginate(15, ['*'], 'page_aktif');
+            ->paginate(15, ['*'], 'page_aktif')
+            ->withQueryString();
 
         // Status diambil dari tipe jabatan ASAL — yaitu jabatan yang membuat
         // seseorang menduduki posisi pejabat ini (history_jabatan_id). Jadi
@@ -70,7 +86,8 @@ class HistoryPejabatController extends Controller
                 $q->whereIn('tipe', self::TIPE_SELESAI);
             })
             ->orderBy('tanggal_selesai', 'desc')
-            ->paginate(15, ['*'], 'page_selesai');
+            ->paginate(15, ['*'], 'page_selesai')
+            ->withQueryString();
 
         // Stats
         $stats = [
@@ -81,7 +98,13 @@ class HistoryPejabatController extends Controller
             'pm'    => HistoryPejabat::where('jabatan', 'PM')->whereNull('tanggal_selesai')->count(),
         ];
 
-        return view('history_pejabat.index', compact('aktif', 'selesai', 'stats'));
+        // Daftar tahun untuk dropdown: dari jabatan paling lama sampai tahun ini.
+        $tahunAwal = HistoryPejabat::min('tanggal_mulai');
+        $tahuns = $tahunAwal
+            ? range((int) date('Y'), (int) date('Y', strtotime($tahunAwal)))
+            : [(int) date('Y')];
+
+        return view('history_pejabat.index', compact('aktif', 'selesai', 'stats', 'tahuns'));
     }
 
     public function export(Request $request)

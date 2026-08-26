@@ -35,6 +35,14 @@
     .btn-reset { display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap; }
     .btn-reset:hover { background:#f5f5f0; }
 
+    /* Tab pemisah Aktif / Selesai — kedua tabel bisa panjang, jadi tidak
+       ditumpuk dalam satu halaman. Pola sama dengan History Assessment. */
+    .tab-wrap { display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:16px; }
+    .tab-btn { flex:1;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;color:#6b7280;background:transparent;transition:all 0.15s;text-align:center; }
+    .tab-btn.active { background:white;color:#15803d;box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+    .tab-count { display:inline-block;margin-left:5px;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:#e5e7eb;color:#6b7280; }
+    .tab-btn.active .tab-count { background:#dcfce7;color:#15803d; }
+
     .section-wrap { margin-bottom:24px; }
     .section-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px; }
     .section-title-label { font-size:14px;font-weight:700;color:#111827;display:flex;align-items:center;gap:8px; }
@@ -158,11 +166,6 @@
         <div class="page-title">History Pejabat</div>
         <div class="page-sub">History pejabat SVP, VP, SPM & PM — terintegrasi otomatis dari history jabatan</div>
     </div>
-    <a href="{{ route('history_pejabat.export', request()->query()) }}"
-       style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;margin-left:auto;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export
-    </a>
 </div>
 
 {{-- STATS --}}
@@ -205,14 +208,42 @@
                 <option value="{{ $j }}" {{ request('jabatan') == $j ? 'selected' : '' }}>{{ $j }}</option>
             @endforeach
         </select>
-        @if(request()->hasAny(['search','jabatan']))
+        {{-- Menampilkan siapa yang menjabat pada tahun terpilih, termasuk yang
+             masa jabatannya melintasi tahun itu. --}}
+        <select name="tahun" class="filter-select" onchange="this.form.submit()"
+                title="Tampilkan pejabat yang menjabat pada tahun ini">
+            <option value="">Semua Tahun</option>
+            @foreach($tahuns as $t)
+                <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
+            @endforeach
+        </select>
+        @if(request()->hasAny(['search','jabatan','tahun']))
             <a href="{{ route('history_pejabat.index') }}" class="btn-reset">× Reset</a>
         @endif
     </form>
+
+    {{-- Export mengikuti filter yang sedang aktif (request()->query()). --}}
+    <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+        <a href="{{ route('history_pejabat.export', request()->query()) }}"
+           style="display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#15803d;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+        </a>
+    </div>
+</div>
+
+{{-- TAB --}}
+<div class="tab-wrap">
+    <button class="tab-btn active" id="tab-aktif" type="button" onclick="switchTab('aktif')">
+        🟢 Sedang Aktif <span class="tab-count">{{ $aktif->total() }}</span>
+    </button>
+    <button class="tab-btn" id="tab-selesai" type="button" onclick="switchTab('selesai')">
+        ⬜ Sudah Selesai <span class="tab-count">{{ $selesai->total() }}</span>
+    </button>
 </div>
 
 {{-- ===== PEJABAT AKTIF ===== --}}
-<div class="section-wrap">
+<div class="section-wrap" id="panel-aktif">
     <div class="section-head">
         <div class="section-title-label">
             🟢 Pejabat Sedang Aktif
@@ -330,7 +361,7 @@
 </div>
 
 {{-- ===== PEJABAT SELESAI ===== --}}
-<div class="section-wrap">
+<div class="section-wrap" id="panel-selesai" style="display:none;">
     <div class="section-head">
         <div class="section-title-label">
             ⬜ Pejabat Sudah Selesai
@@ -463,6 +494,27 @@
 
 @push('scripts')
 <script>
+// ===== TAB AKTIF / SELESAI =====
+// Pilihan tab disimpan di query string agar tidak melompat balik ke "Aktif"
+// setelah pindah halaman, mencari, atau menyaring.
+function switchTab(tab) {
+    var aktif = tab === 'aktif';
+    document.getElementById('panel-aktif').style.display   = aktif ? 'block' : 'none';
+    document.getElementById('panel-selesai').style.display = aktif ? 'none'  : 'block';
+    document.getElementById('tab-aktif').classList.toggle('active', aktif);
+    document.getElementById('tab-selesai').classList.toggle('active', !aktif);
+
+    var url = new URL(window.location.href);
+    url.searchParams.set('tab', tab);
+    window.history.replaceState({}, '', url.toString());
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var p = new URLSearchParams(window.location.search);
+    // Buka tab "Selesai" bila memang dipilih, atau saat menelusuri halaman tabel itu.
+    if (p.get('tab') === 'selesai' || p.has('page_selesai')) switchTab('selesai');
+});
+
 @if($isSA)
 // ===== MODAL HAPUS =====
 var deleteUrl = '';
