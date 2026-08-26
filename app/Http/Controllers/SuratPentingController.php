@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SuratPenting;
 use App\Models\Karyawan;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,8 @@ use Illuminate\Support\Str;
 
 class SuratPentingController extends Controller
 {
+    use LogsActivity;
+
     public function index(Request $request)
     {
         $query = SuratPenting::with(['karyawan', 'uploader'])
@@ -83,7 +86,7 @@ class SuratPentingController extends Controller
         $filePath = $file->storeAs('surat-penting', $fileName, 'local');
         $fileSize = $this->formatFileSize($file->getSize());
 
-        SuratPenting::create([
+        $surat = SuratPenting::create([
             'tipe'          => $request->tipe,
             'karyawan_id'   => $isPersonal ? $request->karyawan_id : null,
             'judul'         => $request->judul,
@@ -97,6 +100,13 @@ class SuratPentingController extends Controller
             'keterangan'    => $request->keterangan,
             'uploaded_by'   => Auth::id(),
         ]);
+
+        $pemilik = $isPersonal
+            ? (optional(Karyawan::find($request->karyawan_id))->nama ?? '-')
+            : 'Umum / Pedoman';
+
+        $this->log('tambah', 'Surat Penting', $surat->judul,
+            "Upload surat ({$surat->kategori}) untuk {$pemilik} — berkas: {$surat->file_name}");
 
         return redirect()
             ->route('surat_penting.index')
@@ -122,10 +132,18 @@ class SuratPentingController extends Controller
 
     public function destroy(SuratPenting $suratPenting)
     {
+        // Catat dulu sebelum baris dihapus — setelah delete() datanya hilang.
+        $judul   = $suratPenting->judul;
+        $berkas  = $suratPenting->file_name;
+        $pemilik = optional($suratPenting->karyawan)->nama ?? 'Umum / Pedoman';
+
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
         $disk = Storage::disk('local');
         $disk->delete((string) $suratPenting->file_path);
         $suratPenting->delete();
+
+        $this->log('hapus', 'Surat Penting', $judul,
+            "Hapus surat milik {$pemilik} — berkas: {$berkas}");
 
         return redirect()
             ->route('surat_penting.index')

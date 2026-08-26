@@ -204,6 +204,7 @@
         .dropdown-header-name { font-size: 13px; font-weight: 700; color: #15803d; margin-bottom: 2px; }
         .dropdown-header-email { font-size: 11px; color: #6b7280; margin-bottom: 8px; }
         .dropdown-header-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; background: white; color: #15803d; border: 1px solid #bbf7d0; }
+        .dropdown-header-badge svg { width: 11px; height: 11px; stroke: #15803d; fill: none; stroke-width: 2.2; flex-shrink: 0; }
 
         .dropdown-body { padding: 6px 0; }
         .dropdown-divider { height: 1px; background: #f3f4f6; margin: 4px 8px; }
@@ -216,6 +217,32 @@
         .dropdown-item.danger:hover { background: #fef2f2; color: #dc2626; }
         .dropdown-item.danger .di-icon { background: #fee2e2; }
         .dropdown-item.danger .di-icon svg { stroke: #ef4444; }
+
+        /* ── "Masuk sebagai": tombol topbar tersendiri + dropdown daftar akun ── */
+        .samar-wrap { position: relative; }
+        .samar-wrap.open .topbar-icon-btn { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+        .dd-panel { display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 268px; background: white; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 16px 48px rgba(0,0,0,0.12); overflow: hidden; z-index: 1200; animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1); }
+        .samar-wrap.open .dd-panel { display: block; }
+        @media (max-width: 640px) {
+            .dd-panel { position: fixed; top: 62px; right: 10px; left: auto; width: min(268px, calc(100vw - 20px)); }
+        }
+        .dd-head { display: flex; align-items: center; gap: 9px; padding: 13px 16px; border-bottom: 1px solid #f3f4f6; }
+        .dd-head svg { width: 15px; height: 15px; stroke: #15803d; fill: none; stroke-width: 2; flex-shrink: 0; }
+        .dd-head-title { font-size: 13.5px; font-weight: 700; color: #111827; }
+        .dd-note { padding: 9px 16px; font-size: 10.5px; color: #9ca3af; line-height: 1.55; background: #fbfcfd; border-bottom: 1px solid #f3f4f6; }
+        .dd-search { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; }
+        .dd-search input { width: 100%; padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 12px; font-family: inherit; color: #111827; outline: none; }
+        .dd-search input:focus { border-color: #15803d; box-shadow: 0 0 0 3px rgba(21,128,61,0.07); }
+        .dd-list { max-height: 264px; overflow-y: auto; padding: 5px 0; }
+        .dd-user { display: flex; align-items: center; gap: 10px; padding: 8px 16px; width: 100%; border: none; background: transparent; cursor: pointer; font-family: inherit; text-align: left; transition: background 0.12s; }
+        .dd-user:hover { background: #f0fdf4; }
+        .dd-ava { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+        .dd-ava.adm { background: #dbeafe; color: #1d4ed8; }
+        .dd-ava.usr { background: #eef0f3; color: #5b6472; }
+        .dd-user-text { min-width: 0; }
+        .dd-user-name { font-size: 12.5px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dd-user-role { font-size: 10px; color: #9ca3af; }
+        .dd-empty { padding: 18px 16px; font-size: 12px; color: #9ca3af; text-align: center; }
 
         .content-area { flex: 1; overflow-y: auto; padding: 24px; }
         @media (max-width: 480px) { .content-area { padding: 16px; } }
@@ -692,6 +719,41 @@
                 </div>
             </div>
 
+            {{-- "Masuk sebagai" — hanya untuk super admin yang belum menyamar.
+                 Daftar akunnya disiapkan View composer di AppServiceProvider. --}}
+            @if($akunSamaran->isNotEmpty())
+            <div class="samar-wrap" id="samarWrap">
+                <button class="topbar-icon-btn" onclick="toggleSamaran()" title="Masuk sebagai akun lain">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                </button>
+                <div class="dd-panel">
+                    <div class="dd-head">
+                        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                        <span class="dd-head-title">Masuk sebagai</span>
+                    </div>
+                    <div class="dd-note">Melihat aplikasi sesuai akses akun tersebut. Semua tindakan tercatat atas namanya.</div>
+                    @if($akunSamaran->count() > 6)
+                    <div class="dd-search">
+                        <input type="text" id="ddCari" placeholder="Cari nama atau email…" autocomplete="off" oninput="saringSamaran(this.value)">
+                    </div>
+                    @endif
+                    <div class="dd-list" id="ddList">
+                        @foreach($akunSamaran as $kandidat)
+                        <button type="button" class="dd-user"
+                            data-cari="{{ Str::lower($kandidat->name . ' ' . $kandidat->email) }}"
+                            onclick="masukSebagai('{{ route('akun.impersonate', $kandidat) }}', this)">
+                            <div class="dd-ava {{ $kandidat->role === 'admin' ? 'adm' : 'usr' }}">{{ initials($kandidat->name) }}</div>
+                            <div class="dd-user-text">
+                                <div class="dd-user-name">{{ $kandidat->name }}</div>
+                                <div class="dd-user-role">{{ $kandidat->role === 'admin' ? 'Admin' : 'User' }}</div>
+                            </div>
+                        </button>
+                        @endforeach
+                        <div class="dd-empty" id="ddKosong" style="display:none;">Tidak ada akun yang cocok</div>
+                    </div>
+                </div>
+            </div>
+            @endif
             <div class="user-dropdown-wrap" id="userDropdownWrap">
                 <button class="user-trigger" onclick="toggleUserDropdown()">
                     <div class="user-trigger-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
@@ -708,7 +770,13 @@
                         <div class="dropdown-header-name">{{ auth()->user()->name }}</div>
                         <div class="dropdown-header-email">{{ auth()->user()->email }}</div>
                         <div class="dropdown-header-badge">
-                            {{ auth()->user()->isSuperAdmin() ? '⭐ Super Admin' : (auth()->user()->isAdmin() ? '🔵 Administrator' : '👤 User') }}
+                            @if(auth()->user()->isSuperAdmin())
+                                <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> Super Admin
+                            @elseif(auth()->user()->isAdmin())
+                                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Administrator
+                            @else
+                                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> User
+                            @endif
                         </div>
                     </div>
                     <div class="dropdown-body">
@@ -731,8 +799,12 @@
                             </button>
                         </form>
                     </div>
+
                 </div>
             </div>
+            @if($akunSamaran->isNotEmpty())
+            <form method="POST" id="formSamaran" style="display:none">@csrf</form>
+            @endif
         </div>
     </div>
 
@@ -740,7 +812,7 @@
         @if(session('impersonator_id'))
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
             <div style="font-size:13px;color:#92400e;display:flex;align-items:center;gap:9px;min-width:0;">
-                <span style="font-size:17px;flex-shrink:0;">🎭</span>
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#b45309;fill:none;stroke-width:2;flex-shrink:0;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
                 <span style="min-width:0;">Anda sedang masuk sebagai <strong>{{ auth()->user()->name }}</strong> — semua tindakan atas nama akun ini.</span>
             </div>
             <form method="POST" action="{{ route('impersonate.leave') }}" style="margin:0;flex-shrink:0;">
@@ -786,11 +858,47 @@
         }
     }
 
-    function toggleUserDropdown() { document.getElementById('userDropdownWrap').classList.toggle('open'); }
+    function toggleUserDropdown() {
+        const wrap = document.getElementById('userDropdownWrap');
+        wrap.classList.toggle('open');
+    }
     document.addEventListener('click', function(e) {
         const wrap = document.getElementById('userDropdownWrap');
         if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
     });
+
+    /* ── "Masuk sebagai" (tombol topbar) ── */
+    function toggleSamaran() {
+        const wrap = document.getElementById('samarWrap');
+        wrap.classList.toggle('open');
+        if (wrap.classList.contains('open')) {
+            const cari = document.getElementById('ddCari');
+            if (cari) setTimeout(() => cari.focus(), 30);
+        }
+    }
+    document.addEventListener('click', function (e) {
+        const wrap = document.getElementById('samarWrap');
+        if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') document.getElementById('samarWrap')?.classList.remove('open');
+    });
+    function saringSamaran(kata) {
+        kata = kata.trim().toLowerCase();
+        let tampil = 0;
+        document.querySelectorAll('#ddList .dd-user').forEach(el => {
+            const cocok = el.dataset.cari.includes(kata);
+            el.style.display = cocok ? '' : 'none';
+            if (cocok) tampil++;
+        });
+        document.getElementById('ddKosong').style.display = tampil ? 'none' : '';
+    }
+    function masukSebagai(url, btn) {
+        if (btn) btn.style.opacity = '.5';
+        const f = document.getElementById('formSamaran');
+        f.action = url;
+        f.submit();
+    }
 
     let notifOpen = false;
     function toggleNotif() {

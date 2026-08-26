@@ -6,11 +6,14 @@ use App\Models\HistoryJabatan;
 use App\Models\HistoryPejabat;
 use App\Models\User;
 use App\Exports\HistoryPejabatExport;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class HistoryPejabatController extends Controller
 {
+    use LogsActivity;
+
     /** Urutan tampil pejabat aktif — tingkat tertinggi di atas. */
     private const URUTAN_JABATAN = ['SVP', 'VP', 'SPM', 'PM'];
 
@@ -113,6 +116,15 @@ class HistoryPejabatController extends Controller
         $search   = $request->search;
         $filename = 'history-pejabat-' . now()->format('d-m-Y') . '.xlsx';
 
+        $saringan = collect([
+            $jabatan        ? "jabatan: {$jabatan}"       : null,
+            $request->tahun ? "tahun: {$request->tahun}"  : null,
+            $search         ? "pencarian: {$search}"      : null,
+        ])->filter()->implode(', ');
+
+        $this->log('export', 'History Pejabat', $filename,
+            'Export Excel' . ($saringan ? " — saringan {$saringan}" : ' — seluruh data'));
+
         return (new HistoryPejabatExport($jabatan, $search))->download($filename);
     }
 
@@ -127,7 +139,12 @@ class HistoryPejabatController extends Controller
         $nama = optional($historyPejabat->karyawan)->nama ?? '-';
         $jab  = $historyPejabat->jabatan;
 
+        $mulai = optional($historyPejabat->tanggal_mulai)->format('d M Y') ?? '-';
+
         $historyPejabat->delete();
+
+        $this->log('hapus', 'History Pejabat', "{$jab} — {$nama}",
+            "Hapus catatan pejabat (mulai menjabat {$mulai}). Riwayat jabatan sumbernya tidak ikut terhapus.");
 
         return redirect()->route('history_pejabat.index')
             ->with('success', "History pejabat {$jab} — {$nama} berhasil dihapus.");
