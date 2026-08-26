@@ -97,7 +97,7 @@
     .modal-btn.cancel { background:#f9fafb;color:#374151;border:1px solid #e5e7eb; }
     .modal-btn.danger { background:#ef4444;color:white; }
     .modal-btn.danger:hover { background:#dc2626; }
-    mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
+    mark { background:transparent;padding:0;color:inherit;font-weight:700; } /* hasil pencarian ditebalkan, tanpa blok warna */
     @media (max-width:768px) {
         .stats-grid { grid-template-columns:repeat(2,1fr); }
         .surat-grid { grid-template-columns:1fr; }

@@ -126,7 +126,7 @@
     .empty-state span { font-size:12px; }
 
     /* highlight search */
-    mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
+    mark { background:transparent;padding:0;color:inherit;font-weight:700; } /* hasil pencarian ditebalkan, tanpa blok warna */
 </style>
 @endpush
 

@@ -60,7 +60,7 @@
     .empty-state { text-align:center;padding:50px 20px;color:#9ca3af; }
     .empty-state svg { width:40px;height:40px;margin:0 auto 10px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
 
-    mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
+    mark { background:transparent;padding:0;color:inherit;font-weight:700; } /* hasil pencarian ditebalkan, tanpa blok warna */
 
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }
     .toast { display:flex;align-items:center;gap:10px;background:white;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);font-size:13px;color:#15803d;font-weight:500;min-width:280px;position:relative;overflow:hidden;pointer-events:all;animation:toastIn 0.35s cubic-bezier(0.4,0,0.2,1) forwards; }

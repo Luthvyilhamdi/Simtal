@@ -85,7 +85,7 @@
     .empty-state svg { width:38px;height:38px;margin:0 auto 10px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }
     .empty-state p { font-size:13px;font-weight:600;color:#6b7280;margin-bottom:3px; }
 
-    mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
+    mark { background:transparent;padding:0;color:inherit;font-weight:700; } /* hasil pencarian ditebalkan, tanpa blok warna */
 
     /* Toast */
     .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none; }

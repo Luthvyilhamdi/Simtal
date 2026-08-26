@@ -126,7 +126,7 @@
     .lf-btn.edit { color:#374151; }
     .lf-btn.edit:hover { background:#f9fafb;border-color:#d1d5db; }
 
-    mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
+    mark { background:transparent;padding:0;color:inherit;font-weight:700; } /* hasil pencarian ditebalkan, tanpa blok warna */
 
     .side-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:2000;display:none;backdrop-filter:blur(2px); }
     .side-overlay.show { display:block; }

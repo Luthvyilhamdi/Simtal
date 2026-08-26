@@ -121,7 +121,7 @@
     .imp-cols code { background:#eef2ff;color:#4338ca;padding:1px 5px;border-radius:4px;font-size:11px; }
     .tmpl-link { display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#15803d;text-decoration:none;margin-bottom:14px; }
 
-    mark { background:#fef08a;border-radius:2px;padding:0 1px;color:inherit;font-weight:600; }
+    mark { background:transparent;padding:0;color:inherit;font-weight:700; } /* hasil pencarian ditebalkan, tanpa blok warna */
 
     /* Side panel */
     .side-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:2000;display:none;backdrop-filter:blur(2px); }

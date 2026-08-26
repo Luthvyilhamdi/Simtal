@@ -180,7 +180,7 @@
 .pag-row { display: flex; align-items: center; gap: 3px; }
 
 /* Highlight search */
-mark { background: #fef08a; border-radius: 2px; padding: 0 1px; color: inherit; font-weight: 700; }
+mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } /* hasil pencarian ditebalkan, tanpa blok warna */
 
 /* Toast */
 .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; pointer-events: none; }
