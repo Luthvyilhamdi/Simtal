@@ -8,7 +8,8 @@
     .page-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap; }
     .page-title { font-size:20px;font-weight:700;color:#111827; }
     .page-sub { font-size:12px;color:#6b7280;margin-top:3px; }
-    .btn-primary { display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap; }
+    /* padding 7px agar sejajar tingginya dengan search & dropdown di baris filter */
+    .btn-primary { display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#15803d;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap; }
     .btn-primary:hover { background:#166534; }
     .btn-primary svg { width:13px;height:13px;stroke:white;fill:none;stroke-width:2.5; }
     .stats-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px; }
@@ -139,10 +140,6 @@
         <div class="page-title">📄 Surat Penting</div>
         <div class="page-sub">Kelola dokumen dan surat penting karyawan</div>
     </div>
-    <a href="{{ route('surat_penting.create') }}" class="btn-primary">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Upload Surat
-    </a>
 </div>
 
 {{-- STATS --}}
@@ -204,6 +201,13 @@
             <a href="{{ route('surat_penting.index') }}" class="btn-reset">× Reset</a>
         @endif
     </form>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+        <a href="{{ route('surat_penting.create') }}" class="btn-primary">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Upload Surat
+        </a>
+    </div>
 </div>
 
 {{-- SURAT GRID --}}
