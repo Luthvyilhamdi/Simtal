@@ -63,6 +63,10 @@
     .badge-pm { background:#f0fdf4;color:#15803d; }
 
     .durasi-chip { display:inline-flex;padding:2px 7px;border-radius:5px;background:#f3f4f6;font-size:11px;color:#6b7280;font-weight:600; }
+    /* Alasan berakhirnya jabatan — diambil dari tipe jabatan penggantinya. */
+    .status-chip { display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap; }
+    .status-promosi { background:#dcfce7;color:#15803d; }
+    .status-rotasi  { background:#dbeafe;color:#1d4ed8; }
 
     /* Tombol hapus (super admin) */
     .btn-del { width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s; }
@@ -351,6 +355,7 @@
                         <th>Tgl Mulai</th>
                         <th>Tgl Selesai</th>
                         <th>Durasi</th>
+                        <th>Status</th>
                         @if($isSA)<th>Aksi</th>@endif
                     </tr>
                 </thead>
@@ -384,6 +389,15 @@
                         <td>{{ $h->tanggal_mulai->format('d M Y') }}</td>
                         <td>{{ $h->tanggal_selesai->format('d M Y') }}</td>
                         <td><span class="durasi-chip">{{ $h->durasi }}</span></td>
+                        <td>
+                            @if($h->tipe_selesai)
+                                <span class="status-chip status-{{ $h->tipe_selesai }}">
+                                    {{ ucfirst($h->tipe_selesai) }}
+                                </span>
+                            @else
+                                -
+                            @endif
+                        </td>
                         @if($isSA)
                         <td>
                             <button type="button" class="btn-del"

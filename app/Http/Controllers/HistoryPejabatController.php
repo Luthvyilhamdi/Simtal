@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HistoryJabatan;
 use App\Models\HistoryPejabat;
 use App\Models\User;
 use App\Exports\HistoryPejabatExport;
@@ -10,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 
 class HistoryPejabatController extends Controller
 {
+    /** Urutan tampil pejabat aktif — tingkat tertinggi di atas. */
+    private const URUTAN_JABATAN = ['SVP', 'VP', 'SPM', 'PM'];
+
+    /** Hanya perpindahan ini yang ditampilkan di daftar "sudah selesai". */
+    private const TIPE_SELESAI = ['promosi', 'rotasi'];
     private function checkSuperAdmin(): void
     {
         /** @var User $user */
@@ -36,14 +42,38 @@ class HistoryPejabatController extends Controller
             });
         }
 
-        // Pisah aktif dan selesai
+        // Pisah aktif dan selesai.
+        // Aktif diurutkan per tingkat jabatan (SVP paling atas), baru per tanggal.
+        $urutan = "'" . implode("','", self::URUTAN_JABATAN) . "'";
+
         $aktif = (clone $query)
             ->whereNull('tanggal_selesai')
+            ->orderByRaw("FIELD(jabatan, {$urutan})")
             ->orderBy('tanggal_mulai', 'desc')
             ->paginate(15, ['*'], 'page_aktif');
 
+        // Satu jabatan pejabat ditutup tepat saat karyawan menerima jabatan baru
+        // (tanggal_selesai = tanggal_mulai jabatan penggantinya). Jadi ALASAN
+        // berakhirnya = tipe jabatan pengganti itu. Diambil lewat subquery agar
+        // tidak menimbulkan query per-baris saat ditampilkan.
+        $tipePengganti = HistoryJabatan::select('tipe')
+            ->whereColumn('history_jabatans.karyawan_id', 'history_pejabats.karyawan_id')
+            ->whereColumn('history_jabatans.tanggal_mulai', 'history_pejabats.tanggal_selesai')
+            ->orderBy('id')
+            ->limit(1);
+
         $selesai = (clone $query)
             ->whereNotNull('tanggal_selesai')
+            ->select('history_pejabats.*')
+            ->addSelect(['tipe_selesai' => $tipePengganti])
+            // Tampilkan hanya yang berakhir karena promosi atau rotasi.
+            ->whereExists(function ($q) {
+                $q->selectRaw('1')
+                  ->from('history_jabatans')
+                  ->whereColumn('history_jabatans.karyawan_id', 'history_pejabats.karyawan_id')
+                  ->whereColumn('history_jabatans.tanggal_mulai', 'history_pejabats.tanggal_selesai')
+                  ->whereIn('history_jabatans.tipe', self::TIPE_SELESAI);
+            })
             ->orderBy('tanggal_selesai', 'desc')
             ->paginate(15, ['*'], 'page_selesai');
 
