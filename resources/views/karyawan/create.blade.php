@@ -342,7 +342,7 @@
             <div class="form-group">
                 <label class="form-label">Jabatan <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="jabatan_id" class="form-input">
+                    <select name="jabatan_id" class="form-input select-search">
                         <option value="">-- Pilih Jabatan --</option>
                         @foreach($jabatans as $j)
                             <option value="{{ $j->id }}" {{ old('jabatan_id')==$j->id ? 'selected' : '' }}>{{ $j->nama_jabatan }}</option>
@@ -355,7 +355,7 @@
             <div class="form-group">
                 <label class="form-label">Struktural / Fungsional</label>
                 <div class="select-wrap">
-                    <select name="struktural_fungsional" class="form-input">
+                    <select name="struktural_fungsional" class="form-input select-search">
                         <option value="">-- Pilih --</option>
                         <option value="Struktural" {{ old('struktural_fungsional')=='Struktural' ? 'selected' : '' }}>Struktural</option>
                         <option value="Fungsional" {{ old('struktural_fungsional')=='Fungsional' ? 'selected' : '' }}>Fungsional</option>
@@ -374,7 +374,7 @@
             <div class="form-group">
                 <label class="form-label">Direktorat <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="direktorat_id" class="form-input">
+                    <select name="direktorat_id" class="form-input select-search">
                         <option value="">-- Pilih Direktorat --</option>
                         @foreach($direktorats as $d)
                             <option value="{{ $d->id }}" {{ old('direktorat_id')==$d->id ? 'selected' : '' }}>{{ $d->nama_direktorat }}</option>
@@ -387,7 +387,7 @@
             <div class="form-group">
                 <label class="form-label">Kompartemen <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="kompartemen_id" class="form-input">
+                    <select name="kompartemen_id" class="form-input select-search">
                         <option value="">-- Pilih Kompartemen --</option>
                         @foreach($kompartemens as $k)
                             <option value="{{ $k->id }}" {{ old('kompartemen_id')==$k->id ? 'selected' : '' }}>{{ $k->nama_kompartemen }}</option>
@@ -400,7 +400,7 @@
             <div class="form-group">
                 <label class="form-label">Departemen <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="departemen_id" class="form-input">
+                    <select name="departemen_id" class="form-input select-search">
                         <option value="">-- Pilih Departemen --</option>
                         @foreach($departemens as $d)
                             <option value="{{ $d->id }}" {{ old('departemen_id')==$d->id ? 'selected' : '' }}>{{ $d->nama_departemen }}</option>
@@ -413,7 +413,7 @@
             <div class="form-group">
                 <label class="form-label">Kode Struktur <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="kode_struktur_id" class="form-input">
+                    <select name="kode_struktur_id" class="form-input select-search">
                         <option value="">-- Pilih Kode Struktur --</option>
                         @foreach($kodeStrukturs as $ks)
                             <option value="{{ $ks->id }}" {{ old('kode_struktur_id')==$ks->id ? 'selected' : '' }}>{{ $ks->kode_struktur }}</option>
@@ -448,7 +448,7 @@
             <div class="form-group">
                 <label class="form-label">Job Grade <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="job_grade_id" class="form-input" id="jobGradeSelect" onchange="updateBand()">
+                    <select name="job_grade_id" class="form-input select-search" id="jobGradeSelect" onchange="updateBand()">
                         <option value="">-- Pilih Job Grade --</option>
                         @foreach($jobGrades as $j)
                             <option value="{{ $j->id }}" data-grade="{{ $j->job_grade }}" {{ old('job_grade_id')==$j->id ? 'selected' : '' }}>JG {{ $j->job_grade }}</option>
@@ -461,7 +461,7 @@
             <div class="form-group">
                 <label class="form-label">Person Grade <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="person_grade_id" class="form-input">
+                    <select name="person_grade_id" class="form-input select-search">
                         <option value="">-- Pilih Person Grade --</option>
                         @foreach($personGrades as $p)
                             <option value="{{ $p->id }}" {{ old('person_grade_id')==$p->id ? 'selected' : '' }}>PG {{ $p->person_grade }}</option>

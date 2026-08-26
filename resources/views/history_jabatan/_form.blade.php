@@ -144,7 +144,7 @@
             <div class="form-group">
                 <label class="form-label">Jabatan <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="jabatan_id" class="form-input {{ $errors->has('jabatan_id') ? 'error-input' : '' }}">
+                    <select name="jabatan_id" class="form-input select-search {{ $errors->has('jabatan_id') ? 'error-input' : '' }}">
                         <option value="">-- Pilih Jabatan --</option>
                         @foreach($jabatans as $j)
                             <option value="{{ $j->id }}" {{ old('jabatan_id', $h?->jabatan_id) == $j->id ? 'selected' : '' }}>{{ $j->nama_jabatan }}</option>
@@ -217,7 +217,7 @@
             <div class="form-group">
                 <label class="form-label">Kode Struktur <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="kode_struktur_id" class="form-input {{ $errors->has('kode_struktur_id') ? 'error-input' : '' }}">
+                    <select name="kode_struktur_id" class="form-input select-search {{ $errors->has('kode_struktur_id') ? 'error-input' : '' }}">
                         <option value="">-- Pilih Kode Struktur --</option>
                         @foreach($kodeStrukturs as $ks)
                             <option value="{{ $ks->id }}" {{ old('kode_struktur_id', $h?->kode_struktur_id) == $ks->id ? 'selected' : '' }}>{{ $ks->kode_struktur }}</option>

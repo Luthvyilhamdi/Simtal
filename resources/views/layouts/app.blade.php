@@ -990,6 +990,9 @@
     });
 </script>
 
+{{-- Select dengan pencarian: aktif untuk <select class="select-search"> --}}
+@include('partials.select-search')
+
 @stack('scripts')
 </body>
 </html>
