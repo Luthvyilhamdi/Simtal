@@ -67,28 +67,27 @@ class HistoryJabatanController extends Controller
 
     /**
      * Data bersama untuk form Tambah & Edit (daftar combobox + master select).
-     * Saran combobox = nama master (struktur kini) ∪ nama historis yang pernah
-     * dipakai, agar nama lama tinggal dipilih ulang (anti-typo).
+     * Saran combobox = nama master saja, ditambah "-" dan "Belum ditentukan"
+     * di posisi paling bawah. Nama historis tidak ikut ditawarkan.
      */
     private function formData(Karyawan $karyawan): array
     {
-        $namaDirektorat = Direktorat::pluck('nama_direktorat')
-            ->merge(HistoryJabatan::whereNotNull('direktorat_nama')->distinct()->pluck('direktorat_nama'))
-            ->filter()->unique()->sort()->values();
-        $namaKompartemen = Kompartemen::pluck('nama_kompartemen')
-            ->merge(HistoryJabatan::whereNotNull('kompartemen_nama')->distinct()->pluck('kompartemen_nama'))
-            ->filter()->unique()->sort()->values();
-        $namaDepartemen = Departemen::pluck('nama_departemen')
-            ->merge(HistoryJabatan::whereNotNull('departemen_nama')->distinct()->pluck('departemen_nama'))
-            ->filter()->unique()->sort()->values();
+        // Daftar saran diambil HANYA dari master data. Nilai yang pernah
+        // diketik bebas di history sengaja tidak ikut ditawarkan supaya daftar
+        // tetap bersih dan tidak melebar sendiri seiring waktu.
+        // Isian bebas tetap bisa diketik — kolomnya combobox (input + datalist),
+        // sehingga nilai lama pada data yang diedit juga tidak hilang.
+        $namaDirektorat  = $this->opsiMaster(Direktorat::pluck('nama_direktorat'));
+        $namaKompartemen = $this->opsiMaster(Kompartemen::pluck('nama_kompartemen'));
+        $namaDepartemen  = $this->opsiMaster(Departemen::pluck('nama_departemen'));
 
         return [
             'karyawan'        => $karyawan,
             'namaDirektorat'  => $namaDirektorat,
             'namaKompartemen' => $namaKompartemen,
             'namaDepartemen'  => $namaDepartemen,
-            'namaJobGrade'    => $this->gradeOptions(JobGrade::pluck('job_grade'), 'job_grade_nama'),
-            'namaPersonGrade' => $this->gradeOptions(PersonGrade::pluck('person_grade'), 'person_grade_nama'),
+            'namaJobGrade'    => $this->gradeOptions(JobGrade::pluck('job_grade')),
+            'namaPersonGrade' => $this->gradeOptions(PersonGrade::pluck('person_grade')),
             'jabatans'        => Jabatan::all(),
             'kodeStrukturs'   => KodeStruktur::all(),
         ];
@@ -421,14 +420,39 @@ class HistoryJabatanController extends Controller
      * Saran combobox grade: gabungan nilai master + nilai historis yang pernah
      * dipakai, diurutkan dari yang TERBESAR ke terkecil (numerik).
      */
-    private function gradeOptions($masterValues, string $historyColumn)
+    /**
+     * Pilihan penampung, selalu diletakkan paling bawah pada daftar saran.
+     * Ejaan "Belum Ditentukan" mengikuti yang sudah dipakai di master data
+     * agar tidak muncul dua versi berbeda.
+     */
+    private const OPSI_TAMBAHAN = ['-', 'Belum Ditentukan'];
+
+    /**
+     * Buang nilai penampung dari daftar (master sebagian sudah memuatnya),
+     * lalu pasang kembali di posisi paling bawah dengan ejaan seragam.
+     */
+    private function tempelOpsiTambahan(\Illuminate\Support\Collection $daftar)
     {
-        return collect($masterValues)
-            ->merge(HistoryJabatan::whereNotNull($historyColumn)->distinct()->pluck($historyColumn))
-            ->filter()
-            ->unique()
-            ->sortByDesc(fn ($v) => (int) $v)
-            ->values();
+        return $daftar
+            ->reject(fn ($v) => trim($v) === '-' || preg_match('/^belum\s+ditentukan$/i', trim($v)))
+            ->values()
+            ->concat(self::OPSI_TAMBAHAN);
+    }
+
+    /** Daftar saran unit: master data (urut A-Z) + opsi penampung di bawahnya. */
+    private function opsiMaster($masterValues)
+    {
+        return $this->tempelOpsiTambahan(
+            collect($masterValues)->filter()->unique()->sort()
+        );
+    }
+
+    /** Sama seperti opsiMaster(), tapi grade diurut dari angka terbesar. */
+    private function gradeOptions($masterValues)
+    {
+        return $this->tempelOpsiTambahan(
+            collect($masterValues)->filter()->unique()->sortByDesc(fn ($v) => (int) $v)
+        );
     }
 
     public function export(Request $request)
