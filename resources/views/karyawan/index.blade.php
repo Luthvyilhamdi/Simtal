@@ -175,12 +175,15 @@
             <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
         </div>
 
-        {{-- Export --}}
+        {{-- Export — rutenya tertutup untuk role 'user', jadi tombolnya ikut disembunyikan
+             supaya tidak jadi tombol mati yang memantul balik ke Struktur Organisasi. --}}
+        @if(!auth()->user()->isUser())
         <a href="{{ route('karyawan.export', request()->query()) }}"
            style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;white-space:nowrap;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export
         </a>
+        @endif
         @if(auth()->user()->isSuperAdmin())
         <button type="button" onclick="openImportModal('modalImportKaryawan')"
            style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">
@@ -193,10 +196,12 @@
             Import TMT
         </button>
         @endif
+        @if(!auth()->user()->isUser())
         <a href="{{ route('karyawan.create') }}" class="btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tambah
         </a>
+        @endif
     </div>
 </div>
 
@@ -266,6 +271,7 @@
                             <a href="{{ route('karyawan.show', $k) }}" class="btn-icon view" title="Detail">
                                 <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </a>
+                            @if(!auth()->user()->isUser())
                             <a href="{{ route('karyawan.edit', $k) }}" class="btn-icon edit" title="Edit">
                                 <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </a>
@@ -275,6 +281,7 @@
                                 onclick="openModal(this.dataset.id, this.dataset.nama, this.dataset.url)">
                                 <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                             </button>
+                            @endif
                         </div>
                     </td>
                 </tr>

@@ -97,6 +97,17 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+    // Profil Karyawan boleh DIBACA role 'user' (daftar + detail ringkas).
+    // Sengaja di luar 'not_user_role', dan hanya GET — tidak ada jalur ubah.
+    Route::get('karyawan',              [KaryawanController::class, 'index'])->name('karyawan.index');
+    Route::get('karyawan/{karyawan}',   [KaryawanController::class, 'show'])->name('karyawan.show');
+
+    // Panel profil di Struktur Organisasi. Dipakai role 'user' juga, sehingga
+    // TIDAK boleh berada di grup 'not_user_role' — kalau tidak, fetch akan
+    // menerima redirect HTML dan panel menampilkan "Gagal memuat data".
+    // Isinya dipangkas untuk role 'user', lihat StrukturOrganisasiController.
+    Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
+
     // ===== NOTIFIKASI (semua role) =====
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/',                   [NotifikasiController::class, 'index'])->name('index');
@@ -119,7 +130,9 @@ Route::middleware('auth')->group(function () {
         Route::get('karyawan/template-download', [KaryawanController::class, 'downloadTemplate'])->name('karyawan.template');
         Route::post('karyawan/import-tmt',         [KaryawanController::class, 'importTmt'])->name('karyawan.import-tmt.store');
         Route::get('karyawan/import-tmt/template', [KaryawanController::class, 'templateTmt'])->name('karyawan.import-tmt.template');
-        Route::resource('karyawan', KaryawanController::class);
+        // Tambah/ubah/hapus tetap tertutup untuk role 'user'.
+        // Melihat daftar & detail dipindah ke luar grup ini (lihat di bawah).
+        Route::resource('karyawan', KaryawanController::class)->except(['index', 'show']);
 
         // History Jabatan
         Route::prefix('karyawan/{karyawan}/history-jabatan')->name('history_jabatan.')->group(function () {
@@ -377,7 +390,6 @@ Route::middleware('auth')->group(function () {
         });
         // API AJAX
         Route::get('api/karyawan/{id}/detail',  [StrukturOrganisasiController::class, 'getKaryawanData'])->name('api.karyawan.detail');
-        Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
 
         // FAQ
         Route::get('/faq', fn() => view('faq'))->name('faq');

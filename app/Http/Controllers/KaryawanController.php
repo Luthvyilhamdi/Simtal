@@ -108,6 +108,15 @@ class KaryawanController extends Controller
 
     public function show(Karyawan $karyawan)
     {
+        // Role 'user' hanya boleh melihat versi ringkas: unit organisasi, band &
+        // grade, jobs, dan kontak kerja. Data pribadi, TMT, MDG, serta riwayat
+        // tidak ikut dimuat — bukan sekadar disembunyikan di tampilan.
+        if (Auth::user()?->isUser()) {
+            $karyawan->load(['direktorat', 'kompartemen', 'departemen', 'jobGrade', 'personGrade', 'jabatan']);
+
+            return view('karyawan.show_ringkas', compact('karyawan'));
+        }
+
         $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur','strukturAssignments','riwayatPendidikan','pgsPjs']);
 
         // Cek shortlist — prioritas tahun ini, fallback tahun lalu

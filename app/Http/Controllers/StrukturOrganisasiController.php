@@ -498,6 +498,33 @@ class StrukturOrganisasiController extends Controller
             ->take(10)
             ->get(['target','keterangan','user_name','created_at']);
 
+        // Role 'user' hanya menerima data penempatan organisasi & kontak kerja —
+        // sama persis dengan halaman Profil Karyawan ringkas miliknya. Data
+        // pribadi, riwayat, dan log penugasan tidak ikut dikirim (dipangkas di
+        // sumbernya, bukan sekadar disembunyikan di tampilan).
+        if (Auth::user()?->isUser()) {
+            return response()->json([
+                'id'               => $k->id,
+                'nama'             => $k->nama,
+                'nik'              => $k->nik,
+                'foto'             => $k->foto ? asset('storage/'.$k->foto) : null,
+                'inisial'          => strtoupper(substr($k->nama, 0, 2)),
+                'jabatan_saat_ini' => $k->jabatan_saat_ini ?? '-',
+                'status'           => $k->status,
+                'direktorat'       => $k->direktorat?->nama_direktorat   ?? '-',
+                'kompartemen'      => $k->kompartemen?->nama_kompartemen ?? '-',
+                'departemen'       => $k->departemen?->nama_departemen   ?? '-',
+                'band'             => $k->band ?: '-',
+                'job_grade'        => $k->jobGrade?->job_grade       ?? '-',
+                'person_grade'     => $k->personGrade?->person_grade ?? '-',
+                'jobs'             => $k->jobs ?: '-',
+                'job_stream'       => $k->job_stream ?: '-',
+                'job_family'       => $k->job_family ?: '-',
+                'no_hp'            => $k->no_hp ?: '-',
+                'email'            => $k->email ?: '-',
+            ]);
+        }
+
         return response()->json([
             'id'              => $k->id,
             'nama'            => $k->nama,

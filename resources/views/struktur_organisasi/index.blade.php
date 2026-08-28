@@ -688,8 +688,10 @@ $isUser = auth()->user()->isUser();
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+        @if(!$isUser)
         <div style="background:#f9fafb;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:#111827" id="pUmur">-</div><div style="font-size:10px;color:#9ca3af;margin-top:2px">Usia (tahun)</div></div>
         <div style="background:#f0fdf4;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:#15803d" id="pSisaMasaKerja">-</div><div style="font-size:10px;color:#9ca3af;margin-top:2px">Sisa Masa Kerja (thn)</div></div>
+        @endif
         <div style="background:#eff6ff;border-radius:10px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:700;color:#185fa5" id="pJG">-</div><div style="font-size:10px;color:#9ca3af;margin-top:2px">Job Grade</div></div>
         <div style="background:#f5f3ff;border-radius:10px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:700;color:#7c3aed" id="pPG">-</div><div style="font-size:10px;color:#9ca3af;margin-top:2px">Person Grade</div></div>
       </div>
@@ -697,10 +699,12 @@ $isUser = auth()->user()->isUser();
         <div style="padding:8px 14px;background:#f9fafb;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Informasi</div>
         <div id="pInfoRows"></div>
       </div>
+      @if(!$isUser)
       <div style="margin-top:0">
         <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">History Penugasan SO</div>
         <div id="pSoHistory"></div>
       </div>
+      @endif
     </div>
   </div>
 </div>
@@ -1185,24 +1189,30 @@ function openPanel(karyawanId){
     st.textContent=d.status==='aktif'?'● Aktif':'● Nonaktif';
     st.style.background=d.status==='aktif'?'#dcfce7':'#fee2e2';
     st.style.color=d.status==='aktif'?'#15803d':'#dc2626';
-    document.getElementById('pUmur').textContent=d.umur??'-';
-    document.getElementById('pSisaMasaKerja').textContent=d.sisa_masa_kerja??'-';
+    // Ubin ini tidak dirender untuk role 'user' — jangan diisi supaya tidak error.
+    const elUmur=document.getElementById('pUmur'); if(elUmur) elUmur.textContent=d.umur??'-';
+    const elSisa=document.getElementById('pSisaMasaKerja'); if(elSisa) elSisa.textContent=d.sisa_masa_kerja??'-';
     document.getElementById('pJG').textContent='JG '+d.job_grade;
     document.getElementById('pPG').textContent='PG '+d.person_grade;
     const currentH = d.history ? d.history.find(h=>h.is_current) : null;
     const noSk = currentH?.no_sk || '-';
     const tglSk = currentH?.tanggal_mulai || '-';
-    const rows=[
+    const rows=@if($isUser)[
+      ['Direktorat',d.direktorat],['Kompartemen',d.kompartemen],['Departemen',d.departemen],
+      ['Band',d.band],['Jobs',d.jobs],['Job Stream',d.job_stream],['Job Family',d.job_family],
+      ['No. HP',d.no_hp],['Email',d.email]
+    ];@else[
       ['Direktorat',d.direktorat],['Kompartemen',d.kompartemen],['Departemen',d.departemen],
       ['Struktural/Fungsional',d.struktural_fungsional],['Band',d.band],
       ['Jobs',d.jobs],['Job Stream',d.job_stream],['Job Family',d.job_family],['Status Kepegawaian',d.status_kepegawaian],
       ['No. SK',noSk],['Tanggal SK',tglSk],
       ['Tgl Masuk',d.tanggal_masuk],['Tgl Lahir',d.tanggal_lahir],['Pensiun',d.pensiun],['Lama Bekerja',d.lama_bekerja],
       ['No. HP',d.no_hp],['Email',d.email],['Jenjang Pendidikan',d.jenjang_pendidikan],['Jurusan',d.jurusan]
-    ];
+    ];@endif
     document.getElementById('pInfoRows').innerHTML=rows.map(([l,v])=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 14px;border-bottom:1px solid #f9fafb;gap:10px"><span style="font-size:11px;color:#9ca3af;flex-shrink:0">${l}</span><span style="font-size:12px;font-weight:500;color:#111827;text-align:right">${v??'-'}</span></div>`).join('');
     const soEl=document.getElementById('pSoHistory');
-    if(!d.so_assignments||d.so_assignments.length===0){
+    if(!soEl){ /* role 'user': blok ini tidak dirender */ }
+    else if(!d.so_assignments||d.so_assignments.length===0){
       soEl.innerHTML='<div style="text-align:center;padding:16px;color:#d1d5db;font-size:12px">Belum ada penugasan SO</div>';
     }else{
       soEl.innerHTML=d.so_assignments.map(s=>`
@@ -1221,7 +1231,7 @@ function openPanel(karyawanId){
           </div>
         </div>`).join('');
     }
-    if(d.assign_logs&&d.assign_logs.length>0){
+    if(soEl&&d.assign_logs&&d.assign_logs.length>0){
       soEl.innerHTML+='<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Log Aktivitas Assign</div>';
       soEl.innerHTML+=d.assign_logs.map(l=>`
         <div style="font-size:11px;color:#6b7280;padding:6px 0;border-bottom:1px solid #f9fafb">

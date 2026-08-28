@@ -65,7 +65,10 @@ class User extends Authenticatable
             return true;
         }
         if ($this->role === 'user') {
-            return $key === 'struktur';
+            // Struktur Organisasi + Profil Karyawan. Profil yang dilihat role ini
+            // adalah versi RINGKAS (lihat KaryawanController::show), dan hanya
+            // membaca — route tambah/ubah/hapus/impor tetap di luar jangkauannya.
+            return in_array($key, ['struktur', 'karyawan'], true);
         }
         if ($this->role === 'admin') {
             return in_array($key, $this->menu_access ?? [], true);

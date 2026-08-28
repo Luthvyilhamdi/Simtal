@@ -411,6 +411,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
                 <span class="nav-text">Struktur Organisasi</span>
             </a>
+            <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="nav-text">Profil Karyawan</span>
+            </a>
         </div>
         @else
         {{-- ===== SIDEBAR ADMIN / SUPER ADMIN ===== --}}
