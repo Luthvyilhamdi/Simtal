@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
-    <title>SIMTAL - @yield('title')</title>
+    <title>SiMental - @yield('title')</title>
     {{-- ===== Design tokens (sistem desain global) ===== --}}
     <style>
         :root {
@@ -249,7 +249,7 @@
 
 
         #pageLoader { display:none;position:fixed;inset:0;background:rgba(255,255,255,0.78);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(2px); }
-        /* Loader layar penuh — logo SIMTAL berputar dengan halo yang berdenyut. */
+        /* Loader layar penuh — logo SiMental berputar dengan halo yang berdenyut. */
         .loader-box { position:relative; width:74px; height:74px; display:flex; align-items:center; justify-content:center; }
         .loader-halo {
             position:absolute; inset:0; border-radius:50%;
@@ -392,8 +392,8 @@
         <div class="brand-row">
             <div class="brand-icon"><img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo"></div>
             <div class="brand-text">
-                <div class="brand-name">SIMTAL</div>
-                <div class="brand-sub">Talent Management System</div>
+                <div class="brand-name">SiMental</div>
+                <div class="brand-sub">Sistem Manajemen Talenta</div>
             </div>
         </div>
         <button class="collapse-btn" id="collapseBtn" onclick="toggleSidebar()" title="Perkecil/perbesar sidebar">
@@ -697,7 +697,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
             <div class="breadcrumb">
-                <span class="breadcrumb-item">@yield('breadcrumb-parent', 'SIMTAL')</span>
+                <span class="breadcrumb-item">@yield('breadcrumb-parent', 'SiMental')</span>
                 <span class="breadcrumb-sep">/</span>
                 <span class="breadcrumb-item active">@yield('breadcrumb', 'Dashboard')</span>
             </div>
@@ -760,7 +760,7 @@
             @endif
             <div class="user-dropdown-wrap" id="userDropdownWrap">
                 <button class="user-trigger" onclick="toggleUserDropdown()">
-                    <div class="user-trigger-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+                    <div class="user-trigger-avatar">{{ initials(auth()->user()->name) }}</div>
                     <div class="user-trigger-info">
                         <div class="user-trigger-name">{{ auth()->user()->name }}</div>
                         <div class="user-trigger-role">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isAdmin() ? 'Administrator' : 'User') }}</div>
@@ -770,7 +770,7 @@
 
                 <div class="user-dropdown-menu" id="userDropdownMenu">
                     <div class="dropdown-header">
-                        <div class="dropdown-avatar-lg">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+                        <div class="dropdown-avatar-lg">{{ initials(auth()->user()->name) }}</div>
                         <div class="dropdown-header-name">{{ auth()->user()->name }}</div>
                         <div class="dropdown-header-email">{{ auth()->user()->email }}</div>
                         <div class="dropdown-header-badge">
@@ -799,7 +799,7 @@
                             @csrf
                             <button type="submit" class="dropdown-item danger">
                                 <div class="di-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-                                Keluar dari SIMTAL
+                                Keluar dari SiMental
                             </button>
                         </form>
                     </div>

@@ -48,6 +48,6 @@
         </tbody>
     </table>
 
-    <div class="footer">SIMTAL &middot; Export Builder</div>
+    <div class="footer">SiMental &middot; Export Builder</div>
 </body>
 </html>

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 class BackupDatabase extends Command
 {
     protected $signature   = 'db:backup';
-    protected $description = 'Backup database SIMTAL ke file .zip (berisi dump .sql)';
+    protected $description = 'Backup database SiMental ke file .zip (berisi dump .sql)';
 
     public function handle(DatabaseBackupService $service): int
     {

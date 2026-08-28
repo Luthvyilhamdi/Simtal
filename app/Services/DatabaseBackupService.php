@@ -9,7 +9,7 @@ use RuntimeException;
 use ZipArchive;
 
 /**
- * Backup database SIMTAL dengan PHP murni (tanpa mysqldump), agar jalan sama
+ * Backup database SiMental dengan PHP murni (tanpa mysqldump), agar jalan sama
  * baiknya di XAMPP lokal maupun shared hosting cPanel.
  *
  * Hasil: file .zip berisi satu dump .sql (CREATE TABLE + INSERT), disimpan di
@@ -37,7 +37,7 @@ class DatabaseBackupService
         $disk->makeDirectory($this->dir);
 
         $dbName   = DB::getDatabaseName();
-        $baseName = 'simtal-backup-' . now()->format('Y-m-d_His');
+        $baseName = 'simental-backup-' . now()->format('Y-m-d_His');
 
         $sqlRel  = $this->dir . '/' . $baseName . '.sql';
         $sqlPath = $disk->path($sqlRel);
@@ -70,7 +70,7 @@ class DatabaseBackupService
         $fileCount  = $this->addDirToZip($zip, storage_path('app'), 'storage/app', [$excludeDir]);
 
         $zip->addFromString('RESTORE.txt',
-            "SIMTAL — Backup Lengkap\n" .
+            "SiMental — Backup Lengkap\n" .
             "Dibuat: " . now()->toDateTimeString() . "\n\n" .
             "Isi paket:\n" .
             "  - {$baseName}.sql  : dump database\n" .
@@ -144,7 +144,7 @@ class DatabaseBackupService
     private function writeDump($handle, string $dbName): void
     {
         fwrite($handle,
-            "-- SIMTAL Database Backup\n" .
+            "-- SiMental Database Backup\n" .
             "-- Database : {$dbName}\n" .
             "-- Dibuat   : " . now()->toDateTimeString() . "\n" .
             "-- ------------------------------------------------------------\n\n" .

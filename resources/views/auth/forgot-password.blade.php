@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMTAL - Lupa Password</title>
+    <title>SiMental - Lupa Password</title>
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -135,7 +135,7 @@
     </div>
 
     <div class="footer-note">
-        &copy; {{ date('Y') }} SIMTAL &mdash; Talent Management System
+        &copy; {{ date('Y') }} SiMental &mdash; Sistem Manajemen Talenta
     </div>
 </div>
 </body>

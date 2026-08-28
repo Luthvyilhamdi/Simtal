@@ -169,7 +169,7 @@
                 </div>
                 <div>
                     <div class="card-title">Data Karyawan Terintegrasi</div>
-                    <div class="card-sub">Informasi dari profil karyawan SIMTAL</div>
+                    <div class="card-sub">Informasi dari profil karyawan SiMental</div>
                 </div>
             </div>
             <a href="{{ route('karyawan.show', $karyawan) }}"

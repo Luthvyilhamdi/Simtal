@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class GenerateNotifikasi extends Command
 {
     protected $signature   = 'notifikasi:generate';
-    protected $description = 'Generate notifikasi otomatis untuk sistem SIMTAL';
+    protected $description = 'Generate notifikasi otomatis untuk sistem SiMental';
 
     /** Urutan tingkat kegentingan, untuk mendeteksi kenaikan. */
     private const URUTAN_LEVEL = ['info' => 0, 'warning' => 1, 'danger' => 2];

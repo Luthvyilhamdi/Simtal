@@ -86,6 +86,6 @@
         </tbody>
     </table>
 
-    <div class="footer">SIMTAL &middot; Riwayat Struktur Organisasi &middot; Dicetak: {{ now()->translatedFormat('d F Y H:i') }}</div>
+    <div class="footer">SiMental &middot; Riwayat Struktur Organisasi &middot; Dicetak: {{ now()->translatedFormat('d F Y H:i') }}</div>
 </body>
 </html>

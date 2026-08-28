@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>SIMTAL - Login</title>
+    <title>SiMental - Login</title>
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     {{-- PWA / mobile app feel --}}
     <meta name="theme-color" content="#14532d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SIMTAL">
+    <meta name="apple-mobile-web-app-title" content="SiMental">
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -266,8 +266,8 @@
     <!-- LEFT -->
     <div class="panel-left">
         <div class="top-logos">
-            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SIMTAL">
-            <span class="sub-name">Talent Management System</span>
+            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SiMental">
+            <span class="sub-name">Sistem Manajemen Talenta</span>
         </div>
 
         <div class="illus-wrap">
@@ -280,7 +280,7 @@
                 </svg>
             </div>
 
-            <div class="app-name">SIMTAL</div>
+            <div class="app-name">SiMental</div>
             <div class="app-tagline">Sistem Manajemen Talenta</div>
         </div>
 
@@ -300,7 +300,7 @@
         <div class="login-inner">
             <div class="greeting">{{ $emoji }} {{ $salam }}</div>
             <div class="login-title">Selamat Datang</div>
-            <div class="login-sub">Masuk ke SIMTAL untuk melanjutkan</div>
+            <div class="login-sub">Masuk ke SiMental untuk melanjutkan</div>
 
             <a href="#" class="btn-identik" id="btnMasuk" role="button" aria-label="Masuk dengan Identik">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
@@ -311,7 +311,7 @@
         </div>
 
         <div class="panel-footer">
-            <span class="copy">© {{ date('Y') }} SIMTAL</span>
+            <span class="copy">© {{ date('Y') }} SiMental</span>
             <a href="{{ route('kebijakan-privasi') }}" class="privacy-link">
                 Kebijakan Privasi
                 <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>

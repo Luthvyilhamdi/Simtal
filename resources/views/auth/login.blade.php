@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#14532d">
-    <title>Login - SIMTAL</title>
+    <title>Login - SiMental</title>
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}?v={{ filemtime(public_path('images/favicon.png')) }}">
@@ -223,19 +223,19 @@
     {{-- LEFT PANEL (desktop) --}}
     <div class="login-left">
         <div class="brand-logo">
-            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SIMTAL">
+            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SiMental">
             <div class="brand-text">
-                <h1>SIMTAL</h1>
+                <h1>SiMental</h1>
                 <p>Sistem Manajemen Talenta</p>
             </div>
         </div>
         <div class="left-desc">
-            <h2>Manajemen Talenta Karyawan Terpadu</h2>
-            <p>Kelola data karyawan, history jabatan, dan assessment secara terpusat, aman, dan efisien.</p>
+            <h2>Satu Sistem untuk Seluruh Data Talenta</h2>
+            <p>Profil karyawan, riwayat jabatan, hasil assessment, dan struktur organisasi dikelola terpusat, dengan setiap perubahan tercatat.</p>
         </div>
         <div class="left-org">
             <span class="left-org-label">Sistem Internal</span>
-            <span class="left-org-name">Pupuk Iskandar Muda</span>
+            <span class="left-org-name">PT Pupuk Iskandar Muda</span>
         </div>
     </div>
 
@@ -243,16 +243,16 @@
     <div class="login-right">
         {{-- Brand ringkas untuk HP --}}
         <div class="mobile-brand">
-            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SIMTAL">
+            <img src="{{ asset('images/logo.png') }}?v={{ filemtime(public_path('images/logo.png')) }}" alt="Logo SiMental">
             <div>
-                <h1>SIMTAL</h1>
+                <h1>SiMental</h1>
                 <p>Sistem Manajemen Talenta</p>
             </div>
         </div>
 
         <div class="welcome-head">
-            <h2>Selamat Datang</h2>
-            <p class="sub">Masuk ke akun SIMTAL Anda</p>
+            <h2>Masuk ke Sistem</h2>
+            <p class="sub">Gunakan NIK dan password akun Anda.</p>
         </div>
 
         @if ($errors->any())
@@ -288,17 +288,17 @@
             <div class="remember-row">
                 <label>
                     <input type="checkbox" name="remember" />
-                    Ingat saya
+                    Tetap masuk di perangkat ini
                 </label>
                 @if (Route::has('password.request'))
                     <a href="{{ route('password.request') }}">Lupa password?</a>
                 @endif
             </div>
-            <button type="submit" class="btn-login">Masuk ke SIMTAL</button>
+            <button type="submit" class="btn-login">Masuk</button>
         </form>
 
         <div class="footer-note">
-            &copy; {{ date('Y') }} SIMTAL &mdash; Talent Management System.
+            &copy; {{ date('Y') }} SiMental &mdash; Sistem Manajemen Talenta.
         </div>
     </div>
 </div>

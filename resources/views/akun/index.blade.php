@@ -446,7 +446,7 @@
 <div class="page-header">
     <div>
         <div class="page-title">Manajemen Akun</div>
-        <div class="page-sub">Kelola pengguna, role, dan hak akses menu SIMTAL</div>
+        <div class="page-sub">Kelola pengguna, role, dan hak akses menu SiMental</div>
     </div>
     <button type="button" class="btn-primary-sm" onclick="openTambahModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>

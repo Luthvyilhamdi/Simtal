@@ -45,8 +45,13 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('nik', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            // Ditulis langsung, bukan trans('auth.failed'), sebab locale aplikasi
+            // masih 'en' sehingga berkas bahasa bawaan Laravel akan memberi
+            // pesan berbahasa Inggris di halaman login yang seluruhnya Indonesia.
+            // Sengaja tidak menyebut mana yang salah (NIK atau password) —
+            // itu praktik keamanan standar agar akun tidak bisa ditebak.
             throw ValidationException::withMessages([
-                'nik' => trans('auth.failed'),
+                'nik' => 'NIK atau password tidak sesuai. Periksa kembali dan coba lagi.',
             ]);
         }
 
@@ -69,10 +74,9 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'nik' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'nik' => $seconds >= 60
+                ? 'Terlalu banyak percobaan masuk. Silakan coba lagi dalam ' . ceil($seconds / 60) . ' menit.'
+                : 'Terlalu banyak percobaan masuk. Silakan coba lagi dalam ' . $seconds . ' detik.',
         ]);
     }
 
