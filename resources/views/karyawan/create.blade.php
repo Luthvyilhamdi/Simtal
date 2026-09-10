@@ -316,7 +316,7 @@
 
             <div class="form-group">
                 <label class="form-label">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" class="form-input {{ $errors->has('email') ? 'error-input' : '' }}" placeholder="cth: nama@pupuk-indonesia.com" />
+                <input type="email" name="email" value="{{ old('email') }}" class="form-input {{ $errors->has('email') ? 'error-input' : '' }}" placeholder="cth: nama@pim.co.id" />
                 @error('email')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
 

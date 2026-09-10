@@ -97,19 +97,8 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // Profil Karyawan boleh DIBACA role 'user' (daftar + detail ringkas).
-    // Sengaja di luar 'not_user_role', dan hanya GET — tidak ada jalur ubah.
     Route::get('karyawan',              [KaryawanController::class, 'index'])->name('karyawan.index');
-    // whereNumber WAJIB: rute ini terdaftar lebih awal daripada rute berruas
-    // harfiah (karyawan/create, karyawan/export, karyawan/template-download).
-    // Tanpa batasan ini, '/karyawan/create' tertangkap sebagai {karyawan}='create',
-    // pencarian model gagal, dan halaman jadi 404.
     Route::get('karyawan/{karyawan}',   [KaryawanController::class, 'show'])->name('karyawan.show')->whereNumber('karyawan');
-
-    // Panel profil di Struktur Organisasi. Dipakai role 'user' juga, sehingga
-    // TIDAK boleh berada di grup 'not_user_role' — kalau tidak, fetch akan
-    // menerima redirect HTML dan panel menampilkan "Gagal memuat data".
-    // Isinya dipangkas untuk role 'user', lihat StrukturOrganisasiController.
     Route::get('api/karyawan/{id}/profile', [StrukturOrganisasiController::class, 'getKaryawanProfile'])->name('api.karyawan.profile');
 
     // ===== NOTIFIKASI (semua role) =====
