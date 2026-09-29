@@ -31,9 +31,6 @@
     .count-num { font-size:15px;font-weight:700;color:#111827; }
     .count-label { font-size:11px;color:#9ca3af; }
 
-    .btn-view { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:white;color:#374151;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.12s;white-space:nowrap; }
-    .btn-view:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .btn-view svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
 
     .empty-state { text-align:center;padding:50px 20px;color:#9ca3af; }
     .empty-state svg { width:40px;height:40px;margin:0 auto 10px;display:block;stroke:#d1d5db;fill:none;stroke-width:1.5; }

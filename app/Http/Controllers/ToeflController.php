@@ -63,7 +63,8 @@ class ToeflController extends Controller
     {
         return $request->validate([
             'skor'        => 'required|numeric|min:0|max:677',
-            'jenis'       => ['nullable', Rule::in(Toefl::JENIS)],
+            // Bebas teks: ada jenis di luar daftar saran (mis. "Prediction").
+            'jenis'       => 'nullable|string|max:50',
             'tanggal_tes' => 'nullable|date',
             'lembaga'     => 'nullable|string|max:255',
             'keterangan'  => 'nullable|string|max:1000',

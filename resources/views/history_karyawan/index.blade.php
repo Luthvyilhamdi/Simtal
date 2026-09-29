@@ -43,9 +43,6 @@
     .count-num { font-size:15px;font-weight:700;color:#111827; }
     .count-label { font-size:11px;color:#9ca3af; }
 
-    .btn-view { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:white;color:#374151;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.12s;white-space:nowrap; }
-    .btn-view:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .btn-view svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
 
     .table-footer { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;flex-wrap:wrap;gap:8px; }
     .pagination-wrap { display:flex;align-items:center;gap:3px; }
@@ -81,7 +78,7 @@
 
         @if(auth()->user()->isSuperAdmin())
         <button type="button" onclick="openImportModal('modalImportHistory')"
-           style="display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;font-family:inherit;">
+           class="btn-import">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Import
         </button>

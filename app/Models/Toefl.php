@@ -17,8 +17,15 @@ class Toefl extends Model
         'skor'        => 'float',   // dukung skor desimal (mis. IELTS band 6.5)
     ];
 
-    /** Jenis tes. */
-    public const JENIS = ['ITP', 'iBT', 'PBT', 'IELTS'];
+    /**
+     * Saran jenis tes untuk dropdown — BUKAN daftar tertutup.
+     *
+     * Di lapangan ada jenis lain (mis. "Prediction"), dan sebagian besar data
+     * lama tidak mengisi kolom ini sama sekali. Karena itu kolom jenis boleh
+     * dikosongkan dan boleh diisi bebas; nilai di sini hanya mempercepat
+     * pengisian yang umum. Jangan dipakai sebagai aturan validasi.
+     */
+    public const JENIS = ['ITP', 'iBT', 'PBT', 'IELTS', 'Prediction'];
 
     public function karyawan()
     {

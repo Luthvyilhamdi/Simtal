@@ -41,6 +41,18 @@
         .btn-primary:hover { background:#166534;box-shadow:0 4px 12px rgba(21,128,61,.25); }
         .btn-outline { background:#fff;color:var(--text);border-color:var(--card-border); }
         .btn-outline:hover { background:#f9fafb;border-color:#bbf7d0;color:var(--brand); }
+
+        /* Tombol Import lintas modul. Didefinisikan sekali di sini supaya
+           semua halaman seragam: netral saat diam, menghijau saat disentuh. */
+        .btn-import { display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--text);border:1px solid var(--card-border);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;text-decoration:none;transition:all .15s; }
+        .btn-import:hover { background:#f0fdf4;border-color:#bbf7d0;color:var(--brand); }
+        .btn-import svg { width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2; }
+
+        /* Tombol "Lihat" pada tabel. Definisinya dulu disalin identik di 5 halaman;
+           disatukan di sini supaya perubahan cukup sekali. */
+        .btn-view { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:white;color:#374151;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.12s;white-space:nowrap; }
+        .btn-view:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
+        .btn-view svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     {{-- Baca cookie & pasang class collapsed SEBELUM halaman render (cegah kedip) --}}

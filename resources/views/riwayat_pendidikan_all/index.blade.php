@@ -42,13 +42,7 @@
     .count-num { font-size:15px;font-weight:700;color:#111827; }
     .count-label { font-size:11px;color:#9ca3af; }
 
-    .btn-view { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:white;color:#374151;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.12s;white-space:nowrap; }
-    .btn-view:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
-    .btn-view svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    .btn-import { display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;border:none;cursor:pointer;font-family:inherit; }
-    .btn-import:hover { background:#166534; }
-    .btn-import svg { width:13px;height:13px;stroke:white;fill:none;stroke-width:2; }
     .btn-export { display:inline-flex;align-items:center;gap:6px;background:white;color:#374151;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;border:1px solid #e5e7eb;cursor:pointer;font-family:inherit; }
     .btn-export:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
     .btn-export svg { width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2; }
@@ -147,15 +141,15 @@
             <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
         </div>
 
-        <a href="{{ route('riwayat_pendidikan_all.export', ['search' => request('search')]) }}" class="btn-export">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-        </a>
-
         <button type="button" class="btn-import" onclick="openImport()">
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Import
         </button>
+
+        <a href="{{ route('riwayat_pendidikan_all.export', ['search' => request('search')]) }}" class="btn-export">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+        </a>
     </div>
 </div>
 

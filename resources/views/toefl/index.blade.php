@@ -220,10 +220,13 @@
                 </div>
                 <div class="form-field">
                     <label>Jenis</label>
-                    <select name="jenis" id="fJenis">
-                        <option value="">-- Pilih --</option>
-                        @foreach(\App\Models\Toefl::JENIS as $j)<option value="{{ $j }}">{{ $j }}</option>@endforeach
-                    </select>
+                    {{-- Combobox: boleh dipilih dari saran, boleh diketik bebas,
+                         boleh dikosongkan. Pola sama seperti History Jabatan. --}}
+                    <input type="text" name="jenis" id="fJenis" list="listJenisToefl"
+                           autocomplete="off" maxlength="50" placeholder="Pilih atau ketik sendiri">
+                    <datalist id="listJenisToefl">
+                        @foreach(\App\Models\Toefl::JENIS as $j)<option value="{{ $j }}">@endforeach
+                    </datalist>
                 </div>
                 <div class="form-field">
                     <label>Tanggal Tes</label>

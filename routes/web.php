@@ -190,8 +190,10 @@ Route::middleware('auth')->group(function () {
 
         // TOEFL GLOBAL (semua karyawan)
         Route::prefix('toefl')->name('toefl_all.')->group(function () {
-            Route::get('/',       [ToeflAllController::class, 'index'])->name('index');
-            Route::get('/export', [ToeflAllController::class, 'export'])->name('export');
+            Route::get('/',                  [ToeflAllController::class, 'index'])->name('index');
+            Route::get('/export',            [ToeflAllController::class, 'export'])->name('export');
+            Route::post('/import',           [ToeflAllController::class, 'import'])->name('import.store');
+            Route::get('/template-download', [ToeflAllController::class, 'downloadTemplate'])->name('template');
         });
 
         // History Assessment All
