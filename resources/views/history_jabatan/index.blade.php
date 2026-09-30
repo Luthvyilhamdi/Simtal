@@ -325,9 +325,6 @@
             <div class="stat-card-value">{{ $mdjAktif['tahun'] }} tahun {{ $mdjAktif['sisa_bulan'] }} bulan {{ $mdjAktif['hari'] }} hari</div>
             <div class="stat-card-sub">
                 Sejak {{ \Carbon\Carbon::parse($mdjAktif['mulai'])->format('d M Y') }}
-                @if($mdjAktif['count'] > 1)
-                    · {{ $mdjAktif['count'] }} jabatan dalam periode ini (perubahan SO, dihitung menyambung)
-                @endif
             </div>
         </div>
     </div>

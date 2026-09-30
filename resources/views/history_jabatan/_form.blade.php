@@ -88,11 +88,11 @@
             </div>
             <div>
                 <div class="section-title">Tipe Perubahan Jabatan</div>
-                <div class="section-sub">Pilih jenis perubahan jabatan yang terjadi</div>
+                <div class="section-sub">Pilih jenis perubahan jabatan yang terjadi <span style="color:#dc2626">*wajib</span></div>
             </div>
         </div>
 
-        @php $tipe = old('tipe', $h?->tipe ?? 'mutasi'); @endphp
+        @php $tipe = old('tipe', $h?->tipe); @endphp
         <div class="tipe-group">
             <label class="tipe-card {{ $tipe=='promosi' ? 'selected-promosi' : '' }}" id="tipe-promosi" onclick="selectTipe('promosi')">
                 <input type="radio" name="tipe" value="promosi" {{ $tipe=='promosi' ? 'checked' : '' }}>

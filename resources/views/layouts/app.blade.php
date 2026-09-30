@@ -415,6 +415,17 @@
 
     <div class="sidebar-nav">
 
+        {{-- Semua halaman di bawah karyawan/{karyawan}/... masih bagian dari profil
+             SATU karyawan (riwayat, assessment, penilaian, TOEFL), bukan laporan
+             lintas karyawan. Penandanya tetap di "Profil Karyawan" supaya sidebar
+             tidak melompat ke grup lain padahal kita belum keluar dari orang itu. --}}
+        @php
+            $dalamProfil = request()->routeIs(
+                'karyawan.*', 'history_jabatan.*', 'riwayat_pendidikan.*', 'history_assessment.*',
+                'assessment_kompetensi.*', 'penilaian_karyawan.*', 'kalibrasi_karyawan.*', 'toefl.*'
+            );
+        @endphp
+
         @if(auth()->user()->role === 'user')
         {{-- ===== SIDEBAR USER ===== --}}
         <div class="nav-group">
@@ -423,7 +434,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="1" y="14" width="6" height="4" rx="1"/><rect x="9" y="14" width="6" height="4" rx="1"/><rect x="17" y="14" width="6" height="4" rx="1"/><path d="M4 14v-3h16v3"/><path d="M12 6v5"/></svg>
                 <span class="nav-text">Struktur Organisasi</span>
             </a>
-            <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+            <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ $dalamProfil ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span class="nav-text">Profil Karyawan</span>
             </a>
@@ -450,14 +461,14 @@
 
             {{-- Data Karyawan (accordion) --}}
             @if($u->canAccessMenu('karyawan') || $u->canAccessMenu('history_jabatan') || $u->canAccessMenu('history_pendidikan') || $u->canAccessMenu('struktur'))
-            <div class="nav-link master-toggle {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
+            <div class="nav-link master-toggle {{ $dalamProfil || request()->routeIs('history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'active open' : '' }}" data-tooltip="Data Karyawan" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <span class="nav-text">Data Karyawan</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="master-sub {{ request()->routeIs('karyawan.*','history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'open' : '' }}">
+            <div class="master-sub {{ $dalamProfil || request()->routeIs('history_karyawan.*','struktur-organisasi.*','riwayat_pendidikan_all.*') ? 'open' : '' }}">
                 @if($u->canAccessMenu('karyawan'))
-                <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                <a href="{{ route('karyawan.index') }}" data-tooltip="Profil Karyawan" class="nav-link {{ $dalamProfil ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-text">Profil Karyawan</span>
                 </a>
@@ -582,14 +593,14 @@
 
             {{-- Assessment & Penilaian (accordion) --}}
             @if($u->canAccessMenu('assessment') || $u->canAccessMenu('kalibrasi') || $u->canAccessMenu('toefl'))
-            <div class="nav-link master-toggle {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*','toefl_all.*','toefl.*') ? 'active open' : '' }}" data-tooltip="Assessment & Penilaian" onclick="toggleMaster(this)">
+            <div class="nav-link master-toggle {{ request()->routeIs('history_assessment_all.*','history_penilaian_kalibrasi.*','toefl_all.*') ? 'active open' : '' }}" data-tooltip="Assessment & Penilaian" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 <span class="nav-text">Assessment & Penilaian</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="master-sub {{ request()->routeIs('history_assessment_all.*','assessment_kompetensi.*','history_penilaian_kalibrasi.*','toefl_all.*','toefl.*') ? 'open' : '' }}">
+            <div class="master-sub {{ request()->routeIs('history_assessment_all.*','history_penilaian_kalibrasi.*','toefl_all.*') ? 'open' : '' }}">
                 @if($u->canAccessMenu('assessment'))
-                <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') || request()->routeIs('assessment_kompetensi.*') ? 'active' : '' }}">
+                <a href="{{ route('history_assessment_all.index') }}" data-tooltip="History Assessment" class="nav-link {{ request()->routeIs('history_assessment_all.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     <span class="nav-text">History Assessment</span>
                 </a>
@@ -601,7 +612,7 @@
                 </a>
                 @endif
                 @if($u->canAccessMenu('toefl'))
-                <a href="{{ route('toefl_all.index') }}" data-tooltip="Nilai TOEFL" class="nav-link {{ request()->routeIs('toefl_all.*') || request()->routeIs('toefl.*') ? 'active' : '' }}">
+                <a href="{{ route('toefl_all.index') }}" data-tooltip="Nilai TOEFL" class="nav-link {{ request()->routeIs('toefl_all.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                     <span class="nav-text">Nilai TOEFL</span>
                 </a>

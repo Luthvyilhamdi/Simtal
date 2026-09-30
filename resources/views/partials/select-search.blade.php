@@ -41,7 +41,14 @@
     .ss-opt mark { background:transparent;color:inherit;font-weight:800;padding:0; }
     .ss-hampa { padding:16px 12px;text-align:center;color:#98a2b3;font-size:12px;display:none; }
 
-    /* Panah bawaan .select-wrap::after milik halaman tetap terpakai; beri ruang. */
+    /* Panah penanda dropdown. Tanpa ini tombolnya tampak seperti kotak isian
+       teks biasa dan orang tidak tahu itu bisa diklik. Digambar oleh komponen
+       sendiri, lalu DITEKAN pada halaman yang sudah punya panah via
+       .select-wrap::after supaya tidak muncul dua panah. */
+    .ss-trigger { position:relative;padding-right:32px; }
+    .ss-trigger::after { content:'';position:absolute;right:12px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #98a2b3;pointer-events:none; }
+    .ss.open .ss-trigger::after { border-top-color:#15803d; }
+    .select-wrap .ss-trigger::after { display:none; }
     .select-wrap .ss-trigger { padding-right:34px; }
 </style>
 
@@ -50,6 +57,11 @@
     'use strict';
 
     var IKON_CARI = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+
+    /* Kotak cari baru berguna kalau pilihannya banyak. Di bawah ambang ini
+       panel tampil sebagai daftar bersih tanpa kotak cari, supaya dropdown
+       berisi 2-3 pilihan tidak terasa berlebihan. */
+    var AMBANG_CARI = 8;
 
     function lolos(t) {
         return String(t).replace(/[&<>"]/g, function (c) {
@@ -105,6 +117,14 @@
         var label     = tombol.querySelector('.ss-label');
         var sorot     = -1;
 
+        // Daftar pendek: buang kotak cari, papan ketik dipindah ke daftar.
+        var pakaiCari = opsi.length > AMBANG_CARI;
+        if (!pakaiCari) {
+            panel.querySelector('.ss-search-wrap').remove();
+            daftar.tabIndex = -1;
+        }
+        var penerimaTombol = pakaiCari ? kotakCari : daftar;
+
         function segarkanLabel() {
             var o = select.options[select.selectedIndex];
             var kosong = !o || o.value === '';
@@ -154,9 +174,9 @@
             aturArah();
             bungkus.classList.add('open');
             tombol.setAttribute('aria-expanded', 'true');
-            kotakCari.value = '';
+            if (pakaiCari) kotakCari.value = '';
             gambar('');
-            kotakCari.focus();
+            penerimaTombol.focus();
         }
 
         function tutup(kembalikanFokus) {
@@ -184,11 +204,13 @@
             }
         });
 
-        kotakCari.addEventListener('input', function () {
-            gambar(this.value.trim().toLowerCase());
-        });
+        if (pakaiCari) {
+            kotakCari.addEventListener('input', function () {
+                gambar(this.value.trim().toLowerCase());
+            });
+        }
 
-        kotakCari.addEventListener('keydown', function (e) {
+        penerimaTombol.addEventListener('keydown', function (e) {
             if (e.key === 'ArrowDown')      { e.preventDefault(); geser(1); }
             else if (e.key === 'ArrowUp')   { e.preventDefault(); geser(-1); }
             else if (e.key === 'Escape')    { e.preventDefault(); tutup(true); }

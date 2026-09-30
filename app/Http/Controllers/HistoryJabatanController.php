@@ -110,6 +110,9 @@ class HistoryJabatanController extends Controller
             'no_sk'            => 'nullable|string',
             'tanggal_sk'       => 'nullable|date',
             'jabatan_saat_ini' => 'nullable|string',
+        ], [
+            'tipe.required' => 'Tipe perubahan jabatan belum dipilih.',
+            'tipe.in'       => 'Tipe perubahan jabatan tidak dikenali.',
         ]);
 
         DB::transaction(function () use ($request, $karyawan) {
@@ -249,6 +252,9 @@ class HistoryJabatanController extends Controller
             'no_sk'            => 'nullable|string',
             'tanggal_sk'       => 'nullable|date',
             'jabatan_saat_ini' => 'nullable|string',
+        ], [
+            'tipe.required' => 'Tipe perubahan jabatan belum dipilih.',
+            'tipe.in'       => 'Tipe perubahan jabatan tidak dikenali.',
         ]);
 
         DB::transaction(function () use ($request, $karyawan, $historyJabatan) {

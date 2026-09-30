@@ -28,6 +28,26 @@
     .section-title { font-size:16px;font-weight:700;color:#111827; }
     .section-sub { font-size:13px;color:#6b7280;margin-top:2px; }
 
+    /* Ringkasan masa dinas -- gaya sama dengan halaman History Jabatan per-karyawan */
+    .stat-cards { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px; }
+    .stat-card { display:flex;gap:10px;align-items:center;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:11px 14px; }
+    .stat-card-icon { width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .stat-card-icon svg { width:17px;height:17px;fill:none;stroke-width:2; }
+    .stat-card-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px; }
+    .stat-card-value { font-size:15px;font-weight:800;color:#111827;line-height:1.2;margin-top:1px; }
+    .stat-card-sub { font-size:11px;color:#6b7280;margin-top:2px; }
+    /* MDJ = hijau */
+    .stat-card.mdj { background:#f0fdf4;border:1px solid #bbf7d0; }
+    .stat-card.mdj .stat-card-icon { background:#dcfce7; }
+    .stat-card.mdj .stat-card-icon svg { stroke:#16a34a; }
+    .stat-card.mdj .stat-card-label { color:#15803d; }
+    /* MDG = biru */
+    .stat-card.mdg { background:#eff6ff;border:1px solid #bfdbfe; }
+    .stat-card.mdg .stat-card-icon { background:#dbeafe; }
+    .stat-card.mdg .stat-card-icon svg { stroke:#2563eb; }
+    .stat-card.mdg .stat-card-label { color:#1d4ed8; }
+    @media (max-width:768px) { .stat-cards { grid-template-columns:1fr; } }
+
     /* Timeline */
     .timeline { position:relative;padding-left:32px; }
     .timeline::before { content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:#e5e7eb; }
@@ -122,6 +142,42 @@
         </div>
     </div>
 </div>
+
+{{-- Ringkasan Masa Dinas: Jabatan (MDJ) & Grade / Person Grade (MDG-PG) --}}
+@if(!empty($mdjAktif) || !empty($mdgPg))
+<div class="stat-cards">
+    @if(!empty($mdjAktif))
+    <div class="stat-card mdj">
+        <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+            <div class="stat-card-label">Masa Dinas Jabatan (berjalan)</div>
+            <div class="stat-card-value">{{ $mdjAktif['tahun'] }} tahun {{ $mdjAktif['sisa_bulan'] }} bulan {{ $mdjAktif['hari'] }} hari</div>
+            <div class="stat-card-sub">
+                Sejak {{ \Carbon\Carbon::parse($mdjAktif['mulai'])->format('d M Y') }}
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(!empty($mdgPg))
+    <div class="stat-card mdg">
+        <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div>
+            <div class="stat-card-label">Masa Dinas Grade (Person Grade)</div>
+            <div class="stat-card-value">{{ $mdgPg['tahun'] }} tahun {{ $mdgPg['bulan'] }} bulan {{ $mdgPg['hari'] }} hari</div>
+            <div class="stat-card-sub">
+                Sejak {{ \Carbon\Carbon::parse($mdgPg['mulai'])->format('d M Y') }}
+                @if($mdgPg['grade']) &middot; Person Grade {{ $mdgPg['grade'] }} @endif
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+@endif
 
 {{-- Section Header --}}
 <div class="section-header">

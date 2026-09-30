@@ -26,9 +26,12 @@
 
     .field { margin-bottom:14px; }
     .field label { display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px; }
-    .field select, .field textarea { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;font-family:inherit; }
+    /* .ss-trigger ikut disebut karena komponen select-search mengganti <select>
+       dengan <button>; tanpa ini tombolnya tidak mewarisi gaya .field select. */
+    .field select, .field textarea, .field .ss-trigger { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;font-family:inherit; }
     .field textarea { resize:vertical;line-height:1.5; }
-    .field select:focus, .field textarea:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
+    .field select:focus, .field textarea:focus, .field .ss-trigger:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }
+    .field .ss-trigger { text-align:left;color:#111827;cursor:pointer; }
 
     .hint { font-size:11px;color:#9ca3af;margin-top:4px; }
     .err { font-size:12px;color:#dc2626;margin-top:6px; }
@@ -215,7 +218,7 @@
 
                 <div class="field">
                     <label>Tahun data</label>
-                    <select name="tahun">
+                    <select name="tahun" class="select-search">
                         <option value="">Semua Tahun (kolom per tahun)</option>
                         @foreach($tahunList as $th)
                             <option value="{{ $th }}" {{ old('tahun') == $th ? 'selected' : '' }}>{{ $th }}</option>
@@ -225,7 +228,7 @@
 
                 <div class="field">
                     <label>Bulan data</label>
-                    <select name="bulan">
+                    <select name="bulan" class="select-search">
                         <option value="">Semua Bulan</option>
                         @foreach($bulanList as $no => $nama)
                             <option value="{{ $no }}" {{ old('bulan') == $no ? 'selected' : '' }}>{{ $nama }}</option>
@@ -235,7 +238,7 @@
 
                 <div class="field">
                     <label>Pendidikan</label>
-                    <select name="pendidikan">
+                    <select name="pendidikan" class="select-search">
                         <option value="">Tidak disertakan</option>
                         <option value="terakhir" {{ old('pendidikan')=='terakhir'?'selected':'' }}>Pendidikan Terakhir</option>
                     </select>
@@ -244,7 +247,7 @@
                 <div class="field">
                     <label>Status</label>
                     @php $selStatus = old('status', 'aktif'); @endphp
-                    <select name="status">
+                    <select name="status" class="select-search">
                         <option value=""            {{ $selStatus===''            ? 'selected' : '' }}>Semua</option>
                         <option value="aktif"       {{ $selStatus==='aktif'       ? 'selected' : '' }}>Aktif</option>
                         <option value="tidak aktif" {{ $selStatus==='tidak aktif' ? 'selected' : '' }}>Tidak Aktif</option>
@@ -253,7 +256,7 @@
 
                 <div class="field">
                     <label>Direktorat</label>
-                    <select name="direktorat_id">
+                    <select name="direktorat_id" class="select-search">
                         <option value="">Semua</option>
                         @foreach($direktorats as $d)
                             <option value="{{ $d->id }}" {{ old('direktorat_id')==$d->id?'selected':'' }}>{{ $d->nama_direktorat }}</option>
@@ -263,7 +266,7 @@
 
                 <div class="field">
                     <label>Kompartemen</label>
-                    <select name="kompartemen_id">
+                    <select name="kompartemen_id" class="select-search">
                         <option value="">Semua</option>
                         @foreach($kompartemens as $d)
                             <option value="{{ $d->id }}" {{ old('kompartemen_id')==$d->id?'selected':'' }}>{{ $d->nama_kompartemen }}</option>
@@ -273,7 +276,7 @@
 
                 <div class="field">
                     <label>Departemen</label>
-                    <select name="departemen_id">
+                    <select name="departemen_id" class="select-search">
                         <option value="">Semua</option>
                         @foreach($departemens as $d)
                             <option value="{{ $d->id }}" {{ old('departemen_id')==$d->id?'selected':'' }}>{{ $d->nama_departemen }}</option>
@@ -283,7 +286,7 @@
 
                 <div class="field">
                     <label>Band</label>
-                    <select name="band">
+                    <select name="band" class="select-search">
                         <option value="">Semua</option>
                         @foreach($bandList as $b)
                             <option value="{{ $b }}" {{ old('band')==$b?'selected':'' }}>{{ $b }}</option>
@@ -293,7 +296,7 @@
 
                 <div class="field">
                     <label>Status Kepegawaian</label>
-                    <select name="status_kepegawaian">
+                    <select name="status_kepegawaian" class="select-search">
                         <option value="">Semua</option>
                         @foreach($statusKepegawaianList as $s)
                             <option value="{{ $s }}" {{ old('status_kepegawaian')==$s?'selected':'' }}>{{ $s }}</option>
@@ -303,7 +306,7 @@
 
                 <div class="field">
                     <label>Jenis Kelamin</label>
-                    <select name="jenis_kelamin">
+                    <select name="jenis_kelamin" class="select-search">
                         <option value="">Semua</option>
                         <option value="L" {{ old('jenis_kelamin')=='L'?'selected':'' }}>Laki-laki</option>
                         <option value="P" {{ old('jenis_kelamin')=='P'?'selected':'' }}>Perempuan</option>
@@ -312,7 +315,7 @@
 
                 <div class="field">
                     <label>Jenjang Pendidikan</label>
-                    <select name="jenjang">
+                    <select name="jenjang" class="select-search">
                         <option value="">Semua</option>
                         @foreach($jenjangList as $j)
                             <option value="{{ $j }}" {{ old('jenjang')==$j?'selected':'' }}>{{ $j }}</option>
@@ -322,7 +325,7 @@
 
                 <div class="field">
                     <label>Kelengkapan TMT</label>
-                    <select name="tmt">
+                    <select name="tmt" class="select-search">
                         <option value="">Semua</option>
                         <option value="ada" {{ old('tmt')=='ada'?'selected':'' }}>Sudah ada TMT</option>
                         <option value="belum" {{ old('tmt')=='belum'?'selected':'' }}>Belum ada TMT</option>
@@ -331,7 +334,7 @@
 
                 <div class="field">
                     <label>Tier Pejabat</label>
-                    <select name="tier">
+                    <select name="tier" class="select-search">
                         <option value="">Semua</option>
                         @foreach($tierList as $t)
                             <option value="{{ $t }}" {{ old('tier')==$t?'selected':'' }}>{{ $t }}</option>

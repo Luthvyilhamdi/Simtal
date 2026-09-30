@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HistoryJabatan;
 use App\Models\Karyawan;
 use App\Exports\HistoryJabatanExport;
 use Illuminate\Http\Request;
@@ -38,7 +39,32 @@ class HistoryKaryawanController extends Controller
             ->orderBy('tanggal_mulai', 'desc')
             ->get();
 
-        return view('history_karyawan.show', compact('karyawan', 'histories'));
+        // Ringkasan masa dinas, disusun sama persis seperti halaman History
+        // Jabatan per-karyawan supaya angkanya tidak berbeda antar halaman:
+        // MDJ = periode jabatan yang sedang berjalan, MDG = sejak TMT Person Grade.
+        $mdjAktif = collect(HistoryJabatan::ringkasPeriodeMdj($histories))->firstWhere('aktif', true);
+        $mdgPg    = $this->masaDinasPersonGrade($karyawan);
+
+        return view('history_karyawan.show', compact('karyawan', 'histories', 'mdjAktif', 'mdgPg'));
+    }
+
+    /** Masa Dinas Grade dari TMT Person Grade; null bila TMT-nya belum diisi. */
+    private function masaDinasPersonGrade(Karyawan $karyawan): ?array
+    {
+        $mulai = $karyawan->tanggal_mulai_pg;
+        if (! $mulai || $mulai->isFuture()) {
+            return null;
+        }
+
+        $d = $mulai->diff(now());
+
+        return [
+            'mulai' => $mulai,
+            'grade' => optional($karyawan->personGrade)->person_grade,
+            'tahun' => $d->y,
+            'bulan' => $d->m,
+            'hari'  => $d->d,
+        ];
     }
 
     public function export()

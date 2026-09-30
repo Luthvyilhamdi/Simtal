@@ -114,6 +114,7 @@ class ExportBuilderController extends Controller
             'assessment_primer'     => ['Assessment', 'Rekomendasi Primer'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->rekomendasi_primer ?? '-'],
             'assessment_skunder'    => ['Assessment', 'Rekomendasi Sekunder'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->rekomendasi_skunder ?? '-'],
             'assessment_job_stream' => ['Assessment', 'Job Stream Assessment'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->job_stream ?? '-'],
+            'assessment_tingkat'    => ['Assessment', 'Tingkat Pengukuran'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->tingkat_pengukuran ?: '-'],
             'assessment_lembaga'    => ['Assessment', 'Lembaga Assessment'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->lembaga ?? '-'],
             'assessment_tgl'        => ['Assessment', 'Tgl Pelaksanaan'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->tanggal_pelaksanaan?->format('d/m/Y') ?? '-'],
             'assessment_exp_idp'    => ['Assessment', 'Tgl Exp Assessment'.$suffix, 'historyAssessment', fn ($k) => optional(self::byTanggal($k->historyAssessment, 'tanggal_pelaksanaan', $tahun, $bulan))->tanggal_exp_idp?->format('d/m/Y') ?? '-'],
@@ -533,7 +534,7 @@ class ExportBuilderController extends Controller
             'kalibrasi', 'kalibrasi_ket',
             'kpi_tw1', 'kpi_tw2', 'kpi_tw3', 'kpi_tw4', 'kpi_tahunan', 'penilaian_360',
             'assessment', 'assessment_inti', 'assessment_primer', 'assessment_skunder',
-            'assessment_job_stream', 'assessment_lembaga', 'assessment_tgl', 'assessment_exp_idp',
+            'assessment_job_stream', 'assessment_tingkat', 'assessment_lembaga', 'assessment_tgl', 'assessment_exp_idp',
             'kompetensi_kesimpulan', 'kompetensi_lembaga', 'kompetensi_tgl',
             'talent_klasifikasi', 'talent_catatan',
         ];
