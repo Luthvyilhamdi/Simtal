@@ -16,7 +16,6 @@ use App\Traits\LogsActivity;
 use App\Exports\HistoryJabatanExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class HistoryJabatanController extends Controller
 {
@@ -138,12 +137,15 @@ class HistoryJabatanController extends Controller
             $pgLama = $karyawan->person_grade_id;
             $bandDateSebelum = $karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg;
 
-            // Tutup history lama
+            // Tutup history lama SEHARI SEBELUM TMT jabatan baru. Kalau ditutup
+            // pada tanggal yang sama, satu hari terhitung di dua jabatan sekaligus.
+            $akhirJabatanLama = \Carbon\Carbon::parse($request->tanggal_mulai)->subDay();
+
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->update([
                     'is_current'      => false,
-                    'tanggal_selesai' => $request->tanggal_mulai,
+                    'tanggal_selesai' => $akhirJabatanLama,
                 ]);
 
             // Buat history baru
@@ -188,37 +190,10 @@ class HistoryJabatanController extends Controller
                 'jabatan_saat_ini' => $request->jabatan_saat_ini,
             ];
 
-            // Auto update TMT JG jika Job Grade berubah (hanya bila grade ke-resolve master)
-            if ($jgId !== null && $jgId != $jgLama) {
-                $updateData['tanggal_mulai_jg'] = $request->tanggal_mulai;
-            }
-
-            // Auto update TMT PG jika Person Grade berubah (hanya bila grade ke-resolve master)
-            if ($pgId !== null && $pgId != $pgLama) {
-                $updateData['tanggal_mulai_pg'] = $request->tanggal_mulai;
-
-                // Ketentuan MDG: saat Person Grade NAIK (nilai bertambah),
-                // TMT Job Grade ikut di-reset. TMT JG tetap bisa diubah manual
-                // lewat Edit Karyawan. Turun/tetap → TMT JG tidak diubah di sini.
-                $pgLamaVal = (int) optional(PersonGrade::find($pgLama))->person_grade;
-                $pgBaruVal = (int) optional(PersonGrade::find($pgId))->person_grade;
-                if ($pgBaruVal > $pgLamaVal) {
-                    $updateData['tanggal_mulai_jg'] = $request->tanggal_mulai;
-                }
-            }
-
             $karyawan->update($updateData);
 
-            // TMT Band otoritatif: reset hanya saat NAIK BAND; band sama/turun →
-            // dipertahankan. Query builder agar menang atas event syncTanggalMulaiBand.
-            // Dilewati bila JG tak ke-resolve master (grade historis).
-            if ($jgId !== null) {
-                Karyawan::where('id', $karyawan->id)->update([
-                    'tanggal_mulai_band' => Karyawan::tmtBandSetelahPromosi(
-                        (int) $jgLama, (int) $jgId, $bandDateSebelum, $request->tanggal_mulai
-                    ),
-                ]);
-            }
+            $this->terapkanTmt($karyawan, $jgLama, $jgId, $pgLama, $pgId,
+                $bandDateSebelum, $request->tanggal_mulai);
         });
 
         $this->log(
@@ -265,6 +240,11 @@ class HistoryJabatanController extends Controller
             $jgNama   = trim((string) $request->job_grade);
             $pgNama   = trim((string) $request->person_grade);
 
+            // Keadaan grade SEBELUM disunting — pembanding untuk aturan TMT di bawah.
+            $jgLama = $karyawan->job_grade_id;
+            $pgLama = $karyawan->person_grade_id;
+            $bandDateSebelum = $karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg;
+
             $historyJabatan->update([
                 'jabatan_id'        => $request->jabatan_id,
                 'jabatan_saat_ini'  => $request->jabatan_saat_ini,
@@ -291,8 +271,18 @@ class HistoryJabatanController extends Controller
             // Selaraskan Pejabat Definitif yang terhubung (event model tak jalan di update).
             $this->syncPejabatFromHistory($historyJabatan->refresh());
 
-            // Hitung ulang: current, profil, & TMT band untuk karyawan ini.
+            // Hitung ulang: current & profil untuk karyawan ini.
             $this->recomputeKaryawan($karyawan);
+
+            // TMT hanya digeser bila yang disunting adalah jabatan yang SEDANG
+            // BERJALAN. Membetulkan baris riwayat lama tidak boleh mengubah masa
+            // dinas yang berjalan sekarang.
+            $karyawan->refresh();
+            if ($historyJabatan->fresh()->is_current) {
+                $this->terapkanTmt($karyawan, $jgLama, $karyawan->job_grade_id,
+                    $pgLama, $karyawan->person_grade_id,
+                    $bandDateSebelum, $historyJabatan->tanggal_mulai);
+            }
         });
 
         $this->log(
@@ -305,6 +295,62 @@ class HistoryJabatanController extends Controller
         return redirect()
             ->route('history_jabatan.index', $karyawan)
             ->with('success', 'History jabatan berhasil diperbarui & profil karyawan disinkronkan!');
+    }
+
+    /**
+     * Geser TMT JG / PG / Band setelah grade karyawan berpindah.
+     *
+     * SATU-SATUNYA tempat aturan ini ditulis; dipakai bersama oleh Tambah
+     * Jabatan dan Edit Jabatan supaya keduanya tidak pernah berbeda hasil.
+     * Yang dilihat hanya PERUBAHAN GRADE — kolom `tipe` (promosi/mutasi/…)
+     * tidak ikut menentukan.
+     *
+     *   TMT JG   : grade berubah & ke-resolve master. Juga di-reset saat PG NAIK
+     *              (ketentuan MDG). PG turun/tetap tidak me-reset.
+     *   TMT PG   : person grade berubah & ke-resolve master.
+     *   TMT Band : hanya saat NAIK BAND; band sama/turun mempertahankan tanggal
+     *              lama. Naik JG di dalam band yang sama tidak menggeser.
+     *
+     * Grade yang tidak ada di master (mis. grade historis '2A') sengaja
+     * dilewati — naik/turunnya tidak bisa dinilai tanpa acuan master.
+     *
+     * Ditulis lewat query builder, bukan $karyawan->update(), supaya menang
+     * atas event syncTanggalMulaiBand yang jalan saat baris history dibuat.
+     */
+    private function terapkanTmt(
+        Karyawan $karyawan,
+        ?int $jgLama,
+        ?int $jgBaru,
+        ?int $pgLama,
+        ?int $pgBaru,
+        $bandDateSebelum,
+        $tmt
+    ): void {
+        $tmtBaru = [];
+
+        if ($jgBaru !== null && $jgBaru != $jgLama) {
+            $tmtBaru['tanggal_mulai_jg'] = $tmt;
+        }
+
+        if ($pgBaru !== null && $pgBaru != $pgLama) {
+            $tmtBaru['tanggal_mulai_pg'] = $tmt;
+
+            $pgLamaVal = (int) optional(PersonGrade::find($pgLama))->person_grade;
+            $pgBaruVal = (int) optional(PersonGrade::find($pgBaru))->person_grade;
+            if ($pgBaruVal > $pgLamaVal) {
+                $tmtBaru['tanggal_mulai_jg'] = $tmt;
+            }
+        }
+
+        if ($jgBaru !== null) {
+            $tmtBaru['tanggal_mulai_band'] = Karyawan::tmtBandSetelahPromosi(
+                (int) $jgLama, (int) $jgBaru, $bandDateSebelum, $tmt
+            );
+        }
+
+        if ($tmtBaru) {
+            Karyawan::where('id', $karyawan->id)->update($tmtBaru);
+        }
     }
 
     /**
@@ -345,10 +391,11 @@ class HistoryJabatanController extends Controller
             'kode_struktur_id' => $current->kode_struktur_id ?? $karyawan->kode_struktur_id,
         ]);
 
-        if (Schema::hasColumn('karyawans', 'tanggal_mulai_band')) {
-            $karyawan->tanggal_mulai_band = $karyawan->hitungTanggalMulaiBand();
-            $karyawan->saveQuietly();
-        }
+        // TMT Band TIDAK dihitung ulang di sini. Dulu memakai rumus rentetan
+        // (hitungTanggalMulaiBand) yang berbeda dengan aturan naik-band di alur
+        // Tambah, sehingga perubahan grade yang sama memberi dua hasil berbeda.
+        // Kini keduanya lewat terapkanTmt(). Jalur hapus riwayat tetap terlayani
+        // event syncTanggalMulaiBand pada model HistoryJabatan.
     }
 
     /**

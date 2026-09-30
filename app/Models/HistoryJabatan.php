@@ -162,10 +162,11 @@ class HistoryJabatan extends Model
             // bukan jabatan pejabat (yang akan memicu return lebih awal di bawah).
             self::syncTanggalMulaiBand($history->karyawan_id);
 
-            // Tutup jabatan pejabat yang masih aktif untuk karyawan ini (kalau ada)
+            // Tutup jabatan pejabat yang masih aktif untuk karyawan ini (kalau ada).
+            // Patokannya sama dengan penutupan history jabatan: H-1 dari TMT baru.
             HistoryPejabat::where('karyawan_id', $history->karyawan_id)
                 ->whereNull('tanggal_selesai')
-                ->update(['tanggal_selesai' => $history->tanggal_mulai]);
+                ->update(['tanggal_selesai' => $history->tanggal_mulai->copy()->subDay()]);
 
             // Tentukan tingkat pejabat dari jabatan master (level_pejabat) → fallback teks
             $jabatan = $history->jabatan_id ? Jabatan::find($history->jabatan_id) : null;
