@@ -485,7 +485,7 @@
             <button type="button" class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearSearchBtn" onclick="clearSearch()">&times;</button>
         </div>
         <div class="select-wrap">
-            <select name="role" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+            <select name="role" class="filter-select select-search" onchange="document.getElementById('filterForm').submit()">
                 <option value="">Semua Role</option>
                 <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                 <option value="admin"       {{ request('role') === 'admin'       ? 'selected' : '' }}>Admin</option>

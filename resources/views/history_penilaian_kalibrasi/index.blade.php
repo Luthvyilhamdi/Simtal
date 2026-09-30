@@ -253,7 +253,7 @@
             <div class="search-spinner" id="spinnerPenilaian"></div>
             <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearPenilaian" type="button" onclick="clearSearchPenilaian()">×</button>
         </div>
-        <select id="tahunPenilaian" class="filter-select" onchange="applyPenilaian()">
+        <select id="tahunPenilaian" class="filter-select select-search" onchange="applyPenilaian()">
             <option value="">Semua Tahun</option>
             @foreach($tahunsPenilaian as $t)<option value="{{ $t }}" {{ request('tahun')==$t ? 'selected' : '' }}>{{ $t }}</option>@endforeach
         </select>
@@ -340,7 +340,7 @@
             <div class="search-spinner" id="spinnerKalibrasi"></div>
             <button class="clear-btn {{ request('search_kalibrasi') ? 'visible' : '' }}" id="clearKalibrasi" type="button" onclick="clearSearchKalibrasi()">×</button>
         </div>
-        <select id="tahunKalibrasi" class="filter-select" onchange="applyKalibrasi()">
+        <select id="tahunKalibrasi" class="filter-select select-search" onchange="applyKalibrasi()">
             <option value="">Semua Tahun</option>
             @foreach($tahunsKalibrasi as $t)<option value="{{ $t }}" {{ request('tahun_kalibrasi')==$t ? 'selected' : '' }}>{{ $t }}</option>@endforeach
         </select>

@@ -135,7 +135,7 @@
     <form method="GET" action="{{ route('organisasi.struktur.compare') }}" class="compare-row">
         <div class="compare-group">
             <label class="compare-label">Versi Lama</label>
-            <select name="lama" class="compare-select" required>
+            <select name="lama" class="compare-select select-search" required>
                 <option value="">— Pilih versi —</option>
                 @foreach($versiFinal as $v)
                     <option value="{{ $v->id }}" {{ (string) $preselect === (string) $v->id ? 'selected' : '' }}>
@@ -147,7 +147,7 @@
         <div class="compare-arrow">→</div>
         <div class="compare-group">
             <label class="compare-label">Versi Baru</label>
-            <select name="baru" class="compare-select" required>
+            <select name="baru" class="compare-select select-search" required>
                 <option value="">— Pilih versi —</option>
                 @foreach($versiFinal as $v)
                     <option value="{{ $v->id }}">

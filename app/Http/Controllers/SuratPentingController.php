@@ -52,13 +52,49 @@ class SuratPentingController extends Controller
             'soon'     => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
         ];
 
-        return view('surat_penting.index', compact('surats', 'stats'));
+        // Kategori bebas yang sudah terlanjur dipakai - tanpa ini, surat
+        // berkategori ketikan sendiri tidak bisa disaring dari halaman daftar.
+        $kategoriLain = SuratPenting::select('kategori')->distinct()->pluck('kategori')
+            ->filter()
+            ->reject(fn ($k) => isset(SuratPenting::KATEGORI[$k]))
+            ->sort()->values();
+
+        // Baris surat bisa hidup tanpa berkasnya (terhapus manual, gagal ikut
+        // pindah server). Ditandai di sini supaya tombol Preview & Download
+        // untuk surat itu dimatikan di daftar - jadi tidak ada yang bisa diklik
+        // lalu berujung galat.
+        $disk = Storage::disk('local');
+        $berkasHilang = $surats->filter(fn ($s) => ! $s->file_path || ! $disk->exists((string) $s->file_path))
+            ->pluck('id')->all();
+
+        return view('surat_penting.index', compact('surats', 'stats', 'kategoriLain', 'berkasHilang'));
     }
 
     public function create()
     {
         $karyawans = Karyawan::orderBy('nama')->get();
-        return view('surat_penting.create', compact('karyawans'));
+        $kategoriSaran = SuratPenting::KATEGORI;
+
+        return view('surat_penting.create', compact('karyawans', 'kategoriSaran'));
+    }
+
+    /**
+     * Samakan penulisan kategori. Bila yang diketik cocok dengan salah satu
+     * saran (labelnya maupun slug-nya), simpan sebagai slug supaya tidak lahir
+     * dua kategori kembar ("SK Jabatan" vs "sk_jabatan"). Selain itu dipakai
+     * apa adanya - daftar saran bukan pembatas.
+     */
+    private function rapikanKategori(?string $nilai): string
+    {
+        $nilai = trim((string) $nilai);
+
+        foreach (SuratPenting::KATEGORI as $slug => $label) {
+            if (strcasecmp($slug, $nilai) === 0 || strcasecmp($label, $nilai) === 0) {
+                return $slug;
+            }
+        }
+
+        return $nilai;
     }
 
     public function store(Request $request)
@@ -70,7 +106,7 @@ class SuratPentingController extends Controller
             'karyawan_id'   => $isPersonal ? 'required|exists:karyawans,id' : 'nullable',
             'judul'         => 'required|string|max:255',
             'nomor_surat'   => 'nullable|string|max:255',
-            'kategori'      => 'required|in:sk_jabatan,sk_promosi,sk_mutasi,sk_pensiun,surat_tugas,surat_peringatan,kontrak,sertifikat,pedoman,prosedur,kebijakan,lainnya',
+            'kategori'      => 'required|string|max:50',
             'tanggal_surat' => 'required|date',
             'tanggal_exp'   => 'nullable|date|after:tanggal_surat',
             'file'          => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
@@ -91,7 +127,7 @@ class SuratPentingController extends Controller
             'karyawan_id'   => $isPersonal ? $request->karyawan_id : null,
             'judul'         => $request->judul,
             'nomor_surat'   => $request->nomor_surat,
-            'kategori'      => $request->kategori,
+            'kategori'      => $this->rapikanKategori($request->kategori),
             'tanggal_surat' => $request->tanggal_surat,
             'tanggal_exp'   => $request->tanggal_exp,
             'file_path'     => $filePath,
@@ -117,6 +153,11 @@ class SuratPentingController extends Controller
     {
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
         $disk = Storage::disk('local');
+
+        if ($pesan = $this->berkasHilang($disk, $suratPenting)) {
+            return $pesan;
+        }
+
         return response()->file($disk->path((string) $suratPenting->file_path));
     }
 
@@ -124,10 +165,31 @@ class SuratPentingController extends Controller
     {
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
         $disk = Storage::disk('local');
+
+        if ($pesan = $this->berkasHilang($disk, $suratPenting)) {
+            return $pesan;
+        }
+
         return $disk->download(
             (string) $suratPenting->file_path,
             (string) $suratPenting->file_name
         );
+    }
+
+    /**
+     * Penjaga terakhir kalau URL-nya dibuka langsung. Di daftar surat tombolnya
+     * sudah dimatikan untuk berkas yang hilang, jadi jalur ini semestinya tidak
+     * terpakai - gunanya hanya agar tidak berakhir sebagai galat 500.
+     *
+     * @return \Illuminate\Http\RedirectResponse|null  null bila berkasnya ada
+     */
+    private function berkasHilang($disk, SuratPenting $surat)
+    {
+        if ($surat->file_path && $disk->exists((string) $surat->file_path)) {
+            return null;
+        }
+
+        return redirect()->route('surat_penting.index');
     }
 
     public function destroy(SuratPenting $suratPenting)

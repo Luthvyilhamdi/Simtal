@@ -35,6 +35,35 @@
     .btn-reset:hover { background:#f5f5f0; }
     #suratGridWrap { transition:opacity 0.2s; }
     .surat-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px; }
+    /* Pengalih tampilan: kartu <-> baris */
+    .view-toggle { display:inline-flex;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:white;flex-shrink:0; }
+    .vt-btn { display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:none;background:white;cursor:pointer;color:#9ca3af;transition:all 0.12s; }
+    .vt-btn + .vt-btn { border-left:1px solid var(--card-border); }
+    .vt-btn:hover { background:#f9fafb;color:#374151; }
+    .vt-btn.active { background:#f0fdf4;color:#15803d; }
+    .vt-btn svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
+
+    /* Tampilan baris memakai kartu yang sama, hanya dipipihkan. Bagian yang
+       tidak dibutuhkan saat menyapu daftar panjang disembunyikan. */
+    .surat-grid.mode-list { grid-template-columns:1fr;gap:8px; }
+    .mode-list .surat-card { display:flex;align-items:center;gap:16px;padding:12px 16px; }
+    .mode-list .surat-card > * { margin-bottom:0; }
+    .mode-list .scard-top { flex:2 1 240px;min-width:0;margin-bottom:0; }
+    .mode-list .scard-icon { display:none; }
+    .mode-list .scard-top > div, .mode-list .scard-karyawan > div { min-width:0; }
+    .mode-list .scard-judul, .mode-list .scard-nomor,
+    .mode-list .scard-kname, .mode-list .scard-knik { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .mode-list .scard-karyawan { flex:1 1 150px;min-width:0;margin-bottom:0;padding:0;background:transparent !important;border:0 !important; }
+    .mode-list .scard-meta { flex:0 1 200px;display:flex;gap:14px;margin-bottom:0; }
+    .mode-list .scard-meta .meta-item:nth-child(n+3) { display:none; }
+    .mode-list .scard-file { flex:1 1 160px;min-width:0;margin-bottom:0;padding:0;background:transparent; }
+    .mode-list .scard-ket { display:none; }
+    .mode-list .scard-actions { flex:0 0 auto;margin-left:auto; }
+    /* Pita EXPIRED/SOON menempel di pojok kanan - di baris akan menimpa tombol.
+       Statusnya tetap terbaca dari kolom "Berlaku Hingga" dan warna tepi kartu. */
+    .mode-list .expire-ribbon, .mode-list .soon-ribbon { display:none; }
+    @media (max-width:900px) { .surat-grid.mode-list .surat-card { flex-wrap:wrap; } }
+
     .surat-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
     .surat-card:hover { box-shadow:var(--card-shadow-hover); }
     .surat-card.expired { border-color:#fecaca; }
@@ -62,6 +91,9 @@
     .btn-preview:hover { background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8; }
     .btn-download { display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.12s; }
     .btn-download:hover { background:#dcfce7; }
+    /* Berkasnya tidak ada di disk - tombolnya dimatikan, tanpa pesan apa pun */
+    .btn-preview.mati, .btn-download.mati { background:#f9fafb;border-color:#f3f4f6;color:#d1d5db;cursor:default; }
+    .btn-preview.mati:hover, .btn-download.mati:hover { background:#f9fafb;border-color:#f3f4f6;color:#d1d5db; }
     .btn-del-surat { width:32px;height:32px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s;flex-shrink:0; }
     .btn-del-surat:hover { background:#fef2f2;border-color:#fecaca; }
     .btn-del-surat svg { width:13px;height:13px;stroke:#ef4444;fill:none;stroke-width:2; }
@@ -173,12 +205,12 @@
 
     <form method="GET" id="filterForm" style="display:contents">
         <input type="hidden" name="search" id="hiddenSearch" value="{{ request('search') }}">
-        <select name="tipe" class="filter-select" onchange="this.form.submit()">
+        <select name="tipe" class="filter-select select-search" onchange="this.form.submit()">
             <option value="">Semua Tipe</option>
             <option value="personal" {{ request('tipe')=='personal' ? 'selected' : '' }}>👤 Personal</option>
             <option value="umum"     {{ request('tipe')=='umum'     ? 'selected' : '' }}>📋 Umum / Pedoman</option>
         </select>
-        <select name="kategori" class="filter-select" onchange="this.form.submit()">
+        <select name="kategori" class="filter-select select-search" onchange="this.form.submit()">
             <option value="">Semua Kategori</option>
             <optgroup label="Surat Karyawan">
                 <option value="sk_jabatan"       {{ request('kategori')=='sk_jabatan'       ? 'selected' : '' }}>SK Jabatan</option>
@@ -196,6 +228,13 @@
                 <option value="kebijakan" {{ request('kategori')=='kebijakan' ? 'selected' : '' }}>Kebijakan</option>
             </optgroup>
             <option value="lainnya" {{ request('kategori')=='lainnya' ? 'selected' : '' }}>Lainnya</option>
+            @if($kategoriLain->isNotEmpty())
+            <optgroup label="Kategori Sendiri">
+                @foreach($kategoriLain as $k)
+                <option value="{{ $k }}" {{ request('kategori')==$k ? 'selected' : '' }}>{{ $k }}</option>
+                @endforeach
+            </optgroup>
+            @endif
         </select>
         @if(request()->hasAny(['search','kategori','tipe']))
             <a href="{{ route('surat_penting.index') }}" class="btn-reset">× Reset</a>
@@ -203,6 +242,16 @@
     </form>
 
     <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+        <div class="view-toggle">
+            <button type="button" class="vt-btn active" data-mode="grid" aria-pressed="true"
+                    title="Tampilan kartu" onclick="setTampilan('grid')">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button type="button" class="vt-btn" data-mode="list" aria-pressed="false"
+                    title="Tampilan baris" onclick="setTampilan('list')">
+                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+        </div>
         <a href="{{ route('surat_penting.create') }}" class="btn-primary">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Upload Surat
@@ -283,11 +332,16 @@
                 <span class="scard-file-size">{{ $s->file_size }}</span>
             </div>
             @if($s->keterangan)
-            <div style="font-size:12px;color:#6b7280;font-style:italic;margin-bottom:10px;padding:8px;background:#f9fafb;border-radius:7px;">💬 {{ $s->keterangan }}</div>
+            <div class="scard-ket" style="font-size:12px;color:#6b7280;font-style:italic;margin-bottom:10px;padding:8px;background:#f9fafb;border-radius:7px;">💬 {{ $s->keterangan }}</div>
             @endif
             <div class="scard-actions">
-                <a href="{{ route('surat_penting.show', $s) }}" target="_blank" class="btn-preview">👁 Preview</a>
-                <a href="{{ route('surat_penting.download', $s) }}" class="btn-download">⬇ Download</a>
+                @if(in_array($s->id, $berkasHilang, true))
+                    <span class="btn-preview mati" title="Berkas tidak ada di server">👁 Preview</span>
+                    <span class="btn-download mati" title="Berkas tidak ada di server">⬇ Download</span>
+                @else
+                    <a href="{{ route('surat_penting.show', $s) }}" target="_blank" class="btn-preview">👁 Preview</a>
+                    <a href="{{ route('surat_penting.download', $s) }}" class="btn-download">⬇ Download</a>
+                @endif
                 <button type="button" class="btn-del-surat"
                     data-url="{{ route('surat_penting.destroy', $s) }}"
                     data-judul="{{ $s->judul }}"
@@ -342,6 +396,27 @@
 
 @push('scripts')
 <script>
+/* Pengalih tampilan kartu <-> baris. Pilihannya milik masing-masing pemakai,
+   jadi cukup diingat peramban; tidak perlu disimpan di server. */
+function setTampilan(mode) {
+    var grid = document.getElementById('suratGrid');
+    if (grid) grid.classList.toggle('mode-list', mode === 'list');
+    document.querySelectorAll('.vt-btn').forEach(function (b) {
+        var aktif = b.dataset.mode === mode;
+        b.classList.toggle('active', aktif);
+        b.setAttribute('aria-pressed', aktif ? 'true' : 'false');
+    });
+    try { localStorage.setItem('suratPentingTampilan', mode); } catch (e) { /* mode privat / storage diblokir */ }
+}
+
+// Dipanggil langsung, bukan menunggu DOMContentLoaded, supaya tidak sempat
+// terlihat berkedip dari tampilan kartu ke baris.
+(function () {
+    var simpan = null;
+    try { simpan = localStorage.getItem('suratPentingTampilan'); } catch (e) {}
+    if (simpan === 'list') setTampilan('list');
+})();
+
 function closeToast() {
     var t=document.getElementById('toast');if(!t)return;
     t.classList.add('hiding');setTimeout(function(){var w=document.getElementById('toastWrap');if(w)w.remove();},300);

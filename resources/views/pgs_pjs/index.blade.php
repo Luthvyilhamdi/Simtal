@@ -26,6 +26,30 @@
 
     /* Aktif Cards */
     .aktif-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:32px; }
+    /* Pengalih tampilan: kartu <-> baris (sama seperti Surat Penting) */
+    .view-toggle { display:inline-flex;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:white;flex-shrink:0;margin-left:auto; }
+    .vt-btn { display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:none;background:white;cursor:pointer;color:#9ca3af;transition:all 0.12s; }
+    .vt-btn + .vt-btn { border-left:1px solid var(--card-border); }
+    .vt-btn:hover { background:#f9fafb;color:#374151; }
+    .vt-btn.active { background:#f0fdf4;color:#15803d; }
+    .vt-btn svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
+
+    /* Tampilan baris memakai kartu yang sama, hanya dipipihkan. Bilah kemajuan,
+       rincian unit, dan catatan disembunyikan supaya satu layar memuat lebih banyak. */
+    .aktif-grid.mode-list { grid-template-columns:1fr;gap:8px; }
+    .mode-list .aktif-card { display:flex;align-items:center;gap:16px;padding:12px 16px; }
+    /* display:contents menaikkan .acard-left & .acard-right jadi item baris langsung */
+    .mode-list .acard-top { display:contents; }
+    .mode-list .acard-left { order:1;flex:2 1 260px;min-width:0;margin-bottom:0; }
+    .mode-list .acard-jabatan, .mode-list .acard-karyawan { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .mode-list .acard-period { order:2;flex:1 1 210px;min-width:0;margin:0;padding-top:0;border-top:0; }
+    .mode-list .acard-total { display:none; }
+    .mode-list .acard-right { order:3;flex-direction:row;align-items:center;gap:8px;margin-left:auto; }
+    .mode-list .progress-wrap, .mode-list .acard-details, .mode-list .acard-ket { display:none; }
+    /* Garis warna jenis dipindah ke tepi kiri - di baris, garis atas nyaris tak terlihat. */
+    .mode-list .aktif-card::before { top:0;bottom:0;right:auto;width:3px;height:auto; }
+    @media (max-width:900px) { .aktif-grid.mode-list .aktif-card { flex-wrap:wrap; } }
+
     .aktif-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px 20px;transition:box-shadow 0.15s;position:relative;overflow:hidden; }
     .aktif-card:hover { box-shadow:var(--card-shadow-hover); }
     .aktif-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
@@ -215,10 +239,22 @@
 <div class="section-label">
     🟢 Sedang Berlangsung
     <span class="count-badge aktif">{{ $aktif->count() }} aktif</span>
+    @if($aktif->count() > 0)
+    <div class="view-toggle">
+        <button type="button" class="vt-btn active" data-mode="grid" aria-pressed="true"
+                title="Tampilan kartu" onclick="setTampilan('grid')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <button type="button" class="vt-btn" data-mode="list" aria-pressed="false"
+                title="Tampilan baris" onclick="setTampilan('list')">
+            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+    </div>
+    @endif
 </div>
 
 @if($aktif->count() > 0)
-<div class="aktif-grid">
+<div class="aktif-grid" id="aktifGrid">
     @foreach($aktif as $a)
     @php
         $totalHari        = $a->tanggal_mulai->diffInDays($a->tanggal_berakhir);
@@ -303,12 +339,12 @@
             <span>→</span>
             <strong>{{ $a->tanggal_berakhir ? $a->tanggal_berakhir->format('d M Y') : 'Sedang Berlangsung' }}</strong>
             @if($totalHari > 0)
-                <span style="margin-left:auto;font-size:11px;color:#9ca3af;">{{ (int) $totalHari }} hari total</span>
+                <span class="acard-total" style="margin-left:auto;font-size:11px;color:#9ca3af;">{{ (int) $totalHari }} hari total</span>
             @endif
         </div>
 
         @if($a->keterangan)
-        <div style="margin-top:10px;padding:8px 12px;background:#f9fafb;border-radius:8px;font-size:12px;color:#6b7280;font-style:italic;border-left:3px solid #e5e7eb;">
+        <div class="acard-ket" style="margin-top:10px;padding:8px 12px;background:#f9fafb;border-radius:8px;font-size:12px;color:#6b7280;font-style:italic;border-left:3px solid #e5e7eb;">
             💬 {{ $a->keterangan }}
         </div>
         @endif
@@ -458,6 +494,27 @@
 
     // Modal Hapus
     let deleteUrl = '';
+    /* Pengalih tampilan kartu <-> baris untuk daftar 'Sedang Berlangsung'.
+       Pilihannya milik masing-masing pemakai, jadi cukup diingat peramban. */
+    function setTampilan(mode) {
+        var grid = document.getElementById('aktifGrid');
+        if (grid) grid.classList.toggle('mode-list', mode === 'list');
+        document.querySelectorAll('.vt-btn').forEach(function (b) {
+            var aktif = b.dataset.mode === mode;
+            b.classList.toggle('active', aktif);
+            b.setAttribute('aria-pressed', aktif ? 'true' : 'false');
+        });
+        try { localStorage.setItem('pgsPjsTampilan', mode); } catch (e) { /* mode privat / storage diblokir */ }
+    }
+
+    // Dipanggil langsung, bukan menunggu DOMContentLoaded, supaya tidak sempat
+    // terlihat berkedip dari tampilan kartu ke baris.
+    (function () {
+        var simpan = null;
+        try { simpan = localStorage.getItem('pgsPjsTampilan'); } catch (e) {}
+        if (simpan === 'list') setTampilan('list');
+    })();
+
     function openModal(url, nama) {
         deleteUrl = url;
         document.getElementById('modalDesc').innerHTML =

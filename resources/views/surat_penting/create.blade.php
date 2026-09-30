@@ -187,27 +187,14 @@
                 {{-- Kategori --}}
                 <div class="form-group">
                     <label class="form-label">Kategori <span class="req">*</span></label>
-                    <div class="select-wrap">
-                        <select name="kategori" id="inputKategori" class="form-input {{ $errors->has('kategori') ? 'error-input' : '' }}">
-                            <option value="">-- Pilih Kategori --</option>
-                            <optgroup label="Surat Karyawan" id="groupPersonal">
-                                <option value="sk_jabatan"       {{ old('kategori')=='sk_jabatan' ? 'selected' : '' }}>SK Jabatan</option>
-                                <option value="sk_promosi"       {{ old('kategori')=='sk_promosi' ? 'selected' : '' }}>SK Promosi</option>
-                                <option value="sk_mutasi"        {{ old('kategori')=='sk_mutasi' ? 'selected' : '' }}>SK Mutasi</option>
-                                <option value="sk_pensiun"       {{ old('kategori')=='sk_pensiun' ? 'selected' : '' }}>SK Pensiun</option>
-                                <option value="surat_tugas"      {{ old('kategori')=='surat_tugas' ? 'selected' : '' }}>Surat Tugas</option>
-                                <option value="surat_peringatan" {{ old('kategori')=='surat_peringatan' ? 'selected' : '' }}>Surat Peringatan</option>
-                                <option value="kontrak"          {{ old('kategori')=='kontrak' ? 'selected' : '' }}>Kontrak</option>
-                                <option value="sertifikat"       {{ old('kategori')=='sertifikat' ? 'selected' : '' }}>Sertifikat</option>
-                            </optgroup>
-                            <optgroup label="Dokumen Umum" id="groupUmum">
-                                <option value="pedoman"   {{ old('kategori')=='pedoman' ? 'selected' : '' }}>Pedoman</option>
-                                <option value="prosedur"  {{ old('kategori')=='prosedur' ? 'selected' : '' }}>Prosedur / SOP</option>
-                                <option value="kebijakan" {{ old('kategori')=='kebijakan' ? 'selected' : '' }}>Kebijakan</option>
-                            </optgroup>
-                            <option value="lainnya" {{ old('kategori')=='lainnya' ? 'selected' : '' }}>Lainnya</option>
-                        </select>
-                    </div>
+                    {{-- Bukan dropdown tertutup: daftarnya saran, isian lain boleh diketik --}}
+                    <input type="text" name="kategori" id="inputKategori" list="list-kategori" autocomplete="off"
+                        value="{{ old('kategori') ? ($kategoriSaran[old('kategori')] ?? old('kategori')) : '' }}"
+                        class="form-input {{ $errors->has('kategori') ? 'error-input' : '' }}"
+                        placeholder="Pilih dari daftar atau ketik kategori sendiri" />
+                    <datalist id="list-kategori">
+                        @foreach($kategoriSaran as $label)<option value="{{ $label }}">@endforeach
+                    </datalist>
                     @error('kategori')<div class="error-msg">{{ $message }}</div>@enderror
                 </div>
 

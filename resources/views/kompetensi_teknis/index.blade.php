@@ -89,19 +89,19 @@
 </div>
 
 <div class="filter-row">
-    <select class="filter-select" id="kt-filter-unit" onchange="filterKompetensiTeknis()">
+    <select class="filter-select select-search" id="kt-filter-unit" onchange="filterKompetensiTeknis()">
         <option value="">Semua Unit</option>
         @foreach($unitOptions as $opt)
             <option value="{{ $opt }}">{{ $opt }}</option>
         @endforeach
     </select>
-    <select class="filter-select" id="kt-filter-jenjang" onchange="filterKompetensiTeknis()">
+    <select class="filter-select select-search" id="kt-filter-jenjang" onchange="filterKompetensiTeknis()">
         <option value="">Semua Jenjang</option>
         @foreach($jenjangOptions as $opt)
             <option value="{{ $opt }}">{{ $opt }}</option>
         @endforeach
     </select>
-    <select class="filter-select" id="kt-filter-komb" onchange="filterKompetensiTeknis()">
+    <select class="filter-select select-search" id="kt-filter-komb" onchange="filterKompetensiTeknis()">
         <option value="">Semua Asal &amp; Prioritas</option>
         {{-- value tetap "asal-prioritas" (skema DB tidak berubah) — TEKS opsi disamakan dgn
              label badge tunggal yg dipakai di overlay (lihat UnitKompetensiTeknis::
@@ -111,7 +111,7 @@
         <option value="generic-secondary">Generic</option>
         <option value="generic-primary">Primary (Generic)</option>
     </select>
-    <select class="filter-select" id="kt-filter-versi" onchange="filterKompetensiTeknis()">
+    <select class="filter-select select-search" id="kt-filter-versi" onchange="filterKompetensiTeknis()">
         <option value="">Semua Versi</option>
         @foreach($versiList as $v)
             <option value="{{ $v->id }}">SK {{ $v->nomor_sk }}</option>

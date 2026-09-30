@@ -297,7 +297,7 @@
                 <button type="button" class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
             </div>
             <div class="select-wrap">
-                <select name="periode" class="filter-select" onchange="submitFilter()">
+                <select name="periode" class="filter-select select-search" onchange="submitFilter()">
                     @foreach($periodeList as $p)
                         <option value="{{ $p }}" {{ $p == $periode ? 'selected' : '' }}>{{ $p }}</option>
                     @endforeach
@@ -307,7 +307,7 @@
                 </select>
             </div>
             <div class="select-wrap">
-                <select name="klasifikasi" class="filter-select" onchange="submitFilter()">
+                <select name="klasifikasi" class="filter-select select-search" onchange="submitFilter()">
                     <option value="">Semua Klasifikasi</option>
                     <option value="longlist"  {{ request('klasifikasi') === 'longlist'  ? 'selected' : '' }}>Longlist</option>
                     <option value="shortlist" {{ request('klasifikasi') === 'shortlist' ? 'selected' : '' }}>Shortlist</option>

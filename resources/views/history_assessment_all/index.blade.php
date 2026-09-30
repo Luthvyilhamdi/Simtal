@@ -288,13 +288,13 @@
         <form method="GET" id="filterForm" style="display:contents">
             <input type="hidden" name="tab" value="rekom">
             <input type="hidden" name="search" id="hiddenSearch" value="{{ request('search') }}">
-            <select name="rekomendasi" class="filter-select" onchange="this.form.submit()">
+            <select name="rekomendasi" class="filter-select select-search" onchange="this.form.submit()">
                 <option value="">Semua Rekomendasi</option>
                 <option value="ready" {{ request('rekomendasi')=='ready' ? 'selected' : '' }}>Ready</option>
                 <option value="ready_with_development" {{ request('rekomendasi')=='ready_with_development' ? 'selected' : '' }}>Ready with Development</option>
                 <option value="not_ready" {{ request('rekomendasi')=='not_ready' ? 'selected' : '' }}>Not Ready</option>
             </select>
-            <select name="tahun" class="filter-select" onchange="this.form.submit()">
+            <select name="tahun" class="filter-select select-search" onchange="this.form.submit()">
                 <option value="">Semua Tahun</option>
                 @foreach($tahuns as $t)
                     <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>

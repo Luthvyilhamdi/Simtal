@@ -56,8 +56,11 @@
     .sum-label { font-size:12px;color:#6b7280;margin-top:3px;font-weight:500; }
 
     .toolbar { background:white;border-radius:12px;border:1px solid var(--card-border);padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--card-shadow); }
-    .toolbar select { border:1px solid #e4e7ec;border-radius:9px;padding:8px 12px;font-size:13px;outline:none;background:#fcfcfd;color:#374151;cursor:pointer; }
-    .toolbar select:focus { border-color:#16a34a; }
+    /* .ss-trigger ikut disebut: komponen select-search mengganti <select>
+       dengan <button>, yang tidak kena selektor elemen "select". */
+    .toolbar select, .toolbar .ss-trigger { border:1px solid #e4e7ec;border-radius:9px;padding:8px 12px;font-size:13px;outline:none;background:#fcfcfd;color:#374151;cursor:pointer; }
+    .toolbar select:focus, .toolbar .ss-trigger:focus { border-color:#16a34a; }
+    .toolbar .ss-trigger { padding-right:30px; }
     /* Search kecil — samakan dengan karyawan/index */
     .search-mini { display:flex;align-items:center;gap:8px;background:white;border:1px solid #e5e7eb;border-radius:9px;padding:8px 12px;width:240px;transition:border-color .15s; }
     .search-mini:focus-within { border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,0.1); }
@@ -183,13 +186,13 @@
         <input type="text" id="searchInput" placeholder="Cari nama / NIK..." autocomplete="off">
         <button type="button" class="clear-btn" id="clearBtn" onclick="clearMdgSearch()">×</button>
     </div>
-    <select id="filterDir" onchange="applyMdgFilter('direktorat', this.value)">
+    <select id="filterDir" class="select-search" onchange="applyMdgFilter('direktorat', this.value)">
         <option value="">Semua Direktorat</option>
         @foreach($direktorats as $d)
             <option value="{{ $d->nama_direktorat }}" {{ $direktoratFilter === $d->nama_direktorat ? 'selected' : '' }}>{{ $d->nama_direktorat }}</option>
         @endforeach
     </select>
-    <select id="filterJenis" onchange="applyMdgFilter('jenis', this.value)">
+    <select id="filterJenis" class="select-search" onchange="applyMdgFilter('jenis', this.value)">
         <option value="">Semua Jenis Kenaikan</option>
         <option value="naik_pg"   {{ $jenisFilter==='naik_pg'   ? 'selected' : '' }}>Naik Person Grade</option>
         <option value="naik_jg"   {{ $jenisFilter==='naik_jg'   ? 'selected' : '' }}>Naik Job Grade</option>

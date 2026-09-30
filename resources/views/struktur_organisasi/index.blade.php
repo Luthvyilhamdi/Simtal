@@ -39,6 +39,11 @@ $isUser = auth()->user()->isUser();
 @endif
 
 <style>
+  /* Dropdown penyaring. Dulu bergaya sebaris; dipindah ke kelas supaya
+     tombol pengganti dari komponen select-search ikut mewarisinya. */
+  .so-periode { border:1px solid #e8e8e3;border-radius:8px;outline:none;background:#fff;color:#374151;font-family:inherit;padding:6px 10px;font-size:13px; }
+  .so-versi   { border:1px solid #e8e8e3;border-radius:8px;outline:none;background:#fff;color:#374151;font-family:inherit;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer; }
+  .so-saring  { border:1px solid #e8e8e3;border-radius:8px;outline:none;background:#fff;color:#374151;font-family:inherit;padding:7px 12px;font-size:13px; }
   .badge-pengisian { padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
   .badge-deviasi   { padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
   .badge-core      { padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500; }
@@ -60,14 +65,14 @@ $isUser = auth()->user()->isUser();
   </div>
 
   <form method="GET" action="{{ route('struktur-organisasi.index') }}" style="display:flex;align-items:center;gap:6px">
-    <select name="bulan" style="border:1px solid #e8e8e3;border-radius:8px;padding:6px 10px;font-size:13px;outline:none;background:#fff;color:#374151">
+    <select name="bulan" class="so-periode select-search">
       @foreach($namaBulanList as $i => $nb)
         @if($i > 0)
           <option value="{{ $i }}" {{ $bulan == $i ? 'selected' : '' }}>{{ $nb }}</option>
         @endif
       @endforeach
     </select>
-    <select name="tahun" style="border:1px solid #e8e8e3;border-radius:8px;padding:6px 10px;font-size:13px;outline:none;background:#fff;color:#374151">
+    <select name="tahun" class="so-periode select-search">
       @for($y = now()->year + 1; $y >= 2020; $y--)
         <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
       @endfor
@@ -97,7 +102,7 @@ $isUser = auth()->user()->isUser();
   @if($periodeList->count() > 0)
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
     <span style="font-size:11px;color:#9ca3af;white-space:nowrap">Tersedia:</span>
-    <select onchange="window.location.href=this.value" style="border:1px solid #e8e8e3;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;outline:none;background:#fff;color:#374151;cursor:pointer">
+    <select onchange="window.location.href=this.value" class="so-versi select-search">
       @foreach($periodeList as $p)
       @php $isActive = $p->bulan==$bulan && $p->tahun==$tahun; @endphp
       <option value="{{ route('struktur-organisasi.index', ['bulan'=>$p->bulan,'tahun'=>$p->tahun]) }}"
@@ -143,19 +148,19 @@ $isUser = auth()->user()->isUser();
         oninput="filterRealtime(this.value)">
       <span id="searchClear" onclick="clearSearch()" style="cursor:pointer;color:#9ca3af;display:none;font-size:16px;line-height:1">×</span>
     </div>
-    <select id="filterDir" onchange="applyDropdownFilter()" style="border:1px solid #e8e8e3;border-radius:8px;padding:7px 12px;font-size:13px;outline:none;background:#fff;color:#374151">
+    <select id="filterDir" onchange="applyDropdownFilter()" class="so-saring select-search">
       <option value="">Semua Direktorat</option>
       @foreach($direktorats as $d)
         <option value="{{ $d }}" {{ request('direktorat')==$d?'selected':'' }}>{{ $d }}</option>
       @endforeach
     </select>
-    <select id="filterKomp" onchange="applyDropdownFilter()" style="border:1px solid #e8e8e3;border-radius:8px;padding:7px 12px;font-size:13px;outline:none;background:#fff;color:#374151">
+    <select id="filterKomp" onchange="applyDropdownFilter()" class="so-saring select-search">
       <option value="">Semua Kompartemen</option>
       @foreach($kompartemens as $k)
         <option value="{{ $k }}" {{ request('kompartemen')==$k?'selected':'' }}>{{ $k }}</option>
       @endforeach
     </select>
-    <select id="filterCore" onchange="applyDropdownFilter()" style="border:1px solid #e8e8e3;border-radius:8px;padding:7px 12px;font-size:13px;outline:none;background:#fff;color:#374151">
+    <select id="filterCore" onchange="applyDropdownFilter()" class="so-saring select-search">
       <option value="">Core & Non Core</option>
       <option value="Core" {{ request('core')=='Core'?'selected':'' }}>Core</option>
       <option value="Non Core" {{ request('core')=='Non Core'?'selected':'' }}>Non Core</option>

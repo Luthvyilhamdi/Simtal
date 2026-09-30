@@ -25,6 +25,28 @@ use Illuminate\Support\Str;
  */
 class SuratPenting extends Model
 {
+    /**
+     * Kategori bawaan (slug => label) - BUKAN daftar tertutup.
+     *
+     * Kolom kategori menerima teks bebas, jadi daftar ini hanya saran yang
+     * muncul di form upload dan sumber label untuk slug yang sudah terlanjur
+     * tersimpan. Jangan dipakai sebagai aturan validasi.
+     */
+    public const KATEGORI = [
+        'sk_jabatan'       => 'SK Jabatan',
+        'sk_promosi'       => 'SK Promosi',
+        'sk_mutasi'        => 'SK Mutasi',
+        'sk_pensiun'       => 'SK Pensiun',
+        'surat_tugas'      => 'Surat Tugas',
+        'surat_peringatan' => 'Surat Peringatan',
+        'kontrak'          => 'Kontrak',
+        'sertifikat'       => 'Sertifikat',
+        'pedoman'          => 'Pedoman',
+        'prosedur'         => 'Prosedur / SOP',
+        'kebijakan'        => 'Kebijakan',
+        'lainnya'          => 'Lainnya',
+    ];
+
     protected $fillable = [
         'uuid', 'tipe', 'karyawan_id', 'judul', 'nomor_surat', 'kategori',
         'tanggal_surat', 'tanggal_exp', 'file_path',
@@ -68,20 +90,7 @@ class SuratPenting extends Model
 
     public function getKategoriLabelAttribute(): string
     {
-        return match($this->kategori) {
-            'sk_jabatan'       => 'SK Jabatan',
-            'sk_promosi'       => 'SK Promosi',
-            'sk_mutasi'        => 'SK Mutasi',
-            'sk_pensiun'       => 'SK Pensiun',
-            'surat_tugas'      => 'Surat Tugas',
-            'surat_peringatan' => 'Surat Peringatan',
-            'kontrak'          => 'Kontrak',
-            'sertifikat'       => 'Sertifikat',
-            'pedoman'          => 'Pedoman',
-            'prosedur'         => 'Prosedur/SOP',
-            'kebijakan'        => 'Kebijakan',
-            default            => 'Lainnya',
-        };
+        return self::KATEGORI[$this->kategori] ?? ($this->kategori ?: 'Lainnya');
     }
 
     public function getKategoriWarnaAttribute(): array

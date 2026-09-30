@@ -143,7 +143,7 @@
     <form method="GET" action="{{ route('penilaian_karyawan.index', $karyawan) }}" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
         <span style="font-size:12px;color:#6b7280;font-weight:600">Filter:</span>
         <div class="select-wrap">
-            <select name="tahun" class="filter-select" onchange="this.form.submit()">
+            <select name="tahun" class="filter-select select-search" onchange="this.form.submit()">
                 <option value="">Semua Tahun</option>
                 @foreach($tahuns as $t)
                     <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
@@ -151,7 +151,7 @@
             </select>
         </div>
         <div class="select-wrap">
-            <select name="tipe" class="filter-select" onchange="this.form.submit()">
+            <select name="tipe" class="filter-select select-search" onchange="this.form.submit()">
                 <option value="">Semua Tipe</option>
                 <option value="KPI" {{ request('tipe') === 'KPI' ? 'selected' : '' }}>KPI</option>
                 <option value="360" {{ request('tipe') === '360' ? 'selected' : '' }}>360°</option>

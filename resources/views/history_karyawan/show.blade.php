@@ -206,22 +206,22 @@
                         @endif
                     </div>
                     <div class="card-jabatan">{{ $h->jabatan_saat_ini ?? $h->jabatan->nama_jabatan ?? '-' }}</div>
-                    <div class="card-dept">{{ $h->departemen->nama_departemen ?? '-' }} · {{ $h->direktorat->nama_direktorat ?? '-' }}</div>
+                    <div class="card-dept">{{ $h->departemen_label ?? '-' }} · {{ $h->direktorat_label ?? '-' }}</div>
                 </div>
             </div>
 
             <div class="card-details">
                 <div>
                     <div class="detail-label">Job Grade</div>
-                    <div class="detail-val">{{ $h->jobGrade->job_grade ?? '-' }}</div>
+                    <div class="detail-val">{{ $h->job_grade_label ?? '-' }}</div>
                 </div>
                 <div>
                     <div class="detail-label">Person Grade</div>
-                    <div class="detail-val">{{ $h->personGrade->person_grade ?? '-' }}</div>
+                    <div class="detail-val">{{ $h->person_grade_label ?? '-' }}</div>
                 </div>
                 <div>
                     <div class="detail-label">Kompartemen</div>
-                    <div class="detail-val">{{ $h->kompartemen->nama_kompartemen ?? '-' }}</div>
+                    <div class="detail-val">{{ $h->kompartemen_label ?? '-' }}</div>
                 </div>
                 <div>
                     <div class="detail-label">Kode Struktur</div>

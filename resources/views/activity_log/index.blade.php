@@ -128,7 +128,7 @@
                    placeholder="Cari nama user, target, keterangan..."
                    onchange="document.getElementById('filterForm').submit()" />
         </div>
-        <select name="aksi" class="filter-select" onchange="this.form.submit()">
+        <select name="aksi" class="filter-select select-search" onchange="this.form.submit()">
             <option value="">Semua Aksi</option>
             @php
             $aksiList = [
@@ -149,7 +149,7 @@
                 <option value="{{ $val }}" {{ request('aksi') === $val ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>
-        <select name="modul" class="filter-select" onchange="this.form.submit()">
+        <select name="modul" class="filter-select select-search" onchange="this.form.submit()">
             <option value="">Semua Modul</option>
             @foreach($moduls as $m)
                 <option value="{{ $m }}" {{ request('modul') === $m ? 'selected' : '' }}>{{ $m }}</option>

@@ -202,7 +202,7 @@
     </div>
     <form method="GET" id="filterForm" style="display:contents">
         <input type="hidden" name="search" id="hiddenSearch" value="{{ request('search') }}">
-        <select name="jabatan" class="filter-select" onchange="this.form.submit()">
+        <select name="jabatan" class="filter-select select-search" onchange="this.form.submit()">
             <option value="">Semua Jabatan</option>
             @foreach(['SVP','VP','SPM','PM'] as $j)
                 <option value="{{ $j }}" {{ request('jabatan') == $j ? 'selected' : '' }}>{{ $j }}</option>
@@ -210,7 +210,7 @@
         </select>
         {{-- Menampilkan siapa yang menjabat pada tahun terpilih, termasuk yang
              masa jabatannya melintasi tahun itu. --}}
-        <select name="tahun" class="filter-select" onchange="this.form.submit()"
+        <select name="tahun" class="filter-select select-search" onchange="this.form.submit()"
                 title="Tampilkan pejabat yang menjabat pada tahun ini">
             <option value="">Semua Tahun</option>
             @foreach($tahuns as $t)
