@@ -7,6 +7,7 @@ use App\Imports\AssessmentKompetensiImport;
 use App\Exports\TemplateAssessmentExport;
 use App\Exports\TemplateAssessmentKompetensiExport;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ImportAssessmentController extends Controller
 {
+    use LogsActivity;
+
     // ===== CEK SUPER ADMIN =====
     private function checkSuperAdmin(): void
     {
@@ -54,6 +57,12 @@ class ImportAssessmentController extends Controller
             $msg = "Berhasil mengimport {$imported} data assessment rekomendasi.";
             if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK tidak ditemukan).";
 
+            // Jejak untuk Log Aktivitas: import massal tanpa catatan membuat
+            // data aneh tidak bisa ditelusuri ke unggahan mana penyebabnya.
+            $this->log('import', 'Assessment', 'Import Excel',
+                "{$imported} data, {$skipped} dilewati - berkas: "
+                . $request->file('file')->getClientOriginalName());
+
             return redirect()
                 ->route('history_assessment_all.index')
                 ->with('success', $msg);
@@ -93,6 +102,12 @@ class ImportAssessmentController extends Controller
 
             $msg = "Berhasil mengimport {$imported} data assessment kompetensi.";
             if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK tidak ditemukan atau nilai tidak valid).";
+
+            // Jejak untuk Log Aktivitas: import massal tanpa catatan membuat
+            // data aneh tidak bisa ditelusuri ke unggahan mana penyebabnya.
+            $this->log('import', 'Assessment Kompetensi', 'Import Excel',
+                "{$imported} data, {$skipped} dilewati - berkas: "
+                . $request->file('file')->getClientOriginalName());
 
             return redirect()
                 ->route('history_assessment_all.index', ['tab' => 'komp'])

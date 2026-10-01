@@ -6,10 +6,13 @@ use App\Models\HistoryAssessment;
 use App\Models\HistoryAssessmentKompetensi;
 use App\Exports\HistoryAssessmentExport;
 use App\Exports\HistoryAssessmentKompetensiExport;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 
 class HistoryAssessmentAllController extends Controller
 {
+    use LogsActivity;
+
     public function index(Request $request)
     {
         // ===== QUERY REKOMENDASI =====
@@ -96,7 +99,11 @@ class HistoryAssessmentAllController extends Controller
     // ===== DESTROY REKOMENDASI =====
     public function destroy(HistoryAssessment $assessment)
     {
+        $nama = optional($assessment->karyawan)->nama ?? '-';
+        $tgl  = $assessment->tanggal_pelaksanaan?->format('d/m/Y') ?? '-';
         $assessment->delete();
+
+        $this->log('hapus', 'Assessment', $nama, "Hapus assessment tanggal {$tgl}");
         return redirect()
             ->route('history_assessment_all.index')
             ->with('success', 'Data assessment berhasil dihapus!');
@@ -111,19 +118,4 @@ class HistoryAssessmentAllController extends Controller
             ->with('success', 'Data assessment kompetensi berhasil dihapus!');
     }
 
-    // ===== UPDATE LINK FILE (assessment rekomendasi) =====
-    public function updateLinkFile(Request $request, HistoryAssessment $assessment)
-    {
-        $data = $request->validate(['link_file' => 'nullable|url|max:2048']);
-        $assessment->update(['link_file' => $data['link_file'] ?: null]);
-        return back()->with('success', 'Link file assessment berhasil disimpan.');
-    }
-
-    // ===== UPDATE LINK FILE (assessment kompetensi) =====
-    public function updateLinkFileKompetensi(Request $request, HistoryAssessmentKompetensi $kompetensi)
-    {
-        $data = $request->validate(['link_file' => 'nullable|url|max:2048']);
-        $kompetensi->update(['link_file' => $data['link_file'] ?: null]);
-        return back()->with('success', 'Link file assessment kompetensi berhasil disimpan.');
-    }
 }

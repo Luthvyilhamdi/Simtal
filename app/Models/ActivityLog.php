@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string      $aksi
  * @property string      $modul
  * @property string|null $target
+ * @property string|null $subjek_type
+ * @property int|null    $subjek_id
  * @property string|null $keterangan
  * @property string|null $ip_address
  * @property \Carbon\Carbon $created_at
@@ -25,11 +27,26 @@ class ActivityLog extends Model
     protected $fillable = [
         'user_id', 'user_name', 'aksi',
         'modul', 'target', 'keterangan', 'ip_address',
+        'subjek_type', 'subjek_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Record yang disentuh catatan ini (boleh kosong untuk catatan lama). */
+    public function subjek()
+    {
+        return $this->morphTo(__FUNCTION__, 'subjek_type', 'subjek_id');
+    }
+
+    /** Riwayat satu record, terbaru dulu. */
+    public function scopeUntukSubjek($query, $model)
+    {
+        return $query->where('subjek_type', $model::class)
+            ->where('subjek_id', $model->getKey())
+            ->orderByDesc('created_at')->orderByDesc('id');
     }
 
     public function getIconAttribute(): string

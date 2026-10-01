@@ -1,7 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Tambah Assessment Kompetensi')
+
+@php
+    /** Form ini dipakai dua kali: Tambah ($h null) dan Edit ($h berisi record). */
+    $h = $h ?? null;
+    $judul = ($h ? 'Edit' : 'Tambah') . ' Assessment Kompetensi';
+@endphp
+
+@section('title', $judul)
 @section('breadcrumb-parent', $karyawan->nama)
-@section('breadcrumb', 'Assessment Kompetensi')
+@section('breadcrumb', $judul)
 
 @push('styles')
 <style>
@@ -75,13 +82,15 @@
 
 @section('content')
 
+
 <a href="{{ route('history_assessment.index', $karyawan) }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Kembali ke History Assessment
 </a>
 
-<form method="POST" action="{{ route('assessment_kompetensi.store', $karyawan) }}">
+<form method="POST" action="{{ $h ? route('assessment_kompetensi.update', [$karyawan, $h]) : route('assessment_kompetensi.store', $karyawan) }}">
     @csrf
+    @if($h) @method('PUT') @endif
 
     {{-- Info Karyawan --}}
     <div class="form-card">
@@ -106,7 +115,7 @@
             <div class="form-group" style="grid-column:1/-1;">
                 <label class="form-label">Lembaga Assessor</label>
                 <input type="text" name="lembaga" class="form-input"
-                    value="{{ old('lembaga') }}" placeholder="cth: PT. XYZ Consulting, Lembaga ABC" />
+                    value="{{ old('lembaga', $h?->lembaga) }}" placeholder="cth: PT. XYZ Consulting, Lembaga ABC" />
                 <span class="form-hint">Opsional</span>
             </div>
         </div>
@@ -119,24 +128,24 @@
             <div class="form-group">
                 <label class="form-label">Tanggal Assessment <span class="req">*</span></label>
                 <input type="date" name="tanggal_assessment" class="form-input {{ $errors->has('tanggal_assessment') ? 'error-input' : '' }}"
-                       value="{{ old('tanggal_assessment') }}" />
+                       value="{{ old('tanggal_assessment', $h?->tanggal_assessment?->format('Y-m-d')) }}" />
                 @error('tanggal_assessment')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">
                 <label class="form-label">Periode</label>
                 <input type="text" name="periode" class="form-input"
-                       value="{{ old('periode') }}" placeholder="cth: 2024, Q1-2024" />
+                       value="{{ old('periode', $h?->periode) }}" placeholder="cth: 2024, Q1-2024" />
                 <span class="form-hint">Opsional — periode pelaksanaan assessment</span>
             </div>
             <div class="form-group" style="grid-column:1/-1;">
                 <label class="form-label">Keterangan</label>
                 <input type="text" name="keterangan" class="form-input"
-                       value="{{ old('keterangan') }}" placeholder="Keterangan tambahan (opsional)" />
+                       value="{{ old('keterangan', $h?->keterangan) }}" placeholder="Keterangan tambahan (opsional)" />
             </div>
             <div class="form-group" style="grid-column:1/-1;">
                 <label class="form-label">Link File</label>
                 <input type="url" name="link_file" class="form-input"
-                       value="{{ old('link_file') }}" placeholder="https://drive.google.com/... atau https://1drv.ms/..." />
+                       value="{{ old('link_file', $h?->link_file) }}" placeholder="https://drive.google.com/... atau https://1drv.ms/..." />
                 <span class="form-hint">Link file assessment (Google Drive / OneDrive), diawali http:// atau https://. Opsional.</span>
                 @error('link_file')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
@@ -166,7 +175,7 @@
                 </thead>
                 <tbody>
                     @foreach($competencies as $key => $label)
-                    @php $oldVal = old($key); @endphp
+                    @php $oldVal = old($key, $h?->{$key}); @endphp
                     <tr>
                         <td><div class="komp-name">{{ $label }}</div></td>
                         <td>
@@ -222,7 +231,7 @@
                 </thead>
                 <tbody>
                     @foreach($qualifications as $key => $label)
-                    @php $oldVal = old($key); @endphp
+                    @php $oldVal = old($key, $h?->{$key}); @endphp
                     <tr>
                         <td><div class="komp-name">{{ $label }}</div></td>
                         <td>
@@ -291,7 +300,7 @@
         <a href="{{ route('history_assessment.index', $karyawan) }}" class="btn-cancel">Batal</a>
         <button type="submit" class="btn-save">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"/></svg>
-            Simpan Assessment
+            {{ $h ? 'Perbarui Assessment' : 'Simpan Assessment' }}
         </button>
     </div>
 

@@ -64,9 +64,14 @@ class HistoryJabatanImport implements
 
         // Jabatan & Kode Struktur = master level (boleh dibuat bila belum ada).
         $jabatan = Jabatan::firstOrCreate(['nama_jabatan' => trim($row['jabatan'])]);
-        $kodeStruktur = isset($row['kode_struktur']) && $row['kode_struktur']
-            ? KodeStruktur::firstOrCreate(['kode_struktur' => trim($row['kode_struktur'])])
-            : null;
+        // kode_struktur_id tidak boleh null di tabel. Kebiasaan pengisian:
+        // tanda "-" bila jabatan itu memang tidak punya kode struktur — 1.746
+        // dari 1.750 baris riwayat memakainya. Sel yang dikosongkan di Excel
+        // diperlakukan sama, supaya tidak berakhir sebagai galat mentah MySQL.
+        $kodeTeks = trim((string) ($row['kode_struktur'] ?? ''));
+        $kodeStruktur = KodeStruktur::firstOrCreate([
+            'kode_struktur' => $kodeTeks !== '' ? $kodeTeks : '-',
+        ]);
 
         // Unit & grade = SNAPSHOT TEKS apa adanya; resolve FK master HANYA bila
         // namanya cocok (tanpa create) → nama historis yang beda tidak mengotori

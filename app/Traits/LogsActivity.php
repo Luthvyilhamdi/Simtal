@@ -9,11 +9,16 @@ use Illuminate\Support\Facades\Request;
 
 trait LogsActivity
 {
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|null  $subjek  record yang disentuh;
+     *         diisi bila catatan ini perlu muncul di riwayat per-record.
+     */
     protected function log(
         string $aksi,
         string $modul,
         string $target = '',
-        string $keterangan = ''
+        string $keterangan = '',
+        $subjek = null
     ): void {
         /** @var User|null $user */
         $user = Auth::user();
@@ -26,6 +31,8 @@ trait LogsActivity
             'target'     => $target,
             'keterangan' => $keterangan,
             'ip_address' => Request::ip(),
+            'subjek_type' => $subjek ? $subjek::class : null,
+            'subjek_id'   => $subjek?->getKey(),
         ]);
     }
 }

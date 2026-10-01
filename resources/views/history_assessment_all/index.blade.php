@@ -211,24 +211,6 @@
 </div>
 <form id="formHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
 
-{{-- MODAL LINK FILE --}}
-<div class="modal-backdrop" id="modalLinkFile">
-    <div class="modal-box" style="max-width:460px;text-align:left;">
-        <div class="modal-title">🔗 Link File Assessment</div>
-        <div style="font-size:13px;color:#6b7280;margin:6px 0 14px;">Tempel link file assessment (Google Drive / OneDrive), diawali http:// atau https://. Kosongkan untuk menghapus link.</div>
-        <form id="formLinkFile" method="POST">
-            @csrf
-            @method('PATCH')
-            <input type="url" name="link_file" id="linkFileInput" placeholder="https://drive.google.com/..."
-                   style="width:100%;border:1px solid #d1d5db;border-radius:9px;padding:10px 12px;font-size:13px;font-family:inherit;">
-            <div style="display:flex;gap:10px;margin-top:16px;">
-                <button type="button" class="modal-btn cancel" onclick="closeLinkFile()">Batal</button>
-                <button type="submit" class="modal-btn green">Simpan Link</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 {{-- PAGE HEADER --}}
 <div class="page-header">
     <div>
@@ -446,9 +428,7 @@
                             @if($a->link_file)
                                 <a href="{{ $a->link_file }}" target="_blank" rel="noopener" class="lf-btn open" title="Buka file assessment"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
                             @endif
-                            <button type="button" class="lf-btn edit" title="{{ $a->link_file ? 'Ubah link file' : 'Tambah link file' }}"
-                                data-url="{{ route('history_assessment_all.link_file', $a) }}" data-link="{{ $a->link_file }}"
-                                onclick="openLinkFile(this.dataset.url, this.dataset.link)"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+                            <a href="{{ route('history_assessment.edit', [$a->karyawan, $a]) }}" class="lf-btn edit" title="Edit assessment"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></a>
                             <button type="button" class="btn-del"
                                 data-url="{{ route('history_assessment_all.destroy', $a) }}"
                                 data-nama="{{ $a->karyawan->nama }}"
@@ -608,9 +588,7 @@
                                 @if($ak->link_file)
                                     <a href="{{ $ak->link_file }}" target="_blank" rel="noopener" class="lf-btn open" title="Buka file assessment"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
                                 @endif
-                                <button type="button" class="lf-btn edit" title="{{ $ak->link_file ? 'Ubah link file' : 'Tambah link file' }}"
-                                    data-url="{{ route('assessment_kompetensi_all.link_file', $ak) }}" data-link="{{ $ak->link_file }}"
-                                    onclick="openLinkFile(this.dataset.url, this.dataset.link)"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+                                <a href="{{ route('assessment_kompetensi.edit', [$ak->karyawan, $ak]) }}" class="lf-btn edit" title="Edit assessment kompetensi"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></a>
                                 <button type="button" class="btn-del"
                                     data-url="{{ route('assessment_kompetensi_all.destroy', $ak) }}"
                                     data-nama="{{ $ak->karyawan->nama }}"
@@ -721,18 +699,7 @@ function closeModal(){document.getElementById('modalHapus').classList.remove('sh
 function submitHapus(){document.getElementById('formHapus').action=deleteUrl;document.getElementById('formHapus').submit();}
 document.getElementById('modalHapus').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-// Modal Link File
-function openLinkFile(url,current){
-    document.getElementById('formLinkFile').action=url;
-    document.getElementById('linkFileInput').value=current||'';
-    document.getElementById('modalLinkFile').classList.add('show');
-    document.body.style.overflow='hidden';
-    setTimeout(function(){document.getElementById('linkFileInput').focus();},50);
-}
-function closeLinkFile(){document.getElementById('modalLinkFile').classList.remove('show');document.body.style.overflow='';}
-document.getElementById('modalLinkFile').addEventListener('click',function(e){if(e.target===this)closeLinkFile();});
-
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeLinkFile();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();}});
 
 // Real-time search (panel rekomendasi)
 var searchTimer=null;

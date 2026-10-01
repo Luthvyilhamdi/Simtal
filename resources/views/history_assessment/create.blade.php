@@ -1,7 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Tambah Assessment')
+
+@php
+    /** Form ini dipakai dua kali: Tambah ($h null) dan Edit ($h berisi record). */
+    $h = $h ?? null;
+    $judul = $h ? 'Edit Assessment' : 'Tambah Assessment';
+@endphp
+
+@section('title', $judul)
 @section('breadcrumb-parent', $karyawan->nama)
-@section('breadcrumb', 'Tambah Assessment')
+@section('breadcrumb', $judul)
 
 @push('styles')
 <style>
@@ -87,13 +94,14 @@
 
 @section('content')
 
+
 <a href="{{ route('history_assessment.index', $karyawan) }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Kembali ke History Assessment
 </a>
 
 <div class="page-header">
-    <div class="page-title">📋 Tambah Assessment</div>
+    <div class="page-title">📋 {{ $judul }}</div>
     <div class="page-sub">Data jabatan, job grade & person grade diambil otomatis dari profil karyawan</div>
 </div>
 
@@ -117,8 +125,9 @@
     <div class="info-note">✓ Data terintegrasi</div>
 </div>
 
-<form method="POST" action="{{ route('history_assessment.store', $karyawan) }}">
+<form method="POST" action="{{ $h ? route('history_assessment.update', [$karyawan, $h]) : route('history_assessment.store', $karyawan) }}">
     @csrf
+    @if($h) @method('PUT') @endif
 
     {{-- Data Terintegrasi (readonly) --}}
     <div class="form-card">
@@ -160,7 +169,7 @@
             </div>
             <div class="form-group full">
                 <label class="form-label">Lembaga Assessor</label>
-                <input type="text" name="lembaga" value="{{ old('lembaga') }}"
+                <input type="text" name="lembaga" value="{{ old('lembaga', $h?->lembaga) }}"
                     class="form-input" placeholder="cth: PT. XYZ Consulting, Lembaga ABC" />
                 <span class="form-hint">Opsional</span>
             </div>
@@ -182,40 +191,40 @@
         <div class="form-grid">
             <div class="form-group">
                 <label class="form-label">Tanggal Pelaksanaan <span class="req">*</span></label>
-                <input type="date" name="tanggal_pelaksanaan" value="{{ old('tanggal_pelaksanaan') }}"
+                <input type="date" name="tanggal_pelaksanaan" value="{{ old('tanggal_pelaksanaan', $h?->tanggal_pelaksanaan?->format('Y-m-d')) }}"
                        class="form-input {{ $errors->has('tanggal_pelaksanaan') ? 'error-input' : '' }}"
                        id="tglPelaksanaan" onchange="hitungExpIdp(this.value)" />
                 @error('tanggal_pelaksanaan')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
 
             <div class="form-group">
-                <label class="form-label">Tanggal Exp IDP</label>
+                <label class="form-label">Tanggal Exp Assessment</label>
                 <input type="text" class="form-input" readonly id="tglExpIdpDisplay"
-                       value="{{ old('tanggal_pelaksanaan') ? \Carbon\Carbon::parse(old('tanggal_pelaksanaan'))->addYears(2)->format('d M Y') : '-' }}" />
+                       value="{{ ($tgl = old('tanggal_pelaksanaan', $h?->tanggal_pelaksanaan?->format('Y-m-d'))) ? \Carbon\Carbon::parse($tgl)->addYears(2)->format('d M Y') : '-' }}" />
                 <span class="form-hint">Otomatis 2 tahun dari tanggal pelaksanaan</span>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Job Stream</label>
-                <input type="text" name="job_stream" value="{{ old('job_stream') }}"
+                <input type="text" name="job_stream" value="{{ old('job_stream', $h?->job_stream) }}"
                        class="form-input" placeholder="cth: Operation, Finance" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">Tingkat Pengukuran</label>
-                <input type="text" name="tingkat_pengukuran" value="{{ old('tingkat_pengukuran') }}"
+                <input type="text" name="tingkat_pengukuran" value="{{ old('tingkat_pengukuran', $h?->tingkat_pengukuran) }}"
                        class="form-input" placeholder="cth: Band 1, ToBe Band 1" />
             </div>
 
             <div class="form-group full">
                 <label class="form-label">Keterangan</label>
                 <textarea name="keterangan" rows="3" class="form-input" style="resize:vertical;"
-                          placeholder="Catatan tambahan assessment...">{{ old('keterangan') }}</textarea>
+                          placeholder="Catatan tambahan assessment...">{{ old('keterangan', $h?->keterangan) }}</textarea>
             </div>
 
             <div class="form-group full">
                 <label class="form-label">Link File</label>
-                <input type="url" name="link_file" value="{{ old('link_file') }}" class="form-input"
+                <input type="url" name="link_file" value="{{ old('link_file', $h?->link_file) }}" class="form-input"
                        placeholder="https://drive.google.com/... atau https://1drv.ms/...">
                 <span class="form-hint">Link file assessment (Google Drive / OneDrive), diawali http:// atau https://. Opsional.</span>
                 @error('link_file')<div class="error-msg">{{ $message }}</div>@enderror
@@ -239,7 +248,7 @@
             <div class="form-group">
                 <label class="form-label">Rekomendasi Inti</label>
                 <div class="persen-wrap">
-                    <input type="number" name="rekomendasi_inti" value="{{ old('rekomendasi_inti') }}"
+                    <input type="number" name="rekomendasi_inti" value="{{ old('rekomendasi_inti', $h?->rekomendasi_inti) }}"
                            class="form-input" min="0" max="100" step="0.01" placeholder="0.00" />
                     <span class="persen-suffix">%</span>
                 </div>
@@ -249,7 +258,7 @@
             <div class="form-group">
                 <label class="form-label">Rekomendasi Primer</label>
                 <div class="persen-wrap">
-                    <input type="number" name="rekomendasi_primer" value="{{ old('rekomendasi_primer') }}"
+                    <input type="number" name="rekomendasi_primer" value="{{ old('rekomendasi_primer', $h?->rekomendasi_primer) }}"
                            class="form-input" min="0" max="100" step="0.01" placeholder="0.00" />
                     <span class="persen-suffix">%</span>
                 </div>
@@ -259,7 +268,7 @@
             <div class="form-group">
                 <label class="form-label">Rekomendasi Sekunder</label>
                 <div class="persen-wrap">
-                    <input type="number" name="rekomendasi_skunder" value="{{ old('rekomendasi_skunder') }}"
+                    <input type="number" name="rekomendasi_skunder" value="{{ old('rekomendasi_skunder', $h?->rekomendasi_skunder) }}"
                            class="form-input" min="0" max="100" step="0.01" placeholder="0.00" />
                     <span class="persen-suffix">%</span>
                 </div>
@@ -268,7 +277,7 @@
 
             <div class="form-group full">
                 <label class="form-label">Rekomendasi Final</label>
-                @php $finalVal = old('rekomendasi_final', ''); @endphp
+                @php $finalVal = old('rekomendasi_final', $h?->rekomendasi_final ?? ''); @endphp
                 <div class="final-group">
                     <label class="final-card {{ $finalVal=='ready' ? 'sel-ready' : '' }}"
                            id="final-ready" onclick="selectFinal('ready')">
@@ -307,7 +316,7 @@
             </a>
             <button type="submit" class="btn-save">
                 <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                Simpan Assessment
+                {{ $h ? 'Perbarui Assessment' : 'Simpan Assessment' }}
             </button>
         </div>
     </div>

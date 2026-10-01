@@ -220,7 +220,7 @@
                 <div class="integrated-item">✓ Jabatan Saat Ini</div>
                 <div class="integrated-item">✓ Job Grade & Person Grade</div>
                 <div class="integrated-item">✓ Jenis Kelamin & Usia</div>
-                <div class="integrated-item">✓ Tgl Exp IDP (+2 tahun otomatis)</div>
+                <div class="integrated-item">✓ Tgl Exp Assessment (+2 tahun otomatis)</div>
             </div>
         </div>
     </div>
@@ -348,7 +348,7 @@
         <div style="font-size:12px;color:#6b7280;"><span style="color:#15803d;font-weight:700;">✓</span> Data langsung masuk ke sistem</div>
         <div style="font-size:12px;color:#6b7280;"><span style="color:#15803d;font-weight:700;">✓</span> NIK tidak ditemukan dilewati (skip)</div>
         <div id="info1" style="font-size:12px;color:#6b7280;"><span style="color:#15803d;font-weight:700;">✓</span> Jabatan, job grade, usia otomatis dari profil</div>
-        <div id="info2" style="font-size:12px;color:#6b7280;"><span style="color:#15803d;font-weight:700;">✓</span> Tgl Exp IDP otomatis +2 tahun</div>
+        <div id="info2" style="font-size:12px;color:#6b7280;"><span style="color:#15803d;font-weight:700;">✓</span> Tgl Exp Assessment otomatis +2 tahun</div>
     </div>
 </div>
 
@@ -391,7 +391,7 @@ function selectType(type) {
         document.getElementById('warningText').innerHTML =
             '<strong>Perhatian:</strong> NIK yang tidak ditemukan di sistem akan dilewati otomatis. Nilai rekomendasi dalam bentuk angka <strong>0-100</strong> (tanpa tanda %).';
         document.getElementById('info1').innerHTML = '<span style="color:#15803d;font-weight:700;">✓</span> Jabatan, job grade, usia otomatis dari profil';
-        document.getElementById('info2').innerHTML = '<span style="color:#15803d;font-weight:700;">✓</span> Tgl Exp IDP otomatis +2 tahun';
+        document.getElementById('info2').innerHTML = '<span style="color:#15803d;font-weight:700;">✓</span> Tgl Exp Assessment otomatis +2 tahun';
     }
 
     removeFile();

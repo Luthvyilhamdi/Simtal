@@ -94,6 +94,10 @@
     .detail-val { font-size:12px;color:#374151;font-weight:600;margin-top:2px; }
     .expired { color:#ef4444;font-weight:700; }
 
+    .lf-btn.ubah { color:#16a34a; }
+    .lf-btn.ubah:hover { background:#f0fdf4;border-color:#bbf7d0; }
+    .lf-btn.riwayat:hover { background:#eff6ff;border-color:#bfdbfe; }
+    .lf-btn.riwayat svg { stroke:#2563eb; }
     .btn-del { width:30px;height:30px;border-radius:7px;border:1px solid #e5e7eb;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s; }
     .btn-del:hover { background:#fef2f2;border-color:#fecaca; }
     .btn-del svg { width:13px;height:13px;stroke:#ef4444;fill:none;stroke-width:2; }
@@ -112,6 +116,27 @@
     @keyframes toastIn { from{opacity:0;transform:translateX(110%);}to{opacity:1;transform:translateX(0);} }
     @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translateX(110%);} }
     @keyframes toastProgress { from{width:100%;}to{width:0%;} }
+
+    /* Riwayat perubahan satu assessment */
+    .rw-box { background:white;border-radius:16px;padding:22px;width:100%;max-width:560px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:left;max-height:82vh;display:flex;flex-direction:column; }
+    .rw-head { display:flex;align-items:center;gap:9px;margin-bottom:4px; }
+    .rw-head svg { width:17px;height:17px;stroke:#374151;fill:none;stroke-width:2; }
+    .rw-title { font-size:15px;font-weight:700;color:#111827; }
+    .rw-sub { font-size:12px;color:#6b7280;margin-bottom:14px; }
+    .rw-list { overflow-y:auto;padding-left:6px;flex:1; }
+    .rw-item { position:relative;background:#fff;border:1px solid #e7eaee;border-radius:10px;padding:11px 13px;margin:0 0 9px 24px; }
+    .rw-item::after { content:'';position:absolute;left:-14px;top:19px;bottom:-11px;width:2px;background:#eef1f4; }
+    .rw-item:last-child::after { display:none; }
+    .rw-item::before { content:'';position:absolute;left:-19px;top:14px;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #2563eb;box-sizing:content-box; }
+    .rw-item.lama::before { border-color:#cbd5e1; }
+    .rw-baris { display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px; }
+    .rw-tgl { font-size:12.5px;font-weight:700;color:#111827; }
+    .rw-jam { font-size:12px;color:#6b7280; }
+    .rw-tag { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#eff6ff;color:#1d4ed8; }
+    .rw-tag.abu { background:#f3f4f6;color:#6b7280; }
+    .rw-oleh { font-size:11.5px;color:#6b7280;margin-bottom:6px; }
+    .rw-ket { font-size:12.5px;color:#374151;border-top:1px solid #f3f4f6;padding-top:7px; }
+    .rw-kosong { text-align:center;color:#9ca3af;font-size:12.5px;padding:26px 10px;font-style:italic; }
 
     .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center; }
     .modal-backdrop.show { display:flex; }
@@ -173,24 +198,6 @@
     </div>
 </div>
 <form id="formHapus" method="POST" style="display:none">@csrf @method('DELETE')</form>
-
-{{-- MODAL LINK FILE --}}
-<div class="modal-backdrop" id="modalLinkFile">
-    <div class="modal-box" style="max-width:460px;text-align:left;">
-        <div class="modal-title">🔗 Link File Assessment</div>
-        <div class="modal-desc" style="text-align:left;margin-bottom:14px;">Tempel link file assessment (Google Drive / OneDrive), diawali http:// atau https://. Kosongkan untuk menghapus link.</div>
-        <form id="formLinkFile" method="POST">
-            @csrf
-            @method('PATCH')
-            <input type="url" name="link_file" id="linkFileInput" placeholder="https://drive.google.com/..."
-                   style="width:100%;border:1px solid #d1d5db;border-radius:9px;padding:10px 12px;font-size:13px;font-family:inherit;">
-            <div class="modal-actions" style="margin-top:16px;">
-                <button type="button" class="modal-btn cancel" onclick="closeLinkFile()">Batal</button>
-                <button type="submit" class="modal-btn green">Simpan Link</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <a href="{{ route('karyawan.show', $karyawan) }}" class="back-link">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -256,7 +263,44 @@
 </div>
 
 <div class="tab-wrap">
-    {{-- FIX: onclick switchTab pakai this.dataset.tab --}}
+    {{-- MODAL RIWAYAT PERUBAHAN (per assessment) --}}
+<div class="modal-backdrop" id="modalRiwayat">
+    <div class="rw-box">
+        <div class="rw-head">
+            <svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><polyline points="12 7 12 12 15 14"/></svg>
+            <span class="rw-title">Riwayat Perubahan Assessment</span>
+        </div>
+        <div class="rw-sub">{{ $karyawan->nama }} &middot; NIK {{ $karyawan->nik }}</div>
+
+        @foreach($assessments as $a)
+        <div class="rw-list" id="rw-{{ $a->id }}" style="display:none">
+            @forelse($riwayat[$a->id] ?? [] as $i => $log)
+                <div class="rw-item {{ $i > 0 ? 'lama' : '' }}">
+                    <div class="rw-baris">
+                        <span class="rw-tgl">{{ $log->created_at->translatedFormat('d M Y') }}</span>
+                        <span class="rw-jam">{{ $log->created_at->format('H:i') }}</span>
+                        @if($i === 0)<span class="rw-tag">Terbaru</span>@endif
+                        <span class="rw-tag abu" style="margin-left:auto">{{ $log->labelAksi }}</span>
+                    </div>
+                    <div class="rw-oleh">Oleh <strong>{{ $log->user_name }}</strong></div>
+                    @if($log->keterangan)<div class="rw-ket">{{ $log->keterangan }}</div>@endif
+                </div>
+            @empty
+                <div class="rw-kosong">
+                    Belum ada catatan untuk assessment ini.<br>
+                    Riwayat mulai terisi sejak fitur ini dipasang.
+                </div>
+            @endforelse
+        </div>
+        @endforeach
+
+        <div class="modal-actions" style="margin-top:14px">
+            <button class="modal-btn cancel" onclick="tutupRiwayat()">Tutup</button>
+        </div>
+    </div>
+</div>
+
+{{-- FIX: onclick switchTab pakai this.dataset.tab --}}
     <button class="tab-btn active" id="tab-rekom" data-tab="rekom" onclick="switchTab(this.dataset.tab)">
         📋 Assessment Rekomendasi ({{ $assessments->count() }})
     </button>
@@ -305,9 +349,9 @@
                     @if($a->link_file)
                         <a href="{{ $a->link_file }}" target="_blank" rel="noopener" class="lf-btn open" title="Buka file assessment"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
                     @endif
-                    <button type="button" class="lf-btn edit" title="{{ $a->link_file ? 'Ubah link file' : 'Tambah link file' }}"
-                        data-url="{{ route('history_assessment_all.link_file', $a) }}" data-link="{{ $a->link_file }}"
-                        onclick="openLinkFile(this.dataset.url, this.dataset.link)"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+                    <a href="{{ route('history_assessment.edit', [$karyawan, $a]) }}" class="lf-btn ubah" title="Edit assessment"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></a>
+                    <button type="button" class="lf-btn riwayat" title="Riwayat perubahan"
+                        onclick="bukaRiwayat({{ $a->id }})"><svg viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><polyline points="12 7 12 12 15 14"/></svg></button>
                     <button type="button" class="btn-del"
                         data-url="{{ route('history_assessment.destroy', [$karyawan, $a]) }}"
                         data-tgl="{{ \Carbon\Carbon::parse($a->tanggal_pelaksanaan)->format('d M Y') }}"
@@ -354,7 +398,7 @@
                     <div class="detail-val">{{ $a->usia }} tahun</div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Tanggal Exp IDP</div>
+                    <div class="detail-label">Tanggal Exp Assessment</div>
                     <div class="detail-val {{ $a->isExpired ? 'expired' : '' }}">
                         {{ \Carbon\Carbon::parse($a->tanggal_exp_idp)->format('d M Y') }}
                         @if($a->isExpired) ⚠ @endif
@@ -408,9 +452,7 @@
                     @if($ak->link_file)
                         <a href="{{ $ak->link_file }}" target="_blank" rel="noopener" class="lf-btn open" title="Buka file assessment"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
                     @endif
-                    <button type="button" class="lf-btn edit" title="{{ $ak->link_file ? 'Ubah link file' : 'Tambah link file' }}"
-                        data-url="{{ route('assessment_kompetensi_all.link_file', $ak) }}" data-link="{{ $ak->link_file }}"
-                        onclick="openLinkFile(this.dataset.url, this.dataset.link)"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+                    <a href="{{ route('assessment_kompetensi.edit', [$karyawan, $ak]) }}" class="lf-btn ubah" title="Edit assessment kompetensi"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></a>
                     <button type="button" class="btn-del"
                         data-url="{{ route('assessment_kompetensi.destroy', [$karyawan, $ak]) }}"
                         data-tgl="{{ $ak->tanggal_assessment->format('d M Y') }}"
@@ -470,6 +512,23 @@
 
 @push('scripts')
 <script>
+/* Riwayat per assessment. Isinya sudah dirender di halaman, jadi membuka
+   panel tidak memerlukan permintaan ke server. */
+function bukaRiwayat(id) {
+    document.querySelectorAll('.rw-list').forEach(el => el.style.display = 'none');
+    const daftar = document.getElementById('rw-' + id);
+    if (daftar) daftar.style.display = 'block';
+    document.getElementById('modalRiwayat').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function tutupRiwayat() {
+    document.getElementById('modalRiwayat').classList.remove('show');
+    document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+    if (e.target.id === 'modalRiwayat') tutupRiwayat();
+});
+
 function closeToast() {
     const t = document.getElementById('toast');
     if (!t) return;
@@ -512,20 +571,6 @@ document.getElementById('modalHapus').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
 
-// ===== Modal Link File =====
-function openLinkFile(url, current) {
-    document.getElementById('formLinkFile').action = url;
-    document.getElementById('linkFileInput').value = current || '';
-    document.getElementById('modalLinkFile').classList.add('show');
-    setTimeout(() => document.getElementById('linkFileInput').focus(), 50);
-}
-function closeLinkFile() {
-    document.getElementById('modalLinkFile').classList.remove('show');
-}
-document.getElementById('modalLinkFile').addEventListener('click', function(e) {
-    if (e.target === this) closeLinkFile();
-});
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeLinkFile(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); tutupRiwayat(); } });
 </script>
 @endpush

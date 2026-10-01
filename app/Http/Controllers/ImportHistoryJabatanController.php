@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Imports\HistoryJabatanImport;
 use App\Exports\TemplateHistoryJabatanExport;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ImportHistoryJabatanController extends Controller
 {
+    use LogsActivity;
+
     private function checkSuperAdmin(): void
     {
         /** @var User $user */
@@ -46,6 +49,12 @@ class ImportHistoryJabatanController extends Controller
 
             $msg = "Import selesai: {$added} ditambah, {$updated} diperbarui.";
             if ($skipped > 0) $msg .= " {$skipped} dilewati (NIK tidak ditemukan / tanggal mulai kosong).";
+
+            // Import massal mengubah banyak baris sekaligus; tanpa jejak ini tidak
+            // ada cara menelusuri siapa yang mengunggah dan berapa yang tersentuh.
+            $this->log('import', 'History Jabatan', 'Import Excel',
+                "{$added} ditambah, {$updated} diperbarui, {$skipped} dilewati - berkas: "
+                . $request->file('file')->getClientOriginalName());
 
             return redirect()
                 ->route('history_karyawan.index')
