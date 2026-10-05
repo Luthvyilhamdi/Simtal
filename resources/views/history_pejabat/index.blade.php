@@ -32,11 +32,8 @@
 
     .filter-row { display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center; }
     .filter-select { padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:inherit;color:#374151;background:white;outline:none;cursor:pointer; }
-    .btn-reset { display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap; }
-    .btn-reset:hover { background:#f5f5f0; }
 
-    /* Tab pemisah Aktif / Selesai — kedua tabel bisa panjang, jadi tidak
-       ditumpuk dalam satu halaman. Pola sama dengan History Assessment. */
+    /* Tab pemisah Aktif / Selesai */
     .tab-wrap { display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:16px; }
     .tab-btn { flex:1;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;color:#6b7280;background:transparent;transition:all 0.15s;text-align:center; }
     .tab-btn.active { background:white;color:#15803d;box-shadow:0 1px 4px rgba(0,0,0,0.08); }
@@ -200,27 +197,32 @@
         <div class="search-spinner" id="searchSpinner"></div>
         <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
     </div>
-    <form method="GET" id="filterForm" style="display:contents">
+    <x-filter-drawer :aktif="(int) request()->filled('jabatan') + (int) request()->filled('tahun')"
+                     :reset="route('history_pejabat.index')">
         <input type="hidden" name="search" id="hiddenSearch" value="{{ request('search') }}">
-        <select name="jabatan" class="filter-select select-search" onchange="this.form.submit()">
-            <option value="">Semua Jabatan</option>
-            @foreach(['SVP','VP','SPM','PM'] as $j)
-                <option value="{{ $j }}" {{ request('jabatan') == $j ? 'selected' : '' }}>{{ $j }}</option>
-            @endforeach
-        </select>
+        <input type="hidden" name="tab" value="{{ request('tab') }}">
+        <div class="fd-field">
+            <span class="fd-label">Jabatan</span>
+            <select name="jabatan" class="select-search" aria-label="Jabatan">
+                <option value="">Semua Jabatan</option>
+                @foreach(['SVP','VP','SPM','PM'] as $j)
+                    <option value="{{ $j }}" {{ request('jabatan') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                @endforeach
+            </select>
+        </div>
         {{-- Menampilkan siapa yang menjabat pada tahun terpilih, termasuk yang
              masa jabatannya melintasi tahun itu. --}}
-        <select name="tahun" class="filter-select select-search" onchange="this.form.submit()"
-                title="Tampilkan pejabat yang menjabat pada tahun ini">
-            <option value="">Semua Tahun</option>
-            @foreach($tahuns as $t)
-                <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
-            @endforeach
-        </select>
-        @if(request()->hasAny(['search','jabatan','tahun']))
-            <a href="{{ route('history_pejabat.index') }}" class="btn-reset">× Reset</a>
-        @endif
-    </form>
+        <div class="fd-field">
+            <span class="fd-label">Tahun</span>
+            <select name="tahun" class="select-search" aria-label="Tahun"
+                    title="Tampilkan pejabat yang menjabat pada tahun ini">
+                <option value="">Semua Tahun</option>
+                @foreach($tahuns as $t)
+                    <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                @endforeach
+            </select>
+        </div>
+    </x-filter-drawer>
 
     {{-- Export mengikuti filter yang sedang aktif (request()->query()). --}}
     <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
@@ -494,9 +496,7 @@
 
 @push('scripts')
 <script>
-// ===== TAB AKTIF / SELESAI =====
-// Pilihan tab disimpan di query string agar tidak melompat balik ke "Aktif"
-// setelah pindah halaman, mencari, atau menyaring.
+// ===== TAB AKTIF / SELESAI (pilihan disimpan di query string) =====
 function switchTab(tab) {
     var aktif = tab === 'aktif';
     document.getElementById('panel-aktif').style.display   = aktif ? 'block' : 'none';

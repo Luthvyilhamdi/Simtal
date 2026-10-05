@@ -57,8 +57,7 @@ class ImportAssessmentController extends Controller
             $msg = "Berhasil mengimport {$imported} data assessment rekomendasi.";
             if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK tidak ditemukan).";
 
-            // Jejak untuk Log Aktivitas: import massal tanpa catatan membuat
-            // data aneh tidak bisa ditelusuri ke unggahan mana penyebabnya.
+            // Jejak untuk Log Aktivitas.
             $this->log('import', 'Assessment', 'Import Excel',
                 "{$imported} data, {$skipped} dilewati - berkas: "
                 . $request->file('file')->getClientOriginalName());
@@ -103,8 +102,7 @@ class ImportAssessmentController extends Controller
             $msg = "Berhasil mengimport {$imported} data assessment kompetensi.";
             if ($skipped > 0) $msg .= " {$skipped} data dilewati (NIK tidak ditemukan atau nilai tidak valid).";
 
-            // Jejak untuk Log Aktivitas: import massal tanpa catatan membuat
-            // data aneh tidak bisa ditelusuri ke unggahan mana penyebabnya.
+            // Jejak untuk Log Aktivitas.
             $this->log('import', 'Assessment Kompetensi', 'Import Excel',
                 "{$imported} data, {$skipped} dilewati - berkas: "
                 . $request->file('file')->getClientOriginalName());

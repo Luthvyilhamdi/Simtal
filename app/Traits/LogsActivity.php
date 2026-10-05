@@ -9,10 +9,7 @@ use Illuminate\Support\Facades\Request;
 
 trait LogsActivity
 {
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model|null  $subjek  record yang disentuh;
-     *         diisi bila catatan ini perlu muncul di riwayat per-record.
-     */
+    /** @param  \Illuminate\Database\Eloquent\Model|null  $subjek  record yang disentuh */
     protected function log(
         string $aksi,
         string $modul,

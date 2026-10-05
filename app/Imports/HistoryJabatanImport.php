@@ -34,19 +34,10 @@ class HistoryJabatanImport implements
     /** karyawan_id yang tersentuh, untuk hitung ulang current & profil. */
     private array $affected = [];
 
-    /** [karyawan_id][tanggal_mulai(Y-m-d)] baris yg kolom lanjut_mdj-nya KOSONG
-     *  → penanda MDJ ditentukan otomatis dari band saat finalize(). */
+    /** Baris dengan lanjut_mdj kosong; ditentukan otomatis di finalize(). */
     private array $autoMdj = [];
 
-    /**
-     * SMART-UPDATE: kunci unik 1 periode = karyawan_id + tanggal_mulai.
-     * Baris cocok → diperbarui; tidak ada → ditambah. Re-import file yang sama
-     * tidak menggandakan baris. is_current & profil TIDAK diset per-baris —
-     * dihitung ulang sekali per karyawan di finalize() setelah semua baris masuk.
-     *
-     * Persistensi dilakukan manual (updateOrCreate) lalu return null agar
-     * Maatwebsite tidak meng-insert ganda.
-     */
+    /** Smart-update: kunci 1 periode = karyawan_id + tanggal_mulai. */
     public function model(array $row)
     {
         $karyawan = Karyawan::where('nik', trim((string) ($row['nik'] ?? '')))->first();
@@ -64,18 +55,13 @@ class HistoryJabatanImport implements
 
         // Jabatan & Kode Struktur = master level (boleh dibuat bila belum ada).
         $jabatan = Jabatan::firstOrCreate(['nama_jabatan' => trim($row['jabatan'])]);
-        // kode_struktur_id tidak boleh null di tabel. Kebiasaan pengisian:
-        // tanda "-" bila jabatan itu memang tidak punya kode struktur — 1.746
-        // dari 1.750 baris riwayat memakainya. Sel yang dikosongkan di Excel
-        // diperlakukan sama, supaya tidak berakhir sebagai galat mentah MySQL.
+        // kode_struktur_id tak boleh null; sel kosong diisi "-".
         $kodeTeks = trim((string) ($row['kode_struktur'] ?? ''));
         $kodeStruktur = KodeStruktur::firstOrCreate([
             'kode_struktur' => $kodeTeks !== '' ? $kodeTeks : '-',
         ]);
 
-        // Unit & grade = SNAPSHOT TEKS apa adanya; resolve FK master HANYA bila
-        // namanya cocok (tanpa create) → nama historis yang beda tidak mengotori
-        // master (tersimpan sebagai teks, FK null).
+        // Unit & grade = snapshot teks; FK di-resolve hanya bila cocok master.
         $dirNama  = trim($row['direktorat'] ?? '');
         $kompNama = trim($row['kompartemen'] ?? '');
         $depNama  = trim($row['departemen'] ?? '');
@@ -97,10 +83,7 @@ class HistoryJabatanImport implements
             $tipe = 'penempatan';
         }
 
-        // Penanda kelangsungan MDJ:
-        //   'ya'    → jabatan sama/kelanjutan (lanjut)
-        //   'tidak' → jabatan baru (reset)
-        //   kosong  → AUTO: ditentukan dari band di finalize() (band sama = lanjut)
+        // Penanda MDJ: 'ya' lanjut, 'tidak' reset, kosong = auto dari band.
         $lanjutRaw  = strtolower(trim((string) ($row['lanjut_mdj'] ?? $row['jabatan_sama'] ?? '')));
         $explicitYa = in_array($lanjutRaw, ['1', 'ya', 'yes', 'true', 'y', 'sama'], true);
         $lanjutMdj  = $explicitYa; // 'tidak' & kosong → false dulu; kosong dikoreksi di finalize()
@@ -155,11 +138,7 @@ class HistoryJabatanImport implements
         return null; // persistensi sudah manual
     }
 
-    /**
-     * Setelah semua baris masuk: untuk tiap karyawan tersentuh, tetapkan
-     * jabatan dengan tanggal_mulai TERBARU sebagai is_current (paling atas di
-     * list), sisanya non-current, lalu sinkronkan profil dari baris current itu.
-     */
+    /** Setelah semua baris masuk: tetapkan is_current & sinkron profil. */
     public function finalize(): void
     {
         foreach ($this->affected as $karyawanId) {
@@ -187,8 +166,7 @@ class HistoryJabatanImport implements
                 }
             }
 
-            // AUTO lanjut_mdj untuk baris yang kolomnya KOSONG: band sama dengan
-            // baris sebelumnya (kronologis) → lanjut; band beda / baris pertama → reset.
+            // AUTO lanjut_mdj: band sama dengan baris sebelumnya = lanjut.
             if (!empty($this->autoMdj[$karyawanId])) {
                 $autoDates = $this->autoMdj[$karyawanId];
                 $asc = $histories->sortBy([['tanggal_mulai', 'asc'], ['id', 'asc']])->values();
@@ -211,8 +189,7 @@ class HistoryJabatanImport implements
                 }
             }
 
-            // Sinkron profil dari baris current. Pakai ?? agar nilai historis
-            // (FK null) tidak meng-null-kan profil aktif.
+            // Sinkron profil dari baris current.
             $karyawan->update([
                 'jabatan_id'       => $current->jabatan_id       ?? $karyawan->jabatan_id,
                 'jabatan_saat_ini' => $current->jabatan_saat_ini ?? $karyawan->jabatan_saat_ini,
@@ -256,8 +233,7 @@ class HistoryJabatanImport implements
             } catch (\Exception $e) {}
         }
 
-        // Semua format dd/mm/yyyy (tanpa mm/dd). hasFormat memvalidasi ketat
-        // agar tanggal tak valid tidak "overflow" menjadi tanggal keliru.
+        // Semua format dd/mm/yyyy, divalidasi ketat.
         $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'd M Y'];
         foreach ($formats as $format) {
             if (Carbon::hasFormat((string) $value, $format)) {

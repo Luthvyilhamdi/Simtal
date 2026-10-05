@@ -140,24 +140,29 @@
 
 {{-- Filter --}}
 <div class="filter-bar">
-    <form method="GET" action="{{ route('penilaian_karyawan.index', $karyawan) }}" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
-        <span style="font-size:12px;color:#6b7280;font-weight:600">Filter:</span>
-        <div class="select-wrap">
-            <select name="tahun" class="filter-select select-search" onchange="this.form.submit()">
-                <option value="">Semua Tahun</option>
-                @foreach($tahuns as $t)
-                    <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="select-wrap">
-            <select name="tipe" class="filter-select select-search" onchange="this.form.submit()">
-                <option value="">Semua Tipe</option>
-                <option value="KPI" {{ request('tipe') === 'KPI' ? 'selected' : '' }}>KPI</option>
-                <option value="360" {{ request('tipe') === '360' ? 'selected' : '' }}>360°</option>
-            </select>
-        </div>
-    </form>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
+        <x-filter-drawer :aksi="route('penilaian_karyawan.index', $karyawan)"
+                         :reset="route('penilaian_karyawan.index', $karyawan)"
+                         :aktif="(int) request()->filled('tahun') + (int) request()->filled('tipe')">
+            <div class="fd-field">
+                <span class="fd-label">Tahun</span>
+                <select name="tahun" class="select-search" aria-label="Tahun">
+                    <option value="">Semua Tahun</option>
+                    @foreach($tahuns as $t)
+                        <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="fd-field">
+                <span class="fd-label">Tipe</span>
+                <select name="tipe" class="select-search" aria-label="Tipe">
+                    <option value="">Semua Tipe</option>
+                    <option value="KPI" {{ request('tipe') === 'KPI' ? 'selected' : '' }}>KPI</option>
+                    <option value="360" {{ request('tipe') === '360' ? 'selected' : '' }}>360°</option>
+                </select>
+            </div>
+        </x-filter-drawer>
+    </div>
 </div>
 
 {{-- Table --}}

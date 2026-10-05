@@ -25,13 +25,7 @@ use Illuminate\Support\Str;
  */
 class SuratPenting extends Model
 {
-    /**
-     * Kategori bawaan (slug => label) - BUKAN daftar tertutup.
-     *
-     * Kolom kategori menerima teks bebas, jadi daftar ini hanya saran yang
-     * muncul di form upload dan sumber label untuk slug yang sudah terlanjur
-     * tersimpan. Jangan dipakai sebagai aturan validasi.
-     */
+    /** Kategori bawaan (slug => label) - hanya saran, bukan daftar tertutup. */
     public const KATEGORI = [
         'sk_jabatan'       => 'SK Jabatan',
         'sk_promosi'       => 'SK Promosi',

@@ -39,9 +39,7 @@ class HistoryKaryawanController extends Controller
             ->orderBy('tanggal_mulai', 'desc')
             ->get();
 
-        // Ringkasan masa dinas, disusun sama persis seperti halaman History
-        // Jabatan per-karyawan supaya angkanya tidak berbeda antar halaman:
-        // MDJ = periode jabatan yang sedang berjalan, MDG = sejak TMT Person Grade.
+        // Ringkasan masa dinas: MDJ & MDG Person Grade.
         $mdjAktif = collect(HistoryJabatan::ringkasPeriodeMdj($histories))->firstWhere('aktif', true);
         $mdgPg    = $this->masaDinasPersonGrade($karyawan);
 

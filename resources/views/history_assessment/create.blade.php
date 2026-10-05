@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @php
-    /** Form ini dipakai dua kali: Tambah ($h null) dan Edit ($h berisi record). */
+    {{-- Dipakai Tambah ($h null) & Edit --}}
     $h = $h ?? null;
     $judul = $h ? 'Edit Assessment' : 'Tambah Assessment';
 @endphp

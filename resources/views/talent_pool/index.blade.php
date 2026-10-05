@@ -286,8 +286,7 @@
 
 {{-- Filter bar --}}
 <div class="filter-bar">
-    <form method="GET" action="{{ route('talent_pool.index') }}" id="filterForm" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
-        <input type="hidden" name="search" id="searchHidden" value="{{ request('search') }}">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <div class="search-mini">
                 <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -296,25 +295,31 @@
                 <div class="search-spinner" id="searchSpinner"></div>
                 <button type="button" class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
             </div>
-            <div class="select-wrap">
-                <select name="periode" class="filter-select select-search" onchange="submitFilter()">
-                    @foreach($periodeList as $p)
-                        <option value="{{ $p }}" {{ $p == $periode ? 'selected' : '' }}>{{ $p }}</option>
-                    @endforeach
-                    @if(!$periodeList->contains(now()->year))
-                        <option value="{{ now()->year }}" {{ now()->year == $periode ? 'selected' : '' }}>{{ now()->year }}</option>
-                    @endif
-                </select>
-            </div>
-            <div class="select-wrap">
-                <select name="klasifikasi" class="filter-select select-search" onchange="submitFilter()">
-                    <option value="">Semua Klasifikasi</option>
-                    <option value="longlist"  {{ request('klasifikasi') === 'longlist'  ? 'selected' : '' }}>Longlist</option>
-                    <option value="shortlist" {{ request('klasifikasi') === 'shortlist' ? 'selected' : '' }}>Shortlist</option>
-                </select>
-            </div>
+            <x-filter-drawer :aktif="(int) request()->filled('periode') + (int) request()->filled('klasifikasi')"
+                             :reset="route('talent_pool.index')">
+                <input type="hidden" name="search" id="searchHidden" value="{{ request('search') }}">
+                <div class="fd-field">
+                    <span class="fd-label">Periode</span>
+                    <select name="periode" class="select-search" aria-label="Periode">
+                        @foreach($periodeList as $p)
+                            <option value="{{ $p }}" {{ $p == $periode ? 'selected' : '' }}>{{ $p }}</option>
+                        @endforeach
+                        @if(!$periodeList->contains(now()->year))
+                            <option value="{{ now()->year }}" {{ now()->year == $periode ? 'selected' : '' }}>{{ now()->year }}</option>
+                        @endif
+                    </select>
+                </div>
+                <div class="fd-field">
+                    <span class="fd-label">Klasifikasi</span>
+                    <select name="klasifikasi" class="select-search" aria-label="Klasifikasi">
+                        <option value="">Semua Klasifikasi</option>
+                        <option value="longlist"  {{ request('klasifikasi') === 'longlist'  ? 'selected' : '' }}>Longlist</option>
+                        <option value="shortlist" {{ request('klasifikasi') === 'shortlist' ? 'selected' : '' }}>Shortlist</option>
+                    </select>
+                </div>
+            </x-filter-drawer>
         </div>
-    </form>
+    </div>
 </div>
 
 {{-- Table --}}
@@ -564,10 +569,6 @@ window.addEventListener('pageshow', function(e) {
 const modalImport = document.getElementById('modalImport');
 if (modalImport) modalImport.addEventListener('click', function(e) { if (e.target === this) closeImport(); });
 
-function submitFilter() {
-    document.getElementById('searchHidden').value = document.getElementById('searchInput').value;
-    document.getElementById('filterForm').submit();
-}
 
 ['modalHapus','modalEdit'].forEach(id => {
     const el = document.getElementById(id);

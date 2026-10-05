@@ -34,8 +34,7 @@
     .vt-btn.active { background:#f0fdf4;color:#15803d; }
     .vt-btn svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    /* Tampilan baris memakai kartu yang sama, hanya dipipihkan. Bilah kemajuan,
-       rincian unit, dan catatan disembunyikan supaya satu layar memuat lebih banyak. */
+    /* Tampilan baris: kartu yang sama, dipipihkan */
     .aktif-grid.mode-list { grid-template-columns:1fr;gap:8px; }
     .mode-list .aktif-card { display:flex;align-items:center;gap:16px;padding:12px 16px; }
     /* display:contents menaikkan .acard-left & .acard-right jadi item baris langsung */
@@ -494,8 +493,7 @@
 
     // Modal Hapus
     let deleteUrl = '';
-    /* Pengalih tampilan kartu <-> baris untuk daftar 'Sedang Berlangsung'.
-       Pilihannya milik masing-masing pemakai, jadi cukup diingat peramban. */
+    /* Pengalih tampilan kartu <-> baris, diingat peramban */
     function setTampilan(mode) {
         var grid = document.getElementById('aktifGrid');
         if (grid) grid.classList.toggle('mode-list', mode === 'list');
@@ -507,8 +505,7 @@
         try { localStorage.setItem('pgsPjsTampilan', mode); } catch (e) { /* mode privat / storage diblokir */ }
     }
 
-    // Dipanggil langsung, bukan menunggu DOMContentLoaded, supaya tidak sempat
-    // terlihat berkedip dari tampilan kartu ke baris.
+    // Dipanggil langsung agar tidak berkedip dari kartu ke baris.
     (function () {
         var simpan = null;
         try { simpan = localStorage.getItem('pgsPjsTampilan'); } catch (e) {}

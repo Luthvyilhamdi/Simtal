@@ -42,14 +42,12 @@
         .btn-outline { background:#fff;color:var(--text);border-color:var(--card-border); }
         .btn-outline:hover { background:#f9fafb;border-color:#bbf7d0;color:var(--brand); }
 
-        /* Tombol Import lintas modul. Didefinisikan sekali di sini supaya
-           semua halaman seragam: netral saat diam, menghijau saat disentuh. */
+        /* Tombol Import lintas modul */
         .btn-import { display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--text);border:1px solid var(--card-border);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;text-decoration:none;transition:all .15s; }
         .btn-import:hover { background:#f0fdf4;border-color:#bbf7d0;color:var(--brand); }
         .btn-import svg { width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2; }
 
-        /* Tombol "Lihat" pada tabel. Definisinya dulu disalin identik di 5 halaman;
-           disatukan di sini supaya perubahan cukup sekali. */
+        /* Tombol "Lihat" pada tabel */
         .btn-view { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:white;color:#374151;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.12s;white-space:nowrap; }
         .btn-view:hover { background:#f0fdf4;border-color:#bbf7d0;color:#15803d; }
         .btn-view svg { width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2; }
@@ -274,8 +272,7 @@
             border-top-color:#15803d;
             animation:loader-ring 0.85s linear infinite;
         }
-        /* Logo ikut berputar, sedikit lebih lambat dari cincin agar dua geraknya
-           tidak terkunci sinkron (terlihat kaku bila sama persis). */
+        /* Logo berputar sedikit lebih lambat dari cincin */
         .loader-logo {
             width:40px; height:40px; object-fit:contain; position:relative;
             animation:loader-spin 1.4s linear infinite;
@@ -361,16 +358,14 @@
             .page-header { flex-direction: column; align-items: stretch; }
             .page-header > div { min-width: 0; }
 
-            /* Kelompok tombol yang didorong ke kanan lewat margin-left:auto
-               (ditulis inline di banyak halaman) — turunkan jadi satu baris penuh. */
+            /* Kelompok tombol yang didorong ke kanan: turunkan jadi satu baris */
             .filter-row > [style*="margin-left:auto"],
             .toolbar    > [style*="margin-left:auto"],
             .page-header > [style*="margin-left:auto"] {
                 margin-left: 0 !important; flex: 1 1 100%; width: 100%;
             }
 
-            /* Tombol aksi (Import/Export/Tambah/dll): dua per baris.
-               ":not(:first-child)" menjaga blok judul di kiri tidak ikut terkena. */
+            /* Tombol aksi: dua per baris */
             .filter-row > [style*="margin-left:auto"] > a,
             .filter-row > [style*="margin-left:auto"] > button,
             .filter-row > [style*="margin-left:auto"] > div,
@@ -381,8 +376,7 @@
                 flex: 1 1 calc(50% - 4px); min-width: 0; justify-content: center;
             }
 
-            /* Sebagian halaman menaruh tombol langsung sebagai anak .page-header
-               (tanpa div pembungkus) — biarkan selebar layar, isinya ditengahkan. */
+            /* Tombol yang jadi anak langsung .page-header */
             .page-header > a, .page-header > button { justify-content: center; }
         }
     </style>
@@ -985,12 +979,9 @@
         loader.style.display = 'flex';
     });
     document.addEventListener('submit', function(e) {
-        // Submit yang dibatalkan (mis. confirm/modal batal) — jangan tampilkan loader,
-        // karena tak ada navigasi & 'pageshow' tak jalan → spinner akan menggantung.
+        // Submit yang dibatalkan: jangan tampilkan loader.
         if (e.defaultPrevented) return;
-        // Form yang menghasilkan unduhan file tidak memuat ulang halaman,
-        // sehingga 'pageshow' tak pernah jalan & loader akan menggantung.
-        // Lewati loader untuk form bertanda data-download.
+        // Form unduhan (data-download): jangan tampilkan loader.
         if (e.target.matches('[data-download]')) return;
         loader.style.display = 'flex';
     });

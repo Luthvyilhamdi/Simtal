@@ -37,8 +37,6 @@
     .clear-btn.visible { display:block; }
     .filter-select { padding:8px 12px;border:1px solid var(--card-border);border-radius:9px;font-size:var(--fs-sm);font-family:inherit;color:var(--text);background:#fff;outline:none;cursor:pointer; }
     .filter-select:focus { border-color:var(--brand); }
-    .btn-reset { display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:9px;border:1px solid var(--card-border);background:#fff;color:var(--text-muted);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap; }
-    .btn-reset:hover { background:#f7f8f9;color:var(--text); }
 
     /* ===================== Tabel ===================== */
     .table-card { background:#fff;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);overflow:hidden; }
@@ -222,16 +220,13 @@
         tbody td { display:block;border:none;padding:0; }
         td.col-index { display:none; }
         td.cell-user { flex:1 1 100%;min-width:0; }
-        /* Ruang untuk badge role hanya disisakan di baris nama (badge ada di pojok
-           kanan atas), supaya email & NIK di bawahnya tetap dapat lebar penuh. */
+        /* Ruang badge role hanya disisakan di baris nama */
         .user-name { padding-right:114px; }
         .user-meta { flex-direction:column;align-items:flex-start;gap:2px; }
         .user-meta .dot { display:none; }
         .user-email { max-width:100%; }
         td.cell-role { position:absolute;top:14px;right:14px; }
-        /* Baris kartu di HP: (1) identitas  (2) status + akses  (3) tanggal + aksi.
-           Urutan diatur lewat `order` karena di DOM status berada sebelum akses,
-           dan ::after milik <tr> dipakai sebagai pemaksa ganti baris. */
+        /* Baris kartu di HP: identitas, status + akses, tanggal + aksi */
         td.cell-user { order:1; }
         td.cell-status { flex:0 0 auto;margin-top:11px;margin-right:12px;order:2; }
         td.cell-akses { flex:0 0 auto;margin-top:11px;order:3; }
@@ -475,8 +470,8 @@
 </div>
 
 {{-- ===================== Saringan ===================== --}}
-<form method="GET" action="{{ route('akun.index') }}" id="filterForm">
-    <div class="filter-row">
+<div class="filter-row">
+    <form method="GET" action="{{ route('akun.index') }}" id="filterForm" style="display:contents">
         <div class="search-mini">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" name="search" id="searchInput" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email…" autocomplete="off">
@@ -484,22 +479,23 @@
                  elemen ber-id ikut jadi properti form dan menutupi fungsi global. --}}
             <button type="button" class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearSearchBtn" onclick="clearSearch()">&times;</button>
         </div>
-        <div class="select-wrap">
-            <select name="role" class="filter-select select-search" onchange="document.getElementById('filterForm').submit()">
+        {{-- Filter yang sedang menyala ikut dibawa, supaya mencari tidak mematikannya. --}}
+        <input type="hidden" name="role" value="{{ request('role') }}">
+    </form>
+
+    <x-filter-drawer :aktif="(int) request()->filled('role')" :reset="route('akun.index')">
+        <input type="hidden" name="search" value="{{ request('search') }}">
+        <div class="fd-field">
+            <span class="fd-label">Role</span>
+            <select name="role" class="select-search" aria-label="Role">
                 <option value="">Semua Role</option>
                 <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                 <option value="admin"       {{ request('role') === 'admin'       ? 'selected' : '' }}>Admin</option>
                 <option value="user"        {{ request('role') === 'user'        ? 'selected' : '' }}>User</option>
             </select>
         </div>
-        @if(request('search') || request('role'))
-        <a href="{{ route('akun.index') }}" class="btn-reset">
-            <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Reset
-        </a>
-        @endif
-    </div>
-</form>
+    </x-filter-drawer>
+</div>
 
 {{-- ===================== Daftar akun ===================== --}}
 <div class="table-card">

@@ -39,8 +39,7 @@ $isUser = auth()->user()->isUser();
 @endif
 
 <style>
-  /* Dropdown penyaring. Dulu bergaya sebaris; dipindah ke kelas supaya
-     tombol pengganti dari komponen select-search ikut mewarisinya. */
+  /* Dropdown penyaring */
   .so-periode { border:1px solid #e8e8e3;border-radius:8px;outline:none;background:#fff;color:#374151;font-family:inherit;padding:6px 10px;font-size:13px; }
   .so-versi   { border:1px solid #e8e8e3;border-radius:8px;outline:none;background:#fff;color:#374151;font-family:inherit;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer; }
   .so-saring  { border:1px solid #e8e8e3;border-radius:8px;outline:none;background:#fff;color:#374151;font-family:inherit;padding:7px 12px;font-size:13px; }
@@ -148,23 +147,36 @@ $isUser = auth()->user()->isUser();
         oninput="filterRealtime(this.value)">
       <span id="searchClear" onclick="clearSearch()" style="cursor:pointer;color:#9ca3af;display:none;font-size:16px;line-height:1">×</span>
     </div>
-    <select id="filterDir" onchange="applyDropdownFilter()" class="so-saring select-search">
-      <option value="">Semua Direktorat</option>
-      @foreach($direktorats as $d)
-        <option value="{{ $d }}" {{ request('direktorat')==$d?'selected':'' }}>{{ $d }}</option>
-      @endforeach
-    </select>
-    <select id="filterKomp" onchange="applyDropdownFilter()" class="so-saring select-search">
-      <option value="">Semua Kompartemen</option>
-      @foreach($kompartemens as $k)
-        <option value="{{ $k }}" {{ request('kompartemen')==$k?'selected':'' }}>{{ $k }}</option>
-      @endforeach
-    </select>
-    <select id="filterCore" onchange="applyDropdownFilter()" class="so-saring select-search">
-      <option value="">Core & Non Core</option>
-      <option value="Core" {{ request('core')=='Core'?'selected':'' }}>Core</option>
-      <option value="Non Core" {{ request('core')=='Non Core'?'selected':'' }}>Non Core</option>
-    </select>
+    <x-filter-drawer terapkan="applyDropdownFilter()"
+                     :aktif="(int) request()->filled('direktorat') + (int) request()->filled('kompartemen') + (int) request()->filled('core')"
+                     :reset="route('struktur-organisasi.index', ['bulan' => $bulan, 'tahun' => $tahun])">
+      <div class="fd-field">
+        <span class="fd-label">Direktorat</span>
+        <select id="filterDir" class="select-search" aria-label="Direktorat">
+          <option value="">Semua Direktorat</option>
+          @foreach($direktorats as $d)
+            <option value="{{ $d }}" {{ request('direktorat')==$d?'selected':'' }}>{{ $d }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="fd-field">
+        <span class="fd-label">Kompartemen</span>
+        <select id="filterKomp" class="select-search" aria-label="Kompartemen">
+          <option value="">Semua Kompartemen</option>
+          @foreach($kompartemens as $k)
+            <option value="{{ $k }}" {{ request('kompartemen')==$k?'selected':'' }}>{{ $k }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="fd-field">
+        <span class="fd-label">Core / Non Core</span>
+        <select id="filterCore" class="select-search" aria-label="Core atau non core">
+          <option value="">Core & Non Core</option>
+          <option value="Core" {{ request('core')=='Core'?'selected':'' }}>Core</option>
+          <option value="Non Core" {{ request('core')=='Non Core'?'selected':'' }}>Non Core</option>
+        </select>
+      </div>
+    </x-filter-drawer>
     <div style="display:flex;gap:4px">
       <button onclick="collapseAll()" title="Collapse Semua" style="padding:8px 10px;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
@@ -1078,13 +1090,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===== EVENT DELEGATION =====
-// Listener untuk [data-action] di document — tanpa stopPropagation
-// agar tidak memblokir form submit, onclick, dan event lain
 document.addEventListener('click', function(e) {
     const el = e.target.closest('[data-action]');
     if (!el) return;
-    // Jangan stopPropagation — biarkan event bubble normal
-    // (form submit, onclick di modal dll tetap berjalan)
+    // Jangan stopPropagation, biarkan event bubble normal.
     const action = el.dataset.action;
     const d = el.dataset;
     if (action === 'openEdit') {
@@ -1104,8 +1113,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Listener untuk tr[data-toggle] — pasang langsung per elemen
-// Cek apakah klik berasal dari [data-action] supaya tidak trigger toggle saat klik button
+// Listener tr[data-toggle], dipasang per elemen.
 function bindToggleRows() {
     document.querySelectorAll('tr[data-toggle]:not([data-bound])').forEach(function(tr) {
         tr.setAttribute('data-bound', '1');
@@ -1152,6 +1160,9 @@ function doFilter(keyword){
   const countEl=document.getElementById('searchCount');
   if(kw||dir||komp||core){countEl.textContent=visible+' posisi ditemukan';countEl.style.display='block';}
   else{countEl.style.display='none';rows.forEach(r=>r.style.display='');}
+
+  // Penyaringan di sisi klien: lencana tombol Filter diperbarui dari sini.
+  if(window.fdTandai)fdTandai('filterDrawer',[dir,komp,core].filter(Boolean).length);
 }
 
 let hapusId=null;

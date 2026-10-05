@@ -17,8 +17,7 @@
     .ss-native { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0; }
     .ss { position:relative; }
 
-    /* Tombolnya sengaja memakai class .form-input milik halaman masing-masing
-       supaya bentuknya persis sama dengan input lain di halaman itu. */
+    /* Tombolnya memakai .form-input halaman agar bentuknya seragam */
     .ss-trigger { display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer; }
     .ss-trigger .ss-label { flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
     .ss-trigger .ss-label.kosong { color:#9ca3af; }
@@ -41,10 +40,7 @@
     .ss-opt mark { background:transparent;color:inherit;font-weight:800;padding:0; }
     .ss-hampa { padding:16px 12px;text-align:center;color:#98a2b3;font-size:12px;display:none; }
 
-    /* Panah penanda dropdown. Tanpa ini tombolnya tampak seperti kotak isian
-       teks biasa dan orang tidak tahu itu bisa diklik. Digambar oleh komponen
-       sendiri, lalu DITEKAN pada halaman yang sudah punya panah via
-       .select-wrap::after supaya tidak muncul dua panah. */
+    /* Panah penanda dropdown, ditekan bila halaman sudah punya panah */
     .ss-trigger { position:relative;padding-right:32px; }
     .ss-trigger::after { content:'';position:absolute;right:12px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #98a2b3;pointer-events:none; }
     .ss.open .ss-trigger::after { border-top-color:#15803d; }
@@ -58,9 +54,7 @@
 
     var IKON_CARI = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
 
-    /* Kotak cari baru berguna kalau pilihannya banyak. Di bawah ambang ini
-       panel tampil sebagai daftar bersih tanpa kotak cari, supaya dropdown
-       berisi 2-3 pilihan tidak terasa berlebihan. */
+    /* Kotak cari hanya muncul kalau pilihannya banyak */
     var AMBANG_CARI = 8;
 
     function lolos(t) {
@@ -134,8 +128,7 @@
 
         function gambar(kata) {
             var cocok = opsi.filter(function (o) {
-                // Baris placeholder ("-- Pilih … --") bukan pilihan sungguhan:
-                // fungsinya mengosongkan, jadi tidak ikut hasil pencarian.
+                // Baris placeholder bukan pilihan; tidak ikut hasil pencarian.
                 if (o.nilai === '') return !kata;
                 return !kata || o.cari.indexOf(kata) >= 0;
             });
@@ -161,9 +154,7 @@
             item[sorot].scrollIntoView({ block: 'nearest' });
         }
 
-        /* Tentukan panel membuka ke bawah atau ke atas menurut ruang yang tersisa.
-           Dihitung ulang saat halaman digulir, sebab kalau hanya dihitung sekali
-           arahnya bisa basi dan panel menutupi field di atasnya. */
+        /* Arah panel (ke bawah / ke atas) menurut ruang yang tersisa */
         function aturArah() {
             var kotak = tombol.getBoundingClientRect();
             var bawah = window.innerHeight - kotak.bottom;

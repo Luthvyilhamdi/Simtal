@@ -88,12 +88,7 @@ class HistoryAssessmentKompetensiController extends Controller
         return $rules;
     }
 
-    /**
-     * Susun data + hitung kesimpulan.
-     *
-     * Dipakai Tambah maupun Edit supaya rumus kesimpulannya hanya ada di satu
-     * tempat - kalau disalin, cepat atau lambat keduanya akan berbeda hasil.
-     */
+    /** Susun data + hitung kesimpulan, dipakai Tambah & Edit. */
     private function siapkanData(Request $request): array
     {
         $kompetensiKeys  = array_keys(HistoryAssessmentKompetensi::competencies());
@@ -138,7 +133,7 @@ class HistoryAssessmentKompetensiController extends Controller
             $ubah[] = 'Kesimpulan: ' . ($lama->kesimpulan ?: '(kosong)') . ' -> ' . $baru['kesimpulan'];
         }
 
-        // Nilainya 20-an kolom; yang berguna di timeline adalah BERAPA yang berubah.
+        // Yang berguna di timeline: berapa nilai yang berubah.
         $nilaiKeys = array_merge(
             array_keys(HistoryAssessmentKompetensi::competencies()),
             array_keys(HistoryAssessmentKompetensi::qualifications())

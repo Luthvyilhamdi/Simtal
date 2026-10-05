@@ -287,8 +287,7 @@
                 </div>
             @empty
                 <div class="rw-kosong">
-                    Belum ada catatan untuk assessment ini.<br>
-                    Riwayat mulai terisi sejak fitur ini dipasang.
+                    Belum ada catatan untuk assessment ini.
                 </div>
             @endforelse
         </div>
@@ -512,8 +511,7 @@
 
 @push('scripts')
 <script>
-/* Riwayat per assessment. Isinya sudah dirender di halaman, jadi membuka
-   panel tidak memerlukan permintaan ke server. */
+/* Riwayat per assessment, isinya sudah dirender di halaman */
 function bukaRiwayat(id) {
     document.querySelectorAll('.rw-list').forEach(el => el.style.display = 'none');
     const daftar = document.getElementById('rw-' + id);

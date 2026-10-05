@@ -35,8 +35,6 @@
     @keyframes hpkspin { to{transform:rotate(360deg)} }
     #panel-penilaian, #panel-kalibrasi { transition:opacity .15s ease; }
     .filter-select { padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:inherit;color:#374151;background:white;outline:none;cursor:pointer; }
-    .btn-reset { display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap; }
-    .btn-reset:hover { background:#f5f5f0; }
     .spacer { flex:1; }
     .btn-act { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;border:none;cursor:pointer;font-family:inherit; }
     .btn-act svg { width:13px;height:13px;fill:none;stroke-width:2; }
@@ -253,11 +251,17 @@
             <div class="search-spinner" id="spinnerPenilaian"></div>
             <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearPenilaian" type="button" onclick="clearSearchPenilaian()">×</button>
         </div>
-        <select id="tahunPenilaian" class="filter-select select-search" onchange="applyPenilaian()">
-            <option value="">Semua Tahun</option>
-            @foreach($tahunsPenilaian as $t)<option value="{{ $t }}" {{ request('tahun')==$t ? 'selected' : '' }}>{{ $t }}</option>@endforeach
-        </select>
-        @if(request('search') || request('tahun'))<a href="{{ route('history_penilaian_kalibrasi.index', ['tab'=>'penilaian']) }}" class="btn-reset">× Reset</a>@endif
+        <x-filter-drawer id="filterPenilaian" terapkan="applyPenilaian()"
+                         :aktif="(int) request()->filled('tahun')"
+                         :reset="route('history_penilaian_kalibrasi.index', ['tab'=>'penilaian'])">
+            <div class="fd-field">
+                <span class="fd-label">Tahun</span>
+                <select id="tahunPenilaian" class="select-search" aria-label="Tahun penilaian">
+                    <option value="">Semua Tahun</option>
+                    @foreach($tahunsPenilaian as $t)<option value="{{ $t }}" {{ request('tahun')==$t ? 'selected' : '' }}>{{ $t }}</option>@endforeach
+                </select>
+            </div>
+        </x-filter-drawer>
         <div class="spacer"></div>
         @if($isSA)<button class="btn-act btn-import" onclick="openImport('Pen')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>@endif
         <a href="{{ route('history_penilaian_kalibrasi.export.penilaian', request()->only('search','tahun')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Penilaian</a>
@@ -340,11 +344,17 @@
             <div class="search-spinner" id="spinnerKalibrasi"></div>
             <button class="clear-btn {{ request('search_kalibrasi') ? 'visible' : '' }}" id="clearKalibrasi" type="button" onclick="clearSearchKalibrasi()">×</button>
         </div>
-        <select id="tahunKalibrasi" class="filter-select select-search" onchange="applyKalibrasi()">
-            <option value="">Semua Tahun</option>
-            @foreach($tahunsKalibrasi as $t)<option value="{{ $t }}" {{ request('tahun_kalibrasi')==$t ? 'selected' : '' }}>{{ $t }}</option>@endforeach
-        </select>
-        @if(request('search_kalibrasi') || request('tahun_kalibrasi'))<a href="{{ route('history_penilaian_kalibrasi.index', ['tab'=>'kalibrasi']) }}" class="btn-reset">× Reset</a>@endif
+        <x-filter-drawer id="filterKalibrasi" terapkan="applyKalibrasi()"
+                         :aktif="(int) request()->filled('tahun_kalibrasi')"
+                         :reset="route('history_penilaian_kalibrasi.index', ['tab'=>'kalibrasi'])">
+            <div class="fd-field">
+                <span class="fd-label">Tahun</span>
+                <select id="tahunKalibrasi" class="select-search" aria-label="Tahun kalibrasi">
+                    <option value="">Semua Tahun</option>
+                    @foreach($tahunsKalibrasi as $t)<option value="{{ $t }}" {{ request('tahun_kalibrasi')==$t ? 'selected' : '' }}>{{ $t }}</option>@endforeach
+                </select>
+            </div>
+        </x-filter-drawer>
         <div class="spacer"></div>
         @if($isSA)<button class="btn-act btn-import" onclick="openImport('Kal')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>@endif
         <a href="{{ route('history_penilaian_kalibrasi.export.kalibrasi', request()->only('search_kalibrasi','tahun_kalibrasi')) }}" class="btn-act btn-export"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Kalibrasi</a>

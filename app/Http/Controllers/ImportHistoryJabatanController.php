@@ -50,8 +50,7 @@ class ImportHistoryJabatanController extends Controller
             $msg = "Import selesai: {$added} ditambah, {$updated} diperbarui.";
             if ($skipped > 0) $msg .= " {$skipped} dilewati (NIK tidak ditemukan / tanggal mulai kosong).";
 
-            // Import massal mengubah banyak baris sekaligus; tanpa jejak ini tidak
-            // ada cara menelusuri siapa yang mengunggah dan berapa yang tersentuh.
+            // Jejak untuk Log Aktivitas.
             $this->log('import', 'History Jabatan', 'Import Excel',
                 "{$added} ditambah, {$updated} diperbarui, {$skipped} dilewati - berkas: "
                 . $request->file('file')->getClientOriginalName());

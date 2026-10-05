@@ -36,8 +36,6 @@
 
     .filter-row { display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center; }
     .filter-select { padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:inherit;color:#374151;background:white;outline:none;cursor:pointer; }
-    .btn-reset { display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;text-decoration:none;white-space:nowrap; }
-    .btn-reset:hover { background:#f5f5f0; }
 
     .table-card { background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden; }
     .table-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch; }
@@ -267,25 +265,29 @@
             <div class="search-spinner" id="spinnerRekom"></div>
             <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearRekom" onclick="clearSearchRekom()">×</button>
         </div>
-        <form method="GET" id="filterForm" style="display:contents">
+        <x-filter-drawer :aktif="(int) request()->filled('rekomendasi') + (int) request()->filled('tahun')"
+                         :reset="route('history_assessment_all.index')">
             <input type="hidden" name="tab" value="rekom">
             <input type="hidden" name="search" id="hiddenSearch" value="{{ request('search') }}">
-            <select name="rekomendasi" class="filter-select select-search" onchange="this.form.submit()">
-                <option value="">Semua Rekomendasi</option>
-                <option value="ready" {{ request('rekomendasi')=='ready' ? 'selected' : '' }}>Ready</option>
-                <option value="ready_with_development" {{ request('rekomendasi')=='ready_with_development' ? 'selected' : '' }}>Ready with Development</option>
-                <option value="not_ready" {{ request('rekomendasi')=='not_ready' ? 'selected' : '' }}>Not Ready</option>
-            </select>
-            <select name="tahun" class="filter-select select-search" onchange="this.form.submit()">
-                <option value="">Semua Tahun</option>
-                @foreach($tahuns as $t)
-                    <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
-                @endforeach
-            </select>
-            @if(request()->hasAny(['search','rekomendasi','tahun']))
-                <a href="{{ route('history_assessment_all.index') }}" class="btn-reset">× Reset</a>
-            @endif
-        </form>
+            <div class="fd-field">
+                <span class="fd-label">Rekomendasi</span>
+                <select name="rekomendasi" class="select-search" aria-label="Rekomendasi">
+                    <option value="">Semua Rekomendasi</option>
+                    <option value="ready" {{ request('rekomendasi')=='ready' ? 'selected' : '' }}>Ready</option>
+                    <option value="ready_with_development" {{ request('rekomendasi')=='ready_with_development' ? 'selected' : '' }}>Ready with Development</option>
+                    <option value="not_ready" {{ request('rekomendasi')=='not_ready' ? 'selected' : '' }}>Not Ready</option>
+                </select>
+            </div>
+            <div class="fd-field">
+                <span class="fd-label">Tahun</span>
+                <select name="tahun" class="select-search" aria-label="Tahun">
+                    <option value="">Semua Tahun</option>
+                    @foreach($tahuns as $t)
+                        <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </x-filter-drawer>
 
         <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
             @if(auth()->user()->isSuperAdmin())

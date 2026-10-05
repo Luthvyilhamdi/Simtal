@@ -25,8 +25,7 @@ class HistoryAssessmentController extends Controller
             ->orderBy('tanggal_assessment', 'desc')
             ->get();
 
-        // Riwayat penyuntingan tiap assessment, diambil sekali lalu dikelompokkan
-        // per record - bukan satu query per kartu.
+        // Riwayat penyuntingan per assessment.
         $riwayat = \App\Models\ActivityLog::where('subjek_type', HistoryAssessment::class)
             ->whereIn('subjek_id', $assessments->pluck('id'))
             ->orderByDesc('created_at')->orderByDesc('id')
@@ -98,7 +97,7 @@ class HistoryAssessmentController extends Controller
 
         $karyawan->load(['jobGrade', 'personGrade']);
 
-        // Form yang sama dengan Tambah; kehadiran $h yang membedakannya.
+        // Form sama dengan Tambah, pembedanya $h.
         return view('history_assessment.create', [
             'karyawan' => $karyawan,
             'h'        => $historyAssessment,
@@ -135,9 +134,7 @@ class HistoryAssessmentController extends Controller
             'link_file'           => $request->link_file,
         ];
 
-        // Tanggal exp diturunkan dari tanggal pelaksanaan (+2 tahun). Kalau
-        // tanggalnya dibetulkan, masa berlakunya harus ikut dihitung ulang -
-        // kalau tidak, record menyimpan dua tanggal yang saling bertentangan.
+        // Tanggal exp = tanggal pelaksanaan + 2 tahun.
         $baru['tanggal_exp_idp'] = Carbon::parse($request->tanggal_pelaksanaan)->addYears(2);
 
         $perubahan = $this->ringkasPerubahan($historyAssessment, $baru);
@@ -151,12 +148,7 @@ class HistoryAssessmentController extends Controller
             ->with('success', 'History assessment berhasil diperbarui!');
     }
 
-    /**
-     * Rangkum kolom yang benar-benar berubah menjadi "Label: lama -> baru".
-     *
-     * Tanpa ini catatan riwayat hanya berbunyi "diubah" dan tidak menjawab
-     * pertanyaan yang sebenarnya diajukan orang: APA yang berubah.
-     */
+    /** Ringkasan kolom yang berubah: "Label: lama -> baru". */
     private function ringkasPerubahan(HistoryAssessment $lama, array $baru): string
     {
         $label = [
@@ -182,7 +174,7 @@ class HistoryAssessmentController extends Controller
             $sebelum = $lama->{$kolom};
             $sesudah = $baru[$kolom] ?? null;
 
-            // Tanggal dibandingkan sebagai tanggal, bukan sebagai teks mentah.
+            // Bandingkan sebagai tanggal, bukan teks.
             if ($sebelum instanceof \Carbon\Carbon || str_starts_with($kolom, 'tanggal')) {
                 $a = $sebelum ? \Carbon\Carbon::parse($sebelum)->toDateString() : null;
                 $b = $sesudah ? \Carbon\Carbon::parse($sesudah)->toDateString() : null;
@@ -196,7 +188,7 @@ class HistoryAssessmentController extends Controller
             $ubah[] = $teks . ': ' . $rapi($sebelum) . ' -> ' . $rapi($sesudah);
         }
 
-        // Tautan berkas cukup disebut berubah, URL-nya terlalu panjang untuk timeline.
+        // URL terlalu panjang untuk timeline.
         if ((string) $lama->link_file !== (string) ($baru['link_file'] ?? null)) {
             $ubah[] = 'Tautan berkas diperbarui';
         }
@@ -210,8 +202,7 @@ class HistoryAssessmentController extends Controller
     public function destroy(Karyawan $karyawan, HistoryAssessment $historyAssessment)
     {
         $historyAssessment->delete();
-        // Record sudah hilang, jadi tidak ditautkan - catatan ini hanya untuk
-        // daftar Log Aktivitas, bukan untuk riwayat per-record.
+        // Tanpa subjek: record-nya sudah dihapus.
         $this->log('hapus', 'Assessment', $karyawan->nama, 'Hapus data assessment');
 
         return redirect()

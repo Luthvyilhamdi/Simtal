@@ -52,17 +52,13 @@ class SuratPentingController extends Controller
             'soon'     => SuratPenting::whereNotNull('tanggal_exp')->whereBetween('tanggal_exp', [now(), now()->addDays(30)])->count(),
         ];
 
-        // Kategori bebas yang sudah terlanjur dipakai - tanpa ini, surat
-        // berkategori ketikan sendiri tidak bisa disaring dari halaman daftar.
+        // Kategori ketikan sendiri, supaya ikut bisa disaring.
         $kategoriLain = SuratPenting::select('kategori')->distinct()->pluck('kategori')
             ->filter()
             ->reject(fn ($k) => isset(SuratPenting::KATEGORI[$k]))
             ->sort()->values();
 
-        // Baris surat bisa hidup tanpa berkasnya (terhapus manual, gagal ikut
-        // pindah server). Ditandai di sini supaya tombol Preview & Download
-        // untuk surat itu dimatikan di daftar - jadi tidak ada yang bisa diklik
-        // lalu berujung galat.
+        // Berkas bisa hilang dari disk; ditandai agar tombolnya dimatikan.
         $disk = Storage::disk('local');
         $berkasHilang = $surats->filter(fn ($s) => ! $s->file_path || ! $disk->exists((string) $s->file_path))
             ->pluck('id')->all();
@@ -78,12 +74,7 @@ class SuratPentingController extends Controller
         return view('surat_penting.create', compact('karyawans', 'kategoriSaran'));
     }
 
-    /**
-     * Samakan penulisan kategori. Bila yang diketik cocok dengan salah satu
-     * saran (labelnya maupun slug-nya), simpan sebagai slug supaya tidak lahir
-     * dua kategori kembar ("SK Jabatan" vs "sk_jabatan"). Selain itu dipakai
-     * apa adanya - daftar saran bukan pembatas.
-     */
+    /** Samakan penulisan kategori: cocok saran -> simpan sebagai slug. */
     private function rapikanKategori(?string $nilai): string
     {
         $nilai = trim((string) $nilai);
@@ -114,11 +105,9 @@ class SuratPentingController extends Controller
         ]);
 
         $file = $request->file('file');
-        // Nama file server-side acak (hindari path traversal / nama dari klien).
-        // Ekstensi sudah dibatasi oleh aturan validasi mimes di atas.
+        // Nama file acak dari server, bukan dari klien.
         $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        // Disk privat ('local'): dokumen HR hanya bisa diakses lewat controller
-        // yang sudah ter-auth, bukan via URL /storage publik.
+        // Disk privat: akses hanya lewat controller ter-auth.
         $filePath = $file->storeAs('surat-penting', $fileName, 'local');
         $fileSize = $this->formatFileSize($file->getSize());
 
@@ -177,9 +166,7 @@ class SuratPentingController extends Controller
     }
 
     /**
-     * Penjaga terakhir kalau URL-nya dibuka langsung. Di daftar surat tombolnya
-     * sudah dimatikan untuk berkas yang hilang, jadi jalur ini semestinya tidak
-     * terpakai - gunanya hanya agar tidak berakhir sebagai galat 500.
+     * Penjaga kalau URL dibuka langsung, supaya tidak jadi galat 500.
      *
      * @return \Illuminate\Http\RedirectResponse|null  null bila berkasnya ada
      */

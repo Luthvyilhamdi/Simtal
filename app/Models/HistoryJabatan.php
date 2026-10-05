@@ -36,10 +36,7 @@ class HistoryJabatan extends Model
     public function personGrade() { return $this->belongsTo(PersonGrade::class); }
     public function kodeStruktur(){ return $this->belongsTo(KodeStruktur::class); }
 
-    /**
-     * Label unit untuk ditampilkan: utamakan snapshot teks (nama saat itu),
-     * fallback ke master via FK bila kolom teks kosong (data lama pra-migrasi).
-     */
+    /** Label unit: utamakan snapshot teks, fallback ke master via FK. */
     public function getDirektoratLabelAttribute(): ?string
     {
         return filled($this->direktorat_nama) ? $this->direktorat_nama : optional($this->direktorat)->nama_direktorat;
@@ -66,11 +63,7 @@ class HistoryJabatan extends Model
     }
 
     /**
-     * Kelompokkan riwayat jabatan menjadi PERIODE Masa Dinas Jabatan (MDJ).
-     * Satu periode = deretan entri berurutan (tanggal_mulai naik) di mana entri
-     * lanjutan ditandai lanjut_mdj = true ("jabatan sama dengan sebelumnya",
-     * mis. hanya ganti nama karena SO). Entri lanjut_mdj = false memulai periode
-     * baru (jabatan baru / promosi / pindah band / beda ranah).
+     * Kelompokkan riwayat jabatan menjadi periode Masa Dinas Jabatan (MDJ).
      *
      * @param  iterable $histories  koleksi HistoryJabatan (urutan bebas)
      * @return array<int,array>     tiap periode: mulai/selesai/aktif/jabatan/bulan/label/count
@@ -85,8 +78,7 @@ class HistoryJabatan extends Model
         $prevBand = null; // band terakhir yang diketahui
         foreach ($rows as $row) {
             $band = self::bandDariRow($row);
-            // Pindah BAND = reset otomatis (menang atas centang "sama"): band beda
-            // pasti jabatan/level baru, walau namanya kebetulan mirip.
+            // Pindah band = reset otomatis, menang atas centang "sama".
             $bandBerubah = ($prevBand !== null && $band !== null && $band !== $prevBand);
 
             if (!empty($periods) && $row->lanjut_mdj && !$bandBerubah) {
@@ -148,22 +140,15 @@ class HistoryJabatan extends Model
         return empty($parts) ? '0 bulan' : implode(' ', $parts);
     }
 
-    /**
-     * Sinkronisasi otomatis ke Pejabat Definitif (history_pejabats).
-     * Berlaku untuk SEMUA jalur pembuatan history jabatan:
-     * form manual, Terbit SK Promosi, dan Terbit SK Rotasi/Mutasi.
-     */
+    /** Sinkronisasi otomatis ke Pejabat Definitif (history_pejabats). */
     protected static function booted(): void
     {
         // Saat history jabatan baru dibuat
         static::created(function (HistoryJabatan $history) {
-            // Perbarui tanggal masuk band karyawan secara otomatis.
-            // Selalu dijalankan (di awal) agar tetap berlaku walau jabatan ini
-            // bukan jabatan pejabat (yang akan memicu return lebih awal di bawah).
+            // Perbarui tanggal masuk band karyawan.
             self::syncTanggalMulaiBand($history->karyawan_id);
 
-            // Tutup jabatan pejabat yang masih aktif untuk karyawan ini (kalau ada).
-            // Patokannya sama dengan penutupan history jabatan: H-1 dari TMT baru.
+            // Tutup jabatan pejabat yang masih aktif, di H-1 TMT baru.
             HistoryPejabat::where('karyawan_id', $history->karyawan_id)
                 ->whereNull('tanggal_selesai')
                 ->update(['tanggal_selesai' => $history->tanggal_mulai->copy()->subDay()]);
@@ -206,12 +191,7 @@ class HistoryJabatan extends Model
         });
     }
 
-    /**
-     * Hitung ulang & simpan tanggal_mulai_band karyawan dari Riwayat Jabatan.
-     * Dipanggil otomatis tiap riwayat jabatan dibuat/dihapus (termasuk lewat
-     * Terbit SK Promosi/Mutasi). saveQuietly() dipakai agar tidak memicu
-     * observer/event Karyawan lain.
-     */
+    /** Hitung ulang & simpan tanggal_mulai_band dari Riwayat Jabatan. */
     /** Cache pengecekan keberadaan kolom (sekali per proses). */
     protected static ?bool $bandColumnExists = null;
 

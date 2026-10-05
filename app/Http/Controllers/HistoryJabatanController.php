@@ -64,18 +64,10 @@ class HistoryJabatanController extends Controller
         ]);
     }
 
-    /**
-     * Data bersama untuk form Tambah & Edit (daftar combobox + master select).
-     * Saran combobox = nama master saja, ditambah "-" dan "Belum ditentukan"
-     * di posisi paling bawah. Nama historis tidak ikut ditawarkan.
-     */
+    /** Data bersama form Tambah & Edit (combobox + master select). */
     private function formData(Karyawan $karyawan): array
     {
-        // Daftar saran diambil HANYA dari master data. Nilai yang pernah
-        // diketik bebas di history sengaja tidak ikut ditawarkan supaya daftar
-        // tetap bersih dan tidak melebar sendiri seiring waktu.
-        // Isian bebas tetap bisa diketik — kolomnya combobox (input + datalist),
-        // sehingga nilai lama pada data yang diedit juga tidak hilang.
+        // Saran hanya dari master data; isian bebas tetap bisa diketik.
         $namaDirektorat  = $this->opsiMaster(Direktorat::pluck('nama_direktorat'));
         $namaKompartemen = $this->opsiMaster(Kompartemen::pluck('nama_kompartemen'));
         $namaDepartemen  = $this->opsiMaster(Departemen::pluck('nama_departemen'));
@@ -116,8 +108,7 @@ class HistoryJabatanController extends Controller
 
         DB::transaction(function () use ($request, $karyawan) {
 
-            // Snapshot nama unit (apa adanya) + resolve FK bila cocok master.
-            // Nama historis yang tak ada di master → FK null, master tak dikotori.
+            // Snapshot nama unit + resolve FK bila cocok master.
             $dirNama  = trim($request->direktorat);
             $kompNama = trim($request->kompartemen);
             $depNama  = trim($request->departemen);
@@ -125,8 +116,7 @@ class HistoryJabatanController extends Controller
             $kompId = Kompartemen::where('nama_kompartemen', $kompNama)->value('id');
             $depId  = Departemen::where('nama_departemen', $depNama)->value('id');
 
-            // JG & PG: snapshot teks + resolve FK master (untuk hitungan band/MDG).
-            // Grade lama yang tak ada di master → FK null, hitungan band dilewati.
+            // JG & PG: snapshot teks + resolve FK master.
             $jgNama = trim($request->job_grade);
             $pgNama = trim($request->person_grade);
             $jgId = JobGrade::where('job_grade', $jgNama)->value('id');
@@ -137,8 +127,7 @@ class HistoryJabatanController extends Controller
             $pgLama = $karyawan->person_grade_id;
             $bandDateSebelum = $karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg;
 
-            // Tutup history lama SEHARI SEBELUM TMT jabatan baru. Kalau ditutup
-            // pada tanggal yang sama, satu hari terhitung di dua jabatan sekaligus.
+            // Tutup history lama di H-1 TMT jabatan baru.
             $akhirJabatanLama = \Carbon\Carbon::parse($request->tanggal_mulai)->subDay();
 
             HistoryJabatan::where('karyawan_id', $karyawan->id)
@@ -149,7 +138,6 @@ class HistoryJabatanController extends Controller
                 ]);
 
             // Buat history baru
-            // (Sinkronisasi ke Pejabat Definitif ditangani otomatis oleh event model HistoryJabatan)
             HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,
                 'jabatan_id'       => $request->jabatan_id,
@@ -175,10 +163,7 @@ class HistoryJabatanController extends Controller
                 'lanjut_mdj'       => $request->boolean('lanjut_mdj'),
             ]);
 
-            // Update profil karyawan
-            // Profil (posisi terkini) tetap mengacu master. Bila nama tak cocok
-            // master (nama historis), pertahankan FK profil yang ada — jangan
-            // set null agar profil aktif tidak kehilangan unit.
+            // Update profil karyawan (?? agar FK lama tidak ter-null).
             $updateData = [
                 'jabatan_id'       => $request->jabatan_id,
                 'direktorat_id'    => $dirId  ?? $karyawan->direktorat_id,
@@ -240,7 +225,7 @@ class HistoryJabatanController extends Controller
             $jgNama   = trim((string) $request->job_grade);
             $pgNama   = trim((string) $request->person_grade);
 
-            // Keadaan grade SEBELUM disunting — pembanding untuk aturan TMT di bawah.
+            // Keadaan grade sebelum disunting, pembanding aturan TMT.
             $jgLama = $karyawan->job_grade_id;
             $pgLama = $karyawan->person_grade_id;
             $bandDateSebelum = $karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg;
@@ -274,9 +259,7 @@ class HistoryJabatanController extends Controller
             // Hitung ulang: current & profil untuk karyawan ini.
             $this->recomputeKaryawan($karyawan);
 
-            // TMT hanya digeser bila yang disunting adalah jabatan yang SEDANG
-            // BERJALAN. Membetulkan baris riwayat lama tidak boleh mengubah masa
-            // dinas yang berjalan sekarang.
+            // TMT hanya digeser bila jabatan yang disunting sedang berjalan.
             $karyawan->refresh();
             if ($historyJabatan->fresh()->is_current) {
                 $this->terapkanTmt($karyawan, $jgLama, $karyawan->job_grade_id,
@@ -297,26 +280,7 @@ class HistoryJabatanController extends Controller
             ->with('success', 'History jabatan berhasil diperbarui & profil karyawan disinkronkan!');
     }
 
-    /**
-     * Geser TMT JG / PG / Band setelah grade karyawan berpindah.
-     *
-     * SATU-SATUNYA tempat aturan ini ditulis; dipakai bersama oleh Tambah
-     * Jabatan dan Edit Jabatan supaya keduanya tidak pernah berbeda hasil.
-     * Yang dilihat hanya PERUBAHAN GRADE — kolom `tipe` (promosi/mutasi/…)
-     * tidak ikut menentukan.
-     *
-     *   TMT JG   : grade berubah & ke-resolve master. Juga di-reset saat PG NAIK
-     *              (ketentuan MDG). PG turun/tetap tidak me-reset.
-     *   TMT PG   : person grade berubah & ke-resolve master.
-     *   TMT Band : hanya saat NAIK BAND; band sama/turun mempertahankan tanggal
-     *              lama. Naik JG di dalam band yang sama tidak menggeser.
-     *
-     * Grade yang tidak ada di master (mis. grade historis '2A') sengaja
-     * dilewati — naik/turunnya tidak bisa dinilai tanpa acuan master.
-     *
-     * Ditulis lewat query builder, bukan $karyawan->update(), supaya menang
-     * atas event syncTanggalMulaiBand yang jalan saat baris history dibuat.
-     */
+    /** Geser TMT JG / PG / Band setelah grade karyawan berpindah. */
     private function terapkanTmt(
         Karyawan $karyawan,
         ?int $jgLama,
@@ -353,12 +317,7 @@ class HistoryJabatanController extends Controller
         }
     }
 
-    /**
-     * Hitung ulang untuk 1 karyawan setelah edit: jabatan dengan tanggal_mulai
-     * TERBARU = is_current (paling atas), sisanya non-current; profil disinkron
-     * dari baris current (pakai ?? agar nilai historis FK-null tak meng-null-kan
-     * profil); TMT band dihitung ulang otoritatif dari riwayat.
-     */
+    /** Hitung ulang is_current & profil untuk satu karyawan. */
     private function recomputeKaryawan(Karyawan $karyawan): void
     {
         $histories = HistoryJabatan::where('karyawan_id', $karyawan->id)
@@ -391,17 +350,10 @@ class HistoryJabatanController extends Controller
             'kode_struktur_id' => $current->kode_struktur_id ?? $karyawan->kode_struktur_id,
         ]);
 
-        // TMT Band TIDAK dihitung ulang di sini. Dulu memakai rumus rentetan
-        // (hitungTanggalMulaiBand) yang berbeda dengan aturan naik-band di alur
-        // Tambah, sehingga perubahan grade yang sama memberi dua hasil berbeda.
-        // Kini keduanya lewat terapkanTmt(). Jalur hapus riwayat tetap terlayani
-        // event syncTanggalMulaiBand pada model HistoryJabatan.
+        // TMT Band tidak dihitung ulang di sini; lihat terapkanTmt().
     }
 
-    /**
-     * Selaraskan record Pejabat Definitif yang terhubung ke sebuah history.
-     * Bukan pejabat lagi → hapus record; masih/menjadi pejabat → update/buat.
-     */
+    /** Selaraskan Pejabat Definitif yang terhubung ke sebuah history. */
     private function syncPejabatFromHistory(HistoryJabatan $h): void
     {
         $jabatan = $h->jabatan_id ? Jabatan::find($h->jabatan_id) : null;
@@ -446,9 +398,7 @@ class HistoryJabatanController extends Controller
             ->first();
 
         if ($prev) {
-            // Hapus jabatan CURRENT (mis. batalkan promosi) → jabatan sebelumnya
-            // kembali berjalan (tanggal_selesai null) & TMT JG/PG kembali ke
-            // tanggal mulainya (TMT band dihitung ulang di bawah).
+            // Hapus jabatan current: jabatan sebelumnya kembali berjalan.
             if ($wasCurrent) {
                 $prev->tanggal_selesai = null;
                 $prev->saveQuietly();
@@ -457,8 +407,7 @@ class HistoryJabatanController extends Controller
                 $karyawan->saveQuietly();
             }
 
-            // Hitung ulang current + profil (termasuk jabatan_saat_ini, unit, JG/PG)
-            // + TMT band otoritatif. Sama seperti alur edit → konsisten.
+            // Hitung ulang current + profil + TMT band.
             $this->recomputeKaryawan($karyawan);
         }
 
@@ -469,21 +418,11 @@ class HistoryJabatanController extends Controller
             ->with('success', 'History jabatan berhasil dihapus!');
     }
 
-    /**
-     * Saran combobox grade: gabungan nilai master + nilai historis yang pernah
-     * dipakai, diurutkan dari yang TERBESAR ke terkecil (numerik).
-     */
-    /**
-     * Pilihan penampung, selalu diletakkan paling bawah pada daftar saran.
-     * Ejaan "Belum Ditentukan" mengikuti yang sudah dipakai di master data
-     * agar tidak muncul dua versi berbeda.
-     */
+    /** Saran grade: master + nilai historis, urut terbesar ke terkecil. */
+    /** Pilihan penampung, selalu di paling bawah daftar saran. */
     private const OPSI_TAMBAHAN = ['-', 'Belum Ditentukan'];
 
-    /**
-     * Buang nilai penampung dari daftar (master sebagian sudah memuatnya),
-     * lalu pasang kembali di posisi paling bawah dengan ejaan seragam.
-     */
+    /** Pasang ulang nilai penampung di posisi paling bawah. */
     private function tempelOpsiTambahan(\Illuminate\Support\Collection $daftar)
     {
         return $daftar

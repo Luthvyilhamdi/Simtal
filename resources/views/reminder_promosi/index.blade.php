@@ -56,8 +56,7 @@
     .sum-label { font-size:12px;color:#6b7280;margin-top:3px;font-weight:500; }
 
     .toolbar { background:white;border-radius:12px;border:1px solid var(--card-border);padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--card-shadow); }
-    /* .ss-trigger ikut disebut: komponen select-search mengganti <select>
-       dengan <button>, yang tidak kena selektor elemen "select". */
+    /* .ss-trigger: select-search mengganti <select> dengan <button> */
     .toolbar select, .toolbar .ss-trigger { border:1px solid #e4e7ec;border-radius:9px;padding:8px 12px;font-size:13px;outline:none;background:#fcfcfd;color:#374151;cursor:pointer; }
     .toolbar select:focus, .toolbar .ss-trigger:focus { border-color:#16a34a; }
     .toolbar .ss-trigger { padding-right:30px; }
@@ -69,8 +68,6 @@
     .search-mini input::placeholder { color:#9ca3af; }
     .clear-btn { background:none;border:none;cursor:pointer;color:#9ca3af;font-size:15px;line-height:1;padding:0;display:none;flex-shrink:0; }
     .clear-btn.visible { display:block; }
-    .toolbar .tb-reset { font-size:12.5px;color:#6b7280;text-decoration:none;padding:8px 10px; }
-    .toolbar .tb-reset:hover { color:#15803d; }
 
     .card-table { background:white;border-radius:14px;border:1px solid var(--card-border);overflow:hidden;box-shadow:var(--card-shadow); }
     table.rm { width:100%;border-collapse:collapse;font-size:13px;min-width:1040px; }
@@ -186,21 +183,28 @@
         <input type="text" id="searchInput" placeholder="Cari nama / NIK..." autocomplete="off">
         <button type="button" class="clear-btn" id="clearBtn" onclick="clearMdgSearch()">×</button>
     </div>
-    <select id="filterDir" class="select-search" onchange="applyMdgFilter('direktorat', this.value)">
-        <option value="">Semua Direktorat</option>
-        @foreach($direktorats as $d)
-            <option value="{{ $d->nama_direktorat }}" {{ $direktoratFilter === $d->nama_direktorat ? 'selected' : '' }}>{{ $d->nama_direktorat }}</option>
-        @endforeach
-    </select>
-    <select id="filterJenis" class="select-search" onchange="applyMdgFilter('jenis', this.value)">
-        <option value="">Semua Jenis Kenaikan</option>
-        <option value="naik_pg"   {{ $jenisFilter==='naik_pg'   ? 'selected' : '' }}>Naik Person Grade</option>
-        <option value="naik_jg"   {{ $jenisFilter==='naik_jg'   ? 'selected' : '' }}>Naik Job Grade</option>
-        <option value="naik_band" {{ $jenisFilter==='naik_band' ? 'selected' : '' }}>Naik Band</option>
-    </select>
-    @if($direktoratFilter || $jenisFilter)
-        <a href="{{ route('reminder_promosi.index') }}" class="tb-reset">✕ Reset filter</a>
-    @endif
+    <x-filter-drawer terapkan="terapkanFilterMdg()"
+                     :aktif="(int) (bool) $direktoratFilter + (int) (bool) $jenisFilter"
+                     :reset="route('reminder_promosi.index')">
+        <div class="fd-field">
+            <span class="fd-label">Direktorat</span>
+            <select id="filterDir" class="select-search" aria-label="Direktorat">
+                <option value="">Semua Direktorat</option>
+                @foreach($direktorats as $d)
+                    <option value="{{ $d->nama_direktorat }}" {{ $direktoratFilter === $d->nama_direktorat ? 'selected' : '' }}>{{ $d->nama_direktorat }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Jenis Kenaikan</span>
+            <select id="filterJenis" class="select-search" aria-label="Jenis kenaikan">
+                <option value="">Semua Jenis Kenaikan</option>
+                <option value="naik_pg"   {{ $jenisFilter==='naik_pg'   ? 'selected' : '' }}>Naik Person Grade</option>
+                <option value="naik_jg"   {{ $jenisFilter==='naik_jg'   ? 'selected' : '' }}>Naik Job Grade</option>
+                <option value="naik_band" {{ $jenisFilter==='naik_band' ? 'selected' : '' }}>Naik Band</option>
+            </select>
+        </div>
+    </x-filter-drawer>
     <span style="margin-left:auto;font-size:12px;color:#9ca3af" id="resultCount">{{ count($items) }} hasil</span>
 </div>
 
@@ -371,9 +375,13 @@
 @push('scripts')
 <script>
     // Navigasi filter direktorat/jenis (reload dengan query, pertahankan filter lain)
-    function applyMdgFilter(key, val) {
+    // Dua filter dikirim sekaligus dari laci, bukan satu per satu saat dipilih.
+    function terapkanFilterMdg() {
         var u = new URL(window.location.href);
-        if (val) u.searchParams.set(key, val); else u.searchParams.delete(key);
+        [['direktorat', 'filterDir'], ['jenis', 'filterJenis']].forEach(function (f) {
+            var val = (document.getElementById(f[1]) || {}).value;
+            if (val) u.searchParams.set(f[0], val); else u.searchParams.delete(f[0]);
+        });
         window.location.href = u.toString();
     }
 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @php
-    /** Form ini dipakai dua kali: Tambah ($h null) dan Edit ($h berisi record). */
+    {{-- Dipakai Tambah ($h null) & Edit --}}
     $h = $h ?? null;
     $judul = ($h ? 'Edit' : 'Tambah') . ' Assessment Kompetensi';
 @endphp
@@ -320,8 +320,7 @@ const _meta          = document.getElementById('assessmentMeta');
 const competencies   = _meta.dataset.competencies.split(',');
 const qualifications = _meta.dataset.qualifications.split(',');
 
-// Bind langsung ke setiap score-btn — script ini sudah di bawah semua HTML
-// jadi DOM sudah ready, tidak perlu DOMContentLoaded
+// Bind ke setiap score-btn; script sudah di bawah semua HTML.
 updatePreview();
 
 function selectScore(field, val, btn, type) {

@@ -110,8 +110,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{notifikasi}',    [NotifikasiController::class, 'destroy'])->name('destroy');
     });
 
-    // Keluar dari mode "masuk sebagai" — harus di grup auth (bukan super_admin)
-    // agar tetap bisa diakses selagi menyamar sebagai akun lain.
+    // Keluar dari mode "masuk sebagai" - harus di grup auth.
     Route::post('/impersonate/leave', [ImpersonationController::class, 'leave'])->name('impersonate.leave');
 
     // ===== SEMUA ROUTE BERIKUT: HANYA ADMIN & SUPER ADMIN =====
@@ -124,7 +123,6 @@ Route::middleware('auth')->group(function () {
         Route::post('karyawan/import-tmt',         [KaryawanController::class, 'importTmt'])->name('karyawan.import-tmt.store');
         Route::get('karyawan/import-tmt/template', [KaryawanController::class, 'templateTmt'])->name('karyawan.import-tmt.template');
         // Tambah/ubah/hapus tetap tertutup untuk role 'user'.
-        // Melihat daftar & detail dipindah ke luar grup ini (lihat di bawah).
         Route::resource('karyawan', KaryawanController::class)->except(['index', 'show']);
 
         // History Jabatan
@@ -274,8 +272,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/import/template',[TalentPoolController::class, 'downloadTemplate'])->name('import.template');
         });
 
-        // Penilaian Karyawan
-        // scopeBindings(): {penilaian} wajib milik {karyawan} di URL, kalau tidak -> 404.
+        // Penilaian Karyawan (scopeBindings: {penilaian} wajib milik {karyawan})
         Route::prefix('karyawan/{karyawan}/penilaian')->name('penilaian_karyawan.')->scopeBindings()->group(function () {
             Route::get('/',               [PenilaianKaryawanController::class, 'index'])->name('index');
             Route::get('/create',         [PenilaianKaryawanController::class, 'create'])->name('create');
@@ -283,8 +280,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{penilaian}', [PenilaianKaryawanController::class, 'destroy'])->name('destroy');
         });
 
-        // Kalibrasi Karyawan
-        // scopeBindings(): {kalibrasi} wajib milik {karyawan} di URL, kalau tidak -> 404.
+        // Kalibrasi Karyawan (scopeBindings: {kalibrasi} wajib milik {karyawan})
         Route::prefix('karyawan/{karyawan}/kalibrasi')->name('kalibrasi_karyawan.')->scopeBindings()->group(function () {
             Route::get('/',               [KalibrasiKaryawanController::class, 'index'])->name('index');
             Route::get('/create',         [KalibrasiKaryawanController::class, 'create'])->name('create');
@@ -351,8 +347,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/', [KompetensiTeknisController::class, 'index'])->name('index');
                 Route::get('/{unit}/posisi-overlay', [KompetensiTeknisController::class, 'posisiOverlay'])->name('posisi-overlay');
 
-                // STEP 1 alur import self-service (upload -> parse -> preview mentah).
-                // Mapping unit & commit BELUM ada di sini (tahap terpisah berikutnya).
+                // STEP 1 alur import: upload -> parse -> preview mentah.
                 Route::prefix('import')->name('import.')->group(function () {
                     Route::get('/',               [KompetensiTeknisImportController::class, 'create'])->name('create');
                     Route::post('/',              [KompetensiTeknisImportController::class, 'store'])->name('store');

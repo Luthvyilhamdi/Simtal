@@ -26,8 +26,7 @@
 
     .field { margin-bottom:14px; }
     .field label { display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px; }
-    /* .ss-trigger ikut disebut karena komponen select-search mengganti <select>
-       dengan <button>; tanpa ini tombolnya tidak mewarisi gaya .field select. */
+    /* .ss-trigger: select-search mengganti <select> dengan <button> */
     .field select, .field textarea, .field .ss-trigger { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;font-family:inherit; }
     .field textarea { resize:vertical;line-height:1.5; }
     .field select:focus, .field textarea:focus, .field .ss-trigger:focus { outline:none;border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.1); }

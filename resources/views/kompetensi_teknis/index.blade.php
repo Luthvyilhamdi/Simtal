@@ -89,34 +89,48 @@
 </div>
 
 <div class="filter-row">
-    <select class="filter-select select-search" id="kt-filter-unit" onchange="filterKompetensiTeknis()">
-        <option value="">Semua Unit</option>
-        @foreach($unitOptions as $opt)
-            <option value="{{ $opt }}">{{ $opt }}</option>
-        @endforeach
-    </select>
-    <select class="filter-select select-search" id="kt-filter-jenjang" onchange="filterKompetensiTeknis()">
-        <option value="">Semua Jenjang</option>
-        @foreach($jenjangOptions as $opt)
-            <option value="{{ $opt }}">{{ $opt }}</option>
-        @endforeach
-    </select>
-    <select class="filter-select select-search" id="kt-filter-komb" onchange="filterKompetensiTeknis()">
-        <option value="">Semua Asal &amp; Prioritas</option>
-        {{-- value tetap "asal-prioritas" (skema DB tidak berubah) — TEKS opsi disamakan dgn
-             label badge tunggal yg dipakai di overlay (lihat UnitKompetensiTeknis::
-             getPrioritasLabelAttribute()), supaya filter & badge konsisten istilah. --}}
-        <option value="native-primary">Primary</option>
-        <option value="native-secondary">Secondary</option>
-        <option value="generic-secondary">Generic</option>
-        <option value="generic-primary">Primary (Generic)</option>
-    </select>
-    <select class="filter-select select-search" id="kt-filter-versi" onchange="filterKompetensiTeknis()">
-        <option value="">Semua Versi</option>
-        @foreach($versiList as $v)
-            <option value="{{ $v->id }}">SK {{ $v->nomor_sk }}</option>
-        @endforeach
-    </select>
+    <x-filter-drawer terapkan="filterKompetensiTeknis()" :reset="route('organisasi.kompetensi-teknis.index')">
+        <div class="fd-field">
+            <span class="fd-label">Unit</span>
+            <select class="select-search" id="kt-filter-unit" aria-label="Unit">
+                <option value="">Semua Unit</option>
+                @foreach($unitOptions as $opt)
+                    <option value="{{ $opt }}">{{ $opt }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Jenjang</span>
+            <select class="select-search" id="kt-filter-jenjang" aria-label="Jenjang">
+                <option value="">Semua Jenjang</option>
+                @foreach($jenjangOptions as $opt)
+                    <option value="{{ $opt }}">{{ $opt }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Asal &amp; Prioritas</span>
+            <select class="select-search" id="kt-filter-komb" aria-label="Asal dan prioritas">
+                <option value="">Semua Asal &amp; Prioritas</option>
+                {{-- value tetap "asal-prioritas" (skema DB tidak berubah) — TEKS opsi disamakan dgn
+                     label badge tunggal yg dipakai di overlay (lihat UnitKompetensiTeknis::
+                     getPrioritasLabelAttribute()), supaya filter & badge konsisten istilah. --}}
+                <option value="native-primary">Primary</option>
+                <option value="native-secondary">Secondary</option>
+                <option value="generic-secondary">Generic</option>
+                <option value="generic-primary">Primary (Generic)</option>
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Versi SK</span>
+            <select class="select-search" id="kt-filter-versi" aria-label="Versi SK">
+                <option value="">Semua Versi</option>
+                @foreach($versiList as $v)
+                    <option value="{{ $v->id }}">SK {{ $v->nomor_sk }}</option>
+                @endforeach
+            </select>
+        </div>
+    </x-filter-drawer>
 </div>
 
 <div class="result-count" id="kt-result-count"></div>
@@ -138,10 +152,7 @@
         <tbody id="kt-table-body">
             @forelse($positions as $pos)
                 @php
-                    // Concat sederhana jenjang + nama unit — REPRODUKSI PERSIS penulisan
-                    // "List Jabatan" asli di file sumber Excel (mis. "Officer Organisasi",
-                    // "VP Organisasi & Manajemen Talenta"), jadi natural dibaca tanpa perlu
-                    // kolom data terpisah.
+                    // Concat jenjang + nama unit, sesuai penulisan "List Jabatan" di Excel.
                     $namaPosisi = $pos->jenjang_jabatan . ' ' . $pos->nama_unit;
                     $searchText = mb_strtolower($namaPosisi . ' ' . $pos->nama_unit . ' ' . $pos->kompetensi_names . ' ' . $pos->rumpun_asal_list);
                     $kombList   = implode(',', $pos->komb_list);
@@ -182,8 +193,7 @@
 
 @push('scripts')
 <script>
-    // VANILLA JS MURNI, tanpa Alpine — pola SAMA PERSIS dgn filterJobProfiles() di
-    // organisasi/job-profile/show.blade.php.
+    // Vanilla JS, pola sama dengan filterJobProfiles().
     function filterKompetensiTeknis() {
         const search   = document.getElementById('kt-search').value.toLowerCase().trim();
         const unit     = document.getElementById('kt-filter-unit').value;
@@ -196,10 +206,7 @@
             const matchSearch  = search === '' || row.dataset.searchText.includes(search);
             const matchUnit    = unit === '' || row.dataset.unit === unit;
             const matchJenjang = jenjang === '' || row.dataset.jenjang === jenjang;
-            // komb_list = SET kombinasi "asal-prioritas" yg ADA di posisi ini (bisa lebih
-            // dari 1, mis. "native-primary,generic-secondary") — posisi ikut match kalau
-            // kombinasi yg dipilih ADA di dalamnya, walau tidak ditampilkan sbg kolom
-            // sendiri di baris master.
+            // komb_list = set kombinasi "asal-prioritas" yang ada di posisi ini.
             const matchKomb    = komb === '' || row.dataset.kombList.split(',').includes(komb);
             const matchVersi   = versi === '' || row.dataset.versi === versi;
             const visible = matchSearch && matchUnit && matchJenjang && matchKomb && matchVersi;
@@ -209,14 +216,14 @@
 
         const countEl = document.getElementById('kt-result-count');
         if (countEl) countEl.textContent = visibleCount + ' posisi ditemukan';
+
+        // Penyaringan di sisi klien: lencana tombol Filter diperbarui dari sini.
+        if (window.fdTandai) {
+            fdTandai('filterDrawer', [unit, jenjang, komb, versi].filter(Boolean).length);
+        }
     }
 
-    // Auto-init filter dari query string ?versi=&rumpun= — dipakai link redirect stlh
-    // commit Step 3 alur import (organisasi.kompetensi-teknis.import.review.commit)
-    // supaya user langsung lihat hasil importnya. "rumpun" mengisi search box (bukan
-    // filter <select> tersendiri, krn rumpun_asal itu atribut per-kompetensi, bukan
-    // per-posisi — 1 posisi bisa punya kompetensi dari rumpun campuran) — search text
-    // per baris SUDAH termasuk rumpun_asal (lihat $searchText di atas).
+    // Auto-init filter dari query string ?versi=&rumpun= (redirect setelah commit import).
     window.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
         const versi  = params.get('versi');

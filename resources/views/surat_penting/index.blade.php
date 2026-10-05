@@ -29,10 +29,6 @@
     .search-spinner.show { display:block; }
     @keyframes spin { to{transform:rotate(360deg)} }
     .filter-row { display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center; }
-    .filter-select { padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:inherit;color:#374151;background:white;outline:none;cursor:pointer; }
-    .filter-select:focus { border-color:#16a34a; }
-    .btn-reset { display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none; }
-    .btn-reset:hover { background:#f5f5f0; }
     #suratGridWrap { transition:opacity 0.2s; }
     .surat-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px; }
     /* Pengalih tampilan: kartu <-> baris */
@@ -43,8 +39,7 @@
     .vt-btn.active { background:#f0fdf4;color:#15803d; }
     .vt-btn svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2; }
 
-    /* Tampilan baris memakai kartu yang sama, hanya dipipihkan. Bagian yang
-       tidak dibutuhkan saat menyapu daftar panjang disembunyikan. */
+    /* Tampilan baris: kartu yang sama, dipipihkan */
     .surat-grid.mode-list { grid-template-columns:1fr;gap:8px; }
     .mode-list .surat-card { display:flex;align-items:center;gap:16px;padding:12px 16px; }
     .mode-list .surat-card > * { margin-bottom:0; }
@@ -59,8 +54,7 @@
     .mode-list .scard-file { flex:1 1 160px;min-width:0;margin-bottom:0;padding:0;background:transparent; }
     .mode-list .scard-ket { display:none; }
     .mode-list .scard-actions { flex:0 0 auto;margin-left:auto; }
-    /* Pita EXPIRED/SOON menempel di pojok kanan - di baris akan menimpa tombol.
-       Statusnya tetap terbaca dari kolom "Berlaku Hingga" dan warna tepi kartu. */
+    /* Pita EXPIRED/SOON disembunyikan di tampilan baris */
     .mode-list .expire-ribbon, .mode-list .soon-ribbon { display:none; }
     @media (max-width:900px) { .surat-grid.mode-list .surat-card { flex-wrap:wrap; } }
 
@@ -203,14 +197,20 @@
         <button class="clear-btn {{ request('search') ? 'visible' : '' }}" id="clearBtn" onclick="clearSearch()">×</button>
     </div>
 
-    <form method="GET" id="filterForm" style="display:contents">
+    <x-filter-drawer :aktif="(int) request()->filled('tipe') + (int) request()->filled('kategori')"
+                     :reset="route('surat_penting.index')">
         <input type="hidden" name="search" id="hiddenSearch" value="{{ request('search') }}">
-        <select name="tipe" class="filter-select select-search" onchange="this.form.submit()">
-            <option value="">Semua Tipe</option>
-            <option value="personal" {{ request('tipe')=='personal' ? 'selected' : '' }}>👤 Personal</option>
-            <option value="umum"     {{ request('tipe')=='umum'     ? 'selected' : '' }}>📋 Umum / Pedoman</option>
-        </select>
-        <select name="kategori" class="filter-select select-search" onchange="this.form.submit()">
+        <div class="fd-field">
+            <span class="fd-label">Tipe</span>
+            <select name="tipe" class="select-search" aria-label="Tipe surat">
+                <option value="">Semua Tipe</option>
+                <option value="personal" {{ request('tipe')=='personal' ? 'selected' : '' }}>👤 Personal</option>
+                <option value="umum"     {{ request('tipe')=='umum'     ? 'selected' : '' }}>📋 Umum / Pedoman</option>
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Kategori</span>
+            <select name="kategori" class="select-search" aria-label="Kategori surat">
             <option value="">Semua Kategori</option>
             <optgroup label="Surat Karyawan">
                 <option value="sk_jabatan"       {{ request('kategori')=='sk_jabatan'       ? 'selected' : '' }}>SK Jabatan</option>
@@ -235,11 +235,9 @@
                 @endforeach
             </optgroup>
             @endif
-        </select>
-        @if(request()->hasAny(['search','kategori','tipe']))
-            <a href="{{ route('surat_penting.index') }}" class="btn-reset">× Reset</a>
-        @endif
-    </form>
+            </select>
+        </div>
+    </x-filter-drawer>
 
     <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
         <div class="view-toggle">
@@ -396,8 +394,7 @@
 
 @push('scripts')
 <script>
-/* Pengalih tampilan kartu <-> baris. Pilihannya milik masing-masing pemakai,
-   jadi cukup diingat peramban; tidak perlu disimpan di server. */
+/* Pengalih tampilan kartu <-> baris, diingat peramban */
 function setTampilan(mode) {
     var grid = document.getElementById('suratGrid');
     if (grid) grid.classList.toggle('mode-list', mode === 'list');
@@ -409,8 +406,7 @@ function setTampilan(mode) {
     try { localStorage.setItem('suratPentingTampilan', mode); } catch (e) { /* mode privat / storage diblokir */ }
 }
 
-// Dipanggil langsung, bukan menunggu DOMContentLoaded, supaya tidak sempat
-// terlihat berkedip dari tampilan kartu ke baris.
+// Dipanggil langsung agar tidak berkedip dari kartu ke baris.
 (function () {
     var simpan = null;
     try { simpan = localStorage.getItem('suratPentingTampilan'); } catch (e) {}

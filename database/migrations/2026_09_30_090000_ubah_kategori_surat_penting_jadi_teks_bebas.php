@@ -3,18 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Kategori surat diubah dari ENUM menjadi teks bebas.
- *
- * Alasan: daftar kategori di lapangan tidak pernah selesai (berita acara, nota
- * dinas, dan sebagainya). Dengan ENUM, nilai di luar daftar ditolak MySQL
- * ("Data truncated for column 'kategori'"), sehingga kategori baru hanya bisa
- * ditambah lewat migrasi. VARCHAR membuat pengguna bisa mengetik sendiri,
- * sementara daftar bawaan tetap hidup sebagai SARAN di SuratPenting::KATEGORI.
- *
- * Slug lama ('sk_jabatan' dst.) tidak diutak-atik - nilainya tetap sama,
- * hanya tipe kolomnya yang melonggar.
- */
+/** Kategori surat: ENUM -> teks bebas (VARCHAR). */
 return new class extends Migration
 {
     public function up(): void
@@ -24,8 +13,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Kategori ketikan sendiri tidak muat di ENUM. Kembalikan dulu ke
-        // 'lainnya' supaya ALTER-nya tidak gagal / memotong data diam-diam.
+        // Kategori ketikan sendiri tak muat di ENUM; kembalikan ke 'lainnya'.
         DB::statement("UPDATE surat_pentings SET kategori = 'lainnya' WHERE kategori NOT IN (
             'sk_jabatan','sk_promosi','sk_mutasi','sk_pensiun',
             'surat_tugas','surat_peringatan','kontrak','sertifikat',

@@ -15,8 +15,6 @@
     .search-bar svg { width:15px;height:15px;stroke:#9ca3af;fill:none;flex-shrink:0; }
     .filter-select { padding:9px 14px;border:1px solid #e5e7eb;border-radius:9px;font-size:13px;font-family:inherit;color:#374151;background:white;outline:none;cursor:pointer; }
     .filter-select:focus { border-color:#16a34a; }
-    .btn-reset { display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:13px;font-weight:500;text-decoration:none; }
-    .btn-reset:hover { background:#f5f5f0; }
     .btn-hapus-log { display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
     .btn-hapus-log:hover { background:#fee2e2; }
 
@@ -120,15 +118,26 @@
 </div>
 
 {{-- Filter --}}
-<form method="GET" id="filterForm">
-    <div class="filter-row">
+<div class="filter-row">
+    <form method="GET" id="filterForm" style="display:contents">
         <div class="search-bar">
             <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" name="search" value="{{ request('search') }}"
                    placeholder="Cari nama user, target, keterangan..."
                    onchange="document.getElementById('filterForm').submit()" />
         </div>
-        <select name="aksi" class="filter-select select-search" onchange="this.form.submit()">
+        {{-- Filter yang sedang menyala ikut dibawa, supaya mencari tidak mematikannya. --}}
+        <input type="hidden" name="aksi"    value="{{ request('aksi') }}">
+        <input type="hidden" name="modul"   value="{{ request('modul') }}">
+        <input type="hidden" name="tanggal" value="{{ request('tanggal') }}">
+    </form>
+
+    <x-filter-drawer :aktif="(int) request()->filled('aksi') + (int) request()->filled('modul') + (int) request()->filled('tanggal')"
+                     :reset="route('activity_log.index')">
+        <input type="hidden" name="search" value="{{ request('search') }}">
+        <div class="fd-field">
+            <span class="fd-label">Aksi</span>
+            <select name="aksi" class="select-search" aria-label="Aksi">
             <option value="">Semua Aksi</option>
             @php
             $aksiList = [
@@ -148,20 +157,23 @@
             @foreach($aksiList as $val => $label)
                 <option value="{{ $val }}" {{ request('aksi') === $val ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
-        </select>
-        <select name="modul" class="filter-select select-search" onchange="this.form.submit()">
-            <option value="">Semua Modul</option>
-            @foreach($moduls as $m)
-                <option value="{{ $m }}" {{ request('modul') === $m ? 'selected' : '' }}>{{ $m }}</option>
-            @endforeach
-        </select>
-        <input type="date" name="tanggal" value="{{ request('tanggal') }}"
-               class="filter-select" onchange="this.form.submit()" />
-        @if(request()->hasAny(['search','aksi','modul','tanggal']))
-            <a href="{{ route('activity_log.index') }}" class="btn-reset">Reset</a>
-        @endif
-    </div>
-</form>
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Modul</span>
+            <select name="modul" class="select-search" aria-label="Modul">
+                <option value="">Semua Modul</option>
+                @foreach($moduls as $m)
+                    <option value="{{ $m }}" {{ request('modul') === $m ? 'selected' : '' }}>{{ $m }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="fd-field">
+            <span class="fd-label">Tanggal</span>
+            <input type="date" name="tanggal" value="{{ request('tanggal') }}" aria-label="Tanggal">
+        </div>
+    </x-filter-drawer>
+</div>
 
 {{-- Log List --}}
 @if($logs->count() > 0)

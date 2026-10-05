@@ -61,8 +61,7 @@ class ExportBuilderController extends Controller
             'status_kepegawaian' => ['Data Diri', 'Status Kepegawaian', null, fn ($k) => $k->status_kepegawaian ?: '-'],
             'no_hp'         => ['Data Diri', 'No. HP', null, fn ($k) => $k->no_hp ?: '-'],
             'email'         => ['Data Diri', 'Email', null, fn ($k) => $k->email ?: '-'],
-            // Pendidikan TIDAK lagi kolom checkbox — dipilih lewat filter "Pendidikan"
-            // (Terakhir / Semua / jenjang tertentu) → kolom rapi Jurusan & Institusi.
+            // Pendidikan dipilih lewat filter, bukan checkbox kolom.
 
             // ── Jabatan & Unit ──
             'jabatan'               => ['Jabatan & Unit', 'Jabatan', 'jabatan', fn ($k) => $k->jabatan_saat_ini ?: ($k->jabatan->nama_jabatan ?? '-')],
@@ -188,10 +187,7 @@ class ExportBuilderController extends Controller
         ));
     }
 
-    /**
-     * Preview data (AJAX) — kembalikan heading + sebagian baris sebagai JSON
-     * sebelum user benar-benar mengunduh file.
-     */
+    /** Preview data (AJAX): heading + sebagian baris sebagai JSON. */
     public function preview(Request $request)
     {
         $validated = $request->validate($this->baseRules());
@@ -279,8 +275,7 @@ class ExportBuilderController extends Controller
         $selected   = $validated['columns'];
         $registry   = self::columnRegistry($tahun, $bulan);
 
-        // Urutan kolom kustom dari user (col_order). Hanya kolom yang benar-benar
-        // terpilih yang dipakai; sisa yang tak ada di urutan ditempel di belakang.
+        // Urutan kolom kustom dari user (col_order).
         if (! empty($validated['col_order'])) {
             $order   = array_filter(array_map('trim', explode(',', $validated['col_order'])));
             $ordered = [];
@@ -295,8 +290,7 @@ class ExportBuilderController extends Controller
             $selected = $ordered;
         }
 
-        // Eager-load hanya relasi yang dibutuhkan kolom terpilih.
-        // Index [2] boleh berisi beberapa relasi dipisah koma (mis. 'jobGrade,personGrade').
+        // Eager-load relasi yang dipakai kolom terpilih.
         $relations = collect($selected)
             ->map(fn ($key) => $registry[$key][2])
             ->filter()
@@ -307,8 +301,7 @@ class ExportBuilderController extends Controller
             $relations[] = 'riwayatPendidikan';
         }
 
-        // Urutkan dari grade TERTINGGI ke terendah (JG desc), nama sebagai pemecah seri.
-        // Karyawan tanpa job grade diletakkan paling bawah.
+        // Urut JG tertinggi -> terendah; tanpa grade di bawah.
         $query = Karyawan::with($relations)
             ->leftJoin('job_grade as jg_sort', 'jg_sort.id', '=', 'karyawans.job_grade_id')
             ->orderByRaw('CAST(jg_sort.job_grade AS UNSIGNED) DESC')
@@ -339,8 +332,7 @@ class ExportBuilderController extends Controller
             $query->where('jenis_kelamin', $validated['jenis_kelamin']);
         }
         if (! empty($validated['jenjang'])) {
-            // Saring karyawan yang PUNYA jenjang ini di riwayat pendidikan
-            // (bukan sekadar pendidikan terakhirnya).
+            // Punya jenjang ini di riwayat, bukan cuma pendidikan terakhir.
             $query->whereHas('riwayatPendidikan', fn ($q) => $q->where('jenjang', $validated['jenjang']));
         }
         if (! empty($validated['tmt'])) {
@@ -360,8 +352,7 @@ class ExportBuilderController extends Controller
             $query->whereHas('pejabatAktif', fn ($q) => $q->where('jabatan', $validated['tier']));
         }
 
-        // Pilih karyawan spesifik dengan paste NIK / nama (baris/koma/titik-koma).
-        // Cocok bila NIK sama persis ATAU nama mengandung token.
+        // Pilih karyawan dari paste NIK / nama.
         $tokens = self::parseNikNama($validated['nik_nama'] ?? null);
         if (! empty($tokens)) {
             $query->where(function ($q) use ($tokens) {
@@ -371,9 +362,7 @@ class ExportBuilderController extends Controller
                 }
             });
 
-            // Urutkan hasil MENGIKUTI urutan NIK/nama yang dipaste (bukan grade/nama).
-            // FIELD(nik, t1, t2, ...) → posisi token; token yang cocok via nama (nik
-            // tak ada di daftar) bernilai 0 → ditaruh di belakang.
+            // Urutkan mengikuti urutan NIK/nama yang dipaste.
             $ph = implode(',', array_fill(0, count($tokens), '?'));
             $query->reorder()
                   ->orderByRaw("FIELD(karyawans.nik, {$ph}) = 0", $tokens)
@@ -382,8 +371,7 @@ class ExportBuilderController extends Controller
                   ->orderBy('karyawans.nama');
         }
 
-        // Kolom pendidikan dinamis (Terakhir / Semua / jenjang tertentu) — ditempel
-        // di belakang kolom terpilih. Dihitung dari query TERFILTER (sebelum limit).
+        // Kolom pendidikan dinamis, ditempel di belakang kolom terpilih.
         $eduCols = array_merge(
             self::pendidikanColumns($pendidikan),
             self::jenjangColumns($validated['jenjang'] ?? null)
@@ -423,8 +411,7 @@ class ExportBuilderController extends Controller
             return [$headings, $rows, $total];
         }
 
-        // ── Mode expand: tetap 1 baris per karyawan, tiap kolom tahunan
-        //    dipecah jadi beberapa kolom — satu kolom per tahun (pivot). ──
+        // Mode expand: satu kolom per tahun (pivot).
         $karyawans = $query->get();
 
         // Tahun yang tersedia per kolom tahunan (gabungan seluruh karyawan).
@@ -488,12 +475,7 @@ class ExportBuilderController extends Controller
         return [$headings, $rows, $total];
     }
 
-    /**
-     * Kolom pendidikan untuk Export Builder: hanya "Pendidikan Terakhir"
-     * (jenjang tertinggi) → Pendidikan Terakhir + Jurusan + Institusi.
-     * Daftar lengkap semua jenjang diekspor lewat menu History Pendidikan.
-     * Return list of ['label' => string, 'resolver' => fn(Karyawan): string].
-     */
+    /** Kolom Pendidikan Terakhir + Jurusan + Institusi. */
     private static function pendidikanColumns(?string $pendidikan): array
     {
         if ($pendidikan !== 'terakhir') return [];
@@ -507,13 +489,7 @@ class ExportBuilderController extends Controller
         ];
     }
 
-    /**
-     * Kolom pendidikan untuk jenjang SPESIFIK yang dipilih di filter (mis. S2):
-     * Jenjang Pendidikan + Jurusan + Institusi, diambil dari entri riwayat jenjang
-     * itu (walau bukan pendidikan tertinggi karyawan). Baris sudah difilter agar
-     * hanya karyawan yang punya jenjang ini yang muncul.
-     * Return list of ['label' => string, 'resolver' => fn(Karyawan): string].
-     */
+    /** Kolom pendidikan untuk jenjang yang dipilih di filter. */
     private static function jenjangColumns(?string $jenjang): array
     {
         if (empty($jenjang)) return [];
@@ -540,10 +516,7 @@ class ExportBuilderController extends Controller
         ];
     }
 
-    /**
-     * Daftar tahun (desc) yang tersedia untuk satu kolom tahunan, digabung dari
-     * seluruh karyawan — menentukan berapa sub-kolom tahun yang dibuat (pivot).
-     */
+    /** Daftar tahun (desc) untuk satu kolom tahunan. */
     private static function tahunUntukKolom($karyawans, string $key, ?int $bulan)
     {
         $tahun = collect();
@@ -578,10 +551,7 @@ class ExportBuilderController extends Controller
 
     // ── Helper pemilihan data periodik ──
 
-    /**
-     * Pilih 1 item dari koleksi berdasarkan field tahun (integer).
-     * $tahun null → ambil yang terbaru (field terbesar).
-     */
+    /** Pilih 1 item dari koleksi berdasarkan field tahun. */
     private static function byTahun($items, string $field, ?int $tahun)
     {
         if ($tahun) {
@@ -591,10 +561,7 @@ class ExportBuilderController extends Controller
         return $items->sortByDesc($field)->first();
     }
 
-    /**
-     * Pilih item TERBARU dari koleksi yang cocok dengan tahun &/atau bulan
-     * (berdasarkan field tanggal). Filter yang null diabaikan.
-     */
+    /** Pilih item terbaru yang cocok tahun &/atau bulan. */
     private static function byTanggal($items, string $field, ?int $tahun, ?int $bulan)
     {
         return $items
