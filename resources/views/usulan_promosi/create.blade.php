@@ -183,9 +183,9 @@
 
             {{-- 2) JABATAN MASTER (dropdown) --}}
             <div class="form-group full">
-                <label class="form-label">Jabatan (Master) <span class="req">*</span></label>
+                <label class="form-label">Jabatan <span class="req">*</span></label>
                 <div class="select-wrap">
-                    <select name="jabatan_tujuan_id" id="jabatanMaster" class="form-input {{ $errors->has('jabatan_tujuan_id') ? 'error-input' : '' }}" required>
+                    <select name="jabatan_tujuan_id" id="jabatanMaster" class="form-input {{ $errors->has('jabatan_tujuan_id') ? 'error-input' : '' }} select-search" required>
                         <option value="">— Pilih Jabatan Master —</option>
                         @foreach($jabatans as $jb)
                         <option value="{{ $jb->id }}" {{ old('jabatan_tujuan_id')==$jb->id ? 'selected' : '' }}>{{ $jb->nama_jabatan }}</option>
@@ -211,7 +211,7 @@
             <div class="form-group full">
                 <label class="form-label">Direktorat Tujuan</label>
                 <div class="select-wrap">
-                    <select name="direktorat_tujuan_id" id="dirTujuan" class="form-input">
+                    <select name="direktorat_tujuan_id" id="dirTujuan" class="form-input select-search">
                         <option value="">— Pilih Direktorat —</option>
                         @foreach($direktorats as $d)
                         <option value="{{ $d->id }}" {{ old('direktorat_tujuan_id')==$d->id ? 'selected' : '' }}>{{ $d->nama_direktorat ?? $d->nama ?? ('#'.$d->id) }}</option>
@@ -223,7 +223,7 @@
             <div class="form-group">
                 <label class="form-label">Kompartemen Tujuan</label>
                 <div class="select-wrap">
-                    <select name="kompartemen_tujuan_id" id="kompTujuan" class="form-input">
+                    <select name="kompartemen_tujuan_id" id="kompTujuan" class="form-input select-search">
                         <option value="">— Pilih Kompartemen —</option>
                         @foreach($kompartemens as $kp)
                         <option value="{{ $kp->id }}" {{ old('kompartemen_tujuan_id')==$kp->id ? 'selected' : '' }}>{{ $kp->nama_kompartemen ?? ('#'.$kp->id) }}</option>
@@ -234,7 +234,7 @@
             <div class="form-group">
                 <label class="form-label">Departemen Tujuan</label>
                 <div class="select-wrap">
-                    <select name="departemen_tujuan_id" id="deptTujuan" class="form-input">
+                    <select name="departemen_tujuan_id" id="deptTujuan" class="form-input select-search">
                         <option value="">— Pilih Departemen —</option>
                         @foreach($departemens as $dp)
                         <option value="{{ $dp->id }}" {{ old('departemen_tujuan_id')==$dp->id ? 'selected' : '' }}>{{ $dp->nama_departemen ?? ('#'.$dp->id) }}</option>
@@ -343,7 +343,7 @@
             <div class="form-group">
                 <label class="form-label">MC (Man Count)</label>
                 <div class="select-wrap">
-                    <select name="mc_tersedia" class="form-input">
+                    <select name="mc_tersedia" class="form-input select-search">
                         <option value="0" {{ old('mc_tersedia')==='0' ? 'selected':'' }}>Tidak Tersedia</option>
                         <option value="1" {{ old('mc_tersedia')==='1' ? 'selected':'' }}>Tersedia</option>
                     </select>

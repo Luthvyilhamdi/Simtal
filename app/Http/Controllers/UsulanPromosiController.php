@@ -16,6 +16,7 @@ use App\Models\KodeStruktur;
 use App\Models\Direktorat;
 use App\Models\Kompartemen;
 use App\Models\Departemen;
+use App\Support\PeriodeUsulan;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,12 +28,13 @@ class UsulanPromosiController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->search;
+        $search  = $request->search;
+        $periode = PeriodeUsulan::bersihkan($request->periode);
 
         $with = ['karyawan', 'karyawan.departemen', 'karyawan.kompartemen', 'karyawan.direktorat',
                  'direktoratTujuan', 'kompartemenTujuan', 'departemenTujuan', 'createdBy'];
 
-        $baseQuery = function($status) use ($search, $with) {
+        $baseQuery = function($status) use ($search, $periode, $with) {
             $q = UsulanPromosi::with($with)
                 ->where('status', $status)
                 ->orderBy('created_at', 'desc');
@@ -42,10 +44,10 @@ class UsulanPromosiController extends Controller
                        ->orWhere('nik',  'like', '%'.$search.'%')
                 );
             }
-            return $q;
+            return PeriodeUsulan::terapkan($q, $periode);
         };
 
-        $tanpaSidangQuery = function() use ($search, $with) {
+        $tanpaSidangQuery = function() use ($search, $periode, $with) {
             $q = UsulanPromosi::with($with)
                 ->where('status', 'lulus')
                 ->where('hasil_sidang', 'tanpa_sidang')
@@ -56,7 +58,7 @@ class UsulanPromosiController extends Controller
                        ->orWhere('nik',  'like', '%'.$search.'%')
                 );
             }
-            return $q;
+            return PeriodeUsulan::terapkan($q, $periode);
         };
 
         $statusGroups = [
@@ -91,7 +93,7 @@ class UsulanPromosiController extends Controller
         $departemens   = Departemen::all();
 
         return view('usulan_promosi.index', compact(
-            'statusGroups', 'counts', 'activeTab',
+            'statusGroups', 'counts', 'activeTab', 'periode',
             'jabatans', 'jobGrades', 'personGrades', 'kodeStrukturs',
             'direktorats', 'kompartemens', 'departemens'
         ));
@@ -314,11 +316,13 @@ class UsulanPromosiController extends Controller
             $jgLamaId        = (int) $karyawan->job_grade_id;
             $bandDateSebelum = $karyawan->tanggal_mulai_band ?? $karyawan->tanggal_mulai_jg;
 
+            // Tutup jabatan lama di H-1 TMT jabatan baru. Kalau ditutup pada
+            // tanggal TMT itu sendiri, satu hari terhitung di dua jabatan.
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
                 ->update([
                     'is_current'      => false,
-                    'tanggal_selesai' => $tmt,
+                    'tanggal_selesai' => \Carbon\Carbon::parse($tmt)->subDay(),
                 ]);
 
             HistoryJabatan::create([

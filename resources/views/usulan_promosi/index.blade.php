@@ -47,7 +47,8 @@
     border: 1.5px solid #e5e7eb;
     border-radius: 9px;
     padding: 8px 12px;
-    width: 240px;
+    width: 212px;
+    flex-shrink: 0;
     transition: border-color .15s;
 }
 .search-box:focus-within { border-color: #15803d; box-shadow: 0 0 0 2px rgba(21,128,61,.08); }
@@ -63,86 +64,123 @@
 /* ===== CONTENT WRAPPER (AJAX search) ===== */
 #upContent { transition: opacity .15s ease; }
 
-/* ===== STATS ===== */
-.stats-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; padding-bottom: 4px; }
-.stats-inner { display: flex; gap: 10px; width: max-content; }
-.stat-card { background: white; border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 14px 18px; min-width: 120px; }
-.stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-.stat-lbl { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-.stat-num { font-size: 26px; font-weight: 800; line-height: 1; }
+/* Saringan rentang waktu: satu deret tombol, bukan dropdown — pilihannya
+   cuma lima dan sering dipakai, jadi lebih cepat kalau langsung terlihat. */
+/* Alat di kanan judul: pencarian, lalu saringan rentang waktu di kanannya. */
+/* Alat duduk SEBARIS dengan ubin dan sejajar bagian bawahnya. Kalau layar
+   kurang lebar, ia turun sendiri ke baris berikutnya — tetap rapat kanan. */
+.flow-alat { display: flex; align-items: center; gap: 10px; margin-left: auto; align-self: flex-end; flex: 0 0 auto; flex-wrap: nowrap; }
+.periode-sel { width: 146px; padding: 8px 12px; border: 1.5px solid #e5e7eb; border-radius: 9px; font-size: 13px; font-family: inherit; color: #111827; background: white; outline: none; cursor: pointer; }
+.periode-sel:focus { border-color: #15803d; }
 
-/* ===== WORKFLOW BAR (stepper proses + pill hasil akhir) ===== */
-.flow-card { background: white; border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 16px 18px; margin-bottom: 20px; }
-.flow-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.flow-row + .flow-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f3f4f6; }
-.flow-tag { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .6px; width: 84px; flex-shrink: 0; }
+/* ===== ALUR USULAN (penyaring sekaligus peta tahapan) =====
+   Dulu berupa stepper bercentang. Centangnya menyesatkan: yang ditandai
+   "selesai" sebenarnya cuma tahap yang urutannya SEBELUM tab yang sedang
+   dibuka — tidak ada hubungannya dengan kemajuan usulan mana pun.
+   Sekarang tiap tahap jadi ubin: jumlahnya yang ditonjolkan, warnanya
+   dipakai sebagai penanda tahap, dan yang sedang dipilih diberi warna. */
+.flow-card { background: white; border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 15px 18px 16px; margin-bottom: 20px; }
+.flow-head { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.flow-judul { font-size: 13px; font-weight: 700; color: var(--text-strong); }
+.flow-sub { font-size: 11.5px; color: #9ca3af; margin-top: 2px; }
 
-/* Stepper (Draft -> Verifikasi -> Sidang) */
-.stepper { display: flex; align-items: center; flex: 1; min-width: 0; overflow-x: auto; }
-.step-item { display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent; cursor: pointer; font-family: inherit; padding: 4px 6px; border-radius: 8px; transition: background .12s; white-space: nowrap; }
-.step-item:hover { background: #f9fafb; }
-.step-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: white; color: #9ca3af; border: 2px solid #e5e7eb; flex-shrink: 0; transition: all .15s; box-sizing: border-box; }
-.step-check { width: 12px; height: 12px; stroke: white; fill: none; stroke-width: 3; display: none; }
-.step-item.is-done .step-circle { background: #15803d; border-color: #15803d; color: white; }
-.step-item.is-done .step-check { display: block; }
-.step-item.is-done .step-num { display: none; }
-.step-item.is-active .step-circle { background: #1d4ed8; border-color: #1d4ed8; color: white; box-shadow: 0 0 0 3px rgba(29,78,216,.15); }
-.step-label { font-size: 13px; font-weight: 600; color: #9ca3af; }
-.step-item.is-done .step-label { color: #6b7280; }
-.step-item.is-active .step-label { color: #111827; font-weight: 700; }
-.step-count { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; background: #f3f4f6; color: #6b7280; }
-.step-item.is-active .step-count { background: #dbeafe; color: #1d4ed8; }
-.step-connector { width: 26px; height: 2px; background: #e5e7eb; flex-shrink: 0; margin: 0 2px; }
-.step-connector.is-done { background: #15803d; }
+.flow-pipa { display: flex; align-items: stretch; gap: 16px; flex-wrap: wrap; }
+.pipa-grup { display: flex; flex-direction: column; gap: 7px; min-width: 0; flex-shrink: 1; }
+.pipa-tag { font-size: 9.5px; font-weight: 800; color: #b0b7c3; text-transform: uppercase; letter-spacing: .7px; }
+/* Tanpa geseran: begitu deret ubin meluap, batang gesernya menambah tinggi
+   dan membuat alat di kanan tidak lagi sejajar dengan ubin. Kalau ruangnya
+   kurang, biar .flow-alat saja yang turun ke barisnya sendiri. */
+.pipa-isi { display: flex; align-items: center; gap: 7px; flex-wrap: nowrap; }
+.pipa-pisah { width: 1px; align-self: stretch; background: #eef1f4; margin: 0 2px; }
 
-/* Outcome pills (Lulus / Tidak Lulus / Tanpa Sidang / Ditolak) */
-.outcomes { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; overflow-x: auto; }
-.outcome-tab {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 13px; border-radius: 20px; border: 1.5px solid #e5e7eb;
-    background: white; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
-    color: #6b7280; white-space: nowrap; transition: all .15s;
+/* Satu ubin tahap. --w = warna tahap, --wbg = latar saat dipilih. */
+.tahap {
+    --w: #6b7280; --wbg: #f3f4f6;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+    min-width: 84px; padding: 8px 11px; border: 1.5px solid #e9ecf0; border-radius: 11px;
+    background: white; cursor: pointer; font-family: inherit; text-align: left;
+    transition: border-color .13s, background .13s, box-shadow .13s;
 }
-.outcome-tab:hover { border-color: #d1d5db; }
-.outcome-count { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; background: #f3f4f6; color: #6b7280; }
+.tahap:hover { border-color: #d7dce2; background: #fcfdfe; }
+.tahap-num { font-size: 20px; font-weight: 800; line-height: 1.1; color: #475467; }
+.tahap-lbl { font-size: 11px; font-weight: 600; color: #98a2b3; white-space: nowrap; }
 
-/* ===== TABLE CARD ===== */
+.tahap.aktif { border-color: var(--w); background: var(--wbg); box-shadow: 0 0 0 3px rgba(16,24,40,.05); }
+.tahap.aktif { box-shadow: 0 0 0 3px color-mix(in srgb, var(--w) 14%, transparent); }
+.tahap.aktif .tahap-num { color: var(--w); }
+.tahap.aktif .tahap-lbl { color: var(--w); font-weight: 700; }
+
+/* Tahap tanpa isi tidak perlu menarik perhatian. */
+.tahap.kosong .tahap-num { color: #d7dce2; }
+.tahap.kosong .tahap-lbl { color: #c3c9d2; }
+.tahap.kosong.aktif .tahap-num { color: var(--w); }
+.tahap.kosong.aktif .tahap-lbl { color: var(--w); }
+
+.tahap-panah { display: flex; align-items: center; color: #d7dce2; flex-shrink: 0; }
+.tahap-panah svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+@media (max-width: 760px) {
+    .flow-pipa { flex-direction: column; gap: 13px; }
+    .pipa-pisah { width: 100%; height: 1px; align-self: auto; margin: 0; }
+    .pipa-isi { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+    .tahap { min-width: 88px; }
+    .pipa-isi { overflow-x: auto; padding-bottom: 2px; }
+    .flow-alat { flex: 0 0 100%; justify-content: flex-end; margin-top: 4px; }
+    .flow-alat .search-box { flex: 1; min-width: 0; width: auto; }
+    .periode-sel { width: 130px; }
+}
+
+/* ===== KARTU USULAN =====
+   Dulu tabel selebar 1080px dengan dua kolom "Posisi Awal" & "Posisi Baru"
+   berisi 6 baris label-nilai masing-masing. Yang dicari orang sebenarnya
+   cuma APA YANG BERUBAH, jadi sekarang disusun sebagai perpindahan
+   lama -> baru, dan unit yang tidak berubah diringkas satu baris. */
 .table-card { background: white; border-radius: var(--radius); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); overflow: hidden; }
-.table-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.table-outer::-webkit-scrollbar { height: 8px; }
-.table-outer::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-.table-outer::-webkit-scrollbar-track { background: #f3f4f6; }
-.table-outer table { border-collapse: collapse; width: 100%; min-width: 1080px; }
-.table-outer thead th {
-    background: #f9fafb;
-    padding: 11px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-    white-space: nowrap;
+
+.ucard { padding: 15px 18px; border-bottom: 1px solid #f1f3f5; transition: background .12s; }
+.ucard:last-of-type { border-bottom: none; }
+.ucard:hover { background: #fcfdfc; }
+
+.uc-head { display: flex; align-items: center; gap: 11px; margin-bottom: 13px; }
+.uc-id { flex: 1; min-width: 0; }
+.uc-head .badge { flex-shrink: 0; }
+
+/* Perpindahan jabatan: lama -> baru */
+.uc-move { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 10px; align-items: stretch; }
+.uc-side { border-left: 3px solid #e5e7eb; padding-left: 11px; min-width: 0; }
+.uc-side.baru { border-left-color: #15803d; }
+.uc-cap { display: block; font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: #9ca3af; margin-bottom: 4px; }
+.uc-side.baru .uc-cap { color: #15803d; }
+.uc-jab { display: block; font-size: 12.5px; color: #374151; line-height: 1.45; }
+.uc-side.baru .uc-jab { color: #111827; font-weight: 600; }
+.uc-master { display: block; font-size: 10px; color: #9ca3af; margin-top: 3px; }
+.uc-arrow { display: flex; align-items: center; justify-content: center; }
+.uc-arrow svg { width: 15px; height: 15px; stroke: #cbd5e1; fill: none; stroke-width: 2.2; }
+
+/* Grade & unit */
+.uc-fakta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.uc-chip { display: inline-flex; align-items: center; gap: 6px; background: #f8f9fa; border: 1px solid #eef0f2; border-radius: 9px; padding: 5px 11px; font-size: 11.5px; color: #9ca3af; font-weight: 600; }
+.uc-chip b { font-weight: 700; color: #6b7280; }
+.uc-chip b.naik { color: #15803d; }
+.uc-ke { color: #cbd5e1; font-weight: 700; font-style: normal; }
+.uc-chip.tetap b { font-weight: 600; color: #9ca3af; }
+
+.uc-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 13px; padding-top: 11px; border-top: 1px dashed #eef0f2; }
+.uc-meta { flex: 1; min-width: 0; font-size: 11.5px; color: #9ca3af; }
+.uc-meta strong { color: #6b7280; font-weight: 600; }
+.uc-act { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.uc-act .btn-soft { margin-top: 0; }
+
+@media (max-width: 720px) {
+    .uc-move { grid-template-columns: 1fr; gap: 8px; }
+    .uc-arrow { justify-content: flex-start; padding-left: 4px; }
+    .uc-arrow svg { transform: rotate(90deg); }
 }
-.table-outer tbody tr { border-bottom: 1px solid #f3f4f6; }
-.table-outer tbody tr:last-child { border-bottom: none; }
-.table-outer tbody tr:hover { background: #fafafa; }
-.table-outer tbody td { padding: 14px 16px; font-size: 13px; color: #374151; vertical-align: top; }
 
 /* Avatar */
 .av { width: 36px; height: 36px; border-radius: 50%; background: #f0fdf4; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; border: 1.5px solid #bbf7d0; }
 .td-nama { font-weight: 700; color: #111827; font-size: 13px; }
 .td-nik { font-size: 11px; color: #9ca3af; margin-top: 2px; }
-
-/* Posisi cols */
-.pos-block { border-left: 3px solid #e5e7eb; padding-left: 10px; }
-.pos-block.tujuan { border-left-color: #15803d; }
-.pos-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 8px; color: #9ca3af; }
-.pos-block.tujuan .pos-title { color: #15803d; }
-.pos-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
-.pos-lbl { font-size: 10px; color: #9ca3af; font-weight: 600; flex-shrink: 0; width: 80px; }
-.pos-val { font-size: 12px; color: #111827; font-weight: 500; line-height: 1.4; }
 
 /* Badge */
 .badge { display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
@@ -295,7 +333,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                     <div>
                         <label class="sk-lbl">Job Grade <span class="sk-req">*</span></label>
-                        <select name="job_grade_id" id="skJg" class="sk-inp" required>
+                        <select name="job_grade_id" id="skJg" class="sk-inp select-search" required>
                             <option value="">— JG —</option>
                             @foreach($jobGrades as $jg)
                             <option value="{{ $jg->id }}" data-val="{{ $jg->job_grade }}">JG {{ $jg->job_grade }}</option>
@@ -304,7 +342,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                     </div>
                     <div>
                         <label class="sk-lbl">Person Grade <span class="sk-req">*</span></label>
-                        <select name="person_grade_id" id="skPg" class="sk-inp" required>
+                        <select name="person_grade_id" id="skPg" class="sk-inp select-search" required>
                             <option value="">— PG —</option>
                             @foreach($personGrades as $pg)
                             <option value="{{ $pg->id }}" data-val="{{ $pg->person_grade }}">PG {{ $pg->person_grade }}</option>
@@ -314,7 +352,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                 </div>
                 <div>
                     <label class="sk-lbl">Kode Struktur <span class="sk-req">*</span></label>
-                    <select name="kode_struktur_id" id="skKode" class="sk-inp" required>
+                    <select name="kode_struktur_id" id="skKode" class="sk-inp select-search" required>
                         <option value="">— Pilih Kode Struktur —</option>
                         @foreach($kodeStrukturs as $ks)
                         <option value="{{ $ks->id }}">{{ $ks->nama ?? $ks->kode_struktur ?? $ks->kode ?? ('#'.$ks->id) }}</option>
@@ -323,7 +361,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                 </div>
                 <div>
                     <label class="sk-lbl">Direktorat <span class="sk-req">*</span></label>
-                    <select name="direktorat_id" id="skDir" class="sk-inp" required>
+                    <select name="direktorat_id" id="skDir" class="sk-inp select-search" required>
                         <option value="">— Pilih Direktorat —</option>
                         @foreach($direktorats as $dr)
                         <option value="{{ $dr->id }}">{{ $dr->nama_direktorat ?? $dr->nama ?? ('#'.$dr->id) }}</option>
@@ -333,7 +371,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                     <div>
                         <label class="sk-lbl">Kompartemen <span class="sk-req">*</span></label>
-                        <select name="kompartemen_id" id="skKomp" class="sk-inp" required>
+                        <select name="kompartemen_id" id="skKomp" class="sk-inp select-search" required>
                             <option value="">— Pilih —</option>
                             @foreach($kompartemens as $kp)
                             <option value="{{ $kp->id }}">{{ $kp->nama_kompartemen ?? ('#'.$kp->id) }}</option>
@@ -342,7 +380,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                     </div>
                     <div>
                         <label class="sk-lbl">Departemen <span class="sk-req">*</span></label>
-                        <select name="departemen_id" id="skDept" class="sk-inp" required>
+                        <select name="departemen_id" id="skDept" class="sk-inp select-search" required>
                             <option value="">— Pilih —</option>
                             @foreach($departemens as $dp)
                             <option value="{{ $dp->id }}">{{ $dp->nama_departemen ?? ('#'.$dp->id) }}</option>
@@ -378,7 +416,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
             <div style="display:grid;gap:12px">
                 <div>
                     <label class="sk-lbl">Tindak Lanjut</label>
-                    <select id="tlSelect" name="tindak_lanjut" class="sk-inp" onchange="onTlChange(this.value)">
+                    <select id="tlSelect" name="tindak_lanjut" class="sk-inp select-search" onchange="onTlChange(this.value)">
                         <option value="">— Pilih —</option>
                         <option value="sidang">Lanjut Sidang</option>
                         <option value="ditolak">Ditolak</option>
@@ -409,7 +447,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
             <input type="hidden" name="status" id="hsStatus">
             <div>
                 <label class="sk-lbl">Hasil Sidang</label>
-                <select id="hsSelect" name="hasil_sidang" class="sk-inp" onchange="onHsChange(this.value)">
+                <select id="hsSelect" name="hasil_sidang" class="sk-inp select-search" onchange="onHsChange(this.value)">
                     <option value="">— Pilih —</option>
                     <option value="lulus">Lulus</option>
                     <option value="tidak_lulus">Tidak Lulus</option>
@@ -424,17 +462,8 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
     </div>
 </div>
 
-{{-- DEFINISI ARRAY (dipakai stats, workflow bar, panels) --}}
+{{-- DEFINISI ARRAY (dipakai workflow bar & panel) --}}
 @php
-$sc = [
-    'draft'        => ['Draft',       '#6b7280'],
-    'verif_berkas' => ['Verif Berkas','#d97706'],
-    'sidang'       => ['Sidang',      '#1d4ed8'],
-    'lulus'        => ['Lulus',       '#15803d'],
-    'tidak_lulus'  => ['Tidak Lulus', '#dc2626'],
-    'tanpa_sidang' => ['Tanpa Sidang','#7c3aed'],
-    'ditolak'      => ['Ditolak',     '#be185d'],
-];
 $tabs = [
     'draft'        => 'Draft',
     'verif_berkas' => 'Verifikasi Berkas',
@@ -453,7 +482,6 @@ $bc = [
 
 // Tahapan proses utama (linear): Draft -> Verifikasi Berkas -> Sidang
 $steps = ['draft' => 'Draft', 'verif_berkas' => 'Verifikasi Berkas', 'sidang' => 'Sidang'];
-$stepOrder = ['draft' => 0, 'verif_berkas' => 1, 'sidang' => 2];
 // Hasil akhir (cabang setelah sidang) — warnanya sama dengan $bc supaya konsisten
 $outcomes = [
     'lulus'        => ['Lulus',        '#15803d', '#dcfce7'],
@@ -461,7 +489,6 @@ $outcomes = [
     'tidak_lulus'  => ['Tidak Lulus',   '#dc2626', '#fee2e2'],
     'ditolak'      => ['Ditolak',       '#be185d', '#fce7f3'],
 ];
-$activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (berada di tab hasil akhir)
 @endphp
 
 {{-- HEADER --}}
@@ -478,63 +505,83 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
     </div>
 </div>
 
-{{-- STATS (di luar #upContent, angka di-update via JS) --}}
-<div class="stats-outer">
-    <div class="stats-inner">
-        @foreach($sc as $k => $v)
-        <div class="stat-card">
-            <div class="stat-lbl"><span class="stat-dot" style="background:{{ $v[1] }}"></span>{{ $v[0] }}</div>
-            <div class="stat-num" id="stat-{{ $k }}" style="color:{{ $v[1] }}">{{ $counts[$k] }}</div>
-        </div>
-        @endforeach
-    </div>
-</div>
-
-{{-- WORKFLOW BAR: tahap proses (stepper) + hasil akhir (pill) + search --}}
+{{-- ALUR USULAN: peta tahapan sekaligus penyaring daftar di bawah.
+     Tujuh kartu statistik yang dulu ada di sini dihapus — angkanya persis
+     sama dengan angka di ubin ini, dan yang di sana tidak bisa diklik. --}}
+@php
+// Warna per tahap: [warna teks/garis, latar saat dipilih]
+$warnaTahap = [
+    'draft'        => ['#6b7280', '#f3f4f6'],
+    'verif_berkas' => ['#d97706', '#fef3c7'],
+    'sidang'       => ['#1d4ed8', '#dbeafe'],
+];
+@endphp
 <div class="flow-card">
-    <div class="flow-row">
-        <span class="flow-tag">Tahap Proses</span>
-        <div class="stepper">
-            @foreach($steps as $k => $label)
-            @php $idx = $stepOrder[$k]; $state = $idx < $activeStepIdx ? 'is-done' : ($idx === $activeStepIdx ? 'is-active' : ''); @endphp
-            <button class="step-item {{ $state }}" onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}">
-                <span class="step-circle">
-                    <svg class="step-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span class="step-num">{{ $idx + 1 }}</span>
-                </span>
-                <span class="step-label">{{ $label }}</span>
-                <span class="step-count">{{ $counts[$k] }}</span>
-            </button>
-            @if(!$loop->last)
-            <span class="step-connector {{ $idx < $activeStepIdx ? 'is-done' : '' }}"></span>
-            @endif
-            @endforeach
-        </div>
-        <div class="search-box">
-            <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="sInput" value="{{ request('search') }}" placeholder="Cari nama / NIK..." autocomplete="off">
-            <div class="spin" id="spin"></div>
-            <button class="clear-btn {{ request('search') ? 'visible':'' }}" id="clrBtn" onclick="clearSearch()">×</button>
+
+    <div class="flow-head">
+        <div>
+            <div class="flow-judul">Alur Usulan</div>
+            <div class="flow-sub">Klik salah satu tahap untuk melihat daftarnya</div>
         </div>
     </div>
-    <div class="flow-row">
-        <span class="flow-tag">Hasil Akhir</span>
-        <div class="outcomes">
-            @foreach($outcomes as $k => $o)
-            @php
-                $oActive = $activeTab === $k;
-                $ocText = $oActive ? $o[1] : '#6b7280';
-                $ocBorder = $oActive ? $o[1] : '#e5e7eb';
-                $ocBg = $oActive ? $o[2] : 'white';
-                $ocCountBg = $oActive ? 'white' : '#f3f4f6';
-            @endphp
-            <button class="outcome-tab {{ $oActive?'active':'' }}"
-                style="color:{{ $ocText }};border-color:{{ $ocBorder }};background:{{ $ocBg }}"
-                onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}">
-                {{ $o[0] }} <span class="outcome-count" style="background:{{ $ocCountBg }};color:{{ $ocText }}">{{ $counts[$k] }}</span>
-            </button>
-            @endforeach
+
+    <div class="flow-pipa">
+
+        <div class="pipa-grup">
+            <span class="pipa-tag">Sedang berjalan</span>
+            <div class="pipa-isi">
+                @foreach($steps as $k => $label)
+                @php $w = $warnaTahap[$k] ?? ['#6b7280', '#f3f4f6']; @endphp
+                <button type="button"
+                        class="tahap {{ $activeTab === $k ? 'aktif' : '' }} {{ $counts[$k] ? '' : 'kosong' }}"
+                        style="--w:{{ $w[0] }};--wbg:{{ $w[1] }}"
+                        onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}"
+                        aria-pressed="{{ $activeTab === $k ? 'true' : 'false' }}">
+                    <span class="tahap-num step-count">{{ $counts[$k] }}</span>
+                    <span class="tahap-lbl">{{ $label }}</span>
+                </button>
+                @if(!$loop->last)
+                <span class="tahap-panah" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="18" y2="12"/><polyline points="12 6 18 12 12 18"/></svg>
+                </span>
+                @endif
+                @endforeach
+            </div>
         </div>
+
+        <span class="pipa-pisah" aria-hidden="true"></span>
+
+        <div class="pipa-grup">
+            <span class="pipa-tag">Hasil akhir</span>
+            <div class="pipa-isi">
+                @foreach($outcomes as $k => $o)
+                <button type="button"
+                        class="tahap {{ $activeTab === $k ? 'aktif' : '' }} {{ $counts[$k] ? '' : 'kosong' }}"
+                        style="--w:{{ $o[1] }};--wbg:{{ $o[2] }}"
+                        onclick="switchTab('{{ $k }}',this)" data-tabkey="{{ $k }}"
+                        aria-pressed="{{ $activeTab === $k ? 'true' : 'false' }}">
+                    <span class="tahap-num outcome-count">{{ $counts[$k] }}</span>
+                    <span class="tahap-lbl">{{ $o[0] }}</span>
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="flow-alat">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sInput" value="{{ request('search') }}" placeholder="Cari nama / NIK..." autocomplete="off">
+                <div class="spin" id="spin"></div>
+                <button class="clear-btn {{ request('search') ? 'visible':'' }}" id="clrBtn" onclick="clearSearch()">×</button>
+            </div>
+            <select class="periode-sel select-search" aria-label="Rentang waktu usulan"
+                    onchange="window.location.href = urlPeriode(this.value)">
+                @foreach(\App\Support\PeriodeUsulan::OPSI as $nilai => $label)
+                <option value="{{ $nilai }}" {{ $periode === (string) $nilai ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+
     </div>
 </div>
 
@@ -548,82 +595,94 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
 <div class="table-card">
     @php $d = $statusGroups[$tabKey]; @endphp
     @if($d->total() > 0)
-    <div class="table-outer">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width:36px">#</th>
-                    <th>Nama</th>
-                    <th>Posisi Awal</th>
-                    <th>Posisi Baru</th>
-                    <th>Dibuat Oleh</th>
-                    <th>Status</th>
-                    @if($tabKey==='draft')<th>Verifikasi</th>@endif
-                    @if($tabKey==='verif_berkas')<th>Tindak Lanjut</th>@endif
-                    @if($tabKey==='sidang')<th>Hasil Sidang</th>@endif
-                    @if($tabKey==='lulus' || $tabKey==='tanpa_sidang')<th>Terbitkan SK</th>@endif
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($d as $i => $u)
-                @php $cl = $bc[$u->status] ?? ['#f3f4f6','#374151']; @endphp
-                <tr>
-                    <td style="color:#d1d5db;font-size:11px;font-weight:600;vertical-align:middle">
-                        {{ ($d->currentPage()-1)*$d->perPage()+$i+1 }}
-                    </td>
+    <div class="u-list">
+        @foreach($d as $u)
+        @php
+            $cl = $bc[$u->status] ?? ['#f3f4f6','#374151'];
 
-                    {{-- NAMA --}}
-                    <td style="vertical-align:middle;min-width:160px">
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div class="av">{{ initials($u->karyawan->nama) }}</div>
-                            <div>
-                                <div class="td-nama">{{ $u->karyawan->nama??'-' }}</div>
-                                <div class="td-nik">{{ $u->karyawan->nik??'-' }}</div>
-                            </div>
-                        </div>
-                    </td>
+            // Unit tujuan boleh kosong — artinya unit itu tidak ikut berpindah,
+            // jadi dibandingkan dengan unit sekarang untuk tahu mana yang berubah.
+            $dirLama  = optional($u->karyawan->direktorat)->nama_direktorat ?? optional($u->karyawan->direktorat)->nama ?? '-';
+            $dirBaru  = optional($u->direktoratTujuan)->nama_direktorat ?? optional($u->direktoratTujuan)->nama ?? $dirLama;
+            $kompLama = $u->kompartemen_saat_ini ?? optional($u->karyawan->kompartemen)->nama_kompartemen ?? '-';
+            $kompBaru = optional($u->kompartemenTujuan)->nama_kompartemen ?? $kompLama;
+            $deptLama = $u->departemen_saat_ini ?? optional($u->karyawan->departemen)->nama_departemen ?? '-';
+            $deptBaru = optional($u->departemenTujuan)->nama_departemen ?? $deptLama;
+        @endphp
+        <article class="ucard">
 
-                    {{-- POSISI AWAL --}}
-                    <td style="min-width:200px">
-                        <div class="pos-block">
-                        <div class="pos-title">Posisi Awal</div>
-                        <div class="pos-row"><span class="pos-lbl">Jabatan</span><span class="pos-val">{{ $u->jabatan_saat_ini??'-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Direktorat</span><span class="pos-val">{{ optional($u->karyawan->direktorat)->nama_direktorat ?? optional($u->karyawan->direktorat)->nama ?? '-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Kompartemen</span><span class="pos-val">{{ $u->kompartemen_saat_ini??$u->karyawan->kompartemen->nama_kompartemen??'-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Departemen</span><span class="pos-val">{{ $u->departemen_saat_ini??$u->karyawan->departemen->nama_departemen??'-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Job Grade</span><span class="pos-val" style="font-weight:700">JG {{ $u->job_grade_saat_ini??'-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Person Grade</span><span class="pos-val" style="font-weight:700">PG {{ $u->person_grade_saat_ini??'-' }}</span></div>
-                        </div>
-                    </td>
+            <div class="uc-head">
+                <div class="av">{{ initials($u->karyawan->nama) }}</div>
+                <div class="uc-id">
+                    <div class="td-nama">{{ $u->karyawan->nama ?? '-' }}</div>
+                    <div class="td-nik">NIK {{ $u->karyawan->nik ?? '-' }}</div>
+                </div>
+                <span class="badge" style="background:{{ $cl[0] }};color:{{ $cl[1] }}">{{ $u->status_label }}</span>
+                <div class="icon-row">
+                    <a href="{{ route('usulan_promosi.show',$u) }}" class="btn-ic v" title="Detail">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                    <button type="button" class="btn-ic d" title="Hapus"
+                        data-url="{{ route('usulan_promosi.destroy',$u) }}"
+                        data-nama="{{ addslashes($u->karyawan->nama??'') }}">
+                        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    </button>
+                </div>
+            </div>
 
-                    {{-- POSISI BARU --}}
-                    <td style="min-width:200px">
-                        <div class="pos-block tujuan">
-                        <div class="pos-title">Posisi Baru</div>
-                        <div class="pos-row"><span class="pos-lbl">Jabatan</span><span class="pos-val" style="font-weight:600;color:#111827">{{ $u->jabatan_tujuan }}@if(optional($u->jabatanTujuan)->nama_jabatan)<span style="display:block;font-size:10px;color:#9ca3af;font-weight:500">Master: {{ $u->jabatanTujuan->nama_jabatan }}</span>@endif</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Direktorat</span><span class="pos-val">{{ optional($u->direktoratTujuan)->nama_direktorat ?? optional($u->direktoratTujuan)->nama ?? optional($u->karyawan->direktorat)->nama_direktorat ?? optional($u->karyawan->direktorat)->nama ?? '-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Kompartemen</span><span class="pos-val">{{ optional($u->kompartemenTujuan)->nama_kompartemen ?? $u->karyawan->kompartemen->nama_kompartemen ?? '-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Departemen</span><span class="pos-val">{{ optional($u->departemenTujuan)->nama_departemen ?? $u->karyawan->departemen->nama_departemen ?? '-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Job Grade</span><span class="pos-val" style="font-weight:700;color:#15803d">JG {{ $u->job_grade_promosi??'-' }}</span></div>
-                        <div class="pos-row"><span class="pos-lbl">Person Grade</span><span class="pos-val" style="font-weight:700;color:#15803d">PG {{ $u->person_grade_promosi??'-' }}</span></div>
-                        </div>
-                    </td>
+            {{-- Perpindahan jabatan --}}
+            <div class="uc-move">
+                <div class="uc-side">
+                    <span class="uc-cap">Jabatan sekarang</span>
+                    <span class="uc-jab">{{ $u->jabatan_saat_ini ?? '-' }}</span>
+                </div>
+                <div class="uc-arrow">
+                    <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="18" y2="12"/><polyline points="12 6 18 12 12 18"/></svg>
+                </div>
+                <div class="uc-side baru">
+                    <span class="uc-cap">Diusulkan menjadi</span>
+                    <span class="uc-jab">{{ $u->jabatan_tujuan }}</span>
+                    @if(optional($u->jabatanTujuan)->nama_jabatan)
+                        <span class="uc-master">Jabatan: {{ $u->jabatanTujuan->nama_jabatan }}</span>
+                    @endif
+                </div>
+            </div>
 
-                    {{-- DIBUAT OLEH --}}
-                    <td style="vertical-align:middle;min-width:120px">
-                        <div style="font-size:12px;font-weight:600;color:#374151">{{ $u->createdBy->name??'-' }}</div>
-                        <div style="font-size:11px;color:#9ca3af;margin-top:2px">{{ $u->created_at->format('d M Y') }}</div>
-                    </td>
+            {{-- Grade & unit: hanya yang berubah yang ditulis lama -> baru --}}
+            <div class="uc-fakta">
+                <span class="uc-chip">Job Grade <b>JG {{ $u->job_grade_saat_ini ?? '-' }}</b><i class="uc-ke">→</i><b class="naik">JG {{ $u->job_grade_promosi ?? '-' }}</b></span>
+                <span class="uc-chip">Person Grade <b>PG {{ $u->person_grade_saat_ini ?? '-' }}</b><i class="uc-ke">→</i><b class="naik">PG {{ $u->person_grade_promosi ?? '-' }}</b></span>
 
-                    {{-- STATUS --}}
-                    <td style="vertical-align:middle;white-space:nowrap">
-                        <span class="badge" style="background:{{ $cl[0] }};color:{{ $cl[1] }}">{{ $u->status_label }}</span>
-                    </td>
+                {{-- Direktorat hanya ditulis bila berpindah. Kompartemen &
+                     departemen selalu ditulis supaya penempatan unitnya
+                     terbaca tanpa harus membuka detail. --}}
+                @if($dirLama !== $dirBaru)
+                    <span class="uc-chip">Direktorat <b>{{ $dirLama }}</b><i class="uc-ke">→</i><b class="naik">{{ $dirBaru }}</b></span>
+                @endif
+                @foreach([['Kompartemen', $kompLama, $kompBaru], ['Departemen', $deptLama, $deptBaru]] as [$labelUnit, $unitLama, $unitBaru])
+                    @if($unitLama !== $unitBaru)
+                        <span class="uc-chip">{{ $labelUnit }} <b>{{ $unitLama }}</b><i class="uc-ke">→</i><b class="naik">{{ $unitBaru }}</b></span>
+                    @else
+                        <span class="uc-chip tetap">{{ $labelUnit }} <b>{{ $unitLama }}</b></span>
+                    @endif
+                @endforeach
+            </div>
 
-                    {{-- TINDAK LANJUT (buka modal, bukan form inline) --}}
+            <div class="uc-foot">
+                <div class="uc-meta">
+                    Dibuat oleh <strong>{{ $u->createdBy->name ?? '-' }}</strong> · {{ $u->created_at->format('d M Y') }}
+                </div>
+                <div class="uc-act">
+
+                    @if($tabKey==='draft')
+                        <form method="POST" action="{{ route('usulan_promosi.update_status',$u) }}">
+                            @csrf @method('PATCH')
+                            <input type="hidden" name="status" value="verif_berkas">
+                            <button type="submit" class="btn-v">Verif →</button>
+                        </form>
+                    @endif
+
                     @if($tabKey==='verif_berkas')
-                    <td style="vertical-align:middle;min-width:160px">
                         @if($u->tindak_lanjut==='sidang')
                             <span class="badge" style="background:#dbeafe;color:#1d4ed8">Lanjut Sidang{{ $u->tanggal_sidang ? ' · '.$u->tanggal_sidang->format('d M Y') : '' }}</span>
                         @elseif($u->tindak_lanjut==='ditolak')
@@ -631,23 +690,18 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
                         @else
                             <span class="badge" style="background:#f3f4f6;color:#6b7280">Belum diproses</span>
                         @endif
-                        <div>
-                            <button type="button" class="btn-soft"
-                                data-url="{{ route('usulan_promosi.update_status',$u) }}"
-                                data-nama="{{ $u->karyawan->nama }}"
-                                data-tl="{{ $u->tindak_lanjut }}"
-                                data-tgl="{{ $u->tanggal_sidang?->format('Y-m-d') }}"
-                                onclick="openTl(this)">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                Tindak Lanjut
-                            </button>
-                        </div>
-                    </td>
+                        <button type="button" class="btn-soft"
+                            data-url="{{ route('usulan_promosi.update_status',$u) }}"
+                            data-nama="{{ $u->karyawan->nama }}"
+                            data-tl="{{ $u->tindak_lanjut }}"
+                            data-tgl="{{ $u->tanggal_sidang?->format('Y-m-d') }}"
+                            onclick="openTl(this)">
+                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Tindak Lanjut
+                        </button>
                     @endif
 
-                    {{-- HASIL SIDANG (buka modal, bukan form inline) --}}
                     @if($tabKey==='sidang')
-                    <td style="vertical-align:middle;min-width:160px">
                         @if($u->hasil_sidang==='lulus')
                             <span class="badge" style="background:#dcfce7;color:#15803d">Lulus</span>
                         @elseif($u->hasil_sidang==='tidak_lulus')
@@ -657,36 +711,20 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
                         @else
                             <span class="badge" style="background:#f3f4f6;color:#6b7280">Belum diproses</span>
                         @endif
-                        <div>
-                            <button type="button" class="btn-soft"
-                                data-url="{{ route('usulan_promosi.update_status',$u) }}"
-                                data-nama="{{ $u->karyawan->nama }}"
-                                data-tl="{{ $u->tindak_lanjut }}"
-                                data-tgl="{{ $u->tanggal_sidang?->format('Y-m-d') }}"
-                                data-hs="{{ $u->hasil_sidang }}"
-                                data-status="{{ $u->status }}"
-                                onclick="openHs(this)">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                Hasil Sidang
-                            </button>
-                        </div>
-                    </td>
+                        <button type="button" class="btn-soft"
+                            data-url="{{ route('usulan_promosi.update_status',$u) }}"
+                            data-nama="{{ $u->karyawan->nama }}"
+                            data-tl="{{ $u->tindak_lanjut }}"
+                            data-tgl="{{ $u->tanggal_sidang?->format('Y-m-d') }}"
+                            data-hs="{{ $u->hasil_sidang }}"
+                            data-status="{{ $u->status }}"
+                            onclick="openHs(this)">
+                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Hasil Sidang
+                        </button>
                     @endif
 
-                    {{-- VERIFIKASI (kolom sendiri, hanya tab draft) --}}
-                    @if($tabKey==='draft')
-                    <td style="vertical-align:middle;min-width:100px">
-                        <form method="POST" action="{{ route('usulan_promosi.update_status',$u) }}">
-                            @csrf @method('PATCH')
-                            <input type="hidden" name="status" value="verif_berkas">
-                            <button type="submit" class="btn-v">Verif →</button>
-                        </form>
-                    </td>
-                    @endif
-
-                    {{-- TERBITKAN SK (kolom sendiri, hanya tab lulus/tanpa sidang) --}}
                     @if($tabKey==='lulus' || $tabKey==='tanpa_sidang')
-                    <td style="vertical-align:middle;min-width:160px">
                         @if($u->sk_diproses)
                             <span class="sk-done" title="SK sudah diterbitkan">
                                 <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -707,26 +745,12 @@ $activeStepIdx = $stepOrder[$activeTab] ?? 3; // 3 = sudah lewat semua tahap (be
                                 Terbit SK
                             </button>
                         @endif
-                    </td>
                     @endif
 
-                    {{-- AKSI (selalu kolom terakhir, isinya hanya Detail & Hapus) --}}
-                    <td style="vertical-align:middle;min-width:80px">
-                        <div class="icon-row">
-                            <a href="{{ route('usulan_promosi.show',$u) }}" class="btn-ic v" title="Detail">
-                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </a>
-                            <button type="button" class="btn-ic d" title="Hapus"
-                                data-url="{{ route('usulan_promosi.destroy',$u) }}"
-                                data-nama="{{ addslashes($u->karyawan->nama??'') }}">
-                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </div>
+            </div>
+        </article>
+        @endforeach
     </div>
 
     {{-- PAGINATION --}}
@@ -784,43 +808,18 @@ window.addEventListener('DOMContentLoaded', () => {
     if(document.getElementById('toast')) setTimeout(closeToast, 3000);
 });
 
-// Tabs (stepper + outcome pills berbagi logika yang sama)
-const STEP_ORDER = { draft: 0, verif_berkas: 1, sidang: 2 };
-const OUTCOME_COLORS = {
-    lulus:        ['#15803d', '#dcfce7'],
-    tanpa_sidang: ['#7c3aed', '#f5f3ff'],
-    tidak_lulus:  ['#dc2626', '#fee2e2'],
-    ditolak:      ['#be185d', '#fce7f3'],
-};
-
+// Ubin tahap & hasil akhir dipakai dengan cara yang sama: satu yang aktif.
+// Warnanya datang dari CSS (--w / --wbg) yang dipasang di markup, jadi di sini
+// cukup menukar satu kelas — tidak ada lagi gaya yang ditulis dari JS.
 function switchTab(tab) {
     document.querySelectorAll('[id^="p-"]').forEach(p => p.style.display = 'none');
     const panel = document.getElementById('p-' + tab);
     if (panel) panel.style.display = '';
 
-    // Stepper: step sebelum tab aktif ditandai selesai (is-done), tab aktif ditandai is-active
-    const activeIdx = STEP_ORDER[tab] ?? 3; // 3 = sudah di tab hasil akhir, semua tahap proses selesai
-    document.querySelectorAll('.step-item').forEach(b => {
-        const idx = STEP_ORDER[b.dataset.tabkey];
-        b.classList.remove('is-active', 'is-done');
-        if (idx < activeIdx) b.classList.add('is-done');
-        else if (idx === activeIdx) b.classList.add('is-active');
-    });
-    document.querySelectorAll('.step-connector').forEach((c, i) => {
-        c.classList.toggle('is-done', i < activeIdx);
-    });
-
-    // Outcome pills: warna ikut status yang sedang dipilih
-    document.querySelectorAll('.outcome-tab').forEach(b => {
-        const isActive = b.dataset.tabkey === tab;
-        b.classList.toggle('active', isActive);
-        const countEl = b.querySelector('.outcome-count');
-        const colors = OUTCOME_COLORS[b.dataset.tabkey];
-        const [text, bg] = isActive && colors ? colors : ['#6b7280', 'white'];
-        b.style.color = text;
-        b.style.borderColor = isActive ? text : '#e5e7eb';
-        b.style.background = bg;
-        if (countEl) { countEl.style.background = isActive ? 'white' : '#f3f4f6'; countEl.style.color = text; }
+    document.querySelectorAll('.tahap[data-tabkey]').forEach(b => {
+        const aktif = b.dataset.tabkey === tab;
+        b.classList.toggle('aktif', aktif);
+        b.setAttribute('aria-pressed', aktif ? 'true' : 'false');
     });
 
     const url = new URL(window.location.href);
@@ -954,6 +953,20 @@ function clearSearch() {
     sInp.focus();
 }
 
+// Tautan tombol periode dibuat di server, sedangkan pencarian AJAX mengubah
+// URL tanpa memuat ulang halaman — tautannya jadi basi. Saat diklik, URL
+// disusun ulang dari alamat yang sedang berlaku supaya kata pencarian dan
+// tab yang sedang dibuka tidak hilang.
+// `dasar` default ke alamat yang sedang berlaku; dipisah jadi parameter agar
+// penyusunan URL-nya bisa diperiksa tanpa benar-benar berpindah halaman.
+function urlPeriode(nilai, dasar) {
+    const url = new URL(dasar || window.location.href);
+    if (nilai) url.searchParams.set('periode', nilai);
+    else url.searchParams.delete('periode');
+    ['page_draft','page_verif','page_sidang','page_lulus','page_tidak_lulus','page_tanpa','page_ditolak'].forEach(p => url.searchParams.delete(p));
+    return url.toString();
+}
+
 function doSearch(kw) {
     const url = new URL(window.location.href);
     if (kw) url.searchParams.set('search', kw);
@@ -992,10 +1005,12 @@ function updateCounts() {
     let counts;
     try { counts = JSON.parse(cd.dataset.json); } catch(e) { return; }
     Object.keys(counts).forEach(k => {
-        const st = document.getElementById('stat-' + k);
-        if (st) st.textContent = counts[k];
-        document.querySelectorAll('[data-tabkey="' + k + '"] .step-count, [data-tabkey="' + k + '"] .outcome-count')
-            .forEach(el => el.textContent = counts[k]);
+        document.querySelectorAll('.tahap[data-tabkey="' + k + '"]').forEach(ubin => {
+            const angka = ubin.querySelector('.tahap-num');
+            if (angka) angka.textContent = counts[k];
+            // Tahap yang hasil pencariannya kosong ikut diredupkan.
+            ubin.classList.toggle('kosong', !counts[k]);
+        });
     });
 }
 

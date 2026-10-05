@@ -222,6 +222,21 @@
         // Perubahan dari luar (mis. reset form) ikut tercermin di tombol.
         select.addEventListener('change', segarkanLabel);
 
+        /* Banyak halaman mengisi dropdown lewat kode: el.value = '12'.
+           Cara itu TIDAK memicu event 'change', jadi tombol pengganti akan
+           tetap menampilkan teks lama padahal nilainya sudah berganti.
+           Setter 'value' milik elemen ini dibungkus supaya labelnya ikut. */
+        var asal = Object.getOwnPropertyDescriptor(
+            Object.getPrototypeOf(select), 'value'
+        );
+        if (asal && asal.set) {
+            Object.defineProperty(select, 'value', {
+                configurable: true,
+                get: function () { return asal.get.call(this); },
+                set: function (v) { asal.set.call(this, v); segarkanLabel(); }
+            });
+        }
+
         document.addEventListener('click', function (e) {
             if (!bungkus.contains(e.target)) tutup(false);
         });

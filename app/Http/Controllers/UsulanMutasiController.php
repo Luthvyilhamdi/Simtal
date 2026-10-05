@@ -10,6 +10,7 @@ use App\Models\Direktorat;
 use App\Models\Kompartemen;
 use App\Models\Departemen;
 use App\Models\KodeStruktur;
+use App\Support\PeriodeUsulan;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,17 +22,18 @@ class UsulanMutasiController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->search;
+        $search  = $request->search;
+        $periode = PeriodeUsulan::bersihkan($request->periode);
         $with = ['karyawan', 'jabatanTujuan', 'direktoratTujuan', 'kompartemenTujuan',
                  'departemenTujuan', 'karyawan.direktorat', 'karyawan.kompartemen', 'karyawan.departemen', 'createdBy'];
 
-        $build = function ($done) use ($search, $with) {
+        $build = function ($done) use ($search, $periode, $with) {
             $q = UsulanMutasi::with($with)->where('sk_diproses', $done)->orderByDesc('created_at');
             if ($search) {
                 $q->whereHas('karyawan', fn($k) =>
                     $k->where('nama', 'like', '%'.$search.'%')->orWhere('nik', 'like', '%'.$search.'%'));
             }
-            return $q;
+            return PeriodeUsulan::terapkan($q, $periode);
         };
 
         $statusGroups = [
@@ -44,7 +46,7 @@ class UsulanMutasiController extends Controller
         ];
         $activeTab = $request->tab ?? 'menunggu';
 
-        return view('usulan_mutasi.index', compact('statusGroups', 'counts', 'activeTab'));
+        return view('usulan_mutasi.index', compact('statusGroups', 'counts', 'activeTab', 'periode'));
     }
 
     public function create()
@@ -136,9 +138,14 @@ class UsulanMutasiController extends Controller
 
         DB::transaction(function () use ($request, $usulanMutasi, $karyawan, $namaJabatan, $tmt) {
 
+            // Tutup jabatan lama di H-1 TMT jabatan baru. Kalau ditutup pada
+            // tanggal TMT itu sendiri, satu hari terhitung di dua jabatan.
             HistoryJabatan::where('karyawan_id', $karyawan->id)
                 ->where('is_current', true)
-                ->update(['is_current' => false, 'tanggal_selesai' => $tmt]);
+                ->update([
+                    'is_current'      => false,
+                    'tanggal_selesai' => \Carbon\Carbon::parse($tmt)->subDay(),
+                ]);
 
             HistoryJabatan::create([
                 'karyawan_id'      => $karyawan->id,

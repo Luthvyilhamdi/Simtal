@@ -121,7 +121,11 @@
     .pg-btn { display:inline-flex;align-items:center;gap:5px;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;transition:all .15s; }
     .pg-btn:hover:not(:disabled) { border-color:#15803d;color:#15803d;background:#f0fdf4; }
     .pg-btn:disabled { opacity:.4;cursor:not-allowed; }
-    .pg-info { font-size:12.5px;color:#6b7280;font-weight:600; }
+    .pg-nums { display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center; }
+    .pg-num { min-width:32px;height:32px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;background:white;border:1px solid #e5e7eb;border-radius:8px;font-size:12.5px;font-weight:600;color:#374151;font-family:inherit;cursor:pointer;transition:all .15s; }
+    .pg-num:hover { border-color:#15803d;color:#15803d;background:#f0fdf4; }
+    .pg-num.aktif { background:#15803d;border-color:#15803d;color:white;cursor:default; }
+    .pg-jeda { padding:0 2px;color:#9ca3af;font-size:12.5px;user-select:none; }
     @media (max-width:768px) {
         .summary-grid { grid-template-columns:1fr; }
         table.rm { min-width:760px; }
@@ -302,7 +306,7 @@
     </div>
     <div class="rm-pager" id="rmPager">
         <button type="button" class="pg-btn" id="pgPrev" onclick="rmPage(-1)">‹ Sebelumnya</button>
-        <span class="pg-info" id="pgInfo">Halaman 1 dari 1</span>
+        <div class="pg-nums" id="pgNums"></div>
         <button type="button" class="pg-btn" id="pgNext" onclick="rmPage(1)">Berikutnya ›</button>
     </div>
     @endif
@@ -399,7 +403,7 @@
         var noMatch = document.getElementById('noMatchRow');
         var countEl = document.getElementById('resultCount');
         var pager   = document.getElementById('rmPager');
-        var pgInfo  = document.getElementById('pgInfo');
+        var pgNums  = document.getElementById('pgNums');
         var pgPrev  = document.getElementById('pgPrev');
         var pgNext  = document.getElementById('pgNext');
         if (!input) return;
@@ -433,22 +437,64 @@
             if (pager) {
                 if (total > perPage) {
                     pager.style.display = 'flex';
-                    pgInfo.textContent  = 'Halaman ' + page + ' dari ' + pages;
                     pgPrev.disabled = (page <= 1);
                     pgNext.disabled = (page >= pages);
+                    gambarNomor(pages);
                 } else {
                     pager.style.display = 'none';
                 }
             }
         }
 
-        // Pindah halaman (dipanggil tombol prev/next).
-        window.rmPage = function (delta) {
-            page += delta;
+        /**
+         * Nomor halaman: 1 … sekitar halaman aktif … terakhir.
+         * Sampai 7 halaman ditampilkan semua; lebih dari itu dipendekkan agar
+         * barisnya tidak melebar, tapi halaman pertama & terakhir selalu ada.
+         */
+        function deretNomor(pages) {
+            var n = [], i;
+            if (pages <= 7) {
+                for (i = 1; i <= pages; i++) n.push(i);
+                return n;
+            }
+            var dari = Math.max(2, page - 1), sampai = Math.min(pages - 1, page + 1);
+            n.push(1);
+            if (dari > 2) n.push('…');
+            for (i = dari; i <= sampai; i++) n.push(i);
+            if (sampai < pages - 1) n.push('…');
+            n.push(pages);
+            return n;
+        }
+
+        function gambarNomor(pages) {
+            pgNums.innerHTML = '';
+            deretNomor(pages).forEach(function (n) {
+                if (n === '…') {
+                    var jeda = document.createElement('span');
+                    jeda.className = 'pg-jeda';
+                    jeda.textContent = '…';
+                    pgNums.appendChild(jeda);
+                    return;
+                }
+                var b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'pg-num' + (n === page ? ' aktif' : '');
+                b.textContent = n;
+                if (n === page) b.setAttribute('aria-current', 'page');
+                b.addEventListener('click', function () { keHalaman(n); });
+                pgNums.appendChild(b);
+            });
+        }
+
+        function keHalaman(n) {
+            page = n;
             render();
             var tbl = document.querySelector('.card-table');
             if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
+        }
+
+        // Dipanggil tombol Sebelumnya / Berikutnya.
+        window.rmPage = function (delta) { keHalaman(page + delta); };
 
         // Ketik → kembali ke halaman 1 lalu saring.
         input.addEventListener('input', function () { page = 1; render(); });
