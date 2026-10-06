@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @php
-    {{-- Dipakai Tambah ($h null) & Edit --}}
+    // Dipakai Tambah ($h null) & Edit
     $h = $h ?? null;
     $judul = ($h ? 'Edit' : 'Tambah') . ' Assessment Kompetensi';
 @endphp
