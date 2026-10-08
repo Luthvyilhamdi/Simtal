@@ -271,6 +271,14 @@
         <div class="detail-row"><span class="detail-label">Jobs</span><span class="detail-value">{{ $karyawan->jobs ?: '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Job Stream</span><span class="detail-value">{{ $karyawan->job_stream ?: '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Job Family</span><span class="detail-value">{{ $karyawan->job_family ?: '-' }}</span></div>
+        <div class="detail-row">
+            <span class="detail-label">Core / Non Core</span>
+            <span class="detail-value">
+                @if($karyawan->core)
+                    <span class="badge {{ $karyawan->core === 'Core' ? 'badge-green' : 'badge-blue' }}">{{ $karyawan->core }}</span>
+                @else <span class="muted">-</span> @endif
+            </span>
+        </div>
         <div class="detail-row"><span class="detail-label">Direktorat</span><span class="detail-value">{{ $karyawan->direktorat->nama_direktorat ?? '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Kompartemen</span><span class="detail-value">{{ $karyawan->kompartemen->nama_kompartemen ?? '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Departemen</span><span class="detail-value">{{ $karyawan->departemen->nama_departemen ?? '-' }}</span></div>

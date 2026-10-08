@@ -12,6 +12,8 @@ use App\Models\Direktorat;
 use App\Models\StrukturOrganisasi;
 use App\Models\TalentPool;
 use App\Services\ReminderPromosiService;
+use App\Support\KeterisianHomeHost;
+use App\Support\KomposisiBandKaryawan;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -156,6 +158,15 @@ class DashboardController extends Controller
         $soNonCoreTerisi = $soStats->non_core_terisi ?? 0;
         $soCoreMc        = $soStats->core_mc        ?? 0;
         $soNonCoreMc     = $soStats->non_core_mc    ?? 0;
+
+        // Keterisian Home vs Host: Home ikut menghitung karyawan yang ditugaskan
+        // ke holding, Host mengeluarkannya. Lihat App\Support\KeterisianHomeHost.
+        $keterisian = KeterisianHomeHost::hitung((int) $soBulan, (int) $soTahun);
+
+        // Komposisi karyawan Home per Band: ditempatkan di induk (Core/Non Core)
+        // vs sedang ditugaskan keluar. Menghitung ORANG, bukan kursi.
+        $komposisi     = KomposisiBandKaryawan::hitung((int) $soBulan, (int) $soTahun);
+        $komposisiHost = KomposisiBandKaryawan::hitungHost((int) $soBulan, (int) $soTahun);
 
         // Status pengisian: per posisi yang MC/TKO-nya tersedia (mc_tko > 0),
         // dihitung terisi atau belum terisi (bukan selisih angka mc vs pengisian).
@@ -499,6 +510,7 @@ class DashboardController extends Controller
             'karyawanTerbaru', 'genderChart', 'usiaChart',
             'soTotalPosisi', 'soTotalMc', 'soTerisi', 'soCore', 'soNonCore', 'soDeviasi', 'soBulan', 'soTahun',
             'soCoreTerisi', 'soNonCoreTerisi', 'soCoreMc', 'soNonCoreMc',
+            'keterisian', 'komposisi', 'komposisiHost',
             'soPerDirektorat', 'soPerKompartemen', 'soPerDepartemen',
             'soTerisiDirektorat', 'soTerisiKompartemen', 'soTerisiDepartemen',
             'soDrill',

@@ -136,6 +136,43 @@
     .demo-card { background:white;border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:var(--card-shadow);padding:18px; }
 
     .so-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px; }
+
+    /* Tabel angka: Keterisian Home vs Host & Komposisi per Band */
+    .hh-card   { margin-bottom:12px; }
+    .hh-scroll { overflow-x:auto; }
+    /* Lebar kolom diatur lewat <colgroup> dan table-layout:fixed supaya angka
+       tersebar rata, bukan menumpuk di tepi kanan. */
+    .hh-tbl    { width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px;min-width:780px; }
+
+    .hh-tbl th:first-child, .hh-tbl td:first-child { text-align:left;padding-right:10px; }
+    .hh-tbl th:not(:first-child), .hh-tbl td:not(:first-child) { padding-left:10px; }
+
+    .hh-tbl th { font-size:9.5px;font-weight:700;color:#98a0ad;text-transform:uppercase;letter-spacing:.4px;
+                 padding:0 0 8px;text-align:right;line-height:1.35; }
+    .hh-tbl th.hh-grup { text-align:center;font-size:10px;color:#5b6472;letter-spacing:.6px;
+                         padding:7px 0 7px;background:#f7f8fa;border-radius:6px 6px 0 0; }
+    .hh-tbl thead tr:last-child th { border-bottom:1px solid #e4e7ec;padding-top:9px; }
+
+    .hh-tbl td { padding:9px 0;border-bottom:1px solid #f4f5f7;text-align:right;color:#4b5563;
+                 font-variant-numeric:tabular-nums;white-space:nowrap; }
+    .hh-tbl td:first-child { font-weight:600;color:#111827; }
+    .hh-tbl tbody tr:last-child td { border-bottom:0; }
+    /* Sorotan baris membantu menelusuri angka di tabel selebar ini. */
+    .hh-tbl tbody tr:hover td { background:#fafbfc; }
+    .hh-tbl tbody tr.hh-total:hover td { background:transparent; }
+    .hh-tbl tr.hh-total td { font-weight:800;color:#111827;border-top:1.5px solid #e4e7ec;
+                             border-bottom:0;padding-top:11px; }
+
+    /* Garis pemisah antar kelompok kolom */
+    .hh-tbl th.hh-sep, .hh-tbl td.hh-sep { border-left:1px solid #eceef1; }
+
+    .hh-isi { font-weight:700;color:#111827; }
+    .hh-pct { font-weight:600;color:#8b93a1; }
+    .hh-pct.kurang { color:#dc2626;font-weight:700; }
+    .hh-pct.lebih  { color:#d97706;font-weight:700; }
+    .hh-pct.penuh  { color:#15803d;font-weight:700; }
+    .hh-pct.kosong { color:#d6dae0; }
+    .hh-kecil { font-size:10.5px;color:#9ca3af;font-weight:600; }
     .tp-grid { display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px; }
     @media (min-width:880px) { .tp-grid { grid-template-columns:1fr 1fr; } }
 
@@ -432,9 +469,25 @@ $roleNameDash = auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()
 {{-- SO CORE & NON CORE --}}
 @php
 $namaBulanDash = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-$pctTerisi  = $soTotalMc > 0 ? round(($soTerisi/$soTotalMc)*100) : 0;
-$pctCoreTerisi    = $soCoreMc > 0 ? round(($soCoreTerisi/$soCoreMc)*100) : 0;
-$pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100) : 0;
+
+$hhHome = $keterisian['home'];
+$hhHost = $keterisian['host'];
+
+// '—' dipakai kalau tidak ada formasi untuk dibandingkan (MC/TKO 0),
+// karena menulis 0% di situ menyesatkan.
+$hhPersen = fn ($v) => $v === null ? '—' : number_format($v, 1, ',', '.') . '%';
+$hhKelas  = function ($v) {
+    if ($v === null) return 'kosong';
+    if ($v > 100)    return 'lebih';
+    if ($v == 100)   return 'penuh';
+    return 'kurang';
+};
+// Bar tidak boleh lewat 100 supaya panjangnya tetap terbaca saat kelebihan isi.
+$hhBar = fn ($v) => $v === null ? 0 : min(100, (int) round($v));
+
+// Komposisi karyawan Home per Band — persennya 2 angka di belakang koma,
+// mengikuti format laporan HC.
+$kbPersen = fn ($v) => $v === null ? '—' : number_format($v, 2, ',', '.') . '%';
 @endphp
 <div class="sec-title">Struktur Organisasi — {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
 <div class="so-grid">
@@ -451,34 +504,201 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
     <div class="kpi-sub">Man Count kebutuhan</div>
   </div>
 
-  <div class="kpi-card green" style="flex-direction:column;align-items:flex-start;gap:6px">
-    <div class="kpi-label">Terisi</div>
-    <div class="kpi-num">{{ $soTerisi }}</div>
-    <div class="kpi-sub">{{ $pctTerisi }}% dari MC/TKO</div>
-    {{-- FIX: width Blade diganti data-pct + apply via JS --}}
+  <div class="kpi-card" style="border-top:3px solid #2563eb;flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label" style="color:#9ca3af">Home — Keterisian</div>
+    <div class="kpi-num" style="color:#2563eb">{{ $hhHome['total']['terisi'] }} <span style="font-size:14px;color:#9ca3af">/ {{ $hhHome['total']['mc'] }}</span></div>
+    <div class="kpi-sub">{{ $hhPersen($hhHome['total']['persen']) }} · termasuk penugasan</div>
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div class="progress-mini-fill" data-pct="{{ $pctTerisi }}" style="background:#16a34a;height:100%;border-radius:20px;"></div>
+      <div class="progress-mini-fill" data-pct="{{ $hhBar($hhHome['total']['persen']) }}" style="background:#2563eb;height:100%;border-radius:20px;"></div>
     </div>
   </div>
 
-  <div class="kpi-card" style="border-top:3px solid #2563eb;flex-direction:column;align-items:flex-start;gap:6px">
-    <div class="kpi-label" style="color:#9ca3af">Core — Keterisian</div>
-    <div class="kpi-num" style="color:#2563eb">{{ $soCoreTerisi }} <span style="font-size:14px;color:#9ca3af">/ {{ $soCoreMc }}</span></div>
-    <div class="kpi-sub">{{ $pctCoreTerisi }}% terisi · {{ $soCore }} posisi Core</div>
+  <div class="kpi-card" style="border-top:3px solid #16a34a;flex-direction:column;align-items:flex-start;gap:6px">
+    <div class="kpi-label" style="color:#9ca3af">Host — Keterisian</div>
+    <div class="kpi-num" style="color:#16a34a">{{ $hhHost['total']['terisi'] }} <span style="font-size:14px;color:#9ca3af">/ {{ $hhHost['total']['mc'] }}</span></div>
+    <div class="kpi-sub">{{ $hhPersen($hhHost['total']['persen']) }} · yang bekerja di PIM</div>
     <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div class="progress-mini-fill" data-pct="{{ $pctCoreTerisi }}" style="background:#2563eb;height:100%;border-radius:20px;"></div>
+      <div class="progress-mini-fill" data-pct="{{ $hhBar($hhHost['total']['persen']) }}" style="background:#16a34a;height:100%;border-radius:20px;"></div>
     </div>
   </div>
 
   <div class="kpi-card" style="border-top:3px solid #7c3aed;flex-direction:column;align-items:flex-start;gap:6px">
-    <div class="kpi-label" style="color:#9ca3af">Non Core — Keterisian</div>
-    <div class="kpi-num" style="color:#7c3aed">{{ $soNonCoreTerisi }} <span style="font-size:14px;color:#9ca3af">/ {{ $soNonCoreMc }}</span></div>
-    <div class="kpi-sub">{{ $pctNonCoreTerisi }}% terisi · {{ $soNonCore }} posisi Non Core</div>
-    <div style="height:4px;background:#f3f4f6;border-radius:20px;overflow:hidden;margin-top:4px;width:100%">
-      <div class="progress-mini-fill" data-pct="{{ $pctNonCoreTerisi }}" style="background:#7c3aed;height:100%;border-radius:20px;"></div>
-    </div>
+    <div class="kpi-label" style="color:#9ca3af">Penugasan ke Holding</div>
+    <div class="kpi-num" style="color:#7c3aed">{{ $keterisian['jumlah_penugasan'] }}</div>
+    <div class="kpi-sub">Selisih Home &minus; Host</div>
   </div>
 
+</div>
+
+{{-- KETERISIAN HOME vs HOST --}}
+@php
+$hhBaris = [
+    ['Core',     'core',     '#2563eb'],
+    ['Non Core', 'non_core', '#7c3aed'],
+];
+@endphp
+
+<div class="chart-card hh-card">
+  <div class="chart-card-title">Keterisian Core &amp; Non Core — Home vs Host</div>
+  <div class="chart-card-sub">Periode {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+  <div class="hh-scroll">
+    <table class="hh-tbl">
+      <colgroup>
+        <col style="width:22%">
+        <col style="width:11%">
+        <col span="3" style="width:11.2%">
+        <col span="3" style="width:11.2%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="2">Kategori</th>
+          <th rowspan="2">MC/TKO</th>
+          <th class="hh-grup hh-sep" colspan="3">Home</th>
+          <th class="hh-grup hh-sep" colspan="3">Host</th>
+        </tr>
+        <tr>
+          <th class="hh-sep">Terisi</th><th>Deviasi</th><th>%</th>
+          <th class="hh-sep">Terisi</th><th>Deviasi</th><th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($hhBaris as [$label, $kunci, $warna])
+          @php $a = $hhHome[$kunci]; $b = $hhHost[$kunci]; @endphp
+          <tr>
+            <td>{{ $label }} <span class="hh-kecil">· {{ $a['posisi'] }} posisi{{ $b['posisi'] !== $a['posisi'] ? ', ' . $b['posisi'] . ' di Host' : '' }}</span></td>
+            <td>{{ $a['mc'] }}</td>
+            <td class="hh-sep hh-isi">{{ $a['terisi'] }}</td>
+            <td class="hh-pct {{ $hhKelas($a['persen']) }}">{{ $a['deviasi'] > 0 ? '+' : '' }}{{ $a['deviasi'] }}</td>
+            <td class="hh-pct {{ $hhKelas($a['persen']) }}">{{ $hhPersen($a['persen']) }}</td>
+            <td class="hh-sep hh-isi">{{ $b['terisi'] }}</td>
+            <td class="hh-pct {{ $hhKelas($b['persen']) }}">{{ $b['deviasi'] > 0 ? '+' : '' }}{{ $b['deviasi'] }}</td>
+            <td class="hh-pct {{ $hhKelas($b['persen']) }}">{{ $hhPersen($b['persen']) }}</td>
+          </tr>
+        @endforeach
+        @php $a = $hhHome['total']; $b = $hhHost['total']; @endphp
+        <tr class="hh-total">
+          <td>TOTAL</td>
+          <td>{{ $a['mc'] }}</td>
+          <td class="hh-sep">{{ $a['terisi'] }}</td>
+          <td class="hh-pct {{ $hhKelas($a['persen']) }}">{{ $a['deviasi'] > 0 ? '+' : '' }}{{ $a['deviasi'] }}</td>
+          <td class="hh-pct {{ $hhKelas($a['persen']) }}">{{ $hhPersen($a['persen']) }}</td>
+          <td class="hh-sep">{{ $b['terisi'] }}</td>
+          <td class="hh-pct {{ $hhKelas($b['persen']) }}">{{ $b['deviasi'] > 0 ? '+' : '' }}{{ $b['deviasi'] }}</td>
+          <td class="hh-pct {{ $hhKelas($b['persen']) }}">{{ $hhPersen($b['persen']) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="chart-card hh-card">
+  <div class="chart-card-title">Komposisi Karyawan Home per Band</div>
+  <div class="chart-card-sub">Jumlah karyawan &mdash; Periode {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+  <div class="hh-scroll">
+    <table class="hh-tbl">
+      <colgroup>
+        <col style="width:13%">
+        <col span="5" style="width:10.6%">
+        <col span="3" style="width:11.3%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="2">Band</th>
+          <th class="hh-grup" colspan="5">Penempatan di Struktur Induk</th>
+          <th class="hh-grup hh-sep" colspan="3">Penugasan</th>
+        </tr>
+        <tr>
+          <th>Core</th><th>% Core</th><th>Non Core</th><th>% Non Core</th><th>Total</th>
+          <th class="hh-sep">Anper/Cuper/Yayasan</th><th>PI Group</th><th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($komposisi['band'] as $namaBand => $v)
+          <tr>
+            <td>{{ $namaBand }}</td>
+            <td class="hh-isi">{{ $v['core'] }}</td>
+            <td class="hh-pct">{{ $kbPersen($v['persen_core']) }}</td>
+            <td class="hh-isi">{{ $v['non_core'] }}</td>
+            <td class="hh-pct">{{ $kbPersen($v['persen_non_core']) }}</td>
+            <td class="hh-isi">{{ $v['total_induk'] }}</td>
+            <td class="hh-sep">{{ $v['anper'] ?: '0' }}</td>
+            <td>{{ $v['pi_group'] ?: '0' }}</td>
+            <td class="hh-isi">{{ $v['total_penugasan'] ?: '0' }}</td>
+          </tr>
+        @endforeach
+        @php $kt = $komposisi['total']; @endphp
+        <tr class="hh-total">
+          <td>TOTAL</td>
+          <td>{{ $kt['core'] }}</td>
+          <td class="hh-kecil">&nbsp;</td>
+          <td>{{ $kt['non_core'] }}</td>
+          <td class="hh-kecil">&nbsp;</td>
+          <td>{{ $kt['total_induk'] }}</td>
+          <td class="hh-sep">{{ $kt['anper'] }}</td>
+          <td>{{ $kt['pi_group'] }}</td>
+          <td>{{ $kt['total_penugasan'] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="chart-total-line">
+    <span class="ctl-label">Total karyawan Home{{ $kt['tanpa_penempatan'] ? ' · ' . $kt['tanpa_penempatan'] . ' belum ditempatkan' : '' }}</span>
+    <span class="ctl-val">{{ $kt['total_orang'] }}</span>
+  </div>
+</div>
+
+<div class="chart-card hh-card" style="margin-bottom:18px">
+  <div class="chart-card-title">Komposisi Karyawan Host per Band</div>
+  <div class="chart-card-sub">Yang bekerja di PIM &mdash; Periode {{ $namaBulanDash[$soBulan] }} {{ $soTahun }}</div>
+  <div class="hh-scroll">
+    <table class="hh-tbl">
+      <colgroup>
+        <col style="width:14%">
+        <col span="5" style="width:11.6%">
+        <col span="2" style="width:14%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="2">Band</th>
+          <th class="hh-grup" colspan="5">Karyawan PIM</th>
+          <th class="hh-grup hh-sep" colspan="2">Penugasan Masuk</th>
+        </tr>
+        <tr>
+          <th>Core</th><th>% Core</th><th>Non Core</th><th>% Non Core</th><th>Total</th>
+          <th class="hh-sep">Jumlah</th><th>Total Host</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($komposisiHost['band'] as $namaBand => $v)
+          <tr>
+            <td>{{ $namaBand }}</td>
+            <td class="hh-isi">{{ $v['core'] }}</td>
+            <td class="hh-pct">{{ $kbPersen($v['persen_core']) }}</td>
+            <td class="hh-isi">{{ $v['non_core'] }}</td>
+            <td class="hh-pct">{{ $kbPersen($v['persen_non_core']) }}</td>
+            <td class="hh-isi">{{ $v['total_pim'] }}</td>
+            <td class="hh-sep">{{ $v['masuk'] }}</td>
+            <td class="hh-isi">{{ $v['total_host'] }}</td>
+          </tr>
+        @endforeach
+        @php $ht = $komposisiHost['total']; @endphp
+        <tr class="hh-total">
+          <td>TOTAL</td>
+          <td>{{ $ht['core'] }}</td>
+          <td class="hh-kecil">&nbsp;</td>
+          <td>{{ $ht['non_core'] }}</td>
+          <td class="hh-kecil">&nbsp;</td>
+          <td>{{ $ht['total_pim'] }}</td>
+          <td class="hh-sep">{{ $ht['masuk'] }}</td>
+          <td>{{ $ht['total_host'] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="chart-total-line">
+    <span class="ctl-label">Total karyawan Host{{ $ht['tanpa_penempatan'] ? ' · ' . $ht['tanpa_penempatan'] . ' belum ditempatkan' : '' }}</span>
+    <span class="ctl-val">{{ $ht['total_host'] }}</span>
+  </div>
 </div>
 
 {{-- SO CHARTS --}}
@@ -499,8 +719,10 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
                 <div style="font-size:15px;font-weight:800;color:#7c3aed">{{ $soNonCore }}</div>
             </div>
             <div style="margin-top:14px;padding-top:10px;border-top:1px solid #f3f4f6">
-                <div style="font-size:11px;color:#9ca3af">Terisi Core: <strong style="color:#2563eb">{{ $soCoreTerisi }}</strong> / {{ $soCoreMc }}</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:3px">Terisi Non Core: <strong style="color:#7c3aed">{{ $soNonCoreTerisi }}</strong> / {{ $soNonCoreMc }}</div>
+                <div style="font-size:11px;color:#9ca3af">Terisi Core: <strong style="color:#2563eb">{{ $hhHost['core']['terisi'] }}</strong> / {{ $hhHost['core']['mc'] }}
+                    <span class="hh-kecil">· Home {{ $hhHome['core']['terisi'] }}</span></div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:3px">Terisi Non Core: <strong style="color:#7c3aed">{{ $hhHost['non_core']['terisi'] }}</strong> / {{ $hhHost['non_core']['mc'] }}
+                    <span class="hh-kecil">· Home {{ $hhHome['non_core']['terisi'] }}</span></div>
             </div>
         </div>
     </div>
@@ -959,8 +1181,8 @@ $pctNonCoreTerisi = $soNonCoreMc > 0 ? round(($soNonCoreTerisi/$soNonCoreMc)*100
 {{-- DISTRIBUSI BAND & PENDIDIKAN --}}
 <div class="chart-grid-2">
     <div class="chart-card">
-        <div class="chart-card-title">Distribusi per Band</div>
-        <div class="chart-card-sub">Jumlah karyawan aktif per Band</div>
+        <div class="chart-card-title">Distribusi per Band Karyawan</div>
+        <div class="chart-card-sub">Seluruh karyawan aktif</div>
         @php $maxBand = collect($distribusiBand)->max('total') ?: 1; $totalBand = collect($distribusiBand)->sum('total'); @endphp
         <div class="bar-chart">
             @foreach($distribusiBand as $b)

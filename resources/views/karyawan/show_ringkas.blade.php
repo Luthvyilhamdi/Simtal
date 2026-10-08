@@ -187,6 +187,14 @@
                 <span class="baris-label">Job Family</span>
                 <span class="baris-nilai">{{ $karyawan->job_family ?: '—' }}</span>
             </div>
+            <div class="baris">
+                <span class="baris-label">Core / Non Core</span>
+                <span class="baris-nilai">
+                    @if($karyawan->core)
+                        <span class="pil {{ $karyawan->core === 'Core' ? 'pil-hijau' : 'pil-biru' }}">{{ $karyawan->core }}</span>
+                    @else — @endif
+                </span>
+            </div>
         </div>
     </div>
 
