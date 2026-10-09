@@ -35,6 +35,7 @@ use App\Http\Controllers\TalentPoolController;
 use App\Http\Controllers\PenilaianKaryawanController;
 use App\Http\Controllers\KalibrasiKaryawanController;
 use App\Http\Controllers\UsulanPromosiController;
+use App\Http\Controllers\ReminderPjsController;
 use App\Http\Controllers\ReminderPromosiController;
 use App\Http\Controllers\UsulanMutasiController;
 use App\Http\Controllers\JobFamilyController;
@@ -302,6 +303,9 @@ Route::middleware('auth')->group(function () {
         });
         // Reminder Promosi (read-only) — daftar karyawan yang akan/segera eligible naik grade
         Route::get('reminder-promosi', [ReminderPromosiController::class, 'index'])->name('reminder_promosi.index');
+
+        // Reminder PJS (read-only) — pemegang PJS berjalan & status syarat pengangkatan tetap
+        Route::get('reminder-pjs', [ReminderPjsController::class, 'index'])->name('reminder_pjs.index');
 
         // ===== ORGANIZATION & HC STRATEGY =====
         Route::prefix('organisasi')->name('organisasi.')->group(function () {

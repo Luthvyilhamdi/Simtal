@@ -96,6 +96,15 @@
     .karyawan-name { font-weight:600;color:#111827;font-size:13px;white-space:nowrap; }
     .karyawan-nik { font-size:11px;color:#9ca3af;margin-top:1px; }
 
+    /* Kolom Jabatan: posisi di atas, unitnya di bawah — keduanya UTUH, tidak
+       dipotong. Lebar kolom dikunci supaya kolom lain tidak terdesak, dan
+       tiap sel diberi tinggi minimum agar baris tetap rata walau isinya
+       satu baris saja. */
+    .sel-jabatan { min-width:300px;max-width:430px;min-height:34px;display:flex;
+                   flex-direction:column;justify-content:center; }
+    .sj-posisi { font-weight:600;color:#111827;font-size:12.5px;line-height:1.4; }
+    .sj-unit   { font-size:11px;color:#9ca3af;line-height:1.45;margin-top:2px; }
+
     .badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap; }
     .badge-green { background:#dcfce7;color:#15803d; }
     .badge-red { background:#fee2e2;color:#dc2626; }
@@ -255,7 +264,16 @@
                             </div>
                         </div>
                     </td>
-                    <td>{{ $k->jabatan_saat_ini ?: '-' }}</td>
+                    {{-- Posisi dan unitnya dipisah supaya tiap baris tetap setinggi
+                         dua baris; teks aslinya utuh di atribut title. --}}
+                    <td>
+                        <div class="sel-jabatan" title="{{ $k->jabatan_saat_ini }}">
+                            <div class="sj-posisi">{{ $k->jabatan_posisi ?: '-' }}</div>
+                            @if($k->jabatan_unit)
+                                <div class="sj-unit">{{ $k->jabatan_unit }}</div>
+                            @endif
+                        </div>
+                    </td>
                     <td><span class="badge badge-gray">{{ $k->band ?? '-' }}</span></td>
                     <td><span class="badge badge-gray">{{ $k->jobGrade->job_grade ?? '-' }}</span></td>
                     <td><span class="badge badge-gray">{{ $k->personGrade->person_grade ?? '-' }}</span></td>

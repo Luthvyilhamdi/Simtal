@@ -11,12 +11,20 @@
 
     .profile-card { background:white;border-radius:16px;border:1px solid var(--card-border);padding:24px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:var(--card-shadow); }
     .profile-left { display:flex;align-items:center;gap:18px;flex:1;min-width:0; }
+    /* min-width:0 wajib, kalau tidak blok teks menolak menyusut dan
+       pemotongan dengan elipsis tidak pernah aktif di dalam flex. */
+    .profile-teks { flex:1;min-width:0; }
     .profile-avatar { width:74px;height:74px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0;overflow:hidden;border:3px solid #bbf7d0; }
     .profile-avatar img { width:100%;height:100%;object-fit:cover; }
-    .profile-name { font-size:20px;font-weight:700;color:#111827;margin-bottom:3px; }
-    .profile-jabatan { font-size:13px;color:#6b7280;margin-bottom:10px; }
-    .profile-tags { display:flex;flex-wrap:wrap;gap:6px; }
-    .profile-tag { display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;background:#f3f4f6;color:#374151; }
+    .profile-name { font-size:20px;font-weight:700;color:#111827;margin-bottom:2px; }
+    /* Posisi & unit ditampilkan UTUH — tidak dipotong. Yang dulu jelek bukan
+       teks yang melipat, melainkan posisi dan unit menyatu jadi satu kalimat
+       tanpa hierarki. Setelah dipisah, melipat pun tetap terbaca.
+       Lebarnya dibatasi ~68 karakter, panjang baris yang nyaman dibaca. */
+    .profile-jabatan { font-size:13.5px;font-weight:600;color:#374151;line-height:1.45;max-width:68ch; }
+    .profile-unit    { font-size:11.5px;color:#9ca3af;line-height:1.5;margin-top:2px;max-width:68ch; }
+    .profile-tags { display:flex;flex-wrap:wrap;gap:6px;margin-top:10px; }
+    .profile-tag { display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;background:#f3f4f6;color:#374151;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
     .profile-tag.green { background:#dcfce7;color:#15803d; }
 
     .profile-stats { display:flex;gap:10px;flex-shrink:0; }
@@ -130,12 +138,26 @@
                 {{ initials($karyawan->nama) }}
             @endif
         </div>
-        <div>
+        <div class="profile-teks">
             <div class="profile-name">{{ $karyawan->nama }}</div>
-            <div class="profile-jabatan">{{ $karyawan->jabatan_saat_ini ?? $karyawan->jabatan->nama_jabatan ?? '-' }}</div>
+            {{-- Posisi dan unitnya dipisah: jabatan_saat_ini satu kalimat panjang
+                 (rata-rata 100+ karakter) yang kalau dicetak utuh melipat 2-3 baris.
+                 Teks aslinya tetap utuh di atribut title. --}}
+            <div class="profile-jabatan" title="{{ $karyawan->jabatan_saat_ini }}">
+                {{ $karyawan->jabatan_posisi ?: '-' }}
+            </div>
+            @php
+                // Master memakai "-" sebagai penanda kosong; jangan dicetak
+                // sebagai baris unit yang terlihat seperti data.
+                $unitJabatan = $karyawan->jabatan_unit ?: ($karyawan->departemen->nama_departemen ?? null);
+                $unitJabatan = trim((string) $unitJabatan);
+                $unitJabatan = ($unitJabatan === '' || $unitJabatan === '-') ? null : $unitJabatan;
+            @endphp
+            @if($unitJabatan)
+                <div class="profile-unit" title="{{ $unitJabatan }}">{{ $unitJabatan }}</div>
+            @endif
             <div class="profile-tags">
                 <span class="profile-tag green">NIK {{ $karyawan->nik }}</span>
-                <span class="profile-tag">{{ $karyawan->departemen->nama_departemen ?? '-' }}</span>
                 <span class="profile-tag">{{ $karyawan->band }}</span>
                 <span class="profile-tag">Bergabung {{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->translatedFormat('M Y') }}</span>
                 <span class="profile-tag">
@@ -149,7 +171,18 @@
                 <span class="profile-tag" style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0">🟢 Shortlist {{ $shortlistPeriode }}</span>
                 @endif
                 @if($pgsAktif = $karyawan->pgsPjs->firstWhere('is_active', true))
-                <span class="profile-tag" style="background:{{ $pgsAktif->tipe_warna['bg'] }};color:{{ $pgsAktif->tipe_warna['text'] }};border:1px solid {{ $pgsAktif->tipe_warna['border'] }};">{{ $pgsAktif->tipe_label }}: {{ $pgsAktif->jabatan_pgs_pjs }}</span>
+                    {{-- Dulu seluruh jabatan PGS/PJS dicetak di sini, padahal isinya
+                         sama persis dengan baris posisi di atas — jadi satu kalimat
+                         panjang tercetak dua kali. Sekarang cukup penanda singkat;
+                         yang berbeda dari posisi utama baru ikut ditulis. --}}
+                    @php
+                        $posisiPgs = \App\Models\Karyawan::posisiDari($pgsAktif->jabatan_pgs_pjs);
+                        $samaDenganPosisi = $posisiPgs === $karyawan->jabatan_posisi;
+                    @endphp
+                    <span class="profile-tag" title="{{ $pgsAktif->jabatan_pgs_pjs }}"
+                          style="background:{{ $pgsAktif->tipe_warna['bg'] }};color:{{ $pgsAktif->tipe_warna['text'] }};border:1px solid {{ $pgsAktif->tipe_warna['border'] }};">
+                        {{ $pgsAktif->tipe_label }}{{ $samaDenganPosisi ? '' : ' · ' . $posisiPgs }}
+                    </span>
                 @endif
             </div>
         </div>

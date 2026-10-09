@@ -489,13 +489,13 @@
             @endif
 
             {{-- Manajemen Talenta (accordion) --}}
-            @if($u->canAccessMenu('talent_pool') || $u->canAccessMenu('usulan_promosi') || $u->canAccessMenu('reminder_promosi') || $u->canAccessMenu('usulan_mutasi'))
-            <div class="nav-link master-toggle {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*') ? 'active open' : '' }}" data-tooltip="Manajemen Talenta" onclick="toggleMaster(this)">
+            @if($u->canAccessMenu('talent_pool') || $u->canAccessMenu('usulan_promosi') || $u->canAccessMenu('reminder_promosi') || $u->canAccessMenu('usulan_mutasi') || $u->canAccessMenu('pgs_pjs'))
+            <div class="nav-link master-toggle {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*','reminder_pjs.*') ? 'active open' : '' }}" data-tooltip="Manajemen Talenta" onclick="toggleMaster(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
                 <span class="nav-text">Manajemen Talenta</span>
                 <svg class="toggle-chevron" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="master-sub {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*') ? 'open' : '' }}">
+            <div class="master-sub {{ request()->routeIs('talent_pool.*','usulan_promosi.*','usulan_mutasi.*','reminder_promosi.*','reminder_pjs.*') ? 'open' : '' }}">
                 @if($u->canAccessMenu('talent_pool'))
                 <a href="{{ route('talent_pool.index') }}" data-tooltip="Data Talent" class="nav-link {{ request()->routeIs('talent_pool.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -512,6 +512,12 @@
                 <a href="{{ route('reminder_promosi.index') }}" data-tooltip="Reminder Promosi" class="nav-link {{ request()->routeIs('reminder_promosi.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     <span class="nav-text">Reminder Promosi</span>
+                </a>
+                @endif
+                @if($u->canAccessMenu('pgs_pjs'))
+                <a href="{{ route('reminder_pjs.index') }}" data-tooltip="Reminder PJS" class="nav-link {{ request()->routeIs('reminder_pjs.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                    <span class="nav-text">Reminder PJS</span>
                 </a>
                 @endif
                 @if($u->canAccessMenu('usulan_mutasi'))

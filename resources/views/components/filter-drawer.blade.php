@@ -93,10 +93,19 @@
     /* Dipatok ke .fd-panel supaya menang atas gaya toolbar halaman (.toolbar
        select, .filter-row select, dll) — laci ikut berada di dalam toolbar itu. */
     .fd-panel .fd-field { display:block;background:#f4f5f7;border:0;border-radius:12px;padding:9px 14px;cursor:pointer;box-shadow:none; }
-    .fd-panel .fd-field select,
+    /* select:not(.ss-native) — WAJIB. Begitu select-search mengambil alih sebuah
+       <select>, ia menyembunyikannya lewat .ss-native (1px, clip) dan menaruh
+       tombolnya sendiri. Tanpa :not(), aturan di bawah ini (0,3,0) menang atas
+       .ss-native (0,1,0), select aslinya terbentang penuh lagi di atas tombol,
+       dan kliknya membuka dropdown bawaan peramban di tempat yang salah. */
+    .fd-panel .fd-field select:not(.ss-native),
     .fd-panel .fd-field input:not([type="hidden"]),
     .fd-panel .fd-field .ss-trigger { display:block;width:100%;border:0;outline:none;background:transparent;padding:0;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--text-strong);cursor:pointer;box-shadow:none;height:auto; }
-    .fd-panel .fd-field select { appearance:none;-webkit-appearance:none;padding-right:18px; }
+    .fd-panel .fd-field select:not(.ss-native) { appearance:none;-webkit-appearance:none;padding-right:18px; }
+    /* Kembalikan penyembunyian .ss-native (0,1,0) yang kalah oleh aturan toolbar
+       halaman seperti `.toolbar select` (0,2,0) — tanpa ini padding-nya ikut
+       terpasang dan select yang mestinya 1px membentang jadi 26px. */
+    .fd-panel .fd-field select.ss-native { width:1px;height:1px;padding:0;margin:-1px;border:0; }
     .fd-panel .fd-field .ss-trigger { padding-right:18px;min-height:19px; }
     .fd-panel .fd-field .ss-trigger::after { right:0; }
     .fd-panel .fd-field .ss { position:relative; }

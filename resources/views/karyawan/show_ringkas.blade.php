@@ -31,7 +31,9 @@
     }
     .profil-avatar img { width:100%;height:100%;object-fit:cover; }
     .profil-nama { font-size:20px;font-weight:700;color:var(--text-strong);line-height:1.25; }
-    .profil-jabatan { font-size:13px;color:var(--text-muted);margin-top:3px;max-width:60ch; }
+    /* Ditampilkan utuh; lebarnya saja yang dibatasi agar barisnya nyaman dibaca. */
+    .profil-jabatan { font-size:13.5px;font-weight:600;color:#374151;margin-top:3px;line-height:1.45;max-width:68ch; }
+    .profil-unit    { font-size:11.5px;color:var(--text-muted);line-height:1.5;margin-top:2px;max-width:68ch; }
     .profil-nik {
         display:inline-flex;align-items:center;gap:6px;margin-top:8px;
         font-size:var(--fs-xs);font-weight:700;color:var(--text-muted);
@@ -93,7 +95,11 @@
     </div>
     <div style="min-width:0;">
         <div class="profil-nama">{{ $karyawan->nama }}</div>
-        <div class="profil-jabatan">{{ $karyawan->jabatan_saat_ini ?: ($karyawan->jabatan->nama_jabatan ?? '-') }}</div>
+        {{-- Posisi dan unitnya dipisah; teks aslinya tetap utuh di atribut title. --}}
+        <div class="profil-jabatan" title="{{ $karyawan->jabatan_saat_ini }}">{{ $karyawan->jabatan_posisi ?: '-' }}</div>
+        @if($karyawan->jabatan_unit)
+            <div class="profil-unit" title="{{ $karyawan->jabatan_unit }}">{{ $karyawan->jabatan_unit }}</div>
+        @endif
         <span class="profil-nik">NIK {{ $karyawan->nik }}</span>
     </div>
 </div>

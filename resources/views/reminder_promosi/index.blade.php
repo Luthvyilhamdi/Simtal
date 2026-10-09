@@ -26,12 +26,7 @@
 <style>
     .page-header { margin-bottom:20px; }
     .page-title { font-size:20px;font-weight:700;color:#111827; }
-    .page-sub { font-size:13px;color:#6b7280;margin-top:4px; }
 
-    /* Legenda ringkas (gaya corporate) */
-    .rm-legend { display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:#9ca3af;margin-bottom:18px; }
-    .rm-legend .lg-star { color:#15803d;font-weight:700; }
-    .rm-legend .lg-sep { width:1px;height:12px;background:#e5e7eb;display:inline-block; }
 
     /* Panel karyawan yang disembunyikan (sudah diusulkan) */
     .hidden-panel { margin-top:16px;background:white;border:1px solid var(--card-border);border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden; }
@@ -137,15 +132,6 @@
 
 <div class="page-header">
     <div class="page-title">Reminder Daftar Promosi Karyawan</div>
-    <div class="page-sub">Karyawan yang sudah / akan memenuhi Masa Dinas Grade dalam {{ $windowBulan }} bulan ke depan, sekaligus seluruh nilai kalibrasi 2 tahun terakhir memenuhi syarat.</div>
-</div>
-
-<div class="rm-legend">
-    <span><span class="lg-star">★</span> Shortlist{{ $shortlistPeriode ? ' '.$shortlistPeriode : '' }} — ambang longgar (Band 2 / JG 1 thn)</span>
-    <span class="lg-sep"></span>
-    <span>Normal — Band 3 / JG 2 / PG 1 thn</span>
-    <span class="lg-sep"></span>
-    <span>Eligible = MDG terpenuhi <strong>&amp;</strong> <strong>semua</strong> kalibrasi 2 thn terakhir ∈ FEE/PEE/EXE/MEE/ME</span>
 </div>
 
 {{-- SUMMARY --}}

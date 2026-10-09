@@ -144,29 +144,41 @@
        tersebar rata, bukan menumpuk di tepi kanan. */
     .hh-tbl    { width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px;min-width:780px; }
 
-    .hh-tbl th:first-child, .hh-tbl td:first-child { text-align:left;padding-right:10px; }
-    .hh-tbl th:not(:first-child), .hh-tbl td:not(:first-child) { padding-left:10px; }
+    .hh-tbl th, .hh-tbl td { padding-left:16px; }
+    /* Hanya kolom label baris yang rata kiri. Sasarannya dibatasi ke baris
+       judul PERTAMA: di baris judul kedua, sel "Core" kebetulan jadi anak
+       pertama, dan dengan th:first-child ia ikut rata kiri — meleset 10px
+       dari angkanya. */
+    .hh-tbl thead tr:first-child th:first-child,
+    .hh-tbl tbody td:first-child { text-align:left;padding-left:0;padding-right:10px; }
 
     .hh-tbl th { font-size:9.5px;font-weight:700;color:#98a0ad;text-transform:uppercase;letter-spacing:.4px;
-                 padding:0 0 8px;text-align:right;line-height:1.35; }
-    .hh-tbl th.hh-grup { text-align:center;font-size:10px;color:#5b6472;letter-spacing:.6px;
-                         padding:7px 0 7px;background:#f7f8fa;border-radius:6px 6px 0 0; }
-    .hh-tbl thead tr:last-child th { border-bottom:1px solid #e4e7ec;padding-top:9px; }
+                 padding:0 0 8px;text-align:right;line-height:1.35;overflow-wrap:anywhere; }
+    .hh-tbl th.hh-grup { text-align:center;font-size:10px;font-weight:700;color:#4b5563;letter-spacing:.7px;
+                         padding:8px 0;background:#f4f6f8;border-radius:6px 6px 0 0; }
+    .hh-tbl thead tr:last-child th { border-bottom:1px solid #dfe3e8;padding-top:10px; }
+    /* Judul ber-rowspan (Band, Kategori, MC/TKO) menempel ke bawah supaya
+       sebaris dengan judul kolom di baris kedua, bukan mengambang di tengah. */
+    .hh-tbl thead th[rowspan] { vertical-align:bottom;border-bottom:1px solid #dfe3e8; }
 
-    .hh-tbl td { padding:9px 0;border-bottom:1px solid #f4f5f7;text-align:right;color:#4b5563;
+    .hh-tbl td { padding:10px 0;border-bottom:1px solid #f2f4f6;text-align:right;color:#4b5563;
                  font-variant-numeric:tabular-nums;white-space:nowrap; }
-    .hh-tbl td:first-child { font-weight:600;color:#111827; }
+    .hh-tbl td:first-child { font-weight:600;color:#111827;letter-spacing:.1px; }
     .hh-tbl tbody tr:last-child td { border-bottom:0; }
     /* Sorotan baris membantu menelusuri angka di tabel selebar ini. */
     .hh-tbl tbody tr:hover td { background:#fafbfc; }
-    .hh-tbl tbody tr.hh-total:hover td { background:transparent; }
-    .hh-tbl tr.hh-total td { font-weight:800;color:#111827;border-top:1.5px solid #e4e7ec;
-                             border-bottom:0;padding-top:11px; }
+    .hh-tbl tr.hh-total td { font-weight:800;color:#111827;background:#f8fafb;
+                             border-top:1.5px solid #dfe3e8;border-bottom:0;padding:12px 0; }
+    .hh-tbl tbody tr.hh-total:hover td { background:#f8fafb; }
 
-    /* Garis pemisah antar kelompok kolom */
-    .hh-tbl th.hh-sep, .hh-tbl td.hh-sep { border-left:1px solid #eceef1; }
+    /* Pemisah antar kelompok kolom: garis + jarak, supaya terbaca sebagai blok */
+    .hh-tbl th.hh-sep, .hh-tbl td.hh-sep { border-left:1px solid #e4e7ec;padding-left:26px; }
+
+    /* Persentase menempel pada angka yang dijelaskannya, bukan mengambang sendiri */
+    .hh-tbl th.hh-pct-h, .hh-tbl td.hh-pct { padding-left:7px; }
 
     .hh-isi { font-weight:700;color:#111827; }
+    .hh-nol { color:#cbd2d9;font-weight:500; }
     .hh-pct { font-weight:600;color:#8b93a1; }
     .hh-pct.kurang { color:#dc2626;font-weight:700; }
     .hh-pct.lebih  { color:#d97706;font-weight:700; }
@@ -544,10 +556,10 @@ $hhBaris = [
   <div class="hh-scroll">
     <table class="hh-tbl">
       <colgroup>
-        <col style="width:22%">
-        <col style="width:11%">
-        <col span="3" style="width:11.2%">
-        <col span="3" style="width:11.2%">
+        <col style="width:24%">
+        <col style="width:10%">
+        <col span="3" style="width:11%">
+        <col span="3" style="width:11%">
       </colgroup>
       <thead>
         <tr>
@@ -557,8 +569,8 @@ $hhBaris = [
           <th class="hh-grup hh-sep" colspan="3">Host</th>
         </tr>
         <tr>
-          <th class="hh-sep">Terisi</th><th>Deviasi</th><th>%</th>
-          <th class="hh-sep">Terisi</th><th>Deviasi</th><th>%</th>
+          <th class="hh-sep">Terisi</th><th>Deviasi</th><th class="hh-pct-h">%</th>
+          <th class="hh-sep">Terisi</th><th>Deviasi</th><th class="hh-pct-h">%</th>
         </tr>
       </thead>
       <tbody>
@@ -597,9 +609,15 @@ $hhBaris = [
   <div class="hh-scroll">
     <table class="hh-tbl">
       <colgroup>
+        <col style="width:8%">
+        <col style="width:10%">
+        <col style="width:11%">
+        <col style="width:10%">
+        <col style="width:11%">
+        <col style="width:10%">
+        <col style="width:15%">
+        <col style="width:12%">
         <col style="width:13%">
-        <col span="5" style="width:10.6%">
-        <col span="3" style="width:11.3%">
       </colgroup>
       <thead>
         <tr>
@@ -608,8 +626,8 @@ $hhBaris = [
           <th class="hh-grup hh-sep" colspan="3">Penugasan</th>
         </tr>
         <tr>
-          <th>Core</th><th>% Core</th><th>Non Core</th><th>% Non Core</th><th>Total</th>
-          <th class="hh-sep">Anper/Cuper/Yayasan</th><th>PI Group</th><th>Total</th>
+          <th>Core</th><th class="hh-pct-h">% Core</th><th>Non Core</th><th class="hh-pct-h">% Non Core</th><th>Total</th>
+          <th class="hh-sep">Anper / Cuper / Yayasan</th><th>PI Group</th><th>Total</th>
         </tr>
       </thead>
       <tbody>
@@ -621,9 +639,9 @@ $hhBaris = [
             <td class="hh-isi">{{ $v['non_core'] }}</td>
             <td class="hh-pct">{{ $kbPersen($v['persen_non_core']) }}</td>
             <td class="hh-isi">{{ $v['total_induk'] }}</td>
-            <td class="hh-sep">{{ $v['anper'] ?: '0' }}</td>
-            <td>{{ $v['pi_group'] ?: '0' }}</td>
-            <td class="hh-isi">{{ $v['total_penugasan'] ?: '0' }}</td>
+            <td class="hh-sep {{ $v['anper'] ? '' : 'hh-nol' }}">{{ $v['anper'] }}</td>
+            <td class="{{ $v['pi_group'] ? '' : 'hh-nol' }}">{{ $v['pi_group'] }}</td>
+            <td class="{{ $v['total_penugasan'] ? 'hh-isi' : 'hh-nol' }}">{{ $v['total_penugasan'] }}</td>
           </tr>
         @endforeach
         @php $kt = $komposisi['total']; @endphp
@@ -653,9 +671,14 @@ $hhBaris = [
   <div class="hh-scroll">
     <table class="hh-tbl">
       <colgroup>
-        <col style="width:14%">
-        <col span="5" style="width:11.6%">
-        <col span="2" style="width:14%">
+        <col style="width:9%">
+        <col style="width:10.5%">
+        <col style="width:12%">
+        <col style="width:10.5%">
+        <col style="width:12%">
+        <col style="width:10%">
+        <col style="width:17%">
+        <col style="width:19%">
       </colgroup>
       <thead>
         <tr>
@@ -664,7 +687,7 @@ $hhBaris = [
           <th class="hh-grup hh-sep" colspan="2">Penugasan Masuk</th>
         </tr>
         <tr>
-          <th>Core</th><th>% Core</th><th>Non Core</th><th>% Non Core</th><th>Total</th>
+          <th>Core</th><th class="hh-pct-h">% Core</th><th>Non Core</th><th class="hh-pct-h">% Non Core</th><th>Total</th>
           <th class="hh-sep">Jumlah</th><th>Total Host</th>
         </tr>
       </thead>
@@ -677,7 +700,7 @@ $hhBaris = [
             <td class="hh-isi">{{ $v['non_core'] }}</td>
             <td class="hh-pct">{{ $kbPersen($v['persen_non_core']) }}</td>
             <td class="hh-isi">{{ $v['total_pim'] }}</td>
-            <td class="hh-sep">{{ $v['masuk'] }}</td>
+            <td class="hh-sep {{ $v['masuk'] ? '' : 'hh-nol' }}">{{ $v['masuk'] }}</td>
             <td class="hh-isi">{{ $v['total_host'] }}</td>
           </tr>
         @endforeach

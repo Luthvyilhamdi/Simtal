@@ -514,6 +514,50 @@ class Karyawan extends Model
         return $c !== '' ? $c : null;
     }
 
+    // ===== PEMECAHAN JABATAN SAAT INI =====
+    // jabatan_saat_ini disimpan sebagai satu kalimat panjang berisi posisi
+    // DAN unitnya, mis. "Pjs. Junior Assistant Vice President Bengkel Listrik
+    // & Instrument, Bagian Bengkel Listrik & Instrument, Departemen
+    // Pemeliharaan Mekanik, Listrik & Instrument" — 157 karakter.
+    //
+    // Memotong di koma PERTAMA merusak 21 jabatan yang nama posisinya memang
+    // berkoma ("Vice President Pemeliharaan Mekanik, Listrik & Instrument"
+    // jadi "...Mekanik"). Karena itu pemotongnya adalah koma yang DIIKUTI
+    // kata unit; kalau tidak ada, seluruh teks dianggap posisi.
+    private const PENANDA_UNIT = '/,\s*(?=(Bagian|Seksi|Departemen|Dept\.?|Kompartemen|Komp\.?|Direktorat|Dir\.?|Fungsional|Unit|Divisi|PT)\b)/i';
+
+    /** Nama posisi dari sebuah teks jabatan, tanpa rangkaian unitnya. */
+    public static function posisiDari(?string $teks): ?string
+    {
+        $teks = trim((string) $teks);
+        if ($teks === '') return null;
+
+        return trim(preg_split(self::PENANDA_UNIT, $teks, 2)[0]);
+    }
+
+    /** Rangkaian unit dari sebuah teks jabatan; null kalau tidak ada. */
+    public static function unitDari(?string $teks): ?string
+    {
+        $teks = trim((string) $teks);
+        if ($teks === '') return null;
+
+        $bagian = preg_split(self::PENANDA_UNIT, $teks, 2);
+
+        return isset($bagian[1]) ? trim($bagian[1]) : null;
+    }
+
+    /** Nama posisinya saja, tanpa rangkaian unit di belakangnya. */
+    public function getJabatanPosisiAttribute(): ?string
+    {
+        return self::posisiDari($this->jabatan_saat_ini ?: $this->jabatan->nama_jabatan ?? '');
+    }
+
+    /** Rangkaian unit di belakang nama posisi; null kalau tidak ada. */
+    public function getJabatanUnitAttribute(): ?string
+    {
+        return self::unitDari($this->jabatan_saat_ini);
+    }
+
     /**
      * URL WhatsApp dari no_hp (dinormalkan ke format internasional 62…).
      * "08123…" → "628123…", "+62…"/"62…" tetap, "8123…" → "628123…".
