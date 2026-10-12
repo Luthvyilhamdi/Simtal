@@ -252,7 +252,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
 .sk-lbl { display:block; font-size:11px; font-weight:700; color:#6b7280; margin-bottom:4px; }
 .sk-req { color:#9ca3af; font-weight:700; }
 .sk-note { font-size:11px; color:#9ca3af; margin:-2px 0 4px; }
-.sk-inp { width:100%; border:1.5px solid #e5e7eb; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; color:#111827; outline:none; background:white; }
+.sk-inp { width:100%; min-width:0; border:1.5px solid #e5e7eb; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; color:#111827; outline:none; background:white; }
 .sk-inp:focus { border-color:#16a34a; box-shadow:0 0 0 2px rgba(22,163,74,.08); }
 /* Nilai yang hanya dibaca — melipat penuh, tidak dipotong seperti <input>. */
 .sk-ro { border:1.5px solid #eef0f3; border-radius:8px; padding:8px 10px; font-size:13px; line-height:1.45;
@@ -319,10 +319,10 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
         <form id="skForm" method="POST">
             @csrf
             @method('PATCH')
-            <div style="display:grid;gap:12px;margin-top:10px">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:10px">
                 {{-- Nomor SK & TMT dipasangkan: isinya sama-sama pendek, kalau
                      masing-masing selebar penuh modalnya terasa melar. --}}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
                     <div>
                         <label class="sk-lbl">Nomor SK <span class="sk-req">*</span></label>
                         <input type="text" name="no_sk" id="skNoSk" class="sk-inp" placeholder="cth: 123/SK/DIR/2026" required>
@@ -338,7 +338,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                          akan terpotong tanpa bisa dibaca. Blok ini melipat. --}}
                     <div id="skJabatanInfo" class="sk-ro">—</div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
                     <div>
                         <label class="sk-lbl">Job Grade <span class="sk-req">*</span></label>
                         <select name="job_grade_id" id="skJg" class="sk-inp select-search" required>
@@ -376,7 +376,7 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                         @endforeach
                     </select>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
                     <div>
                         <label class="sk-lbl">Kompartemen <span class="sk-req">*</span></label>
                         <select name="kompartemen_id" id="skKomp" class="sk-inp select-search" required>
