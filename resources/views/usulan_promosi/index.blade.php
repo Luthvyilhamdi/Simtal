@@ -254,6 +254,9 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
 .sk-note { font-size:11px; color:#9ca3af; margin:-2px 0 4px; }
 .sk-inp { width:100%; border:1.5px solid #e5e7eb; border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; color:#111827; outline:none; background:white; }
 .sk-inp:focus { border-color:#16a34a; box-shadow:0 0 0 2px rgba(22,163,74,.08); }
+/* Nilai yang hanya dibaca — melipat penuh, tidak dipotong seperti <input>. */
+.sk-ro { border:1.5px solid #eef0f3; border-radius:8px; padding:8px 10px; font-size:13px; line-height:1.45;
+         color:#111827; background:#f9fafb; word-break:break-word; }
 .btn-sk { padding:6px 12px; background:#15803d; color:white; border:none; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; display:inline-flex; align-items:center; gap:5px; }
 .btn-sk:hover { background:#166534; }
 .btn-sk svg { width:11px; height:11px; stroke:white; fill:none; stroke-width:2; }
@@ -317,18 +320,23 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
             @csrf
             @method('PATCH')
             <div style="display:grid;gap:12px;margin-top:10px">
-                <div>
-                    <label class="sk-lbl">Nomor SK <span class="sk-req">*</span></label>
-                    <input type="text" name="no_sk" id="skNoSk" class="sk-inp" placeholder="cth: 123/SK/DIR/2026" required>
-                </div>
-                <div>
-                    <label class="sk-lbl">TMT — Tanggal Mulai Berlaku <span class="sk-req">*</span></label>
-                    <input type="date" name="tmt" id="skTmt" class="sk-inp" required>
+                {{-- Nomor SK & TMT dipasangkan: isinya sama-sama pendek, kalau
+                     masing-masing selebar penuh modalnya terasa melar. --}}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div>
+                        <label class="sk-lbl">Nomor SK <span class="sk-req">*</span></label>
+                        <input type="text" name="no_sk" id="skNoSk" class="sk-inp" placeholder="cth: 123/SK/DIR/2026" required>
+                    </div>
+                    <div>
+                        <label class="sk-lbl">TMT <span class="sk-req">*</span></label>
+                        <input type="date" name="tmt" id="skTmt" class="sk-inp" required>
+                    </div>
                 </div>
                 <div>
                     <label class="sk-lbl">Jabatan Tujuan</label>
-                    <input type="text" id="skJabatanInfo" class="sk-inp" style="background:#f9fafb" readonly>
-                    <div style="font-size:11px;color:#9ca3af;margin-top:4px">Diambil dari usulan — dipakai otomatis saat SK terbit.</div>
+                    {{-- Bukan <input>: nama jabatan rata-rata 100+ karakter dan
+                         akan terpotong tanpa bisa dibaca. Blok ini melipat. --}}
+                    <div id="skJabatanInfo" class="sk-ro">—</div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                     <div>
@@ -391,10 +399,6 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                 <div>
                     <label class="sk-lbl">Keterangan (opsional)</label>
                     <input type="text" name="keterangan" class="sk-inp" placeholder="Catatan tambahan...">
-                </div>
-                <div style="display:flex;gap:8px;font-size:11px;color:#6b7280;background:#fafafa;border:1px solid #f3f4f6;border-radius:8px;padding:9px 11px;line-height:1.5">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="#9ca3af" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <div>Jabatan tujuan diambil dari usulan. Menyimpan akan otomatis membuat <strong>history jabatan baru</strong> (tipe: promosi) &amp; memperbarui <strong>posisi terkini karyawan</strong>. Jika jabatan tujuan termasuk tingkat pejabat (SVP/VP/SPM/PM), otomatis tercatat di Pejabat Definitif.</div>
                 </div>
             </div>
             <div class="modal-acts" style="margin-top:18px">
@@ -905,7 +909,8 @@ function openSk(btn) {
     document.getElementById('skTmt').value = '';
     document.getElementById('skKode').value = '';
     // jabatan tujuan tampil read-only; dipakai otomatis dari usulan saat terbit SK
-    document.getElementById('skJabatanInfo').value = d.jab || '';
+    // Elemennya kini <div>, bukan <input> — diisi lewat textContent.
+    document.getElementById('skJabatanInfo').textContent = d.jab || '—';
     preselectSk('skJg', 'data-val', d.jg);
     preselectSk('skPg', 'data-val', d.pg);
     // unit langsung pakai ID (default = unit tujuan usulan)
