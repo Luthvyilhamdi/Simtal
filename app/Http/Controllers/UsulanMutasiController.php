@@ -116,9 +116,9 @@ class UsulanMutasiController extends Controller
     public function terbitkanSk(Request $request, UsulanMutasi $usulanMutasi)
     {
         $request->validate([
-            'no_sk'      => 'required|string|max:255',
-            'tmt'        => 'required|date',
-            'keterangan' => 'nullable|string|max:1000',
+            'no_sk'           => 'required|string|max:255',
+            'tmt'             => 'required|date',
+            'keterangan'      => 'nullable|string|max:1000',
         ]);
 
         if ($usulanMutasi->sk_diproses) {
@@ -134,6 +134,23 @@ class UsulanMutasiController extends Controller
 
         if (!$usulanMutasi->jabatan_tujuan_id || !$karyawan->job_grade_id || !$karyawan->person_grade_id) {
             return back()->with('error', 'Data jabatan tujuan / grade karyawan belum lengkap.');
+        }
+
+        // Rotasi/mutasi ke jabatan DAN unit yang sama persis tidak memindahkan
+        // apa pun — JG & PG pun disalin apa adanya — jadi baris riwayat yang
+        // terbentuk benar-benar kembar. Ditahan sampai penerbitnya menyatakan
+        // itu memang disengaja. Dicek lagi di sini, bukan hanya di layar,
+        // karena centang di layar bisa dilewati.
+        $jabatanSama = $karyawan->jabatanSamaDengan(
+            $namaJabatan,
+            $usulanMutasi->direktorat_tujuan_id,
+            $usulanMutasi->kompartemen_tujuan_id,
+            $usulanMutasi->departemen_tujuan_id,
+        );
+        if ($jabatanSama && !$request->boolean('konfirmasi_sama')) {
+            return back()->with('error',
+                'Jabatan dan unit tujuan sama persis dengan yang dipangku sekarang. '
+                . 'Centang konfirmasi di form kalau SK ini memang disengaja demikian.');
         }
 
         DB::transaction(function () use ($request, $usulanMutasi, $karyawan, $namaJabatan, $tmt) {

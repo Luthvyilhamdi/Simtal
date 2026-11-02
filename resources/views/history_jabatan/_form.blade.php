@@ -33,7 +33,6 @@
     .mdj-check:hover { border-color:#bbf7d0;background:#f0fdf4; }
     .mdj-check input[type=checkbox] { margin-top:2px;width:16px;height:16px;accent-color:#16a34a;flex-shrink:0;cursor:pointer; }
     .mdj-check-title { font-size:13px;font-weight:600;color:#111827; }
-    .mdj-check-sub { display:block;font-size:11px;color:#9ca3af;margin-top:3px;line-height:1.5; }
     .select-wrap { position:relative; }
     .select-wrap::after { content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #9ca3af;pointer-events:none; }
     .select-wrap select { appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;width:100%; }
@@ -281,10 +280,7 @@
                 <label class="mdj-check">
                     <input type="hidden" name="lanjut_mdj" value="0">
                     <input type="checkbox" name="lanjut_mdj" value="1" {{ old('lanjut_mdj', $h?->lanjut_mdj) ? 'checked' : '' }}>
-                    <span>
-                        <span class="mdj-check-title">Jabatan ini sama dengan sebelumnya — lanjutkan Masa Dinas Jabatan</span>
-                        <span class="mdj-check-sub">Centang bila jabatan ini kelanjutan (mis. hanya berganti nama karena perubahan SO; band &amp; pekerjaan sama). <strong>Jangan</strong> dicentang bila ini jabatan baru — promosi atau beda ranah. Catatan: bila <strong>band berubah</strong>, MDJ tetap dihitung ulang otomatis walau ini dicentang.</span>
-                    </span>
+                    <span class="mdj-check-title">Jabatan ini sama dengan sebelumnya — lanjutkan Masa Dinas Jabatan</span>
                 </label>
             </div>
         </div>

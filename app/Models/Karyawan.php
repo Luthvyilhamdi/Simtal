@@ -559,6 +559,51 @@ class Karyawan extends Model
     }
 
     /**
+     * Apakah jabatan tujuan sebuah usulan SAMA PERSIS dengan yang dipangku
+     * sekarang — posisi maupun unitnya?
+     *
+     * Dipakai Usulan Promosi dan Usulan Rotasi/Mutasi sebelum SK terbit.
+     * Menerbitkan SK selalu menutup riwayat lama lalu membuat baris riwayat
+     * baru; kalau ternyata tidak ada yang berpindah, satu jabatan terpecah
+     * jadi dua baris padahal orangnya tidak ke mana-mana.
+     *
+     * Yang dibandingkan TEKS jabatannya, bukan jabatan_id. Master jabatan di
+     * sini adalah master TINGKATAN ("Vice President (VP)", "Officer", …)
+     * — 57 baris untuk 657 karyawan — sehingga jabatan_id yang sama cuma
+     * berarti setingkat, bukan posisi yang sama.
+     *
+     * Unit ikut ditimbang karena posisi bernama sama di unit berbeda adalah
+     * rotasi yang sungguhan. Unit yang tidak diisi usulan (null) dilewati:
+     * tidak diketahui, bukan berarti berbeda.
+     */
+    public function jabatanSamaDengan(
+        ?string $teksTujuan,
+        ?int $direktoratId = null,
+        ?int $kompartemenId = null,
+        ?int $departemenId = null,
+    ): bool {
+        $rapikan  = fn (?string $t) => mb_strtolower(preg_replace('/\s+/', ' ', trim((string) $t)));
+        $tujuan   = $rapikan($teksTujuan);
+        $sekarang = $rapikan($this->jabatan_saat_ini);
+
+        if ($tujuan === '' || $tujuan !== $sekarang) {
+            return false;
+        }
+
+        foreach ([
+            [$direktoratId,  $this->direktorat_id],
+            [$kompartemenId, $this->kompartemen_id],
+            [$departemenId,  $this->departemen_id],
+        ] as [$tujuanUnit, $unitSekarang]) {
+            if ($tujuanUnit !== null && (int) $tujuanUnit !== (int) $unitSekarang) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * URL WhatsApp dari no_hp (dinormalkan ke format internasional 62…).
      * "08123…" → "628123…", "+62…"/"62…" tetap, "8123…" → "628123…".
      */

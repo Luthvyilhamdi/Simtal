@@ -316,9 +316,17 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                     <label class="sk-lbl">Keterangan (opsional)</label>
                     <input type="text" name="keterangan" class="sk-inp" placeholder="Catatan tambahan...">
                 </div>
-                <div style="display:flex;gap:8px;font-size:11px;color:#6b7280;background:#fafafa;border:1px solid #f3f4f6;border-radius:8px;padding:9px 11px;line-height:1.5">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="#9ca3af" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <div>Posisi tujuan sudah dipilih saat usulan dibuat. Menyimpan akan membuat <strong>history jabatan baru</strong> (tipe mengikuti jenis usulan: rotasi/mutasi) &amp; memperbarui posisi karyawan. <strong>Job Grade &amp; Person Grade tidak berubah.</strong></div>
+                {{-- Hanya muncul bila jabatan DAN unit tujuan sama persis dengan
+                     yang dipangku sekarang. Ditahan di sini dan di controller. --}}
+                <div id="skSamaBox" style="display:none;gap:9px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 11px">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#c2410c" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <div>
+                        <div style="font-size:12px;font-weight:700;color:#9a3412">Jabatan &amp; unit tujuan sama dengan sekarang</div>
+                        <label style="display:flex;align-items:center;gap:7px;margin-top:8px;font-size:11px;font-weight:600;color:#9a3412;cursor:pointer">
+                            <input type="checkbox" name="konfirmasi_sama" id="skKonfirmasiSama" value="1" disabled style="margin:0;flex-shrink:0;accent-color:#ea580c">
+                            <span>Ya, memang disengaja</span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="modal-acts" style="margin-top:18px">
@@ -511,6 +519,7 @@ $warnaTahap = [
                             data-url="{{ route('usulan_mutasi.terbitkan_sk', $u) }}"
                             data-nama="{{ $u->karyawan->nama }}"
                             data-jenis="{{ $u->jenis_label }}"
+                            data-sama="{{ $u->karyawan->jabatanSamaDengan($u->jabatan_tujuan, $u->direktorat_tujuan_id, $u->kompartemen_tujuan_id, $u->departemen_tujuan_id) ? '1' : '0' }}"
                             onclick="openSk(this)">
                             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                             Terbit SK
@@ -629,6 +638,17 @@ function openSk(btn) {
     document.getElementById('skJenis').textContent = d.jenis || '';
     document.getElementById('skNoSk').value = '';
     document.getElementById('skTmt').value = '';
+
+    // required hanya dipasang saat kotaknya terlihat; kalau tidak, peramban
+    // menolak submit karena kolom tersembunyi yang wajib diisi.
+    const sama = d.sama === '1';
+    const kotak = document.getElementById('skSamaBox');
+    const cek   = document.getElementById('skKonfirmasiSama');
+    kotak.style.display = sama ? 'flex' : 'none';
+    cek.checked  = false;
+    cek.disabled = !sama;
+    cek.required = sama;
+
     document.getElementById('skModal').classList.add('show');
     document.body.style.overflow = 'hidden';
 }

@@ -337,6 +337,12 @@ mark { background: transparent; padding: 0; color: inherit; font-weight: 700; } 
                     {{-- Bukan <input>: nama jabatan rata-rata 100+ karakter dan
                          akan terpotong tanpa bisa dibaca. Blok ini melipat. --}}
                     <div id="skJabatanInfo" class="sk-ro">—</div>
+                    {{-- Muncul hanya bila jabatan & unit tujuan sama dengan sekarang.
+                         Tidak menahan: naik grade tanpa pindah jabatan itu wajar. --}}
+                    <div id="skSamaBox" style="display:none;gap:8px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:9px 11px;margin-top:6px">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#c2410c" fill="none" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <div style="font-size:11px;font-weight:600;color:#9a3412;line-height:1.5">Sama dengan jabatan sekarang.</div>
+                    </div>
                 </div>
                 <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
                     <div>
@@ -744,6 +750,7 @@ $warnaTahap = [
                                 data-dir="{{ $u->direktorat_tujuan_id ?? $u->karyawan->direktorat_id }}"
                                 data-komp="{{ $u->kompartemen_tujuan_id ?? $u->karyawan->kompartemen_id }}"
                                 data-dept="{{ $u->departemen_tujuan_id ?? $u->karyawan->departemen_id }}"
+                                data-sama="{{ $u->karyawan->jabatanSamaDengan($u->jabatan_tujuan, $u->direktorat_tujuan_id, $u->kompartemen_tujuan_id, $u->departemen_tujuan_id) ? '1' : '0' }}"
                                 onclick="openSk(this)">
                                 <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                                 Terbit SK
@@ -911,6 +918,7 @@ function openSk(btn) {
     // jabatan tujuan tampil read-only; dipakai otomatis dari usulan saat terbit SK
     // Elemennya kini <div>, bukan <input> — diisi lewat textContent.
     document.getElementById('skJabatanInfo').textContent = d.jab || '—';
+    document.getElementById('skSamaBox').style.display = d.sama === '1' ? 'flex' : 'none';
     preselectSk('skJg', 'data-val', d.jg);
     preselectSk('skPg', 'data-val', d.pg);
     // unit langsung pakai ID (default = unit tujuan usulan)
