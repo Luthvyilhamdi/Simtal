@@ -57,7 +57,8 @@
     .pcard-meta { font-size:11.5px;color:#9ca3af;font-weight:600; }
     .pcard-pangku { font-size:12.5px;color:#4b5563;margin-top:6px;line-height:1.45; }
     .pcard-pangku b { color:#111827;font-weight:600; }
-    .pcard-sejak { font-size:11.5px;color:#9ca3af;margin-top:2px; }
+    .pcard-sejak { font-size:13px;color:#6b7280;margin-top:4px;line-height:1.45; }
+    .pcard-sejak b { color:#374151;font-weight:600; }
 
     /* Dua syarat ditampilkan berdampingan, lulus/belum terbaca dari warnanya */
     .syarat { display:flex;gap:9px;flex-wrap:wrap;margin-top:11px; }
@@ -182,7 +183,8 @@
             <div class="pcard-pangku">Memangku <b>{{ $i['posisi_pjs'] ?: '-' }}</b></div>
             <div class="pcard-sejak">
                 @if($i['pjs']->tanggal_mulai)
-                    Sejak {{ \Carbon\Carbon::parse($i['pjs']->tanggal_mulai)->translatedFormat('d M Y') }} · {{ $bulanKe($i['lama_bulan']) }}
+                    Sejak <b>{{ \Carbon\Carbon::parse($i['pjs']->tanggal_mulai)->translatedFormat('d M Y') }}</b>
+                    · {{ \App\Models\Karyawan::formatMdgLengkap($i['pjs']->tanggal_mulai) }} memangku
                 @else
                     Tanggal mulai belum diisi
                 @endif
@@ -190,16 +192,21 @@
             </div>
 
             <div class="syarat">
-                {{-- Syarat 1: MDG --}}
-                <span class="sy {{ $i['mdg_ok'] ? 'ok' : 'belum' }}">
-                    @if($i['mdg_ok'])
-                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                        MDG terpenuhi
-                    @else
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        MDG <span class="sy-sub">kurang {{ $i['sisa_mdg'] }} bulan</span>
-                    @endif
-                </span>
+                {{-- Syarat 1: MDG — JG dan PG dinilai sendiri-sendiri, keduanya wajib --}}
+                @foreach([
+                    ['JG', $i['mdg_jg_ok'], $i['mdg_jg_bulan'], $i['min_mdg_jg']],
+                    ['PG', $i['mdg_pg_ok'], $i['mdg_pg_bulan'], $i['min_mdg_pg']],
+                ] as [$jenis, $ok, $bulan, $min])
+                    <span class="sy {{ $ok ? 'ok' : 'belum' }}">
+                        @if($ok)
+                            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        @else
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        @endif
+                        MDG {{ $jenis }} {{ $bulan }} bln
+                        <span class="sy-sub">· min {{ $min }}{{ $jenis === 'JG' && $i['is_shortlist'] ? ' ✦' : '' }}</span>
+                    </span>
+                @endforeach
 
                 {{-- Syarat 2: assessment — dua sumber, salah satu memenuhi sudah cukup --}}
                 <span class="sy {{ $i['assessment_ok'] ? 'ok' : 'belum' }}">

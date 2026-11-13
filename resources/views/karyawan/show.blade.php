@@ -72,6 +72,17 @@
     .badge-amber  { background:#fffbeb;color:#d97706; }
 
     .band-card { background:white;border-radius:14px;border:1px solid var(--card-border);padding:22px;margin-bottom:16px;box-shadow:var(--card-shadow); }
+    .pjs-mulai { display:flex;align-items:center;gap:11px;background:#f9fafb;border:1px solid var(--card-border);
+                 border-radius:11px;padding:11px 14px;margin-bottom:16px; }
+    .pjs-tag { background:#fef3c7;color:#b45309;border-radius:6px;padding:3px 8px;
+               font-size:10px;font-weight:800;letter-spacing:.04em;flex-shrink:0; }
+    .pjs-isi { flex:1;min-width:0; }
+    .pjs-tanggal { font-size:12.5px;color:#374151;line-height:1.45; }
+    .pjs-lama { color:#9ca3af; }
+    .pjs-jabatan { font-size:11.5px;color:#9ca3af;line-height:1.4;margin-top:1px;
+                   overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .pjs-sk { font-size:11px;font-weight:600;color:#6b7280;flex-shrink:0; }
+
     .mdg-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px; }
     .mdg-item { text-align:center;background:#f9fafb;border-radius:11px;padding:14px 10px; }
     .mdg-num { font-size:22px;font-weight:800;color:#111827; }
@@ -411,6 +422,36 @@
         </div>
     </div>
 
+    {{-- Mulai PJS: lamanya memangku PJS dibaca bersama MDG, jadi ditaruh di
+         kartu yang sama. Dari data PGS & PJS, bukan kolom tersendiri. --}}
+    @php
+        $pjsAktif = $karyawan->pgsPjs
+            ->where('is_active', true)
+            ->where('tipe', 'pjs')
+            ->sortByDesc('tanggal_mulai')
+            ->first();
+    @endphp
+    @if($pjsAktif)
+        <div class="pjs-mulai">
+            <span class="pjs-tag">PJS</span>
+            <div class="pjs-isi">
+                <div class="pjs-tanggal">
+                    Mulai
+                    <strong>{{ $pjsAktif->tanggal_mulai
+                        ? \Carbon\Carbon::parse($pjsAktif->tanggal_mulai)->translatedFormat('d M Y')
+                        : 'belum diisi' }}</strong>
+                    @if($pjsAktif->tanggal_mulai)
+                        <span class="pjs-lama">· {{ \App\Models\Karyawan::formatMdgLengkap($pjsAktif->tanggal_mulai) }} memangku</span>
+                    @endif
+                    @if($pjsAktif->tanggal_berakhir)
+                        <span class="pjs-lama">· s/d {{ \Carbon\Carbon::parse($pjsAktif->tanggal_berakhir)->translatedFormat('d M Y') }}</span>
+                    @endif
+                </div>
+                <div class="pjs-jabatan">{{ \App\Models\Karyawan::posisiDari($pjsAktif->jabatan_pgs_pjs) ?: '-' }}</div>
+            </div>
+            @if($pjsAktif->no_sk)<span class="pjs-sk">SK {{ $pjsAktif->no_sk }}</span>@endif
+        </div>
+    @endif
     <div class="mdg-grid">
         <div class="mdg-item {{ $jgOk ? 'mdg-border-ok' : 'mdg-border-warn' }}">
             <div class="mdg-label">MDG Job Grade</div>

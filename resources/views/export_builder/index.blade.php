@@ -253,55 +253,27 @@
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Direktorat</label>
-                    <select name="direktorat_id" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($direktorats as $d)
-                            <option value="{{ $d->id }}" {{ old('direktorat_id')==$d->id?'selected':'' }}>{{ $d->nama_direktorat }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="direktorat_id" label="Direktorat"
+                                :options="$direktorats->pluck('nama_direktorat', 'id')"
+                                :selected="old('direktorat_id', [])" />
 
-                <div class="field">
-                    <label>Kompartemen</label>
-                    <select name="kompartemen_id" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($kompartemens as $d)
-                            <option value="{{ $d->id }}" {{ old('kompartemen_id')==$d->id?'selected':'' }}>{{ $d->nama_kompartemen }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="kompartemen_id" label="Kompartemen"
+                                :options="$kompartemens->pluck('nama_kompartemen', 'id')"
+                                :selected="old('kompartemen_id', [])"
+                                induk="direktorat_id" :peta="$petaKompartemen" />
 
-                <div class="field">
-                    <label>Departemen</label>
-                    <select name="departemen_id" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($departemens as $d)
-                            <option value="{{ $d->id }}" {{ old('departemen_id')==$d->id?'selected':'' }}>{{ $d->nama_departemen }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="departemen_id" label="Departemen"
+                                :options="$departemens->pluck('nama_departemen', 'id')"
+                                :selected="old('departemen_id', [])"
+                                induk="kompartemen_id" :peta="$petaDepartemen" />
 
-                <div class="field">
-                    <label>Band</label>
-                    <select name="band" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($bandList as $b)
-                            <option value="{{ $b }}" {{ old('band')==$b?'selected':'' }}>{{ $b }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="band" label="Band"
+                                :options="array_combine($bandList, $bandList)"
+                                :selected="old('band', [])" />
 
-                <div class="field">
-                    <label>Status Kepegawaian</label>
-                    <select name="status_kepegawaian" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($statusKepegawaianList as $s)
-                            <option value="{{ $s }}" {{ old('status_kepegawaian')==$s?'selected':'' }}>{{ $s }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="status_kepegawaian" label="Status Kepegawaian"
+                                :options="$statusKepegawaianList->combine($statusKepegawaianList)"
+                                :selected="old('status_kepegawaian', [])" />
 
                 <div class="field">
                     <label>Jenis Kelamin</label>
@@ -312,15 +284,9 @@
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Jenjang Pendidikan</label>
-                    <select name="jenjang" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($jenjangList as $j)
-                            <option value="{{ $j }}" {{ old('jenjang')==$j?'selected':'' }}>{{ $j }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="jenjang" label="Jenjang Pendidikan"
+                                :options="array_combine($jenjangList, $jenjangList)"
+                                :selected="old('jenjang', [])" />
 
                 <div class="field">
                     <label>Kelengkapan TMT</label>
@@ -331,15 +297,9 @@
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Tier Pejabat</label>
-                    <select name="tier" class="select-search">
-                        <option value="">Semua</option>
-                        @foreach($tierList as $t)
-                            <option value="{{ $t }}" {{ old('tier')==$t?'selected':'' }}>{{ $t }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-multi-select name="tier" label="Tier Pejabat"
+                                :options="array_combine($tierList, $tierList)"
+                                :selected="old('tier', [])" />
 
                 <div class="field">
                     <label>Pilih Karyawan (opsional)</label>
@@ -432,6 +392,7 @@
 
 <script>
     const exportForm = document.getElementById('exportForm');
+
     const previewRoute = "{{ route('export_builder.preview') }}";
     const previewBtnDefault = document.getElementById('previewBtn').innerHTML;
 

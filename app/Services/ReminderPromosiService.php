@@ -29,21 +29,10 @@ class ReminderPromosiService
      */
     public function build(): array
     {
-        // Tahun Talent Pool TERBARU yang ada datanya (APA PUN klasifikasinya), <= tahun ini.
-        // Patokan pada keberadaan data tahun itu — bukan pada ada-tidaknya shortlist —
-        // supaya begitu penilaian tahun baru masuk (mis. 2026), acuan langsung pindah
-        // ke tahun itu; karyawan yang shortlist hanya di tahun sebelumnya (2025) tidak
-        // lagi dianggap shortlist walau tahun baru kebetulan tanpa shortlist.
-        $latestPeriode = TalentPool::where('periode', '<=', now()->year)->max('periode');
-
-        $shortlistSet = $latestPeriode
-            ? array_flip(
-                TalentPool::where('klasifikasi', 'shortlist')
-                    ->where('periode', $latestPeriode)
-                    ->pluck('karyawan_id')
-                    ->all()
-              )
-            : [];
+        // Aturan periode acuan ada di TalentPool, dipakai bersama profil
+        // karyawan, Usulan Promosi, dan Reminder PJS.
+        $latestPeriode = TalentPool::periodeAcuan();
+        $shortlistSet  = TalentPool::shortlistAcuan();
 
         // Karyawan yang sudah punya usulan promosi berjalan/lulus → disembunyikan.
         // Map karyawan_id => status usulan terbaru (untuk ditampilkan di panel "disembunyikan").

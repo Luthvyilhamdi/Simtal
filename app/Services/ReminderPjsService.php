@@ -6,6 +6,7 @@ use App\Models\HistoryAssessment;
 use App\Models\HistoryAssessmentKompetensi;
 use App\Models\Karyawan;
 use App\Models\PgsPjs;
+use App\Models\TalentPool;
 use Carbon\Carbon;
 
 /**
@@ -17,8 +18,16 @@ use Carbon\Carbon;
  * sisanya tertahan apa.
  *
  * Dua syarat yang dicek:
- *   1. MDG  — memakai Karyawan::statusKenaikan(), sama persis dengan Reminder
- *             Promosi, supaya perhitungan masa dinas tidak bercabang dua versi.
+ *   1. MDG  — MDG JG dan MDG PG, DUA-duanya harus terpenuhi:
+ *             • MDG JG min 2 tahun (1 tahun bila shortlist Talent Pool)
+ *             • MDG PG min 1 tahun
+ *             Tidak lewat Karyawan::statusKenaikan(): method itu menilai syarat
+ *             untuk kenaikan BERIKUTNYA saja. Selama PG < JG ia masuk cabang
+ *             naik_pg dan hanya menimbang MDG PG — MDG JG tidak pernah ikut
+ *             dinilai, sehingga orang dengan MDG JG 18 bulan pun terbaca
+ *             "terpenuhi". Untuk pengangkatan tetap keduanya harus dilihat.
+ *             Ambang shortlist mengikuti Reminder Promosi (JG 24 → 12 bulan)
+ *             supaya tidak ada dua versi keringanan.
  *   2. Assessment — DUA sumber, salah satu memenuhi sudah cukup:
  *        a. Assessment Rekomendasi  — minimal "ready with development"
  *        b. Assessment Kompetensi   — kesimpulan "QUALIFIED"
@@ -36,6 +45,11 @@ class ReminderPjsService
 
     /** Kesimpulan assessment kompetensi yang dianggap memenuhi syarat. */
     public const KOMPETENSI_MEMENUHI = 'qualified';
+
+    /** Ambang MDG untuk pengangkatan tetap (bulan). */
+    public const MIN_MDG_JG           = 24;
+    public const MIN_MDG_JG_SHORTLIST = 12;
+    public const MIN_MDG_PG           = 12;
 
     /** Batas lama memangku PJS sebelum dianggap perlu ditinjau (bulan). */
     public const BATAS_LAMA_BULAN = 12;
@@ -64,14 +78,28 @@ class ReminderPjsService
         $ids        = $pjs->pluck('karyawan_id')->all();
         $rekomendasi = $this->rekomendasiTerakhir($ids);
         $kompetensi  = $this->kompetensiTerakhir($ids);
+        $shortlist   = TalentPool::shortlistAcuan();
 
         $items = [];
         foreach ($pjs as $p) {
-            $k  = $p->karyawan;
-            $sk = $k->statusKenaikan();
+            $k = $p->karyawan;
 
-            $mdgOk   = ($sk['eligible'] ?? false) === true;
-            $sisaMdg = (int) ($sk['sisa_bulan'] ?? 0);
+            $isShortlist = isset($shortlist[$k->id]);
+            $minJg = $isShortlist ? self::MIN_MDG_JG_SHORTLIST : self::MIN_MDG_JG;
+            $minPg = self::MIN_MDG_PG;
+
+            $mdgJg = (int) $k->mdg_jg_bulan;
+            $mdgPg = (int) $k->mdg_pg_bulan;
+
+            $jgOk = $mdgJg >= $minJg;
+            $pgOk = $mdgPg >= $minPg;
+
+            // Keduanya wajib. Sisa yang ditampilkan yang paling jauh, karena
+            // itulah yang menentukan kapan syarat MDG lengkap.
+            $mdgOk   = $jgOk && $pgOk;
+            $sisaJg  = max(0, $minJg - $mdgJg);
+            $sisaPg  = max(0, $minPg - $mdgPg);
+            $sisaMdg = max($sisaJg, $sisaPg);
 
             $rek  = $rekomendasi[$k->id] ?? null;
             $komp = $kompetensi[$k->id] ?? null;
@@ -112,9 +140,15 @@ class ReminderPjsService
                 'posisi_pjs'      => Karyawan::posisiDari($p->jabatan_pgs_pjs),
                 'lama_bulan'      => $lama,
                 'terlalu_lama'    => $lama !== null && $lama > self::BATAS_LAMA_BULAN,
-                'sk'                 => $sk,
+                'is_shortlist'       => $isShortlist,
                 'mdg_ok'             => $mdgOk,
-                'sisa_mdg'           => $mdgOk ? 0 : $sisaMdg,
+                'sisa_mdg'           => $sisaMdg,
+                'mdg_jg_bulan'       => $mdgJg,
+                'mdg_pg_bulan'       => $mdgPg,
+                'mdg_jg_ok'          => $jgOk,
+                'mdg_pg_ok'          => $pgOk,
+                'min_mdg_jg'         => $minJg,
+                'min_mdg_pg'         => $minPg,
                 'rekomendasi'        => $rek,
                 'kompetensi'         => $komp,
                 'assessment_ok'      => $asOk,

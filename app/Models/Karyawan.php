@@ -168,12 +168,20 @@ class Karyawan extends Model
         return (int) floor($this->mdg_band_bulan / 12);
     }
 
-    // MDG format lengkap "X tahun, Y bulan, Z hari" dari TMT grade sampai sekarang.
-    public static function formatMdgLengkap($mulai): string
+    /**
+     * Rentang waktu dalam bentuk "X tahun, Y bulan, Z hari".
+     *
+     * Dipakai kartu MDG, blok PJS di profil, dan kartu PGS/PJS. Tanpa $sampai
+     * dihitung ke hari ini — itulah perilaku lama yang dipakai MDG; diisi
+     * $sampai untuk rentang yang sudah tertutup (mis. PGS/PJS yang berakhir).
+     */
+    public static function formatMdgLengkap($mulai, $sampai = null): string
     {
         if (! $mulai) return '-';
         $mulai = $mulai instanceof Carbon ? $mulai : Carbon::parse($mulai);
-        $now = now();
+        $now   = $sampai
+            ? ($sampai instanceof Carbon ? $sampai : Carbon::parse($sampai))
+            : now();
         if ($mulai->greaterThan($now)) return '-';
 
         $d = $mulai->diff($now);

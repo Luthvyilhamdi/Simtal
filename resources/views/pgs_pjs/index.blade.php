@@ -24,6 +24,22 @@
     .section-label .count-badge { background:#f3f4f6;color:#6b7280;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600; }
     .section-label .count-badge.aktif { background:#dcfce7;color:#15803d; }
 
+    /* Bilah tab: Sedang Berlangsung <-> History */
+    .tab-bar { display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap; }
+    .tab-btn { display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:9px;
+               border:1px solid transparent;background:none;font:inherit;font-size:14px;font-weight:700;
+               color:#9ca3af;cursor:pointer;transition:background .12s,color .12s; }
+    .tab-btn:hover { background:#f9fafb;color:#6b7280; }
+    .tab-btn[aria-selected="true"] { background:#fff;border-color:var(--card-border);color:#111827;
+                                     box-shadow:var(--card-shadow); }
+    .tab-btn .count-badge { background:#f3f4f6;color:#9ca3af;font-size:11px;padding:2px 8px;
+                            border-radius:20px;font-weight:600; }
+    .tab-btn[aria-selected="true"] .count-badge { color:#6b7280; }
+    .tab-btn[aria-selected="true"] .count-badge.aktif { background:#dcfce7;color:#15803d; }
+    .tab-bar .view-toggle { margin-left:auto; }
+    .tab-bar .view-toggle[hidden] { display:none; }
+    #panelRiwayat[hidden], #panelAktif[hidden] { display:none; }
+
     /* Aktif Cards */
     .aktif-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:32px; }
     /* Pengalih tampilan: kartu <-> baris (sama seperti Surat Penting) */
@@ -64,11 +80,6 @@
     .acard-karyawan { font-size:12px;color:#6b7280; }
 
     .acard-right { display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0; }
-    .sisa-hari { text-align:right; }
-    .sisa-num { font-size:20px;font-weight:800;color:#111827; }
-    .sisa-num.warning { color:#f59e0b; }
-    .sisa-num.danger { color:#ef4444; }
-    .sisa-label { font-size:10px;color:#9ca3af;font-weight:600; }
 
     .acard-details { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px; }
     /* .detail-item { } */
@@ -235,11 +246,21 @@
 </div>
 
 {{-- SEDANG BERLANGSUNG --}}
-<div class="section-label">
-    🟢 Sedang Berlangsung
-    <span class="count-badge aktif">{{ $aktif->count() }} aktif</span>
+{{-- Dua tampilan dalam satu halaman: yang sedang berlangsung dan arsipnya.
+     Keduanya sudah ikut terkirim dari server, jadi pindah tab tidak memuat
+     ulang halaman. --}}
+<div class="tab-bar">
+    <button type="button" class="tab-btn aktif-tab" data-panel="aktif" aria-selected="true">
+        🟢 Sedang Berlangsung
+        <span class="count-badge aktif">{{ $aktif->count() }}</span>
+    </button>
+    <button type="button" class="tab-btn" data-panel="riwayat" aria-selected="false">
+        🕐 History
+        <span class="count-badge">{{ $history->total() }}</span>
+    </button>
+
     @if($aktif->count() > 0)
-    <div class="view-toggle">
+    <div class="view-toggle" id="viewToggle">
         <button type="button" class="vt-btn active" data-mode="grid" aria-pressed="true"
                 title="Tampilan kartu" onclick="setTampilan('grid')">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -252,6 +273,7 @@
     @endif
 </div>
 
+<div id="panelAktif">
 @if($aktif->count() > 0)
 <div class="aktif-grid" id="aktifGrid">
     @foreach($aktif as $a)
@@ -260,9 +282,6 @@
         $sudahJalan       = $a->tanggal_mulai->diffInDays(now());
         $totalHariRounded = round($totalHari);
         $progress         = $totalHariRounded > 0 ? min(100, round(($sudahJalan / $totalHariRounded) * 100)) : 100;
-        $sisaHari         = round($a->sisaHari);
-        $warnaProgress    = $sisaHari <= 7 ? '#ef4444' : ($sisaHari <= 30 ? '#f59e0b' : '#16a34a');
-        $warnaSisa        = $sisaHari <= 7 ? 'danger' : ($sisaHari <= 30 ? 'warning' : '');
     @endphp
     <div class="aktif-card {{ $a->tipe }}">
         <div class="acard-top">
@@ -275,10 +294,6 @@
                 </div>
             </div>
             <div class="acard-right">
-                <div class="sisa-hari">
-                    <div class="sisa-num {{ $warnaSisa }}">{{ $sisaHari }}</div>
-                    <div class="sisa-label">SISA HARI</div>
-                </div>
                 {{-- Tombol Hapus --}}
                 <button type="button" class="btn-del-sm"
                     data-url="{{ route('pgs_pjs.destroy', $a) }}"
@@ -338,7 +353,12 @@
             <span>→</span>
             <strong>{{ $a->tanggal_berakhir ? $a->tanggal_berakhir->format('d M Y') : 'Sedang Berlangsung' }}</strong>
             @if($totalHari > 0)
-                <span class="acard-total" style="margin-left:auto;font-size:11px;color:#9ca3af;">{{ (int) $totalHari }} hari total</span>
+                {{-- Yang belum berakhir dihitung sampai hari ini, yang sudah
+                     berakhir sampai tanggal berakhirnya. --}}
+                <span class="acard-total" style="margin-left:auto;font-size:11px;color:#9ca3af;">
+                    {{ \App\Models\Karyawan::formatMdgLengkap($a->tanggal_mulai, $a->tanggal_berakhir) }}
+                    {{ $a->tanggal_berakhir ? 'total' : 'berjalan' }}
+                </span>
             @endif
         </div>
 
@@ -356,13 +376,9 @@
     <p style="font-size:13px;font-weight:600;color:#6b7280;">Tidak ada PGS/PJS yang sedang berlangsung</p>
 </div>
 @endif
-
-{{-- HISTORY --}}
-<div class="section-label">
-    🕐 History {{ $labelTipe }}
-    <span class="count-badge">{{ $history->total() }} data</span>
 </div>
 
+<div id="panelRiwayat" hidden>
 @if($history->count() > 0)
 <div class="table-card">
     <div class="table-wrap">
@@ -474,12 +490,59 @@
     </div>
     @endif
 </div>
+@else
+<div class="empty-state">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <p style="font-size:13px;font-weight:600;color:#6b7280;">Belum ada PGS/PJS yang berakhir</p>
+</div>
 @endif
+</div>
 
 @endsection
 
 @push('scripts')
 <script>
+    /*
+     * Tab Sedang Berlangsung <-> History.
+     *
+     * Pilihannya diingat selama sesi peramban supaya berpindah halaman
+     * riwayat atau mengganti saringan tipe tidak melemparkan kembali ke tab
+     * aktif; kalau URL membawa ?page=, pasti sedang menelusuri riwayat.
+     * Pengalih kartu/baris hanya milik tab aktif, jadi disembunyikan di tab
+     * riwayat yang isinya tabel.
+     */
+    (function () {
+        var tombol = Array.from(document.querySelectorAll('.tab-btn'));
+        var panel  = { aktif: document.getElementById('panelAktif'),
+                       riwayat: document.getElementById('panelRiwayat') };
+        var vt     = document.getElementById('viewToggle');
+        if (!tombol.length || !panel.aktif || !panel.riwayat) return;
+
+        var KUNCI = 'pgspjs.tab';
+        var ingat = function (v) { try { sessionStorage.setItem(KUNCI, v); } catch (e) {} };
+        var dulu  = function ()  { try { return sessionStorage.getItem(KUNCI); } catch (e) { return null; } };
+
+        function pilih(nama) {
+            tombol.forEach(function (t) {
+                t.setAttribute('aria-selected', t.dataset.panel === nama ? 'true' : 'false');
+            });
+            panel.aktif.hidden   = nama !== 'aktif';
+            panel.riwayat.hidden = nama !== 'riwayat';
+            if (vt) vt.hidden = nama !== 'aktif';
+        }
+
+        var awal = new URLSearchParams(location.search).has('page') ? 'riwayat'
+                 : (dulu() === 'riwayat' ? 'riwayat' : 'aktif');
+        pilih(awal);
+
+        tombol.forEach(function (t) {
+            t.addEventListener('click', function () {
+                pilih(t.dataset.panel);
+                ingat(t.dataset.panel);
+            });
+        });
+    })();
+
     // Toast
     function closeToast() {
         const t = document.getElementById('toast');

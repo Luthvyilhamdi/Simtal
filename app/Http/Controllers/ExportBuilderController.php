@@ -165,6 +165,13 @@ class ExportBuilderController extends Controller
         $departemens  = Departemen::orderBy('nama_departemen')->get();
         $tierList     = HistoryPejabat::JABATAN_DIPANTAU; // SVP, VP, SPM, PM
 
+        // Master unit tabelnya datar (id + nama saja) — tidak menyimpan induknya.
+        // Jadi hubungan bertingkatnya diturunkan dari data karyawan: unit mana
+        // yang nyata-nyata dipakai di bawah unit mana. Dipakai untuk menyusutkan
+        // pilihan Kompartemen saat Direktorat dipilih, dan seterusnya.
+        $petaKompartemen = $this->petaInduk('direktorat_id', 'kompartemen_id');
+        $petaDepartemen  = $this->petaInduk('kompartemen_id', 'departemen_id');
+
         // Tahun tersedia dari data kalibrasi + penilaian.
         $tahunList = collect()
             ->merge(KalibrasiKaryawan::distinct()->pluck('tahun'))
@@ -183,7 +190,8 @@ class ExportBuilderController extends Controller
 
         return view('export_builder.index', compact(
             'grouped', 'direktorats', 'kompartemens', 'departemens', 'tierList', 'tahunList', 'bulanList',
-            'bandList', 'jenjangList', 'statusKepegawaianList', 'karyawanPilih'
+            'bandList', 'jenjangList', 'statusKepegawaianList', 'karyawanPilih',
+            'petaKompartemen', 'petaDepartemen'
         ));
     }
 
@@ -229,6 +237,21 @@ class ExportBuilderController extends Controller
           ->download($namaFile.'.pdf');
     }
 
+    /**
+     * Pasangan "anak ada di induk mana" menurut data karyawan.
+     *
+     * @return array<int|string, array<int,int>> nilai anak => daftar id induk
+     */
+    private function petaInduk(string $induk, string $anak): array
+    {
+        return Karyawan::query()
+            ->whereNotNull($induk)->whereNotNull($anak)
+            ->select($induk, $anak)->distinct()->get()
+            ->groupBy($anak)
+            ->map(fn ($baris) => $baris->pluck($induk)->unique()->values()->all())
+            ->all();
+    }
+
     /** Aturan validasi yang dipakai bersama preview & export. */
     private function baseRules(): array
     {
@@ -239,15 +262,22 @@ class ExportBuilderController extends Controller
             'bulan'          => 'nullable|integer|min:1|max:12',
             'pendidikan'     => 'nullable|in:terakhir',
             'status'         => 'nullable|in:aktif,tidak aktif',
-            'direktorat_id'  => 'nullable|exists:direktorat,id',
-            'kompartemen_id' => 'nullable|exists:kompartemen,id',
-            'departemen_id'  => 'nullable|exists:departemen,id',
-            'band'           => 'nullable|in:'.implode(',', array_keys(Karyawan::bandConfig())),
-            'status_kepegawaian' => 'nullable|string|max:50',
+            'direktorat_id'    => 'nullable|array',
+            'direktorat_id.*'  => 'integer|exists:direktorat,id',
+            'kompartemen_id'   => 'nullable|array',
+            'kompartemen_id.*' => 'integer|exists:kompartemen,id',
+            'departemen_id'    => 'nullable|array',
+            'departemen_id.*'  => 'integer|exists:departemen,id',
+            'band'             => 'nullable|array',
+            'band.*'           => 'in:'.implode(',', array_keys(Karyawan::bandConfig())),
+            'status_kepegawaian'   => 'nullable|array',
+            'status_kepegawaian.*' => 'string|max:50',
             'jenis_kelamin'  => 'nullable|in:L,P',
-            'jenjang'        => 'nullable|in:'.implode(',', Karyawan::JENJANG_PENDIDIKAN),
+            'jenjang'        => 'nullable|array',
+            'jenjang.*'      => 'in:'.implode(',', Karyawan::JENJANG_PENDIDIKAN),
             'tmt'            => 'nullable|in:ada,belum',
-            'tier'           => 'nullable|in:'.implode(',', HistoryPejabat::JABATAN_DIPANTAU),
+            'tier'           => 'nullable|array',
+            'tier.*'         => 'in:'.implode(',', HistoryPejabat::JABATAN_DIPANTAU),
             'nik_nama'       => 'nullable|string|max:20000',
             'col_order'      => 'nullable|string|max:5000',
         ];
@@ -312,28 +342,35 @@ class ExportBuilderController extends Controller
             $query->where('status', $validated['status']);
         }
         if (! empty($validated['direktorat_id'])) {
-            $query->where('direktorat_id', $validated['direktorat_id']);
+            $query->whereIn('direktorat_id', $validated['direktorat_id']);
         }
         if (! empty($validated['kompartemen_id'])) {
-            $query->where('kompartemen_id', $validated['kompartemen_id']);
+            $query->whereIn('kompartemen_id', $validated['kompartemen_id']);
         }
         if (! empty($validated['departemen_id'])) {
-            $query->where('departemen_id', $validated['departemen_id']);
+            $query->whereIn('departemen_id', $validated['departemen_id']);
         }
         if (! empty($validated['band'])) {
-            // Band = turunan Job Grade. Saring karyawan yang JG-nya masuk band ini.
-            $grades = array_map('strval', Karyawan::bandConfig()[$validated['band']]['grades'] ?? []);
-            $query->whereHas('jobGrade', fn ($q) => $q->whereIn('job_grade', $grades));
+            // Band = turunan Job Grade. Saring karyawan yang JG-nya masuk band terpilih.
+            $grades = [];
+            foreach ($validated['band'] as $band) {
+                foreach (Karyawan::bandConfig()[$band]['grades'] ?? [] as $g) {
+                    $grades[] = (string) $g;
+                }
+            }
+            $query->whereHas('jobGrade', fn ($q) => $q->whereIn('job_grade', array_unique($grades)));
         }
         if (! empty($validated['status_kepegawaian'])) {
-            $query->where('status_kepegawaian', $validated['status_kepegawaian']);
+            $query->whereIn('status_kepegawaian', $validated['status_kepegawaian']);
         }
         if (! empty($validated['jenis_kelamin'])) {
             $query->where('jenis_kelamin', $validated['jenis_kelamin']);
         }
         if (! empty($validated['jenjang'])) {
-            // Punya jenjang ini di riwayat, bukan cuma pendidikan terakhir.
-            $query->whereHas('riwayatPendidikan', fn ($q) => $q->where('jenjang', $validated['jenjang']));
+            // Punya SALAH SATU jenjang terpilih di riwayatnya — bukan cuma
+            // pendidikan terakhir, dan tidak harus punya semuanya.
+            $query->whereHas('riwayatPendidikan',
+                fn ($q) => $q->whereIn('jenjang', $validated['jenjang']));
         }
         if (! empty($validated['tmt'])) {
             // Kelengkapan TMT (band/JG/PG). 'belum' = ketiganya kosong; 'ada' = minimal satu terisi.
@@ -349,7 +386,7 @@ class ExportBuilderController extends Controller
         }
         if (! empty($validated['tier'])) {
             // Karyawan yang pejabat aktifnya bertier tertentu (SVP/VP/SPM/PM).
-            $query->whereHas('pejabatAktif', fn ($q) => $q->where('jabatan', $validated['tier']));
+            $query->whereHas('pejabatAktif', fn ($q) => $q->whereIn('jabatan', $validated['tier']));
         }
 
         // Pilih karyawan dari paste NIK / nama.
@@ -489,18 +526,34 @@ class ExportBuilderController extends Controller
         ];
     }
 
-    /** Kolom pendidikan untuk jenjang yang dipilih di filter. */
-    private static function jenjangColumns(?string $jenjang): array
+    /**
+     * Kolom pendidikan untuk jenjang yang dipilih di filter.
+     *
+     * Filternya boleh banyak jenjang, dan tiap jenjang dapat trio kolomnya
+     * SENDIRI (Jenjang/Jurusan/Institusi). Kalau ditumpuk jadi satu trio,
+     * isinya ambigu: S1 atau S2? Label diberi keterangan jenjang hanya bila
+     * yang dipilih lebih dari satu, supaya export lama tidak berubah bentuk.
+     *
+     * @param  array<int,string>|string|null  $jenjang
+     */
+    private static function jenjangColumns($jenjang): array
     {
-        if (empty($jenjang)) return [];
+        $daftar = array_values(array_filter((array) $jenjang));
+        if (! $daftar) return [];
 
-        $entri = fn ($k) => $k->riwayatPendidikan->firstWhere('jenjang', $jenjang);
+        $banyak = count($daftar) > 1;
+        $kolom  = [];
 
-        return [
-            ['label' => 'Jenjang Pendidikan', 'resolver' => fn ($k) => $entri($k)?->jenjang ?: '-'],
-            ['label' => 'Jurusan',            'resolver' => fn ($k) => $entri($k)?->jurusan ?: '-'],
-            ['label' => 'Institusi',          'resolver' => fn ($k) => $entri($k)?->institusi ?: '-'],
-        ];
+        foreach ($daftar as $j) {
+            $entri  = fn ($k) => $k->riwayatPendidikan->firstWhere('jenjang', $j);
+            $imbuh  = $banyak ? ' ('.$j.')' : '';
+
+            $kolom[] = ['label' => 'Jenjang Pendidikan'.$imbuh, 'resolver' => fn ($k) => $entri($k)?->jenjang ?: '-'];
+            $kolom[] = ['label' => 'Jurusan'.$imbuh,            'resolver' => fn ($k) => $entri($k)?->jurusan ?: '-'];
+            $kolom[] = ['label' => 'Institusi'.$imbuh,          'resolver' => fn ($k) => $entri($k)?->institusi ?: '-'];
+        }
+
+        return $kolom;
     }
 
     /** Daftar key kolom yang nilainya bergantung pada tahun/periode. */

@@ -39,6 +39,18 @@
     .form-input[readonly] { background:#f3f4f6;color:#15803d;font-weight:700;cursor:not-allowed; }
     .form-input.error-input { border-color:#ef4444; }
     .error-msg { font-size:11.5px;color:#ef4444; }
+    .pjs-mulai { display:flex;align-items:center;gap:11px;background:#f9fafb;border:1px solid var(--card-border);
+                 border-radius:11px;padding:11px 14px;margin-top:12px; }
+    .pjs-tag { background:#fef3c7;color:#b45309;border-radius:6px;padding:3px 8px;
+               font-size:10px;font-weight:800;letter-spacing:.04em;flex-shrink:0; }
+    .pjs-isi { flex:1;min-width:0; }
+    .pjs-tanggal { font-size:12.5px;color:#374151;line-height:1.4; }
+    .pjs-lama { color:#9ca3af; }
+    .pjs-jabatan { font-size:11.5px;color:#9ca3af;line-height:1.4;margin-top:1px;
+                   overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .pjs-tautan { font-size:11px;font-weight:700;color:#15803d;text-decoration:none;flex-shrink:0; }
+    .pjs-tautan:hover { text-decoration:underline; }
+
     .form-hint { font-size:11.5px;color:#9ca3af; }
 
     .select-wrap { position:relative; }
@@ -106,8 +118,6 @@
 
     .band-info-box { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px; }
     .band-info-badge { display:inline-flex;padding:5px 15px;border-radius:20px;font-size:14px;font-weight:800;background:#15803d;color:white; }
-    .mdg-hint-box { background:#fffbeb;border:1px solid #fde68a;border-radius:11px;padding:13px 16px;font-size:12px;color:#92400e;margin-top:10px; }
-    .mdg-hint-box ul { margin:6px 0 0 16px;display:flex;flex-direction:column;gap:3px; }
 
     .form-actions-card { background:white;border-radius:16px;border:1px solid var(--card-border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:var(--card-shadow); }
     .form-actions-right { display:flex;gap:10px; }
@@ -521,14 +531,6 @@
             </div>
         </div>
 
-        <div class="mdg-hint-box">
-            <strong>📋 Ketentuan MDG:</strong>
-            <ul>
-                <li>Naik <strong>Person Grade</strong> → min <strong>1 tahun</strong> TMT PG saat ini</li>
-                <li>Naik <strong>Job Grade</strong> → min <strong>2 tahun</strong> TMT JG saat ini (PG harus = JG)</li>
-                <li>Naik <strong>Band</strong> → MDG JG min <strong>2 tahun</strong>, MDG PG min <strong>1 tahun</strong>, MDG Band min <strong>3 tahun</strong> (dihitung dari TMT JG saat masuk band)</li>
-            </ul>
-        </div>
     </div>
 
     {{-- ===== TMT GRADE ===== --}}
@@ -539,7 +541,6 @@
             </div>
             <div>
                 <div class="section-title">TMT Grade</div>
-                <div class="section-sub">Tanggal mulai berlaku grade — digunakan untuk menghitung MDG</div>
             </div>
         </div>
 
@@ -573,20 +574,38 @@
                 <input type="date" name="tanggal_mulai_band"
                        value="{{ old('tanggal_mulai_band', $karyawan->tanggal_mulai_band?->format('Y-m-d')) }}"
                        class="form-input" />
-                <span class="form-hint">
-                    Tanggal mulai di Band saat ini. Untuk sementara diisi manual; ke depan bisa otomatis dari History Jabatan. Bila kosong, MDG Band memakai TMT Job Grade.
-                </span>
                 @error('tanggal_mulai_band')<div class="error-msg">{{ $message }}</div>@enderror
             </div>
         </div>
 
-        <div style="background:#f9fafb;border:1px solid var(--card-border);border-radius:11px;padding:13px 16px;margin-top:12px;font-size:12px;color:#374151;">
-            📊 <strong>MDG Band</strong> (dari TMT Band; bila kosong pakai TMT JG):
-            <strong style="color:{{ $karyawan->mdg_band_bulan >= 36 ? '#15803d' : '#d97706' }}">
-                {{ $karyawan->mdg_band_bulan }} bulan
-            </strong>
-            dari min 36 bulan untuk naik Band
-        </div>
+        {{-- Mulai PJS: hanya untuk yang sedang memangku PJS. Dibaca dari data
+             PGS & PJS, tidak diisi di sini — kalau tanggalnya bisa diubah di
+             dua tempat, keduanya bisa berbeda isi. --}}
+        @php
+            $pjsAktif = $karyawan->pgsPjs
+                ->where('is_active', true)
+                ->where('tipe', 'pjs')
+                ->sortByDesc('tanggal_mulai')
+                ->first();
+        @endphp
+        @if($pjsAktif)
+            <div class="pjs-mulai">
+                <span class="pjs-tag">PJS</span>
+                <div class="pjs-isi">
+                    <div class="pjs-tanggal">
+                        Mulai
+                        <strong>{{ $pjsAktif->tanggal_mulai
+                            ? \Carbon\Carbon::parse($pjsAktif->tanggal_mulai)->translatedFormat('d M Y')
+                            : 'belum diisi' }}</strong>
+                        @if($pjsAktif->tanggal_mulai)
+                            <span class="pjs-lama">· {{ \App\Models\Karyawan::formatMdgLengkap($pjsAktif->tanggal_mulai) }}</span>
+                        @endif
+                    </div>
+                    <div class="pjs-jabatan">{{ \App\Models\Karyawan::posisiDari($pjsAktif->jabatan_pgs_pjs) ?: '-' }}</div>
+                </div>
+                <a href="{{ route('pgs_pjs.index') }}" class="pjs-tautan">PGS &amp; PJS</a>
+            </div>
+        @endif
     </div>
 
     {{-- FORM ACTIONS --}}

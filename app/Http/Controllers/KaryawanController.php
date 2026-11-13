@@ -119,15 +119,12 @@ class KaryawanController extends Controller
 
         $karyawan->load(['direktorat','kompartemen','departemen','jobGrade','personGrade','jabatan','kodeStruktur','strukturAssignments','riwayatPendidikan','pgsPjs']);
 
-        // Cek shortlist — prioritas tahun ini, fallback tahun lalu
-        $talentShortlist = TalentPool::where('karyawan_id', $karyawan->id)
-            ->where('klasifikasi', 'shortlist')
-            ->whereIn('periode', [now()->year, now()->year - 1])
-            ->orderBy('periode', 'desc')
-            ->first();
-
-        $isShortlist      = $talentShortlist !== null;
-        $shortlistPeriode = $talentShortlist?->periode;
+        // Shortlist hanya berlaku untuk periode acuan — tahun Talent Pool
+        // terbaru yang ada datanya. Dulu di sini dipakai "tahun ini ATAU tahun
+        // lalu", sehingga shortlist 2025 tetap menempel di profil walau data
+        // 2026 sudah masuk.
+        $isShortlist      = TalentPool::isShortlist($karyawan->id);
+        $shortlistPeriode = $isShortlist ? TalentPool::periodeAcuan() : null;
 
         return view('karyawan.show', compact('karyawan', 'isShortlist', 'shortlistPeriode'));
     }

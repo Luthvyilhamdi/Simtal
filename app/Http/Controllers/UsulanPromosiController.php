@@ -136,12 +136,10 @@ class UsulanPromosiController extends Controller
 
         $tahunIni = now()->year;
 
-        // Cek shortlist talent pool tahun lalu — menentukan threshold MDG
-        $talentPool = TalentPool::where('karyawan_id', $karyawan->id)
-            ->where('periode', $tahunIni - 1)
-            ->first();
-
-        $isShortlist = $talentPool && $talentPool->klasifikasi === 'shortlist';
+        // Shortlist pada periode acuan — menentukan ambang MDG. Dulu dipatok
+        // mati ke "tahun lalu", jadi begitu data tahun berjalan masuk, yang
+        // dipakai tetap penilaian lama.
+        $isShortlist = TalentPool::isShortlist($karyawan->id);
 
         // Threshold MDG: shortlist lebih longgar (Band 24 bln, JG 12 bln), normal (Band 36 bln, JG 24 bln)
         $minBand = $isShortlist ? 24 : 36;
