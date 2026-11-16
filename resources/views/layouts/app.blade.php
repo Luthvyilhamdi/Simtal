@@ -1017,6 +1017,9 @@
 {{-- Select dengan pencarian: aktif untuk <select class="select-search"> --}}
 @include('partials.select-search')
 
+{{-- Pengingat PJS: muncul sekali tiap login, datanya dari middleware PengingatPjs --}}
+@include('partials.pengingat-pjs')
+
 @stack('scripts')
 </body>
 </html>

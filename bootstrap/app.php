@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\GenerateDailyNotifikasi::class,
             \App\Http\Middleware\EnforceMenuAccess::class,
+            \App\Http\Middleware\PengingatPjs::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
