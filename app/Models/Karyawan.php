@@ -221,11 +221,62 @@ class Karyawan extends Model
     public function getMdgJgLengkapAttribute(): string   { return self::formatMdgLengkap($this->tanggal_mulai_jg); }
     public function getMdgBandLengkapAttribute(): string { return self::formatMdgLengkap($this->tanggal_mulai_band ?? $this->tanggal_mulai_jg); }
 
+    // ===== USIA =====
+    /**
+     * Usia dalam "X tahun, Y bulan". Bulan disembunyikan bila 0 ("45 tahun"),
+     * karena "45 tahun, 0 bulan" terbaca seperti kesalahan.
+     */
+    public function getUsiaLengkapAttribute(): string
+    {
+        if (! $this->tanggal_lahir) {
+            return '-';
+        }
+
+        $d = $this->tanggal_lahir->diff(now());
+
+        return $d->m > 0
+            ? $d->y . ' tahun, ' . $d->m . ' bulan'
+            : $d->y . ' tahun';
+    }
+
     // ===== PENSIUN =====
-    /** Perkiraan tanggal pensiun = tanggal lahir + USIA_PENSIUN tahun. */
+    /**
+     * Tanggal pensiun = tanggal 1 pada bulan SETELAH bulan ulang tahun ke-56.
+     * Mis. lahir 7 Agustus 1970 → genap 56 pada 7 Agustus 2026 → pensiun
+     * 1 September 2026. Pensiun selalu jatuh di awal bulan, bukan di tanggal
+     * ulang tahunnya.
+     *
+     * Dirakit dari tahun+bulan langsung (bukan addYears lalu startOfMonth)
+     * supaya kelahiran 29 Februari tidak meluber ke 1 Maret dan menggeser
+     * hasilnya satu bulan.
+     */
+    /**
+     * Ulang tahun ke-56 — TANGGAL YANG BERBEDA dari tanggal_pensiun, dan memang
+     * disengaja. Dipakai khusus sebagai dasar hitung mundur "Sisa Masa Kerja",
+     * mengikuti cara hitung yang sudah berjalan di PIM.
+     *
+     * Jadi untuk kelahiran 7 Agustus 1971: tanggal_pensiun = 1 September 2027
+     * (yang ditampilkan), sedangkan sisa masa kerja dihitung sampai 7 Agustus
+     * 2027. Jangan disatukan — keduanya menjawab pertanyaan yang berbeda.
+     */
+    public function getUlangTahunPensiunAttribute(): ?Carbon
+    {
+        return $this->tanggal_lahir
+            ? $this->tanggal_lahir->copy()->addYears(self::USIA_PENSIUN)
+            : null;
+    }
+
     public function getTanggalPensiunAttribute(): ?Carbon
     {
-        return $this->tanggal_lahir ? $this->tanggal_lahir->copy()->addYears(self::USIA_PENSIUN) : null;
+        if (! $this->tanggal_lahir) {
+            return null;
+        }
+
+        return Carbon::create(
+            $this->tanggal_lahir->year + self::USIA_PENSIUN,
+            $this->tanggal_lahir->month,
+            1
+        )->addMonth();
     }
 
     /**
@@ -237,7 +288,7 @@ class Karyawan extends Model
         if (!$this->tanggal_lahir) return null;
 
         $now     = now()->startOfDay();
-        $pensiun = $this->tanggal_pensiun;
+        $pensiun = $this->ulang_tahun_pensiun;
 
         if ($pensiun->lessThanOrEqualTo($now)) {
             return ['tahun' => 0, 'bulan' => 0, 'total_bulan' => 0, 'lewat' => true];
@@ -252,17 +303,33 @@ class Karyawan extends Model
         ];
     }
 
-    /** Label ringkas sisa masa kerja, mis. "2 th 5 bln" / "< 1 bln" / "Sudah pensiun". */
+    /**
+     * Label sisa masa kerja dalam tahun, bulan, hari — mis. "9 bulan, 13 hari"
+     * atau "2 tahun, 5 bulan, 13 hari"; "Sudah pensiun" bila sudah lewat.
+     *
+     * Dihitung sampai ULANG TAHUN ke-56 (ulang_tahun_pensiun), BUKAN sampai
+     * tanggal_pensiun yang ditampilkan di halaman profil — begitulah PIM
+     * menghitungnya. Keduanya memang selisih sampai sebulan; lihat catatan di
+     * getUlangTahunPensiunAttribute() sebelum menyamakannya.
+     *
+     * Harinya ikut ditampilkan (bukan dibulatkan ke bulan seperti sebelumnya)
+     * supaya angkanya tidak terlihat melompat sendiri tiap kali bulan berganti.
+     * Memakai formatMdgLengkap() agar sebentuk dengan Lama Bekerja & MDG.
+     */
     public function getSisaPensiunLabelAttribute(): string
     {
-        $s = $this->sisa_pensiun;
-        if (!$s) return '-';
-        if ($s['lewat']) return 'Sudah pensiun';
+        if (! $this->tanggal_lahir) {
+            return '-';
+        }
 
-        $parts = [];
-        if ($s['tahun'] > 0) $parts[] = $s['tahun'] . ' th';
-        if ($s['bulan'] > 0) $parts[] = $s['bulan'] . ' bln';
-        return $parts ? implode(' ', $parts) : '< 1 bln';
+        $pensiun = $this->ulang_tahun_pensiun;
+        $hariIni = now()->startOfDay();
+
+        if ($pensiun->lessThanOrEqualTo($hariIni)) {
+            return 'Sudah pensiun';
+        }
+
+        return self::formatMdgLengkap($hariIni, $pensiun);
     }
 
     /**

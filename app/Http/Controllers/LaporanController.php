@@ -59,7 +59,12 @@ class LaporanController extends Controller
 
         // === AKAN PENSIUN BULAN INI ===
         $akanPensiun = Karyawan::where('status', 'aktif')
-            ->whereRaw('DATE_ADD(tanggal_lahir, INTERVAL 56 YEAR) BETWEEN ? AND ?', [$awal, $akhir])
+            // Padanan SQL dari Karyawan::getTanggalPensiunAttribute(): tanggal 1 pada
+            // bulan SETELAH bulan ulang tahun ke-56, bukan tanggal ulang tahunnya.
+            ->whereRaw(
+                "DATE_ADD(DATE_FORMAT(DATE_ADD(tanggal_lahir, INTERVAL 56 YEAR), '%Y-%m-01'), INTERVAL 1 MONTH) BETWEEN ? AND ?",
+                [$awal, $akhir]
+            )
             ->with(['direktorat'])
             ->get();
 

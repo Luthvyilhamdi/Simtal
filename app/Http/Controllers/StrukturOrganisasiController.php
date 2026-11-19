@@ -473,9 +473,14 @@ class StrukturOrganisasiController extends Controller
             ]);
 
         $umur          = $k->tanggal_lahir ? Carbon::parse($k->tanggal_lahir)->age : null;
-        $tglPensiun    = $k->tanggal_lahir ? Carbon::parse($k->tanggal_lahir)->addYears(56)->translatedFormat('d F Y') : null;
-        $sisaMasaKerja = $k->tanggal_lahir
-            ? max(0, (int) Carbon::now()->diffInYears(Carbon::parse($k->tanggal_lahir)->addYears(56), false))
+        // Aturan pensiunnya ada di Karyawan::getTanggalPensiunAttribute() (tanggal 1
+        // bulan setelah ulang tahun ke-56) — dipakai lewat accessor supaya overlay ini
+        // tidak pernah menampilkan tanggal yang beda dari Profil Karyawan & Laporan.
+        $tglPensiun    = $k->tanggal_pensiun?->translatedFormat('d F Y');
+        // Sisa masa kerja dihitung sampai ULANG TAHUN ke-56, bukan sampai tanggal
+        // pensiun di baris atas — dua tanggal berbeda, lihat Karyawan::getUlangTahunPensiunAttribute().
+        $sisaMasaKerja = $k->ulang_tahun_pensiun
+            ? max(0, (int) Carbon::now()->diffInYears($k->ulang_tahun_pensiun, false))
             : null;
         $lamaBekerja   = $k->tanggal_masuk
             ? Carbon::parse($k->tanggal_masuk)->diffForHumans(null, true)

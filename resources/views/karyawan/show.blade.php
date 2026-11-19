@@ -33,6 +33,11 @@
     .stat-num.green { color:#15803d; }
     .stat-num.red { color:#e50909; }
     .stat-label { font-size:10.5px;color:#9ca3af;margin-top:5px;font-weight:600; }
+    /* Sisa masa kerja memuat tahun/bulan/hari — jauh lebih panjang dari angka
+       tunggal di kotak lain, jadi kotaknya dilebarkan dan teksnya boleh turun
+       baris supaya tidak mendorong deretan kotak ini keluar. */
+    .stat-item.luas { min-width:104px; }
+    .stat-num.sisa { font-size:13px;font-weight:700;line-height:1.35;white-space:normal; }
 
     .action-row { display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap; }
     .btn-edit { display:inline-flex;align-items:center;gap:8px;background:#15803d;color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s; }
@@ -212,8 +217,8 @@
             <div class="stat-num">{{ $karyawan->personGrade->person_grade ?? '-' }}</div>
             <div class="stat-label">Person Grade</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-num red" style="font-size:19px">{{ $karyawan->sisa_pensiun_label }}</div>
+        <div class="stat-item luas">
+            <div class="stat-num red sisa">{{ $karyawan->sisa_pensiun_label }}</div>
             <div class="stat-label">Sisa Masa Kerja</div>
         </div>
     </div>
@@ -261,9 +266,10 @@
         <div class="detail-row"><span class="detail-label">Jenis Kelamin</span><span class="detail-value">{{ $karyawan->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span></div>
         <div class="detail-row"><span class="detail-label">Tempat Lahir</span><span class="detail-value">{{ $karyawan->tempat_lahir ?: '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Tanggal Lahir</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->translatedFormat('d F Y') }}</span></div>
-        <div class="detail-row"><span class="detail-label">Usia</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_lahir)->age }} tahun</span></div>
+        <div class="detail-row"><span class="detail-label">Usia</span><span class="detail-value">{{ $karyawan->usia_lengkap }}</span></div>
         <div class="detail-row"><span class="detail-label">Tanggal Masuk</span><span class="detail-value">{{ \Carbon\Carbon::parse($karyawan->tanggal_masuk)->translatedFormat('d F Y') }}</span></div>
         <div class="detail-row"><span class="detail-label">Lama Bekerja</span><span class="detail-value">{{ \App\Models\Karyawan::formatMdgLengkap($karyawan->tanggal_masuk) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Tanggal Pensiun</span><span class="detail-value">{{ $karyawan->tanggal_pensiun?->translatedFormat('d F Y') ?? '-' }}</span></div>
         <div class="detail-row"><span class="detail-label">Status Kepegawaian</span><span class="detail-value">@if($karyawan->status_kepegawaian)<span class="badge badge-purple">{{ $karyawan->status_kepegawaian }}</span>@else<span class="muted">-</span>@endif</span></div>
     </div>
 

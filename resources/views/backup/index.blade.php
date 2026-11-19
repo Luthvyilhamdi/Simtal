@@ -7,7 +7,6 @@
 <style>
     .page-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap; }
     .page-title { font-size:22px;font-weight:700;color:#111827; }
-    .page-sub { font-size:13px;color:#6b7280;margin-top:4px;max-width:640px; }
 
     .bk-alert { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;margin-bottom:18px; }
     .bk-alert.ok { background:#dcfce7;color:#15803d;border:1px solid #bbf7d0; }
@@ -19,7 +18,6 @@
     .bk-cta-icon { width:46px;height:46px;border-radius:12px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
     .bk-cta-icon svg { width:24px;height:24px;stroke:#15803d;fill:none;stroke-width:1.8; }
     .bk-cta-title { font-size:15px;font-weight:700;color:#111827; }
-    .bk-cta-desc { font-size:12.5px;color:#6b7280;margin-top:2px; }
     .btn-backup { display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:none;background:#16a34a;color:white;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s; }
     .btn-backup:hover { background:#15803d; }
     .btn-backup:disabled { opacity:.65;cursor:progress; }
@@ -70,7 +68,6 @@
 <div class="page-header">
     <div>
         <div class="page-title">Backup Database</div>
-        <div class="page-sub">Cadangkan <strong>database + seluruh file upload</strong> (foto, surat, dll) ke satu file <strong>.zip</strong> — berisi dump <strong>.sql</strong> dan folder <strong>storage/app</strong>, plus petunjuk restore. Sistem menyimpan otomatis <strong>10 backup terakhir</strong>; yang lebih lama dihapus agar tidak memakan ruang disk.</div>
     </div>
 </div>
 
@@ -81,7 +78,6 @@
         </div>
         <div>
             <div class="bk-cta-title">Buat backup sekarang</div>
-            <div class="bk-cta-desc">Dump database + salin semua file upload, lalu dikompres ke .zip. Bisa beberapa detik s/d menit tergantung jumlah file.</div>
         </div>
     </div>
     <form method="POST" action="{{ route('backup.store') }}" id="backupForm">
